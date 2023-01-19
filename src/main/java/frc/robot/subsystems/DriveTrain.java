@@ -32,6 +32,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
   // File logging variables
   private FileLog log;
+  private int logRotationKey;         // key for the logging cycle for this subsystem
   private boolean fastLogging = false; // true is enabled to run every cycle; false follows normal logging cycles
 
   // variables for swerve modules
@@ -61,6 +62,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    */
   public DriveTrain(FileLog log) {
     this.log = log; // save reference to the fileLog
+    logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
 
     // create swerve modules
     swerveFrontLeft = new SwerveModule( "FL",
@@ -374,7 +376,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     double degrees = getGyroRotation();
     odometry.update(Rotation2d.fromDegrees(degrees), getModulePotisions());
         
-    if(fastLogging || log.getLogRotation() == log.DRIVE_CYCLE) {
+    if(fastLogging || log.isMyLogRotation(logRotationKey)) {
       updateDriveLog(false);
 
       if(!isGyroReading()) {

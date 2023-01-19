@@ -31,18 +31,9 @@ public class FileLog {
 	private int logLevel = 3; // Level of detail. Value between 1-3, where 1 is the most detailed and 3 is the least detailed.
     
     // File logging rotation cycles, to spread out logging times between subsystems	
-    // Note:  Remove/add cycles as we remove/add subsystems
-	public int rotation = 0;
-    public final int DRIVE_CYCLE = 0;
-	// public final int INTAKE_CYCLE = 1;
-	// public final int SHOOTER_CYCLE = 2;
-	// public final int FEEDER_CYCLE = 4;
-	// public final int UPTAKE_CYCLE = 5;
-	// public final int TURRET_CYCLE = 6;
-
-	// public final int LIMELIGHT_CYCLE = 8;
-	// public final int PIVISION_CYCLE = 9;
-
+	private final int NUM_ROTATIONS = 10;
+	private int rotationLastAllocated = NUM_ROTATIONS-1;
+	public int rotationCurrent = 0;			// Values = 0 .. NUM_ROTATIONS-1
     
 	/**
 	 * Creates a new log file called "/home/lvuser/logfile.ver.date.time.csv"
@@ -169,12 +160,13 @@ public class FileLog {
 		return logLevel;
 	}
 
+
 	/** 
 	 * Advances the log rotation counter by one place, and resets if above threshhold for the current log level
 	 */
 	public void advanceLogRotation() {
-		rotation++;
-		if (rotation >= 10) rotation = 0;
+		rotationCurrent++;
+		if (rotationCurrent >= NUM_ROTATIONS) rotationCurrent = 0;
 		// if (logLevel == 3) {
 		// 	if (rotation >= 25) rotation = 0;
 		// } else {
@@ -187,7 +179,29 @@ public class FileLog {
 	 * @return int between 0 and 1 (log levels 1 or 2) or between 0 and 24 (log level 3)
 	 */
 	public int getLogRotation() {
-		return rotation;
+		return rotationCurrent;
+	}
+
+	/**
+	 * Allocates a rotation index to a subsystem.  Use the returned value (logRotationKey) with
+	 * isMyLogRotation(logRotationKey) to see if this is the current rotation for a given
+	 * subsystem.
+	 * @return allocated index for this subsystem
+	 */
+	public int allocateLogRotation() {
+		rotationLastAllocated++;
+		rotationLastAllocated %= NUM_ROTATIONS;
+		return rotationLastAllocated;
+	}
+
+	/**
+	 * Returns true if the scheduler is currently at rotationKey
+	 * @param logRotationKey Key from allocateLogRotation() to check
+	 * @return true = rotationKey is the current rotation, false = rotationKey is not the
+	 * current rotation
+	 */
+	public boolean isMyLogRotation(int logRotationKey) {
+		return (logRotationKey==rotationCurrent);
 	}
 
 	/**
