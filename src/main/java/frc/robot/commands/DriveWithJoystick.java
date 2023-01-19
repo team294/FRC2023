@@ -23,6 +23,7 @@ public class DriveWithJoystick extends CommandBase {
   private final Joystick leftJoystick;
   private final Joystick rightJoystick;
   private final FileLog log;
+  private int logRotationKey;
   
   private double fwdVelocity, leftVelocity, turnRate;
   // private double lastFwdPercent, lastTime, curTime;
@@ -41,6 +42,8 @@ public class DriveWithJoystick extends CommandBase {
     this.log = log;
     this.leftJoystick = leftJoystick;
     this.rightJoystick = rightJoystick;
+    logRotationKey = log.allocateLogRotation();
+
     addRequirements(driveTrain);
   }
 
@@ -70,7 +73,7 @@ public class DriveWithJoystick extends CommandBase {
     leftVelocity = (Math.abs(leftVelocity) < OIConstants.joystickDeadband) ? 0 : scaleJoystick(leftVelocity) * SwerveConstants.kMaxSpeedMetersPerSecond;
     turnRate = (Math.abs(turnRate) < OIConstants.joystickDeadband) ? 0 : scaleTurn(turnRate) * SwerveConstants.kMaxTurningRadiansPerSecond;
 
-    if(log.getLogRotation() == log.DRIVE_CYCLE) {
+    if(log.isMyLogRotation(logRotationKey)) {
       log.writeLog(false, "DriveWithJoystickArcade", "Joystick", "Fwd", fwdVelocity, "Left", leftVelocity, "Turn", turnRate);
     }
     
