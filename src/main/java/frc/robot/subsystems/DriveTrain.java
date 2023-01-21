@@ -17,6 +17,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -55,6 +56,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
   // Odometry class for tracking robot pose
   SwerveDriveOdometry odometry;
+  Field2d field = new Field2d();    // Field to dispaly on Shuffleboard
 
   /**
    * Constructs the DriveTrain subsystem
@@ -99,6 +101,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     // create and initialize odometery
     odometry = new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(getGyroRotation()), 
         getModulePotisions(), new Pose2d(0, 0, Rotation2d.fromDegrees(0)) );
+    SmartDashboard.putData("Field", field);
   }
   
 
@@ -384,6 +387,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
       }
 
       // Update data on SmartDashboard
+      field.setRobotPose(odometry.getPoseMeters());
       // SmartDashboard.putNumber("Drive Average Dist in Meters", Units.inchesToMeters(getAverageDistance()));
       SmartDashboard.putNumber("Drive X Fwd Velocity", getChassisSpeeds().vxMetersPerSecond);
       SmartDashboard.putNumber("Drive Y Left Velocity", getChassisSpeeds().vyMetersPerSecond);
