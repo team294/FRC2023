@@ -1,0 +1,19 @@
+{
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Calibrate Drive Motors": "Command",
+      "/SmartDashboard/Calibrate Turn Motors": "Command",
+      "/SmartDashboard/Clear Sticky Faults": "Command",
+      "/SmartDashboard/Drive 1.5 mps 0 deg": "Command",
+      "/SmartDashboard/Drive Straight": "Command",
+      "/SmartDashboard/Drive Wheels +85 deg": "Command",
+      "/SmartDashboard/Drive Wheels +95 deg": "Command",
+      "/SmartDashboard/Drive Wheels 0 deg": "Command",
+      "/SmartDashboard/Example Auto S-Shape": "Command",
+      "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/Zero Gyro": "Command",
+      "/SmartDashboard/Zero Odometry": "Command"
+    }
+  }
+}
