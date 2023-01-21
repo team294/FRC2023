@@ -271,6 +271,8 @@ public class RobotContainer {
       RobotPreferences.recordStickyFaults("RobotPreferences", log);
     }
 
+    // Set initial robot position on field
+    driveTrain.resetPose(new Pose2d(2.0, 2.0, Rotation2d.fromDegrees(0)));
   }
 
   /**
