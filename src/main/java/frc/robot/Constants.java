@@ -18,6 +18,29 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  */
 public final class Constants {
 
+    public enum CoordType {
+        kRelative(0),
+        kAbsolute(1),
+        kAbsoluteResetPose(2);
+    
+        @SuppressWarnings({"MemberName", "PMD.SingularField"})
+        public final int value;
+        CoordType(int value) { this.value = value; }
+    }
+
+    /**
+     * Options to select driving stopping types.
+     */
+    public enum StopType {
+        kNoStop(0),
+        kCoast(1),
+        kBrake(2);
+    
+        @SuppressWarnings({"MemberName", "PMD.SingularField"})
+        public final int value;
+        StopType(int value) { this.value = value; }
+    }
+
 
     public static final class Ports{
 
