@@ -7,7 +7,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import frc.robot.utilities.TrapezoidProfileBCR;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -48,7 +47,6 @@ public final class Constants {
         public static final int usbRightJoystick = 2;
         public static final int usbCoPanel = 3;
 
-        // TODO Fix code or this constant so that the robot does not move when joystick is "neutral"
         public static final double joystickDeadband = 0.01;
     }
 
