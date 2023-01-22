@@ -9,6 +9,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
@@ -21,6 +22,7 @@ public class DriveResetPose extends CommandBase {
   private DriveTrain driveTrain;
   private FileLog log;
   private double curX, curY, curAngle;
+  private boolean fromShuffleboard;
   private boolean onlyAngle;      // true = resent angle but not X-Y position
 
   /**
@@ -33,10 +35,12 @@ public class DriveResetPose extends CommandBase {
   public DriveResetPose(double curXinMeters, double curYinMeters, double curAngleinDegrees, DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
+    this.fromShuffleboard = false;
     curX = curXinMeters;
     curY = curYinMeters;
     curAngle = curAngleinDegrees;
     onlyAngle = false;
+
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(driveTrain);
   }
@@ -50,15 +54,47 @@ public class DriveResetPose extends CommandBase {
   public DriveResetPose(double curAngleinDegrees, DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
+    this.fromShuffleboard = false;
     curAngle = curAngleinDegrees;
     onlyAngle = true;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(driveTrain);
   }
 
+  /**
+   * Gets values from Shuffleboard
+   * @param driveTrain DriveTrain subystem
+   */
+  public DriveResetPose(DriveTrain driveTrain, FileLog log){
+    this.driveTrain = driveTrain;
+    this.log = log;
+    this.fromShuffleboard = true;
+    onlyAngle = false;
+
+    addRequirements(driveTrain);
+    
+    if(SmartDashboard.getNumber("DriveResetPose Manual Current X", -9999) == -9999) {
+      SmartDashboard.putNumber("DriveStraight Manual Current X", 0);
+    }
+    if(SmartDashboard.getNumber("DriveResetPose Manual Current Y", -9999) == -9999) {
+      SmartDashboard.putNumber("DriveResetPose Manual Current Y", 0);
+    }
+    if(SmartDashboard.getNumber("DriveResetPose Manual Current Angle", -9999) == -9999){
+      SmartDashboard.putNumber("DriveResetPose MAnual Current Angle", 0);
+    }
+    
+
+  }
+
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    if(fromShuffleboard){
+      curX = SmartDashboard.getNumber("DriveResetPose Manual Current X", 0);
+      curX = SmartDashboard.getNumber("DriveResetPose Manual Current Y", 0);
+      curAngle = SmartDashboard.getNumber("DriveResetPose Manual Current Angle", 0);
+    }
+
     if(onlyAngle){
       curX = driveTrain.getPose().getX();
       curY = driveTrain.getPose().getY();
