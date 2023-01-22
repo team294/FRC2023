@@ -18,7 +18,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 // import edu.wpi.first.wpilibj2.command.button.Trigger;
 
+import frc.robot.Constants.CoordType;
 import frc.robot.Constants.OIConstants;
+import frc.robot.Constants.StopType;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
@@ -85,7 +87,14 @@ public class RobotContainer {
     // SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveFollowTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.testCurve.value], false, PIDType.kTalon, driveTrain, log));
     // SmartDashboard.putData("Drive Trajectory Absolute", new DriveFollowTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
     SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
-    SmartDashboard.putData("Drive Straight", new DriveTrajectory(TrajectoryGenerator.generateTrajectory(new Pose2d(0,0,new Rotation2d(0)), List.of(), new Pose2d(3,0,new Rotation2d(0)), Constants.TrajectoryConstants.swerveTrajectoryConfig), driveTrain, log));
+    SmartDashboard.putData("Drive Straight", new DriveTrajectory(
+          CoordType.kRelative, StopType.kBrake,
+          TrajectoryGenerator.generateTrajectory(
+            new Pose2d(0,0,new Rotation2d(0)), 
+            List.of(), 
+            new Pose2d(3,0,new Rotation2d(0)), 
+            Constants.TrajectoryConstants.swerveTrajectoryConfig),
+          driveTrain, log));
   }
 
   /**
