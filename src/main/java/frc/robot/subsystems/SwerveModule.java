@@ -131,7 +131,7 @@ public class SwerveModule {
   /**
    * reconfigures the motors, uses default values from constructor
    */
-  public void reConfigMotors(){
+  public void reConfigEncoders(){
     //configure drive motors
     driveMotor.configFactoryDefault(100);
     driveMotor.configAllSettings(CTREConfigs.swerveDriveFXConfig, 100);
