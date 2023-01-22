@@ -423,12 +423,12 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * @param logWhenDisabled true will log when disabled, false will discard the string
    */
   public void updateDriveLog(boolean logWhenDisabled) {
-    // TODO Add more logging to the log file?
-
     Pose2d pose = odometry.getPoseMeters();
     log.writeLog(logWhenDisabled, "Drive", "Update Variables", 
       "Gyro Angle", getGyroRotation(), "RawGyro", getGyroRaw(), 
-      "Gyro Velocity", angularVelocity, "Pitch", ahrs.getRoll(), "Drive X Fwd Velocity", getChassisSpeeds().vxMetersPerSecond, "Drive Y Left Velocity", getChassisSpeeds().vyMetersPerSecond,
+      "Gyro Velocity", angularVelocity, "Pitch", ahrs.getRoll(), 
+      "Drive X Fwd Velocity", getChassisSpeeds().vxMetersPerSecond, 
+      "Drive Y Left Velocity", getChassisSpeeds().vyMetersPerSecond,
       "Odometry X", pose.getTranslation().getX(), "Odometry Y", pose.getTranslation().getY(), 
       "Odometry Theta", pose.getRotation().getDegrees(),
       swerveFrontLeft.getLogString(),

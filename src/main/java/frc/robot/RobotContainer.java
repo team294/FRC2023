@@ -18,11 +18,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 // import edu.wpi.first.wpilibj2.command.button.Trigger;
 
+import frc.robot.Constants.CoordType;
 import frc.robot.Constants.OIConstants;
+import frc.robot.Constants.StopType;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
 import frc.robot.utilities.*;
+import frc.robot.utilities.TrajectoryCache.TrajectoryType;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -85,11 +88,18 @@ public class RobotContainer {
     SmartDashboard.putData("Drive Straight", new DriveStraight(false, false, false, driveTrain, log));
 
     // Testing for autos and trajectories
-    // SmartDashboard.putData("Drive Trajectory Relative", new DriveFollowTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], false, PIDType.kTalon, driveTrain, log));
-    // SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveFollowTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.testCurve.value], false, PIDType.kTalon, driveTrain, log));
-    // SmartDashboard.putData("Drive Trajectory Absolute", new DriveFollowTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
+    SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
     SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
-    SmartDashboard.putData("Drive Straight", new DriveTrajectory(TrajectoryGenerator.generateTrajectory(new Pose2d(0,0,new Rotation2d(0)), List.of(), new Pose2d(3,0,new Rotation2d(0)), Constants.TrajectoryConstants.swerveTrajectoryConfig), driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Straight", new DriveTrajectory(
+          CoordType.kRelative, StopType.kBrake,
+          TrajectoryGenerator.generateTrajectory(
+            new Pose2d(0,0,new Rotation2d(0)), 
+            List.of(), 
+            new Pose2d(3,0,new Rotation2d(0)), 
+            Constants.TrajectoryConstants.swerveTrajectoryConfig),
+          driveTrain, log));
   }
 
   /**

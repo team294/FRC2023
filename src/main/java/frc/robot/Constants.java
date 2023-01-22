@@ -18,6 +18,29 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
  */
 public final class Constants {
 
+    public enum CoordType {
+        kRelative(0),
+        kAbsolute(1),
+        kAbsoluteResetPose(2);
+    
+        @SuppressWarnings({"MemberName", "PMD.SingularField"})
+        public final int value;
+        CoordType(int value) { this.value = value; }
+    }
+
+    /**
+     * Options to select driving stopping types.
+     */
+    public enum StopType {
+        kNoStop(0),
+        kCoast(1),
+        kBrake(2);
+    
+        @SuppressWarnings({"MemberName", "PMD.SingularField"})
+        public final int value;
+        StopType(int value) { this.value = value; }
+    }
+
 
     public static final class Ports{
 
@@ -103,11 +126,11 @@ public final class Constants {
 
         // Update the offset angles in RobotPreferences (in Shuffleboard), not in this code!
         // After updating in RobotPreferences, you will need to re-start the robot code for the changes to take effect.
-        // When calibrating offset, set the wheels to zero degrees with the gear on the right
-        public static double offsetAngleFrontLeftMotor = 0; // 92.6
-        public static double offsetAngleFrontRightMotor = 0; // -14
-        public static double offsetAngleBackLeftMotor = 0; // -108.2
-        public static double offsetAngleBackRightMotor = 0; // 158.4
+        // When calibrating offset, set the wheels to zero degrees with the bevel gear facing to the right
+        public static double offsetAngleFrontLeftMotor = 0; // 92.2
+        public static double offsetAngleFrontRightMotor = 0; // -12.5
+        public static double offsetAngleBackLeftMotor = 0; // -106.6
+        public static double offsetAngleBackRightMotor = 0; // 157.5
       }
 
       public static final class TrajectoryConstants {
