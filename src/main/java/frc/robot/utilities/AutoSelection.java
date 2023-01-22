@@ -13,7 +13,7 @@ import frc.robot.subsystems.*;
  */
 public class AutoSelection {
 
-	//public static final int AUTO = 0;
+	public static final int EXAMPLE = 0;
 	
 	private TrajectoryCache trajectoryCache;
 	private SendableChooser<Integer> autoChooser = new SendableChooser<>();
@@ -26,7 +26,7 @@ public class AutoSelection {
 		this.trajectoryCache = trajectoryCache;
 
 		// auto selections
-		//autoChooser.setDefaultOption("Auto1", AUTO_NAME);
+		autoChooser.setDefaultOption("Example Auto", EXAMPLE);
 		//autoChooser.addOption("Auto2", AUTO_NAME);
 	
 		// show auto selection widget on Shuffleboard
