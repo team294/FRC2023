@@ -4,8 +4,6 @@
 
 package frc.robot.commands;
 
-import java.io.File;
-
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Grabber;
 import frc.robot.utilities.FileLog;
@@ -26,7 +24,7 @@ public class GrabberEject extends CommandBase {
   @Override
   public void initialize() {
     grabber.setMotorPercentOutput(.2);
-    log.writeLog(false, "Grabber", "ejecting");
+    log.writeLog(false, grabber.getName(), "ejecting");
   }
 
   // Called every time the scheduler runs while the command is scheduled.

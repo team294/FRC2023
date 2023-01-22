@@ -47,7 +47,7 @@ public class RobotContainer {
 
   private final CommandXboxController xboxController = new CommandXboxController(OIConstants.usbXboxController);
   private boolean rumbling = false;
-  Grabber grabber = new Grabber(Ports.CANGrabber, "Grabber", log);
+  Grabber grabber = new Grabber("Grabber", log);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -107,16 +107,27 @@ public class RobotContainer {
    * Configures XBox buttons and controls
    */
   private void configureXboxButtons(){
-    JoystickButton[] xb = new JoystickButton[11];
     //check povtrigger and axis trigger number bindings
     // Trigger xbPOVUp = new POVTrigger(xboxController, 0);
     // Trigger xbPOVRight = new POVTrigger(xboxController, 90);
     //Trigger xbPOVDown = new POVTrigger(xboxController, 180);
     // Trigger xbPOVLeft = new POVTrigger(xboxController, 270);
     
-    
+    // Triggers for all xbox buttons
     Trigger xbLT = xboxController.leftTrigger();
     Trigger xbRT = xboxController.rightTrigger();
+    // Trigger xbA = xboxController.a();
+    // Trigger xbB = xboxController.b();
+    // Trigger xbY = xboxController.y();
+    // Trigger xbX = xboxController.x();
+    // Trigger xbLB = xboxController.leftBumper();
+    // Trigger xbRB = xboxController.rightBumper();
+    // Trigger xbBack = xboxController.back();
+    // Trigger xbStart = xboxController.start();
+    // Trigger xbPOVUp = xboxController.povUp();
+    // Trigger xbPOVRight = xboxController.povRight();
+    // Trigger xbPOVLeft = xboxController.povLeft();
+    // Trigger xbPOVDown = xboxController.povDown();
     
     // right trigger 
     xbRT.whileTrue(new GrabberPickUp(grabber, log));
@@ -129,10 +140,10 @@ public class RobotContainer {
 
     
     //a
-    // xb[1].whenHeld(new ShootSetup(false, 3100, pivisionhub, shooter, log));         
+    // xbA.whileTrue(command));       
     
     //b
-    // xb[2].whenHeld(new ShootSetup(false, 3400, pivisionhub, shooter, log));        
+    // xbB.whileTrue(command));         
  
     //y
     // xb[4].whenHeld(new ShootSetup(false, 4100, pivisionhub, shooter, log));        
