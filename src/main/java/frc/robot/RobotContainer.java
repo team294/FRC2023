@@ -37,6 +37,10 @@ public class RobotContainer {
   // Define robot subsystems  
   private final DriveTrain driveTrain = new DriveTrain(log);
 
+  // Define other utilities
+  private final TrajectoryCache trajectoryCache = new TrajectoryCache(log);
+  private final AutoSelection autoSelection = new AutoSelection(trajectoryCache, log);
+
   // Define controllers
   private final Joystick xboxController = new Joystick(OIConstants.usbXboxController); //assuming usbxboxcontroller is int
   private final Joystick leftJoystick = new Joystick(OIConstants.usbLeftJoystick);
@@ -257,7 +261,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    Command m_autoCommand = null;
+    Command m_autoCommand = autoSelection.getAutoCommand(driveTrain, log);
     return m_autoCommand;
   }
 

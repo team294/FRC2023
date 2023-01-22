@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.commands.ExampleAuto;
 import frc.robot.subsystems.*;
 
 
@@ -53,10 +54,10 @@ public class AutoSelection {
 		double waitTime = SmartDashboard.getNumber("Autonomous delay", 0);
 		waitTime = MathUtil.clamp(waitTime, 0, 15);		// make sure autoDelay isn't negative and is only active during auto
 
-		// if (autoPlan == AUTO_NAME) {
-		// 	log.writeLogEcho(true, "AutoSelect", "run Auto1");
-		// 	autonomousCommand = new AutoShootTaxi(waitTime, driveTrain, log);
-		// }
+		if (autoPlan == EXAMPLE) {
+		 	log.writeLogEcho(true, "AutoSelect", "run Example Auto");
+			autonomousCommand = new ExampleAuto(driveTrain);
+		}
 
 		if (autonomousCommand == null) {
 			log.writeLogEcho(true, "AutoSelect", "No autocommand found");
