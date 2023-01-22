@@ -40,6 +40,7 @@ public final class Constants {
         public static final int CANTurnEncoderBackLeft = 11;
         public static final int CANTurnEncoderBackRight = 12;
 
+        public static final int CANGrabber = 44;
     }
 
     public static final class OIConstants {
@@ -129,4 +130,17 @@ public final class Constants {
         new TrapezoidProfile.Constraints(
             SwerveConstants.kNominalTurningRadiansPerSecond, SwerveConstants.kMaxAngularSpeedRadiansPerSecondSquared);
       }
+
+      public static final class FalconConstants {
+        public static final double compensationVoltage = 12.0;                      // voltage compensation on motor
+        public static final double ticksPerRevolution = 2048.0;                     // Divide by this to convert raw ticks to revolutions
+        public static final double rawVelocityToRPM = 600.0 / ticksPerRevolution;   // Multiply by this to convert raw velocity (ticksPer100ms) to RPM
+
+        public static final double kP = 0.2;        // PID terms
+        public static final double kI = 0.0;
+        public static final double kD = 0.0;
+        // public static final double kFF = 0.056;     // value = 1023 * desired-percent-out / at-sensor-velocity-sensor-units-per-100ms
+        public static final double kS = 0.02;
+        public static final double kV = 0.000161;
+    }
 }
