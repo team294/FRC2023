@@ -38,6 +38,11 @@ public class SwerveModule {
   private double cancoderZero = 0;          // Reference raw encoder reading for CanCoder.  Calibration sets this to the absolute position from RobotPreferences.
   private double turningEncoderZero = 0;    // Reference raw encoder reading for turning FalconFX encoder.  Calibration sets this to match the CanCoder.
 
+  private boolean cancoderReversed;
+  private boolean driveEncoderReversed;
+  private boolean turningEncoderReversed;
+  private double turningOffsetDegrees;
+
   private final SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(SwerveConstants.kSDrive, SwerveConstants.kVDrive, SwerveConstants.kADrive);
   // private final SimpleMotorFeedforward turnFeedforward = new SimpleMotorFeedforward(SwerveConstants.kSTurn, SwerveConstants.kVTurn);
   
@@ -55,12 +60,16 @@ public class SwerveModule {
    * front of the robot.  Value is the desired encoder zero point, in absolute magnet position reading.
    */
   public SwerveModule(String swName, int driveMotorAddress, int turningMotorAddress, int cancoderAddress,
-      boolean driveEncoderReversed, boolean turningEncoderReversed, boolean cancoderReveresed,
+      boolean driveEncoderReversed, boolean turningEncoderReversed, boolean cancoderReversed,
       double turningOffsetDegrees, FileLog log) {
 
     // Save the module name and logfile
     this.swName = swName;
     this.log = log;
+    this.cancoderReversed = cancoderReversed;
+    this.driveEncoderReversed = driveEncoderReversed;
+    this.turningEncoderReversed = turningEncoderReversed;
+    this.turningOffsetDegrees = turningOffsetDegrees;
 
     // Create motor and encoder objects
     driveMotor = new WPI_TalonFX(driveMotorAddress);
@@ -87,7 +96,7 @@ public class SwerveModule {
     // configure turning CanCoder
     turningCanCoder.configFactoryDefault(100);
     turningCanCoder.configAllSettings(CTREConfigs.swerveCanCoderConfig, 100);
-    turningCanCoder.configSensorDirection(cancoderReveresed, 100);
+    turningCanCoder.configSensorDirection(cancoderReversed, 100);
 
     // configure drive encoder
     driveMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 100);
@@ -118,6 +127,59 @@ public class SwerveModule {
   }
 
   // ********** Swerve module configuration methods
+
+  /**
+   * reconfigures the motors, uses default values from constructor
+   */
+  public void reConfigMotors(){
+    //configure drive motors
+    driveMotor.configFactoryDefault(100);
+    driveMotor.configAllSettings(CTREConfigs.swerveDriveFXConfig, 100);
+    driveMotor.selectProfileSlot(0, 0);
+    driveMotor.setInverted(false);
+    driveMotor.enableVoltageCompensation(true);
+
+    // configure turning motor
+    turningMotor.configFactoryDefault(100);
+    turningMotor.configAllSettings(CTREConfigs.swerveAngleFXConfig, 100);
+    turningMotor.selectProfileSlot(0, 0);
+    turningMotor.setInverted(true);
+    turningMotor.enableVoltageCompensation(true);
+
+    // other configs for drive and turning motors
+    setMotorModeCoast(true);        // true on boot up, so robot is easy to push.  Change to false in autoinit or teleopinit
+
+    // configure turning CanCoder
+    turningCanCoder.configFactoryDefault(100);
+    turningCanCoder.configAllSettings(CTREConfigs.swerveCanCoderConfig, 100);
+    turningCanCoder.configSensorDirection(cancoderReversed, 100);
+
+    // configure drive encoder
+    driveMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 100);
+    driveMotor.setSensorPhase(driveEncoderReversed);
+
+    // configure turning TalonFX encoder
+    turningMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 100);
+    turningMotor.setSensorPhase(turningEncoderReversed);
+
+    // NOTE!!! When the Cancoder or TalonFX encoder settings are changed above, then the next call to 
+    // getCanCoderDegrees() getTurningEncoderDegrees() may contain an old value, not the value based on 
+    // the updated configuration settings above!!!!  The CANBus runs asynchronously from this code, so 
+    // sending the updated configuration to the CanCoder/Falcon and then receiving an updated position measurement back
+    // may take longer than this code.
+    // The timeouts in the configuration code above (100ms) should take care of this, but it does not always wait long enough.
+    // So, add a wait time here:
+    double finishTime = System.currentTimeMillis() + 200;
+    while (System.currentTimeMillis() < finishTime) {}
+
+    // System.out.println(swName + " CanCoder " + getCanCoderDegrees() + " FX " + getTurningEncoderDegrees() + " pre-CAN");
+    zeroDriveEncoder();
+    // log.writeLogEcho(true, "SwerveModule", swName+" pre-CAN", "Cancoder", getCanCoderDegrees(), "FX", getTurningEncoderDegrees());
+    calibrateCanCoderDegrees(turningOffsetDegrees);
+    // log.writeLogEcho(true, "SwerveModule", swName+" post-CAN", "Cancoder", getCanCoderDegrees(), "FX", getTurningEncoderDegrees());
+    calibrateTurningEncoderDegrees(getCanCoderDegrees());
+    // log.writeLogEcho(true, "SwerveModule", swName+" post-FX", "Cancoder", getCanCoderDegrees(), "FX", getTurningEncoderDegrees());
+  }
 
   /**
    * @param setCoast true = coast mode, false = brake mode

@@ -68,6 +68,7 @@ public class RobotContainer {
 
     // DriveTrain calibration
     // SmartDashboard.putData("Drive Cal Slow", new DriveCalibrate(0.3, 35, 0.01, CalibrateMode.kStraight, driveTrain, log));
+    SmartDashboard.putData("Drive Reset", new DriveReset(driveTrain, log));
 
     // Testing for drivetrain autos and trajectories
     SmartDashboard.putData("Zero Gyro", new DriveZeroGyro(driveTrain, log));

@@ -174,6 +174,15 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   // ************ Swerve drive methods
 
   /**
+   * reconfigures the Encoders for every swerve module
+   */
+  public void configureEncoders(){
+    swerveFrontLeft.reConfigEncoders();
+    swerveFrontRight.reConfigEncoders();
+    swerveBackLeft.reConfigEncoders();
+    swerveBackRight.reConfigEncoders();
+  }
+  /**
    * @param setCoast true = coast mode, false = brake mode
    */
   public void setDriveModeCoast(boolean setCoast) {
