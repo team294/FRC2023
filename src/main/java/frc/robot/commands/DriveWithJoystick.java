@@ -121,6 +121,6 @@ public class DriveWithJoystick extends CommandBase {
    * @return Scaled joystick value, -1.0 to +1.0
    */
   private double scaleJoystick(double rawJoystick){
-    return Math.signum(rawJoystick)*(0.751*rawJoystick*rawJoystick + 0.221*Math.abs(rawJoystick) + 0.0277);
+    return Math.signum(rawJoystick)*(0.625*rawJoystick*rawJoystick + 0.379*Math.abs(rawJoystick) - 0.0039);
   }
 }
