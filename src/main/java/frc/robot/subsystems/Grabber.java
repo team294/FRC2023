@@ -109,6 +109,7 @@ public class Grabber extends SubsystemBase implements Loggable{
       SmartDashboard.putNumber(buildString(subsystemName, "Bus Volt"), motor.getBusVoltage());
       SmartDashboard.putNumber(buildString(subsystemName, "Volt"), motor.getMotorOutputVoltage());
       SmartDashboard.putNumber(buildString(subsystemName, "Out Percent"), motor.getMotorOutputPercent());
+      SmartDashboard.putNumber(buildString(subsystemName, "Out Temperature"), motor.getTemperature());
     }
   }
 
@@ -121,7 +122,8 @@ public class Grabber extends SubsystemBase implements Loggable{
     "Bus Volt", motor.getBusVoltage(),
     "Out Percent", motor.getMotorOutputPercent(),
     "Volt", motor.getMotorOutputVoltage(),
-    "Amps", motor.getStatorCurrent()
+    "Amps", motor.getStatorCurrent(),
+    "Temperature", motor.getTemperature()
     );
   }
 

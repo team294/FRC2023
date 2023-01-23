@@ -14,7 +14,7 @@ public class GrabberPickUp extends CommandBase {
 
   private final Grabber grabber;
   private final FileLog log;
-  private double percent = -0.5;
+  private double percent = -0.7;
   // private boolean spiked = false;
   /**
    * Sets the motor speed from Shuffboard, -1.0 to +1.0
@@ -33,7 +33,7 @@ public class GrabberPickUp extends CommandBase {
   @Override
   public void initialize() {
     // spiked = false;
-    percent = -0.5;
+    percent = -0.7;
     log.writeLog(false, "GrabberPickUp", "Start");
     grabber.setMotorPercentOutput(percent);
   }
