@@ -82,7 +82,7 @@
               "Colors/Color when false": "#8B0000FF"
             }
           },
-          "3,2": {
+          "5,1": {
             "size": [
               7,
               4
@@ -96,6 +96,27 @@
               "Game/Game": "A2023_Charged_Up",
               "Visuals/Robot Icon Size": 50.0,
               "Visuals/Show Outside Circles": false
+            }
+          },
+          "0,2": {
+            "size": [
+              5,
+              4
+            ],
+            "content": {
+              "_type": "Camera Stream",
+              "_source0": "camera_server://rPi Camera 0",
+              "_title": "rPi Camera 0",
+              "_glyph": 148,
+              "_showGlyph": false,
+              "Crosshair/Show crosshair": true,
+              "Crosshair/Crosshair color": "#FFFFFFFF",
+              "Controls/Show controls": true,
+              "Controls/Rotation": "NONE",
+              "compression": -1.0,
+              "fps": -1,
+              "imageWidth": -1,
+              "imageHeight": -1
             }
           }
         }

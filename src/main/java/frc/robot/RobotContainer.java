@@ -89,6 +89,11 @@ public class RobotContainer {
     // SmartDashboard.putData("Drive Trajectory Absolute", new DriveFollowTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
     SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
     SmartDashboard.putData("Drive Straight", new DriveTrajectory(TrajectoryGenerator.generateTrajectory(new Pose2d(0,0,new Rotation2d(0)), List.of(), new Pose2d(3,0,new Rotation2d(0)), Constants.TrajectoryConstants.swerveTrajectoryConfig), driveTrain, log));
+  
+    //Grabber commands
+    SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
+    SmartDashboard.putData("Grabber Pick Up",new GrabberPickUp(grabber, log));
+    SmartDashboard.putData("Grabber Eject", new GrabberEject(grabber, log));
   }
 
   /**
@@ -116,7 +121,7 @@ public class RobotContainer {
     // Triggers for all xbox buttons
     Trigger xbLT = xboxController.leftTrigger();
     Trigger xbRT = xboxController.rightTrigger();
-    // Trigger xbA = xboxController.a();
+    Trigger xbA = xboxController.a();
     // Trigger xbB = xboxController.b();
     // Trigger xbY = xboxController.y();
     // Trigger xbX = xboxController.x();
@@ -140,7 +145,7 @@ public class RobotContainer {
 
     
     //a
-    // xbA.whileTrue(command));       
+    xbA.whileTrue(new GrabberStopMotor(grabber, log));       
     
     //b
     // xbB.whileTrue(command));         
