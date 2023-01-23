@@ -129,7 +129,7 @@ public class SwerveModule {
   // ********** Swerve module configuration methods
 
   /**
-   * reconfigures the motors, uses default values from constructor
+   * reconfigures the encoders, uses default values from constructor
    */
   public void reConfigEncoders(){
     //configure drive motors

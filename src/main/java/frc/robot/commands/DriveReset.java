@@ -14,7 +14,11 @@ public class DriveReset extends CommandBase {
   private FileLog log;
 
   
-  /** Creates a new DriveReset. */
+  /** Creates a new DriveReset. 
+   * @param driveTrain driveTrain subsytem
+   * @param log FileLog
+   * 
+  */
   public DriveReset(DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
