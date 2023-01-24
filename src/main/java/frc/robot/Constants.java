@@ -136,9 +136,10 @@ public final class Constants {
 
       public static final class TrajectoryConstants {
 
-        public static final double kPXController = 1;
-        public static final double kPYController = 1;
-        public static final double kPThetaController = 1;
+        // Feedback terms for holonomic drive controllers
+        public static final double kPXController = 1;       // X-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)
+        public static final double kPYController = 1;       // Y-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)
+        public static final double kPThetaController = 1;   // Theta-velocity controller:  kp.  Units = (rad/sec of velocity) / (radians of angle error)
 
         public static final TrajectoryConfig swerveTrajectoryConfig =
             new TrajectoryConfig(
