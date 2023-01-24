@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+import math
+import time
 
 def test(frame):
     return detect_pole(frame)
@@ -20,10 +22,11 @@ upper_threshold = np.array([74, 255, 255])
 
 def detect_pole(input_img):
     # convert image to hsv
-    hsv = cv2.cvtColor(input_img, cv2.COLOR_BGR2HSV)
-    
-    # What kind of blur
-    blurred = cv2.blur()
+
+    # TODO What kind of blur?
+    blurred = cv2.blur(input_img, (10,10))
+
+    hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
 
     # get threshold
     threshold = cv2.inRange(hsv, lower_threshold, upper_threshold)
@@ -40,60 +43,47 @@ def detect_pole(input_img):
     # init filtered array
     filtered = []
     
+    rv = 0
+    d1 = 0
+    d2 = 0
     # fill filtered array with values from all contours with an area greater than 15
     # respective values are the contour's center x-value, center y-value, 
     # bounding-rectangle lower-left x-val bounding-rect lower-left y-val, 
     # bounding rect upper-right x, bounding-rect upper-right y-val, and area
     for c in contours:
         area = cv2.contourArea(c)
-        if (area < minimumArea or area > maximumArea):
-            continue
+        # if (area < minimumArea or area > maximumArea):
+        #     continue
         rect = cv2.boundingRect(c)
         x,y,w,h = rect
+        cv2.rectangle(input_img,(x,y),(x+w,y+h),(0,255,0),2)
         M = cv2.moments(c)
         # gets center x and y, x1, x2, y1, y2, and area
         if M["m00"] != 0:
             cX = int(M["m10"] / M["m00"])
             cY = int(M["m01"] / M["m00"])
-            filtered.append((cX, cY, x, x+w, y, y+h, area))
+            filtered.append((cX, cY, x, x+w, y, y+h, area, h))
+            rv+=1
 
-    rv = 0 # amount of contours found
-    rw = 0 # width of contour
-    rx = 0 # center x of contour
-    # if there are any values in filtered
-    if len(filtered) > 0:
-        # finds median value and filters for all values within the y tolerance on smart dashboard
-        filtered.sort(key=lambda c: c[1]) # sorts array by y-value
-        median = filtered[int(len(filtered)/2)][1] # gets median y-value
-        # filtered = list(filter(lambda f: abs(median-f[1]) < yT, filtered)) # filters
-        filtered = list(filter(lambda f: abs(median-f[1]) < yTolerance, filtered)) # filters
+    # dist1 = 359-
+    if rv == 0:
+        return input_img
 
-        
-        # if there are any values left in filtered
-        if len(filtered) > 1:
-            # sorts filtered array by contour area and caps it to at-most 4 elements
-            filtered = sorted(filtered, key=lambda f: f[6])[-4:]
-            
-            rv = len(filtered) # gets the amount of contours found
+    for tape in filtered:
+        if tape[1] < height * 0.5:
+            d1 = 359 - 81.3 * math.log(tape[7])
+        else:
+            d2 =  387 - 78.6 * math.log(tape[7])
 
-            if rv > 1:
-                longWidth = filtered[len(filtered)-1][3] - filtered[len(filtered)-1][2]
-                filtered = sorted(filtered, key=lambda c: c[0])
-                for i in range(len(filtered)-1, 0, -1):
-                    if (filtered[i][0]-filtered[i-1][0] > longWidth*3):
-                        rv+=1
+    filtered.sort(key=lambda c: c[6])
+    
+    try:
+        a = filtered[0]
+        b = filtered[1]
+        print(f"A - height: {a[5]-a[4]}, area: {a[6]}, cY: {a[1]}, distance {d1}")
+        print(f"B - height: {b[5]-b[4]}, area: {b[6]}, cY: {b[1]}, distance {d2}")
+    except:
+        time.sleep(0.01)
 
-
-
-            # gets lower-left-most x- and y-value and upper-right-most x- and y-value for final bounding box
-            fx, fy, bx, by = filtered[0][2], filtered[0][4], filtered[0][3], filtered[0][5]
-            for f in filtered:
-                if f[2] < fx: fx = f[2]
-                if f[4] < fy: fy = f[4]
-                if f[3] > bx: bx = f[3]
-                if f[5] > by: by = f[5]
-            rw = bx - fx
-            rx = -0.0937486*(0.5*(bx+fx)-0.5*width) - 4.99446 # x in pixels converted to angle in degrees!
-            # draws bounding rectangle
-            cv2.rectangle(input_img,(fx, fy),(bx, by),(0,255,0),2)
+    # cv2.rectangle(input_img,(fx, fy),(bx, by),(0,255,0),2)
     return input_img
