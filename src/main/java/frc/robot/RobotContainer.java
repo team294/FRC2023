@@ -15,12 +15,15 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 // import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import frc.robot.Constants.CoordType;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.StopType;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.OIConstants;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
@@ -44,13 +47,14 @@ public class RobotContainer {
   private final TrajectoryCache trajectoryCache = new TrajectoryCache(log);
 
   // Define controllers
-  private final Joystick xboxController = new Joystick(OIConstants.usbXboxController); //assuming usbxboxcontroller is int
+  // private final Joystick xboxController = new Joystick(OIConstants.usbXboxController); //assuming usbxboxcontroller is int
   private final Joystick leftJoystick = new Joystick(OIConstants.usbLeftJoystick);
   private final Joystick rightJoystick = new Joystick(OIConstants.usbRightJoystick);
   private final Joystick coPanel = new Joystick(OIConstants.usbCoPanel);
 
+  private final CommandXboxController xboxController = new CommandXboxController(OIConstants.usbXboxController);
   private boolean rumbling = false;
-
+  Grabber grabber = new Grabber("Grabber", log);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -99,6 +103,11 @@ public class RobotContainer {
             new Pose2d(3,0,new Rotation2d(0)), 
             Constants.TrajectoryConstants.swerveTrajectoryConfig),
           driveTrain, log));
+  
+    //Grabber commands
+    SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
+    SmartDashboard.putData("Grabber Pick Up",new GrabberPickUp(grabber, log));
+    SmartDashboard.putData("Grabber Eject", new GrabberEject(grabber, log));
   }
 
   /**
@@ -117,37 +126,48 @@ public class RobotContainer {
    * Configures XBox buttons and controls
    */
   private void configureXboxButtons(){
-    JoystickButton[] xb = new JoystickButton[11];
     //check povtrigger and axis trigger number bindings
     // Trigger xbPOVUp = new POVTrigger(xboxController, 0);
     // Trigger xbPOVRight = new POVTrigger(xboxController, 90);
     //Trigger xbPOVDown = new POVTrigger(xboxController, 180);
     // Trigger xbPOVLeft = new POVTrigger(xboxController, 270);
     
-    // Trigger xbLT = new AxisTrigger(xboxController, 2, 0.9);
-    // Trigger xbRT = new AxisTrigger(xboxController, 3, 0.9);
+    // Triggers for all xbox buttons
+    Trigger xbLT = xboxController.leftTrigger();
+    Trigger xbRT = xboxController.rightTrigger();
+    Trigger xbA = xboxController.a();
+    // Trigger xbB = xboxController.b();
+    // Trigger xbY = xboxController.y();
+    // Trigger xbX = xboxController.x();
+    // Trigger xbLB = xboxController.leftBumper();
+    // Trigger xbRB = xboxController.rightBumper();
+    // Trigger xbBack = xboxController.back();
+    // Trigger xbStart = xboxController.start();
+    // Trigger xbPOVUp = xboxController.povUp();
+    // Trigger xbPOVRight = xboxController.povRight();
+    // Trigger xbPOVLeft = xboxController.povLeft();
+    // Trigger xbPOVDown = xboxController.povDown();
     
-    // right trigger shoots ball
+    // right trigger 
+    xbRT.whileTrue(new GrabberPickUp(grabber, log));
     // xbRT.whenActive(new ShootSequence(uptake, feeder, shooter, log),false);
 
-    // left trigger aim turret
+    // left trigger
+    xbLT.whileTrue(new GrabberEject(grabber, log));
     // xbLT.whenActive(new TurretTurnAngleTwice(TargetType.kVisionOnScreen, false, turret, pivisionhub, log));
     // xbLT.whenInactive(new TurretStop(turret, log));
 
-    for (int i = 1; i < xb.length; i++) {
-      xb[i] = new JoystickButton(xboxController, i);
-    }
     
-    //a - short shot distance
-    // xb[1].whenHeld(new ShootSetup(false, 3100, pivisionhub, shooter, log));         
+    //a
+    xbA.whileTrue(new GrabberStopMotor(grabber, log));       
     
-    //b - medium shot distance
-    // xb[2].whenHeld(new ShootSetup(false, 3400, pivisionhub, shooter, log));        
+    //b
+    // xbB.whileTrue(command));         
  
-    //y - long shot distance
+    //y
     // xb[4].whenHeld(new ShootSetup(false, 4100, pivisionhub, shooter, log));        
     
-    //x - shot speed using vision
+    //x
     // xb[3].whileTrue(new ShootSetup(true, 3100, pivisionhub, shooter, log));        
     
     // LB = 5, RB = 6
@@ -254,13 +274,13 @@ public class RobotContainer {
    * Sets the rumble on the XBox controller
    * @param percentRumble The normalized value (0 to 1) to set the rumble to
    */
-	public void setXBoxRumble(double percentRumble) {
-		xboxController.setRumble(RumbleType.kLeftRumble, percentRumble);
-    xboxController.setRumble(RumbleType.kRightRumble, percentRumble);
+	// public void setXBoxRumble(double percentRumble) {
+	// 	xboxController.setRumble(RumbleType.kLeftRumble, percentRumble);
+  //   xboxController.setRumble(RumbleType.kRightRumble, percentRumble);
 
-    if (percentRumble == 0) rumbling = false;
-    else rumbling = true;
-  }
+  //   if (percentRumble == 0) rumbling = false;
+  //   else rumbling = true;
+  // }
   
 
   /**
