@@ -17,13 +17,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-// import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import frc.robot.Constants.CoordType;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.StopType;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.OIConstants;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
@@ -274,13 +272,13 @@ public class RobotContainer {
    * Sets the rumble on the XBox controller
    * @param percentRumble The normalized value (0 to 1) to set the rumble to
    */
-	// public void setXBoxRumble(double percentRumble) {
-	// 	xboxController.setRumble(RumbleType.kLeftRumble, percentRumble);
-  //   xboxController.setRumble(RumbleType.kRightRumble, percentRumble);
+	public void setXBoxRumble(double percentRumble) {
+		xboxController.getHID().setRumble(RumbleType.kLeftRumble, percentRumble);
+    xboxController.getHID().setRumble(RumbleType.kRightRumble, percentRumble);
 
-  //   if (percentRumble == 0) rumbling = false;
-  //   else rumbling = true;
-  // }
+    if (percentRumble == 0) rumbling = false;
+    else rumbling = true;
+  }
   
 
   /**
