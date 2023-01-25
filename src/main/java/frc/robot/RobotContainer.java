@@ -288,9 +288,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An ExampleCommand will run in autonomous
-    Command m_autoCommand = autoSelection.getAutoCommand(driveTrain, log);
-    return m_autoCommand;
+    return autoSelection.getAutoCommand(driveTrain, log);
   }
 
 

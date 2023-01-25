@@ -1,6 +1,7 @@
 package frc.robot.utilities;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -56,7 +57,7 @@ public class AutoSelection {
 
 		if (autoPlan == EXAMPLE) {
 		 	log.writeLogEcho(true, "AutoSelect", "run Example Auto");
-			autonomousCommand = new ExampleAuto(driveTrain);
+			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime), new ExampleAuto(driveTrain));
 		}
 
 		if (autonomousCommand == null) {
