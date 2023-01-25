@@ -62,6 +62,7 @@ public final class Constants {
         public static final int CANTurnEncoderBackLeft = 11;
         public static final int CANTurnEncoderBackRight = 12;
 
+        public static final int CANGrabber = 44;
     }
 
     public static final class OIConstants {
