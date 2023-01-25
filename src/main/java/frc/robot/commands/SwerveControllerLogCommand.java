@@ -248,6 +248,8 @@ public class SwerveControllerLogCommand extends CommandBase {
   public void initialize() {
     m_timer.reset();
     m_timer.start();
+
+    //TODO reset holonomic controller
   }
 
   @Override

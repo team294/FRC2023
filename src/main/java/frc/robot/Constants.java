@@ -92,10 +92,10 @@ public final class Constants {
         public static final double kTurningEncoderDegreesPerTick = 360.0/kEncoderCPR / kTurningGearRatio;
         
         // Robot calibration for feed-forward and max speeds
-        // Max speed measured values 1/4/2023:  FL = 4.100, FR  = 4.071, BL = 4.123, BR = 4.084
         // Max speed is used to keep each motor from maxing out, which preserves ratio between motors 
         // and ensures that the robot travels in the requested direction.  So, use min value of all 4 motors,
         // and further derate (initial test by 5%) to account for some battery droop under heavy loads.
+        // Max speed measured values 1/4/2023:  FL = 4.100, FR  = 4.071, BL = 4.123, BR = 4.084
         public static final double kMaxSpeedMetersPerSecond = 3.8;          // CALIBRATED
         public static final double kNominalSpeedMetersPerSecond = 0.5*kMaxSpeedMetersPerSecond;
         // Max acceleration measured values 1/13/2023: FL = 28.073, FR = 26.343, BL = 18.482, BR = 19.289
@@ -104,7 +104,8 @@ public final class Constants {
         // Max turn velocity degrees per second measured values 1/13/2023: FL = 1744.629, FR = 1762.207, BL = 1736.719, BR = 2085.645
         public static final double kMaxTurningRadiansPerSecond = 29.671;   // CALIBRATED took 1700 degrees and converted to radians
         public static final double kNominalTurningRadiansPerSecond = 6.0;
-        public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
+        public static final double kMaxAngularAccelerationRadiansPerSecondSquared = Math.PI;            // TODO Calibrate
+        public static final double kNominalAngularAccelerationRadiansPerSecondSquared = Math.PI;
         public static final double kVDrive = 0.226; // CALIBRATED = 0.226.  in % output per meters per second
         public static final double kADrive = 0.0;                   // TODO -- Calibrate
         public static final double kSDrive = 0.017; // CALIBRATED = 0.017.  in % output
@@ -150,6 +151,6 @@ public final class Constants {
         /* Constraint for the motion profilied robot angle controller */
         public static final TrapezoidProfile.Constraints kThetaControllerConstraints =
         new TrapezoidProfile.Constraints(
-            SwerveConstants.kNominalTurningRadiansPerSecond, SwerveConstants.kMaxAngularSpeedRadiansPerSecondSquared);
+            SwerveConstants.kNominalTurningRadiansPerSecond, SwerveConstants.kNominalAngularAccelerationRadiansPerSecondSquared);
       }
 }
