@@ -6,7 +6,6 @@ package frc.robot.commands;
 
 import static edu.wpi.first.util.ErrorMessages.requireNonNullParam;
 
-import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -17,8 +16,10 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
+import frc.robot.utilities.HolonomicDriveControllerBCR;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -44,7 +45,7 @@ public class SwerveControllerLogCommand extends CommandBase {
   private final Trajectory m_trajectory;
   private final Supplier<Pose2d> m_pose;
   private final SwerveDriveKinematics m_kinematics;
-  private final HolonomicDriveController m_controller;
+  private final HolonomicDriveControllerBCR m_controller;
   private final Consumer<SwerveModuleState[]> m_outputModuleStates;
   private final Supplier<Rotation2d> m_desiredRotation;
   private final FileLog m_log;
@@ -90,7 +91,7 @@ public class SwerveControllerLogCommand extends CommandBase {
         trajectory,
         pose,
         kinematics,
-        new HolonomicDriveController(
+        new HolonomicDriveControllerBCR(
             requireNonNullParam(xController, "xController", "SwerveControllerCommand"),
             requireNonNullParam(yController, "yController", "SwerveControllerCommand"),
             requireNonNullParam(thetaController, "thetaController", "SwerveControllerCommand")),
@@ -180,7 +181,7 @@ public class SwerveControllerLogCommand extends CommandBase {
       Trajectory trajectory,
       Supplier<Pose2d> pose,
       SwerveDriveKinematics kinematics,
-      HolonomicDriveController controller,
+      HolonomicDriveControllerBCR controller,
       Consumer<SwerveModuleState[]> outputModuleStates,
       FileLog log,
       DriveTrain driveTrain) {
@@ -222,7 +223,7 @@ public class SwerveControllerLogCommand extends CommandBase {
       Trajectory trajectory,
       Supplier<Pose2d> pose,
       SwerveDriveKinematics kinematics,
-      HolonomicDriveController controller,
+      HolonomicDriveControllerBCR controller,
       Supplier<Rotation2d> desiredRotation,
       Consumer<SwerveModuleState[]> outputModuleStates,
       FileLog log,
@@ -249,7 +250,7 @@ public class SwerveControllerLogCommand extends CommandBase {
     m_timer.reset();
     m_timer.start();
 
-    //TODO reset holonomic controller
+    m_controller.reset();
   }
 
   @Override
