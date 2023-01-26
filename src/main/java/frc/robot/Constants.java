@@ -7,7 +7,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import frc.robot.utilities.TrapezoidProfileBCR;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -18,6 +17,29 @@ import frc.robot.utilities.TrapezoidProfileBCR;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+
+    public enum CoordType {
+        kRelative(0),
+        kAbsolute(1),
+        kAbsoluteResetPose(2);
+    
+        @SuppressWarnings({"MemberName", "PMD.SingularField"})
+        public final int value;
+        CoordType(int value) { this.value = value; }
+    }
+
+    /**
+     * Options to select driving stopping types.
+     */
+    public enum StopType {
+        kNoStop(0),
+        kCoast(1),
+        kBrake(2);
+    
+        @SuppressWarnings({"MemberName", "PMD.SingularField"})
+        public final int value;
+        StopType(int value) { this.value = value; }
+    }
 
 
     public static final class Ports{
@@ -49,44 +71,45 @@ public final class Constants {
         public static final int usbRightJoystick = 2;
         public static final int usbCoPanel = 3;
 
-        // TODO Fix code or this constant so that the robot does not move when joystick is "neutral"
         public static final double joystickDeadband = 0.01;
     }
 
     public static final class RobotDimensions {
         //left to right distance between the drivetrain wheels; should be measured from center to center
-        public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.57785;      // CALIBRATED
+        public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.57785;      // CALIBRATED-2
         //front-back distance between the drivetrain wheels; should be measured from center to center
-        public static final double DRIVETRAIN_WHEELBASE_METERS = 0.57785;       // CALIBRATED
+        public static final double DRIVETRAIN_WHEELBASE_METERS = 0.57785;       // CALIBRATED-2
 
     }
 
     public static final class SwerveConstants {
         // Encoder calibration to meters travelled or wheel facing degrees
-        public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
-        public static final double kDriveGearRatio = (8.14 / 1.0);      // CALIBRATED = 8.14/1.0.  Team364 (MK3i?) = 6.86:1.  Mk4i = 8.14 : 1
-        public static final double kTurningGearRatio = (150.0/7.0 / 1.0); // CALIBRATED = 150.0/7.0.  Team364 (MK3i?) = 12.8:1.  Mk4i = 150/7 : 1
-        public static final double kWheelDiameterMeters = 0.102;        // CALIBRATED = 0.102.  Depends a little on the tread wear!
+        public static final double kEncoderCPR = 2048.0;                // CALIBRATED-2 = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
+        public static final double kDriveGearRatio = (8.14 / 1.0);      // CALIBRATED-2 = 8.14/1.0.  Team364 (MK3i?) = 6.86:1.  Mk4i = 8.14 : 1
+        public static final double kTurningGearRatio = (150.0/7.0 / 1.0); // CALIBRATED-2 = 150.0/7.0.  Team364 (MK3i?) = 12.8:1.  Mk4i = 150/7 : 1
+        public static final double kWheelDiameterMeters = 0.09953;        // CALIBRATED-2 = 0.102.  Depends a little on the tread wear!
         public static final double kDriveEncoderMetersPerTick = (kWheelDiameterMeters * Math.PI) / kEncoderCPR / kDriveGearRatio;
         public static final double kTurningEncoderDegreesPerTick = 360.0/kEncoderCPR / kTurningGearRatio;
         
         // Robot calibration for feed-forward and max speeds
-        // Max speed measured values 1/4/2023:  FL = 4.100, FR  = 4.071, BL = 4.123, BR = 4.084
         // Max speed is used to keep each motor from maxing out, which preserves ratio between motors 
         // and ensures that the robot travels in the requested direction.  So, use min value of all 4 motors,
         // and further derate (initial test by 5%) to account for some battery droop under heavy loads.
-        public static final double kMaxSpeedMetersPerSecond = 3.8;          // CALIBRATED
+        // Max speed measured values 1/25/2023:  FL = 3.98, FR  = 3.97, BL = 3.98, BR = 3.95
+        public static final double kMaxSpeedMetersPerSecond = 3.8;          // CALIBRATED-2
         public static final double kNominalSpeedMetersPerSecond = 0.5*kMaxSpeedMetersPerSecond;
         // Max acceleration measured values 1/13/2023: FL = 28.073, FR = 26.343, BL = 18.482, BR = 19.289
-        public static final double kMaxAccelerationMetersPerSecondSquare = 17; // CALIBRATED
-        public static final double kNominalAccelerationMetersPerSecondSquare = 0.5*kMaxAccelerationMetersPerSecondSquare;
+        // Max acceleration measured 1/25/2023 (with ~80lbs on robot):  Average of 4 wheels = 10.0 m/sec^2
+        public static final double kMaxAccelerationMetersPerSecondSquare = 10; // CALIBRATED-2
+        public static final double kNominalAccelerationMetersPerSecondSquare = 0.7*kMaxAccelerationMetersPerSecondSquare;
         // Max turn velocity degrees per second measured values 1/13/2023: FL = 1744.629, FR = 1762.207, BL = 1736.719, BR = 2085.645
-        public static final double kMaxTurningRadiansPerSecond = 29.671;   // CALIBRATED took 1700 degrees and converted to radians
+        public static final double kMaxTurningRadiansPerSecond = 9.1;   // CALIBRATED-2 took 528 degreesPerSecond and converted to radians
         public static final double kNominalTurningRadiansPerSecond = 6.0;
-        public static final double kMaxAngularSpeedRadiansPerSecondSquared = Math.PI;
-        public static final double kVDrive = 0.226; // CALIBRATED = 0.226.  in % output per meters per second
+        public static final double kMaxAngularAccelerationRadiansPerSecondSquared = 30.0;            // CALIBRATED-2 31.7 rad/sec^2
+        public static final double kNominalAngularAccelerationRadiansPerSecondSquared = 10.0;
+        public static final double kVDrive = 0.248; // CALIBRATED-2 = 0.248.  in % output per meters per second
         public static final double kADrive = 0.0;                   // TODO -- Calibrate
-        public static final double kSDrive = 0.017; // CALIBRATED = 0.017.  in % output
+        public static final double kSDrive = 0.017; // CALIBRATED-2 = 0.017.  in % output
 
     }
 
@@ -115,9 +138,10 @@ public final class Constants {
 
       public static final class TrajectoryConstants {
 
-        public static final double kPXController = 1;
-        public static final double kPYController = 1;
-        public static final double kPThetaController = 1;
+        // Feedback terms for holonomic drive controllers
+        public static final double kPXController = 1;       // X-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)
+        public static final double kPYController = 1;       // Y-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)
+        public static final double kPThetaController = 1;   // Theta-velocity controller:  kp.  Units = (rad/sec of velocity) / (radians of angle error)
 
         public static final TrajectoryConfig swerveTrajectoryConfig =
             new TrajectoryConfig(
@@ -128,6 +152,6 @@ public final class Constants {
         /* Constraint for the motion profilied robot angle controller */
         public static final TrapezoidProfile.Constraints kThetaControllerConstraints =
         new TrapezoidProfile.Constraints(
-            SwerveConstants.kNominalTurningRadiansPerSecond, SwerveConstants.kMaxAngularSpeedRadiansPerSecondSquared);
+            SwerveConstants.kNominalTurningRadiansPerSecond, SwerveConstants.kNominalAngularAccelerationRadiansPerSecondSquared);
       }
 }

@@ -25,6 +25,7 @@ public class GrabberStopMotor extends CommandBase {
   @Override
   public void initialize() {
     grabber.stopMotor();
+    log.writeLog(false, "GrabberStopMotor", "Initialize");
   }
 
   // Called every time the scheduler runs while the command is scheduled.

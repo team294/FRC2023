@@ -17,14 +17,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-// import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+
+import frc.robot.Constants.CoordType;
 import frc.robot.Constants.OIConstants;
-import frc.robot.Constants.Ports;
+import frc.robot.Constants.StopType;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
 import frc.robot.utilities.*;
+import frc.robot.utilities.TrajectoryCache.TrajectoryType;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -38,6 +40,10 @@ public class RobotContainer {
 
   // Define robot subsystems  
   private final DriveTrain driveTrain = new DriveTrain(log);
+
+  // Define other utilities
+  private final TrajectoryCache trajectoryCache = new TrajectoryCache(log);
+  private final AutoSelection autoSelection = new AutoSelection(trajectoryCache, log);
 
   // Define controllers
   // private final Joystick xboxController = new Joystick(OIConstants.usbXboxController); //assuming usbxboxcontroller is int
@@ -84,11 +90,18 @@ public class RobotContainer {
     SmartDashboard.putData("Drive Straight", new DriveStraight(false, false, false, driveTrain, log));
 
     // Testing for autos and trajectories
-    // SmartDashboard.putData("Drive Trajectory Relative", new DriveFollowTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], false, PIDType.kTalon, driveTrain, log));
-    // SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveFollowTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.testCurve.value], false, PIDType.kTalon, driveTrain, log));
-    // SmartDashboard.putData("Drive Trajectory Absolute", new DriveFollowTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
+    SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
     SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
-    SmartDashboard.putData("Drive Straight", new DriveTrajectory(TrajectoryGenerator.generateTrajectory(new Pose2d(0,0,new Rotation2d(0)), List.of(), new Pose2d(3,0,new Rotation2d(0)), Constants.TrajectoryConstants.swerveTrajectoryConfig), driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Straight", new DriveTrajectory(
+          CoordType.kRelative, StopType.kBrake,
+          TrajectoryGenerator.generateTrajectory(
+            new Pose2d(0,0,new Rotation2d(0)), 
+            List.of(), 
+            new Pose2d(3,0,new Rotation2d(0)), 
+            Constants.TrajectoryConstants.swerveTrajectoryConfig),
+          driveTrain, log));
   
     //Grabber commands
     SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
@@ -260,13 +273,13 @@ public class RobotContainer {
    * Sets the rumble on the XBox controller
    * @param percentRumble The normalized value (0 to 1) to set the rumble to
    */
-	// public void setXBoxRumble(double percentRumble) {
-	// 	xboxController.setRumble(RumbleType.kLeftRumble, percentRumble);
-  //   xboxController.setRumble(RumbleType.kRightRumble, percentRumble);
+	public void setXBoxRumble(double percentRumble) {
+		xboxController.getHID().setRumble(RumbleType.kLeftRumble, percentRumble);
+    xboxController.getHID().setRumble(RumbleType.kRightRumble, percentRumble);
 
-  //   if (percentRumble == 0) rumbling = false;
-  //   else rumbling = true;
-  // }
+    if (percentRumble == 0) rumbling = false;
+    else rumbling = true;
+  }
   
 
   /**
@@ -275,9 +288,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An ExampleCommand will run in autonomous
-    Command m_autoCommand = null;
-    return m_autoCommand;
+    return autoSelection.getAutoCommand(driveTrain, log);
   }
 
 
