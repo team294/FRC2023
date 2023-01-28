@@ -76,9 +76,9 @@ public final class Constants {
 
     public static final class RobotDimensions {
         //left to right distance between the drivetrain wheels; should be measured from center to center
-        public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.57785;      // CALIBRATED-2
+        public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.59127;      // CALIBRATED-2 = 0.59127 (based on robot rotating in place).  CAD geometry = 0.57785.
         //front-back distance between the drivetrain wheels; should be measured from center to center
-        public static final double DRIVETRAIN_WHEELBASE_METERS = 0.57785;       // CALIBRATED-2
+        public static final double DRIVETRAIN_WHEELBASE_METERS = 0.59127;       // CALIBRATED-2 = 0.59127 (based on robot rotating in place).  CAD geometry = 0.57785.
 
     }
 
