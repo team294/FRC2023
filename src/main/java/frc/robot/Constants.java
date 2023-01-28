@@ -63,6 +63,10 @@ public final class Constants {
         public static final int CANTurnEncoderBackRight = 12;
 
         public static final int CANGrabber = 44;
+
+        public static final int CANElevatorMotor1 = 13;
+        public static final int CANElevatorMotor2 = 14;
+        public static final int CANWristMotor = 15;
     }
 
     public static final class OIConstants {
@@ -153,5 +157,47 @@ public final class Constants {
         public static final TrapezoidProfile.Constraints kThetaControllerConstraints =
         new TrapezoidProfile.Constraints(
             SwerveConstants.kNominalTurningRadiansPerSecond, SwerveConstants.kNominalAngularAccelerationRadiansPerSecondSquared);
+      }
+
+      public static final class WristConstants {
+            // Wrist Angles (in degrees)
+            public static final double wristMax = 113.0;		// Location of upper limit switch for auto calibration
+            public static final double wristStowed = 110.0;
+            public static final double wristKeepOut = 28.0; // Max angle to avoid interference with elevator or climber
+            public static final double wristUp = 15.0;
+            public static final double wristStraight = -1.0;	//  needed to bias upward to account for sag and insure that hatch cover gripper engages first
+            public static final double wristVision = -5.0;    // wrist angle for optimal vision tracking
+            public static final double wristCargoShot = -30.0;	// Angle for wrist for cargo ship ball shot
+            public static final double wristLowerCrashWhenElevatorLow = -45.0;   // If the elevator is in the low position, don't move the wrist below this!
+            public static final double wristDown = -60.0;		// TODO Should be -59.0? // In this position, elevator must be able to go to groundCargo
+            public static final double wristMin = -61.0;			// Location of lower limit switch for auto calibration
+            public enum WristAngle {stowed, up, straight, cargoShot, vision, down}
+            // public static double wristCalZero;   		// Wrist encoder position at O degrees, in encoder ticks (i.e. the calibration factor)
+	        // public static boolean wristCalibrated = false;     // Default to wrist being uncalibrated.  Calibrate from robot preferences or "Calibrate Wrist Zero" button on dashboard
+            // public static double elevatorWristSafeStow; 	
+            public static final double encoderTicksPerRevolution = 4096.0;
+            
+        }
+
+      public static final class ElevatorConstants {
+        public static final double hatchLow = 19.0;
+        public static final double hatchMid = 48.5;
+        public static final double hatchHigh = 69.7;		// was 72.8
+        public static final double cargoShipCargo = 43.0;   // Was 34.75
+        public static final double rocketBallOffset = 2;  // Ball intake is higher than the disc grabber (low position only)
+        public static final double loadCargo = 44.125;
+        public static final double groundCargo = 16.5;  		// At this level, wrist must be able to go to wristDown  // TODO should this be the same as elevatorWristStow (at the hard stop)?
+    
+        public enum ElevatorPosition {bottom, vision, wristStow, hatchLow, hatchMid, hatchHigh, cargoShipCargo, loadCargo, groundCargo}
+    
+        //Climb Target Angles (in degrees)
+        public static final double climbLimitAngle = 137.7;		// Max angle for climber (limit switch), was 120
+        public static final double climbWristStowedSafe = 137.0;	// Max angle for climber when wrist is stowed (but wrist can't move if climber is here)
+        public static final double climbWristMovingSafe = 122.0;	// Max angle for climber if wrist is moving
+        public static final double climbLiftAngle = 130.0;			// Angle where robot scores climb points, was 128 in Match 1
+        public static final double climbStart = 110.0;				// Climber starting angle (must be safe for wrist to move, must be in frame perimeter)
+        public static final double climbPrep = 45.0;				// Prep climber for climb (part way down, to make climb faster)
+        public static final double climbVacuumAngle = -5.0;		// Climber angle to attach vacuum to platform
+        public static final double climbMinAngle = -10.0;			// Min angle for climber
       }
 }
