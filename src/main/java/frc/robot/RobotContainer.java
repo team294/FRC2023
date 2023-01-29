@@ -56,9 +56,6 @@ public class RobotContainer {
   private final CommandXboxController xboxController = new CommandXboxController(OIConstants.usbXboxController);
   private boolean rumbling = false;
   Grabber grabber = new Grabber("Grabber", log);
-  
-  private final Timer disabledDisplayTimer = new Timer();
-  private int displayCount = 1;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -334,18 +331,11 @@ public class RobotContainer {
       RobotPreferences.recordStickyFaults("CAN Bus", log);
     }  //    TODO May want to flash this to the driver with some obvious signal!
     boolean error = true;  
-    if((error && displayCount > 1) || (!error && displayCount > 3)) displayCount = 0; // displayCount > 1 for flashing
     if (error == false) {
-      led.setPattern(LED.teamMovingColorsLibrary[displayCount], 0.5, 0);
-      if(disabledDisplayTimer.advanceIfElapsed(0.05)) { //0.25 for flashing
-        displayCount++;
-      }
+      new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 0.5, led, log);
     }
     else {
-      led.setStrip("Red", displayCount, 0);
-      if(disabledDisplayTimer.advanceIfElapsed(0.25)) {
-        displayCount++;
-      } 
+      led.setStrip("Red", 0.5, 0);
     }
   }
   
