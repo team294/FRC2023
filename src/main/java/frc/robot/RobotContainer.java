@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -40,6 +41,7 @@ public class RobotContainer {
 
   // Define robot subsystems  
   private final DriveTrain driveTrain = new DriveTrain(log);
+  private final LED led = new LED();
 
   // Define other utilities
   private final TrajectoryCache trajectoryCache = new TrajectoryCache(log);
@@ -54,6 +56,9 @@ public class RobotContainer {
   private final CommandXboxController xboxController = new CommandXboxController(OIConstants.usbXboxController);
   private boolean rumbling = false;
   Grabber grabber = new Grabber("Grabber", log);
+  
+  private final Timer disabledDisplayTimer = new Timer();
+  private int displayCount = 1;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -102,6 +107,9 @@ public class RobotContainer {
     SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
     SmartDashboard.putData("Grabber Pick Up",new GrabberPickUp(grabber, log));
     SmartDashboard.putData("Grabber Eject", new GrabberEject(grabber, log));
+    //LED
+    SmartDashboard.putData("LED Rainbow", new LEDSetPattern(LED.rainbowLibrary, 0, 0.5, led, log));
+    SmartDashboard.putData("LED OFF", new LEDSetStrip("Red", 0, led, log).ignoringDisable(true));
   }
 
   /**
@@ -325,6 +333,20 @@ public class RobotContainer {
     if (driveTrain.canBusError()) {
       RobotPreferences.recordStickyFaults("CAN Bus", log);
     }  //    TODO May want to flash this to the driver with some obvious signal!
+    boolean error = true;  
+    if((error && displayCount > 1) || (!error && displayCount > 3)) displayCount = 0; // displayCount > 1 for flashing
+    if (error == false) {
+      led.setPattern(LED.teamMovingColorsLibrary[displayCount], 0.5, 0);
+      if(disabledDisplayTimer.advanceIfElapsed(0.05)) { //0.25 for flashing
+        displayCount++;
+      }
+    }
+    else {
+      led.setStrip("Red", displayCount, 0);
+      if(disabledDisplayTimer.advanceIfElapsed(0.25)) {
+        displayCount++;
+      } 
+    }
   }
   
   /**
@@ -335,6 +357,7 @@ public class RobotContainer {
 
     driveTrain.setDriveModeCoast(false);
 
+    led.setStrip("Blue", 0);
     // NOTE:  Do NOT reset the gyro or encoder here!!!!!
     // The first command in auto mode initializes before this code is run, and
     // it will read the gyro/encoder before the reset goes into effect.
@@ -353,12 +376,14 @@ public class RobotContainer {
     log.writeLogEcho(true, "Teleop", "Mode Init");
 
     driveTrain.setDriveModeCoast(false);
+
+    led.setStrip("Orange", 0);
   }
 
   /**
    * Method called once every scheduler cycle when teleop mode is initialized/enabled.
    */
   public void teleopPeriodic() {
-
+    
   }
 }
