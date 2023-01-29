@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -25,6 +26,7 @@ import frc.robot.utilities.FileLog;
 import static frc.robot.Constants.Ports.*;
 import static frc.robot.Constants.DriveConstants.*;
 
+import frc.robot.PhotonCameraWrapper;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.utilities.*;
 
@@ -54,15 +56,20 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   private double angularVelocity;  // Robot angular velocity in degrees per second
   private LinearFilter lfRunningAvg = LinearFilter.movingAverage(4); //calculate running average to smooth quantization error in angular velocity calc
 
+  // variable to store vision camera
+  private PhotonCameraWrapper camera;
+
   // Odometry class for tracking robot pose
   SwerveDriveOdometry odometry;
+  SwerveDrivePoseEstimator poseEstimator; 
   Field2d field = new Field2d();    // Field to dispaly on Shuffleboard
 
   /**
    * Constructs the DriveTrain subsystem
    * @param log FileLog object for logging
    */
-  public DriveTrain(FileLog log) {
+  public DriveTrain(PhotonCameraWrapper camera, FileLog log) {
+    this.camera = camera;
     this.log = log; // save reference to the fileLog
     logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
 
@@ -101,6 +108,8 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     // create and initialize odometery
     odometry = new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(getGyroRotation()), 
         getModulePotisions(), new Pose2d(0, 0, Rotation2d.fromDegrees(0)) );
+    poseEstimator = new SwerveDrivePoseEstimator(kDriveKinematics, Rotation2d.fromDegrees(getGyroRotation()), 
+       getModulePotisions(), new Pose2d(0, 0, Rotation2d.fromDegrees(0)) );
     SmartDashboard.putData("Field", field);
   }
   
@@ -339,6 +348,30 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     odometry.resetPosition( Rotation2d.fromDegrees(getGyroRotation()),
         getModulePotisions(), pose );
   }
+
+  public void updateOdometry() {
+    poseEstimator.update(
+            m_gyro.getRotation2d(), m_leftEncoder.getDistance(), m_rightEncoder.getDistance());
+
+    // Also apply vision measurements. We use 0.3 seconds in the past as an example
+    // -- on
+    // a real robot, this must be calculated based either on latency or timestamps.
+    Optional<EstimatedRobotPose> result =
+            pcw.getEstimatedGlobalPose(poseEstimator.getEstimatedPosition());
+
+    if (result.isPresent()) {
+        EstimatedRobotPose camPose = result.get();
+        poseEstimator.addVisionMeasurement(
+                camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
+        m_fieldSim.getObject("Cam Est Pos").setPose(camPose.estimatedPose.toPose2d());
+    } else {
+        // move it way off the screen to make it disappear
+        m_fieldSim.getObject("Cam Est Pos").setPose(new Pose2d(-100, -100, new Rotation2d()));
+    }
+
+    m_fieldSim.getObject("Actual Pos").setPose(m_drivetrainSimulator.getPose());
+    m_fieldSim.setRobotPose(m_poseEstimator.getEstimatedPosition());
+}
 
   
   // ************ Information methods

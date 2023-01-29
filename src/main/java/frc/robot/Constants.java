@@ -3,10 +3,14 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import frc.robot.utilities.TrapezoidProfileBCR;
 
 /**
@@ -130,4 +134,20 @@ public final class Constants {
         new TrapezoidProfile.Constraints(
             SwerveConstants.kNominalTurningRadiansPerSecond, SwerveConstants.kMaxAngularSpeedRadiansPerSecondSquared);
       }
+
+    public static class FieldConstants {
+        static final double length = Units.feetToMeters(54);
+        static final double width = Units.feetToMeters(27);
+    }
+
+    public static class VisionConstants {
+        static final Transform3d robotToCam =
+                new Transform3d(
+                        new Translation3d(0.5, 0.0, 0.5),
+                        new Rotation3d(
+                                0, 0,
+                                0)); // Cam mounted facing forward, half a meter forward of center, half a meter up
+        // from center.
+        static final String cameraName = "Bob";
+    }
 }
