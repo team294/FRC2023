@@ -8,18 +8,23 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
 
-public class DriveReset extends CommandBase {
+public class DriveResetSwerveModules extends CommandBase {
   
   private DriveTrain driveTrain;
   private FileLog log;
 
   
-  /** Creates a new DriveReset. 
+  /**
+   * Configures the motors and encoders for every swerve module.
+   * The swerve modules are automatically configured in the SwerveModule constructors.  So, this
+   * command should not need to be called.
+   * <p>However, if the robot browns-out or otherwise partially resets, then this can be used to 
+   * force the motors and encoders to have the right calibration and settings, especially the
+   * calibration angle for each swerve module.
    * @param driveTrain driveTrain subsytem
    * @param log FileLog
-   * 
   */
-  public DriveReset(DriveTrain driveTrain, FileLog log) {
+  public DriveResetSwerveModules(DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
     // Use addRequirements() here to declare subsystem dependencies.
@@ -35,7 +40,8 @@ public class DriveReset extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    driveTrain.configureEncoders();
+    log.writeLog(false, "DriveResetSwerveModules", "Execute");
+    driveTrain.configureSwerveModules();
   }
 
   // Called once the command ends or is interrupted.
