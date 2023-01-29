@@ -345,8 +345,8 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * to properly reset.
    *
    * @param pose The pose to which to set the odometry.  Pose components include
-   *    <p> Robot X location in the field, in meters (0 = middle of robot wherever the robot starts auto mode, +=away from our drivestation)
-   *    <p> Robot Y location in the field, in meters (0 = middle of robot wherever the robot starts auto mode, +=left when looking from our drivestation)
+   *    <p> Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
+   *    <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
    *    <p> Robot angle on the field (0 = facing away from our drivestation, + to the left, - to the right)
    */
   public void resetPose(Pose2d pose) {
@@ -438,12 +438,12 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * @param logWhenDisabled true will log when disabled, false will discard the string
    */
   public void updateDriveLog(boolean logWhenDisabled) {
-    // TODO Add more logging to the log file?
-
     Pose2d pose = odometry.getPoseMeters();
     log.writeLog(logWhenDisabled, "Drive", "Update Variables", 
       "Gyro Angle", getGyroRotation(), "RawGyro", getGyroRaw(), 
-      "Gyro Velocity", angularVelocity, "Pitch", ahrs.getRoll(), "Drive X Fwd Velocity", getChassisSpeeds().vxMetersPerSecond, "Drive Y Left Velocity", getChassisSpeeds().vyMetersPerSecond,
+      "Gyro Velocity", angularVelocity, "Pitch", ahrs.getRoll(), 
+      "Drive X Fwd Velocity", getChassisSpeeds().vxMetersPerSecond, 
+      "Drive Y Left Velocity", getChassisSpeeds().vyMetersPerSecond,
       "Odometry X", pose.getTranslation().getX(), "Odometry Y", pose.getTranslation().getY(), 
       "Odometry Theta", pose.getRotation().getDegrees(),
       swerveFrontLeft.getLogString(),

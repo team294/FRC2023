@@ -110,7 +110,7 @@ public class DriveWithJoystick extends CommandBase {
    * @return Scaled joystick value, -1.0 to +1.0
    */
   private double scaleTurn(double rawJoystick){
-    return Math.signum(rawJoystick)*(0.640 * rawJoystick * rawJoystick + 0.334 * Math.abs(rawJoystick) + 0.0266);
+    return Math.signum(rawJoystick)*(0.6801 * rawJoystick * rawJoystick + 0.3232 * Math.abs(rawJoystick) - 0.0033);
   }
 
   /**
@@ -121,6 +121,6 @@ public class DriveWithJoystick extends CommandBase {
    * @return Scaled joystick value, -1.0 to +1.0
    */
   private double scaleJoystick(double rawJoystick){
-    return Math.signum(rawJoystick)*(0.751*rawJoystick*rawJoystick + 0.221*Math.abs(rawJoystick) + 0.0277);
+    return Math.signum(rawJoystick)*(0.7912*rawJoystick*rawJoystick + 0.2109*Math.abs(rawJoystick) - 0.0022);
   }
 }

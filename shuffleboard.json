@@ -82,7 +82,7 @@
               "Colors/Color when false": "#8B0000FF"
             }
           },
-          "3,2": {
+          "5,1": {
             "size": [
               7,
               4
@@ -595,6 +595,20 @@
                   "_type": "Command",
                   "_source0": "network_table:///SmartDashboard/Drive 1.5 mps 0 deg",
                   "_title": "Drive 1.5 mps 0 deg",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Drive Trajectory Relative",
+                  "_title": "Drive Trajectory Relative",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Drive Trajectory Absolute",
+                  "_title": "Drive Trajectory Absolute",
                   "_glyph": 148,
                   "_showGlyph": false
                 }
