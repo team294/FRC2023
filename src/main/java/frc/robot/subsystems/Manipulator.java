@@ -53,16 +53,20 @@ public class Manipulator extends SubsystemBase implements Loggable {
     
     logRotationKey = log.allocateLogRotation();
 
-    motor.configFactoryDefault();
+    // motor.configFactoryDefault();
+    motor.restoreFactoryDefaults();
     motor.setInverted(inverted);
-    motor.setNeutralMode(NeutralMode.Coast);
-    motor.configPeakOutputForward(1.0);
-    motor.configPeakOutputReverse(-1.0);
-    motor.configNeutralDeadband(0.01);
-    motor.configVoltageCompSaturation(12);
-    motor.enableVoltageCompensation(true);
-    motor.configOpenloopRamp(0.05);   //seconds from neutral to full
-    motor.configClosedloopRamp(0.05); //seconds from neutral to full
+    // motor.setNeutralMode(NeutralMode.Coast);
+    // motor.configPeakOutputForward(1.0);
+    // motor.configPeakOutputReverse(-1.0);
+    // motor.configNeutralDeadband(0.01);
+    // motor.configVoltageCompSaturation(12);
+    motor.enableVoltageCompensation(12);
+    // motor.enableVoltageCompensation(true);
+    motor.setOpenLoopRampRate(0.05);    //seconds from neutral to full
+    motor.setClosedLoopRampRate(0.05);  //seconds from neutral to full
+    // motor.configOpenloopRamp(0.05);   
+    // motor.configClosedloopRamp(0.05); 
   
 
   }
@@ -87,7 +91,7 @@ public class Manipulator extends SubsystemBase implements Loggable {
    * @param percent
    */
   public void setMotorPercentOutput(double percent){
-    motor.set(ControlMode.PercentOutput, percent);
+    motor.set(percent);
   }
 
   /**
@@ -101,7 +105,7 @@ public class Manipulator extends SubsystemBase implements Loggable {
    * @return stator current of the motor in amps
    */
   public double getAmps(){
-    return motor.getStatorCurrent();
+    return motor.getOutputCurrent();
   }
 
   /**
@@ -149,11 +153,11 @@ public class Manipulator extends SubsystemBase implements Loggable {
     if(fastLogging || log.isMyLogRotation(logRotationKey)) {
       updateManipulatorLog(false);
       // Update data on SmartDashboard
-      SmartDashboard.putNumber(buildString(subsystemName, "Amps"), motor.getStatorCurrent());
+      SmartDashboard.putNumber(buildString(subsystemName, "Amps"), motor.getOutputCurrent());
       SmartDashboard.putNumber(buildString(subsystemName, "Bus Volt"), motor.getBusVoltage());
-      SmartDashboard.putNumber(buildString(subsystemName, "Volt"), motor.getMotorOutputVoltage());
-      SmartDashboard.putNumber(buildString(subsystemName, "Out Percent"), motor.getMotorOutputPercent());
-      SmartDashboard.putNumber(buildString(subsystemName, "Out Temperature"), motor.getTemperature());
+      SmartDashboard.putNumber(buildString(subsystemName, "Volt"), motor.getVoltageCompensationNominalVoltage()); //ASK DON IF RIGHT
+      SmartDashboard.putNumber(buildString(subsystemName, "Out Percent"), motor.get());
+      SmartDashboard.putNumber(buildString(subsystemName, "Out Temperature"), motor.getMotorTemperature());
       SmartDashboard.putBoolean(buildString(subsystemName, "Piston extend"), pistonExtended);
     }
   }
@@ -165,10 +169,10 @@ public class Manipulator extends SubsystemBase implements Loggable {
   public void updateManipulatorLog(boolean logWhenDisabled){
     log.writeLog(logWhenDisabled, subsystemName, "Update Variables",
     "Bus Volt", motor.getBusVoltage(),
-    "Out Percent", motor.getMotorOutputPercent(),
-    "Volt", motor.getMotorOutputVoltage(),
-    "Amps", motor.getStatorCurrent(),
-    "Temperature", motor.getTemperature(),
+    "Out Percent", motor.get(),
+    "Volt", motor.getVoltageCompensationNominalVoltage(),
+    "Amps", motor.getOutputCurrent(),
+    "Temperature", motor.getMotorTemperature(),
     "Piston extended", getPistonExtended()
     );
   }
