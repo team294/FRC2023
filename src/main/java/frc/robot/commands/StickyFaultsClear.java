@@ -16,7 +16,9 @@ public class StickyFaultsClear extends CommandBase {
   private FileLog log;
 
   /**
-   * Creates a new StickyFaultsClear.
+   * Clears the sticky faults in RobotPreferences.
+   * <p> Note:  This command can run while the robot is disabled.
+   * @param log
    */
   public StickyFaultsClear(FileLog log) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -43,6 +45,16 @@ public class StickyFaultsClear extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
+    return true;
+  }
+
+  /**
+   * Whether the given command should run when the robot is disabled. Override to return true if the
+   * command should run when disabled.
+   * @return whether the command should run when the robot is disabled
+   */
+  @Override
+  public boolean runsWhenDisabled() {
     return true;
   }
 }

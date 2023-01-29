@@ -70,7 +70,7 @@ public class RobotContainer {
 
     // display sticky faults
     RobotPreferences.showStickyFaultsOnShuffleboard();
-    SmartDashboard.putData("Clear Sticky Faults", new StickyFaultsClear(log).ignoringDisable(true));
+    SmartDashboard.putData("Clear Sticky Faults", new StickyFaultsClear(log));
 
     // DriveTrain subsystem
     // SmartDashboard.putData("DriveForward", new DriveSetPercentOutput(0.4, 0.4, driveTrain, log));
