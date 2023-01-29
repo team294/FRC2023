@@ -38,7 +38,7 @@ public class Manipulator extends SubsystemBase implements Loggable {
   private boolean pistonExtended = false;
 
   /**
-   * Constructs the Manipulator subsystem
+   * Constructs the Manipulator subsystem, including rollers and a solenoid to change between cube and cone configuration.
    * @param subsystemName  String name for subsystem
    * @param inverted inverts the motor, true inverts motor
    * @param solenoidForwardChannel
