@@ -63,6 +63,8 @@ public final class Constants {
         public static final int CANTurnEncoderBackRight = 12;
 
         public static final int CANGrabber = 44;
+        public static final int CANManipulator = 0; //CHANGE NUMBER TO REAL PORT 
+        public static final int CANPneumaticHub = 0; //CHANGE NUMBER TO REAL PORT
     }
 
     public static final class OIConstants {
