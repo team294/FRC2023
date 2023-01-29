@@ -24,11 +24,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.utilities.FileLog;
 import static frc.robot.Constants.Ports.*;
+
 import static frc.robot.Constants.DriveConstants.*;
 
-import frc.robot.PhotonCameraWrapper;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.utilities.*;
+
+// Vision imports
+import frc.robot.subsystems.PhotonCameraWrapper;
+import org.photonvision.EstimatedRobotPose;
+import java.util.Optional;
 
 
 public class DriveTrain extends SubsystemBase implements Loggable {
@@ -57,7 +62,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   private LinearFilter lfRunningAvg = LinearFilter.movingAverage(4); //calculate running average to smooth quantization error in angular velocity calc
 
   // variable to store vision camera
-  private PhotonCameraWrapper camera;
+  private PhotonCameraWrapper camera = new PhotonCameraWrapper();
 
   // Odometry class for tracking robot pose
   SwerveDriveOdometry odometry;
@@ -351,27 +356,27 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
   public void updateOdometry() {
     poseEstimator.update(
-            m_gyro.getRotation2d(), m_leftEncoder.getDistance(), m_rightEncoder.getDistance());
+      Rotation2d.fromDegrees(getGyroRotation()), getModulePotisions());
 
     // Also apply vision measurements. We use 0.3 seconds in the past as an example
     // -- on
     // a real robot, this must be calculated based either on latency or timestamps.
     Optional<EstimatedRobotPose> result =
-            pcw.getEstimatedGlobalPose(poseEstimator.getEstimatedPosition());
+      camera.getEstimatedGlobalPose(poseEstimator.getEstimatedPosition());
 
     if (result.isPresent()) {
         EstimatedRobotPose camPose = result.get();
-        poseEstimator.addVisionMeasurement(
+        odometry.addVisionMeasurement(
                 camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
-        m_fieldSim.getObject("Cam Est Pos").setPose(camPose.estimatedPose.toPose2d());
+        field.getObject("Cam Est Pos").setPose(camPose.estimatedPose.toPose2d());
     } else {
         // move it way off the screen to make it disappear
-        m_fieldSim.getObject("Cam Est Pos").setPose(new Pose2d(-100, -100, new Rotation2d()));
+        field.getObject("Cam Est Pos").setPose(new Pose2d(-100, -100, new Rotation2d()));
     }
 
-    m_fieldSim.getObject("Actual Pos").setPose(m_drivetrainSimulator.getPose());
-    m_fieldSim.setRobotPose(m_poseEstimator.getEstimatedPosition());
-}
+    // field.getObject("Actual Pos").setPose(m_drivetrainSimulator.getPose());
+    field.setRobotPose(poseEstimator.getEstimatedPosition());
+  }
 
   
   // ************ Information methods
