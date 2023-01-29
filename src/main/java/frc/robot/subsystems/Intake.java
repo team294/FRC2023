@@ -12,15 +12,14 @@ import static frc.robot.utilities.StringUtil.*;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Ports;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.Loggable;
 
-public class Manipulator extends SubsystemBase implements Loggable {
-  /** Creates a new Manipulator. */
+public class Intake extends SubsystemBase implements Loggable {
+  /** Creates a new Intake. */
   private final FileLog log;
   private int logRotationKey;         // key for the logging cycle for this subsystem
   private boolean fastLogging = false; 
@@ -33,15 +32,15 @@ public class Manipulator extends SubsystemBase implements Loggable {
   private boolean pistonExtended = false;
 
   /**
-   * Constructs the Manipulator subsystem, including rollers and a solenoid to change between cube and cone configuration.
+   * Constructs the Intake subsystem, including rollers and a solenoid to change between deploy and stowed.
    * @param subsystemName  String name for subsystem
    * @param inverted inverts the motor, true inverts motor
    * @param solenoidForwardChannel
    * @param solenoidReverseChannel
    * @param log object for logging
    */
-  public Manipulator(String subsystemName, boolean inverted, int solenoidForwardChannel, int solenoidReverseChannel, FileLog log) {
-    motor = new CANSparkMax(Ports.CANManipulator, MotorType.kBrushless);
+  public Intake(String subsystemName, boolean inverted, int solenoidForwardChannel, int solenoidReverseChannel, FileLog log) {
+    motor = new CANSparkMax(Ports.CANIntake, MotorType.kBrushless);
     pneumaticDoubleSolenoid = new DoubleSolenoid(Ports.CANPneumaticHub, PneumaticsModuleType.REVPH, solenoidForwardChannel, solenoidReverseChannel);
     this.subsystemName = subsystemName;
     this.log = log;
@@ -74,7 +73,7 @@ public class Manipulator extends SubsystemBase implements Loggable {
   }
 
   /**
-   * Sets the percent of the motor
+   * Sets the percent of the motor, + is intake, - is outtake
    * @param percent
    */
   public void setMotorPercentOutput(double percent){
@@ -98,27 +97,27 @@ public class Manipulator extends SubsystemBase implements Loggable {
   /**
    * Sets if the piston should be extended or not
    * 
-   * @param extend true = extend, false = retract
+   * @param extend true = deploy, false = retract
    */
-  public void setPistonExtended(boolean extend) {
+  public void setDeployed(boolean extend) {
     pistonExtended = extend;
     pneumaticDoubleSolenoid.set(extend ? Value.kForward : Value.kReverse);
   }
 
   /**
    * Returns if intake piston is extended or not
-   * @return true = extended, false = retracted
+   * @return true = deployed, false = retracted
    */
-  public boolean getPistonExtended() {
+  public boolean isDeployed() {
     return pistonExtended;
   }
 
   /**
-   * Toggles the piston between cone and cube
+   * Toggles the piston between deploy and undeployed
    */
-  public void togglePistonExtended(){
-    log.writeLog(false, subsystemName, "togglePiston", "from extended", getPistonExtended());
-    setPistonExtended(!getPistonExtended());
+  public void toggleDeploy(){
+    log.writeLog(false, subsystemName, "togglePiston", "from extended", isDeployed());
+    setDeployed(!isDeployed());
   }
 
   
@@ -138,7 +137,7 @@ public class Manipulator extends SubsystemBase implements Loggable {
   public void periodic() {
     // This method will be called once per scheduler run
     if(fastLogging || log.isMyLogRotation(logRotationKey)) {
-      updateManipulatorLog(false);
+      updateIntakeLog(false);
       // Update data on SmartDashboard
       SmartDashboard.putNumber(buildString(subsystemName, "Amps"), motor.getOutputCurrent());
       SmartDashboard.putNumber(buildString(subsystemName, "Bus Volt"), motor.getBusVoltage());
@@ -150,17 +149,17 @@ public class Manipulator extends SubsystemBase implements Loggable {
   }
 
   /**
-   * Writes information about the Manipulator to the filelog
+   * Writes information about the Intake to the filelog
    * @param logWhenDisabled true will log when disabled, false will discard the string
    */
-  public void updateManipulatorLog(boolean logWhenDisabled){
+  public void updateIntakeLog(boolean logWhenDisabled){
     log.writeLog(logWhenDisabled, subsystemName, "Update Variables",
     "Bus Volt", motor.getBusVoltage(),
     "Out Percent", motor.get(),
     // "Volt", motor.(),
     "Amps", motor.getOutputCurrent(),
     "Temperature", motor.getMotorTemperature(),
-    "Piston extended", getPistonExtended()
+    "Piston extended", isDeployed()
     );
   }
 
