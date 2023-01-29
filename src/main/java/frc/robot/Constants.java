@@ -187,17 +187,8 @@ public final class Constants {
         public static final double rocketBallOffset = 2;  // Ball intake is higher than the disc grabber (low position only)
         public static final double loadCargo = 44.125;
         public static final double groundCargo = 16.5;  		// At this level, wrist must be able to go to wristDown  // TODO should this be the same as elevatorWristStow (at the hard stop)?
-    
-        public enum ElevatorPosition {bottom, vision, wristStow, hatchLow, hatchMid, hatchHigh, cargoShipCargo, loadCargo, groundCargo}
-    
-        //Climb Target Angles (in degrees)
-        public static final double climbLimitAngle = 137.7;		// Max angle for climber (limit switch), was 120
-        public static final double climbWristStowedSafe = 137.0;	// Max angle for climber when wrist is stowed (but wrist can't move if climber is here)
-        public static final double climbWristMovingSafe = 122.0;	// Max angle for climber if wrist is moving
-        public static final double climbLiftAngle = 130.0;			// Angle where robot scores climb points, was 128 in Match 1
-        public static final double climbStart = 110.0;				// Climber starting angle (must be safe for wrist to move, must be in frame perimeter)
-        public static final double climbPrep = 45.0;				// Prep climber for climb (part way down, to make climb faster)
-        public static final double climbVacuumAngle = -5.0;		// Climber angle to attach vacuum to platform
-        public static final double climbMinAngle = -10.0;			// Min angle for climber
+        public static final double encoderTicksPerRevolution = 4096.0;
+
+        public enum ElevatorPosition {bottom, vision, wristStow, hatchLow, hatchMid, hatchHigh, cargoShipCargo, loadCargo, groundCargo}        
       }
 }

@@ -9,7 +9,6 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Robot;
 import frc.robot.Constants.WristConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.Ports;

@@ -7,6 +7,14 @@
 
 package frc.robot.utilities;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotBase;
+
 /**
  * Utility with a dumb wait loop
  */

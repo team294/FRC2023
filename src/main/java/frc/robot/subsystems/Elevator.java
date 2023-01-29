@@ -137,8 +137,8 @@ public class Elevator extends SubsystemBase {
 		if (elevEncOK && elevCalibrated &&										// Elevator must be calibrated
 			  wrist.getWristAngle() < WristConstants.wristKeepOut &&  	// Wrist must not be stowed
 			  wrist.getCurrentWristTarget() < WristConstants.wristKeepOut && // Wrist must not be moving to stow
-			  ( wrist.getWristAngle() >= wristLowerCrashWhenElevatorLow &&	// wrist must be at least wristLowerCrashWhenElevatorLow
-				wrist.getCurrentWristTarget() >= wristLowerCrashWhenElevatorLow ||
+			  ( wrist.getWristAngle() >= WristConstants.wristLowerCrashWhenElevatorLow &&	// wrist must be at least wristLowerCrashWhenElevatorLow
+				wrist.getCurrentWristTarget() >= WristConstants.wristLowerCrashWhenElevatorLow ||
 				pos >= ElevatorConstants.groundCargo &&						// Elevator is not going below groundCargo position
 				wrist.getWristAngle() >= WristConstants.wristDown - 3.0 &&	     // wrist must be at least wristDown
 				wrist.getCurrentWristTarget() >= WristConstants.wristDown - 3.0 )
