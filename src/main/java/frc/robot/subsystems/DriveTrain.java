@@ -366,7 +366,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
     if (result.isPresent()) {
         EstimatedRobotPose camPose = result.get();
-        odometry.addVisionMeasurement(
+        poseEstimator.addVisionMeasurement(
                 camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
         field.getObject("Cam Est Pos").setPose(camPose.estimatedPose.toPose2d());
     } else {
