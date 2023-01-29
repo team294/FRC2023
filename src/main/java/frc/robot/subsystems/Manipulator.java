@@ -53,20 +53,12 @@ public class Manipulator extends SubsystemBase implements Loggable {
     
     logRotationKey = log.allocateLogRotation();
 
-    // motor.configFactoryDefault();
     motor.restoreFactoryDefaults();
     motor.setInverted(inverted);
-    // motor.setNeutralMode(NeutralMode.Coast);
-    // motor.configPeakOutputForward(1.0);
-    // motor.configPeakOutputReverse(-1.0);
-    // motor.configNeutralDeadband(0.01);
-    // motor.configVoltageCompSaturation(12);
     motor.enableVoltageCompensation(12);
-    // motor.enableVoltageCompensation(true);
     motor.setOpenLoopRampRate(0.05);    //seconds from neutral to full
     motor.setClosedLoopRampRate(0.05);  //seconds from neutral to full
-    // motor.configOpenloopRamp(0.05);   
-    // motor.configClosedloopRamp(0.05); 
+
   
 
   }
@@ -155,7 +147,7 @@ public class Manipulator extends SubsystemBase implements Loggable {
       // Update data on SmartDashboard
       SmartDashboard.putNumber(buildString(subsystemName, "Amps"), motor.getOutputCurrent());
       SmartDashboard.putNumber(buildString(subsystemName, "Bus Volt"), motor.getBusVoltage());
-      SmartDashboard.putNumber(buildString(subsystemName, "Volt"), motor.getVoltageCompensationNominalVoltage()); //ASK DON IF RIGHT
+      // SmartDashboard.putNumber(buildString(subsystemName, "Volt"), motor.()); 
       SmartDashboard.putNumber(buildString(subsystemName, "Out Percent"), motor.get());
       SmartDashboard.putNumber(buildString(subsystemName, "Out Temperature"), motor.getMotorTemperature());
       SmartDashboard.putBoolean(buildString(subsystemName, "Piston extend"), pistonExtended);
@@ -170,7 +162,7 @@ public class Manipulator extends SubsystemBase implements Loggable {
     log.writeLog(logWhenDisabled, subsystemName, "Update Variables",
     "Bus Volt", motor.getBusVoltage(),
     "Out Percent", motor.get(),
-    "Volt", motor.getVoltageCompensationNominalVoltage(),
+    // "Volt", motor.(),
     "Amps", motor.getOutputCurrent(),
     "Temperature", motor.getMotorTemperature(),
     "Piston extended", getPistonExtended()
