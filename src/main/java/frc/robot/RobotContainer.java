@@ -37,6 +37,7 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryType;
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
   private final FileLog log = new FileLog("A1");
+  private final AllianceSelection allianceSelection = new AllianceSelection(log);
 
   // Define robot subsystems  
   private final DriveTrain driveTrain = new DriveTrain(log);
@@ -310,6 +311,7 @@ public class RobotContainer {
    */
   public void robotPeriodic(){
     log.advanceLogRotation();
+    allianceSelection.periodic();
   }
 
   /**

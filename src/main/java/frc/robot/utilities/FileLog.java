@@ -34,6 +34,7 @@ public class FileLog {
 	private final int NUM_ROTATIONS = 10;
 	private int rotationLastAllocated = NUM_ROTATIONS-1;
 	public int rotationCurrent = 0;			// Values = 0 .. NUM_ROTATIONS-1
+	public final int ALLIANCE_CYCLE = 7;
     
 	/**
 	 * Creates a new log file called "/home/lvuser/logfile.ver.date.time.csv"
