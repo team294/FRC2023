@@ -21,6 +21,7 @@ public class DriveResetSwerveModules extends CommandBase {
    * <p>However, if the robot browns-out or otherwise partially resets, then this can be used to 
    * force the motors and encoders to have the right calibration and settings, especially the
    * calibration angle for each swerve module.
+   * <p> Note:  This command can run while the robot is disabled.
    * @param driveTrain driveTrain subsytem
    * @param log FileLog
   */
@@ -53,6 +54,16 @@ public class DriveResetSwerveModules extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
+    return true;
+  }
+
+  /**
+   * Whether the given command should run when the robot is disabled. Override to return true if the
+   * command should run when disabled.
+   * @return whether the command should run when the robot is disabled
+   */
+  @Override
+  public boolean runsWhenDisabled() {
     return true;
   }
 }
