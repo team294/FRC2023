@@ -57,6 +57,7 @@ public class RobotContainer {
   private boolean rumbling = false;
   Grabber grabber = new Grabber("Grabber", log);
 
+  Command patternTeamMoving = new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 0.5, led, log);
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     configureButtonBindings(); // configure button bindings
@@ -320,6 +321,7 @@ public class RobotContainer {
 
     driveTrain.setDriveModeCoast(true);     // When pushing a disabled robot by hand, it is a lot easier to push in Coast mode!!!!
     driveTrain.stopMotors();                // SAFETY:  Turn off any closed loop control that may be running, so the robot does not move when re-enabled.
+    patternTeamMoving.schedule();
   }
 
   /**
@@ -332,9 +334,10 @@ public class RobotContainer {
     }  //    TODO May want to flash this to the driver with some obvious signal!
     boolean error = true;  
     if (error == false) {
-      new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 0.5, led, log);
+      if(!patternTeamMoving.isScheduled()) patternTeamMoving.schedule();
     }
     else {
+      patternTeamMoving.cancel();
       led.setStrip("Red", 0.5, 0);
     }
   }
