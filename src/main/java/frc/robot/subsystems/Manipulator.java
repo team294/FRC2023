@@ -54,6 +54,7 @@ public class Manipulator extends SubsystemBase implements Loggable {
     logRotationKey = log.allocateLogRotation();
 
     motor.restoreFactoryDefaults();
+    motor.setIdleMode(IdleMode.kCoast);
     motor.setInverted(inverted);
     motor.enableVoltageCompensation(12);
     motor.setOpenLoopRampRate(0.05);    //seconds from neutral to full
