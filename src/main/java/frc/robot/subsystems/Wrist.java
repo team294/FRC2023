@@ -24,10 +24,19 @@ import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxLimitSwitch;
+import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 public class Wrist extends SubsystemBase {
-  private WPI_TalonFX wristMotor = new WPI_TalonFX(Ports.CANWristMotor);
-  private TalonFXSensorCollection wristLimits;
+  private CANSparkMax wristMotor = new CANSparkMax(Ports.CANWristMotor, MotorType.kBrushless);
+  // private TalonFXSensorCollection wristLimits;
+  private RelativeEncoder relativeEncoder;
+
+  private SparkMaxLimitSwitch revLimitSwitch;
+  private SparkMaxLimitSwitch fwdLimitSwitch;
   FileLog log;
   private int logRotationKey;         // key for the logging cycle for this subsystem
 
@@ -62,29 +71,33 @@ public class Wrist extends SubsystemBase {
   public Wrist(FileLog log) {
     this.log = log;
     logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
-    wristMotor.set(ControlMode.PercentOutput, 0);
     wristMotor.setInverted(true);
-    wristMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, 0);
-    wristMotor.configFeedbackNotContinuous(true, 0);
-    wristMotor.setSensorPhase(false);         // Flip sign of sensor reading
-    wristMotor.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
-    wristMotor.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
-    wristMotor.setNeutralMode(NeutralMode.Brake);
-    wristMotor.configVoltageCompSaturation(12.0);
-    wristMotor.enableVoltageCompensation(true);
-    wristMotor.clearStickyFaults();
+    wristMotor.clearFaults();
+    wristMotor.setIdleMode(IdleMode.kCoast);
+    // wristMotor.set(ControlMode.PercentOutput, 0);
+    // wristMotor.setInverted(true);
+    // wristMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, 0);
+    // wristMotor.configFeedbackNotContinuous(true, 0);
+    // wristMotor.setSensorPhase(false);         // Flip sign of sensor reading
+    // wristMotor.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
+    // wristMotor.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
+    // wristMotor.setNeutralMode(NeutralMode.Brake);
+    // wristMotor.configVoltageCompSaturation(12.0);
+    // wristMotor.enableVoltageCompensation(true);
+    // wristMotor.clearStickyFaults();
 
-    wristMotor.config_kP(0, kP);
-		wristMotor.config_kI(0, kI);
-		wristMotor.config_kD(0, kD);
-		wristMotor.config_kF(0, kFF);
-    wristMotor.config_IntegralZone(0, (int)degreesToEncoderTicks(kIz));
-    wristMotor.configMaxIntegralAccumulator(0, kIAccumMax);
-		wristMotor.configClosedloopRamp(rampRate);
-		wristMotor.configPeakOutputForward(kMaxOutput);
-    wristMotor.configPeakOutputReverse(kMinOutput);
+    // wristMotor.config_kP(0, kP);
+		// wristMotor.config_kI(0, kI);
+		// wristMotor.config_kD(0, kD);
+		// wristMotor.config_kF(0, kFF);
+    // wristMotor.config_IntegralZone(0, (int)degreesToEncoderTicks(kIz));
+    // wristMotor.configMaxIntegralAccumulator(0, kIAccumMax);
+		// wristMotor.configClosedloopRamp(rampRate);
+		// wristMotor.configPeakOutputForward(kMaxOutput);
+    // wristMotor.configPeakOutputReverse(kMinOutput);
     
-    wristLimits =  wristMotor.getSensorCollection();
+    // wristLimits =  wristMotor.getSensorCollection();
+    relativeEncoder = wristMotor.getEncoder();
 
     // Wait 0.25 seconds before adjusting the wrist calibration.  The reason is that .setInverted (above)
     // changes the sign of read encoder value, but that change can be delayed up to 50ms for a round trip
@@ -106,7 +119,7 @@ public class Wrist extends SubsystemBase {
     if (log.getLogLevel() == 1) {
       log.writeLog(false, "Wrist" , "Percent Output", "Percent Output", percentOutput);
     }
-    wristMotor.set(ControlMode.PercentOutput, percentOutput);
+    wristMotor.set(percentOutput);
   }
 
   /**
@@ -219,7 +232,9 @@ public class Wrist extends SubsystemBase {
    * @return true if wrist is at lower limit, false if not
    */
   public boolean getWristLowerLimit() {
-    return wristLimits.isRevLimitSwitchClosed() == 1;
+    // return wristLimits.isRevLimitSwitchClosed() == 1;
+    revLimitSwitch = wristMotor.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
+    return revLimitSwitch.isPressed();
   }
 
   /**
@@ -227,7 +242,9 @@ public class Wrist extends SubsystemBase {
    * @return true if wrist is at upper limit, false if not
    */
   public boolean getWristUpperLimit() {
-    return wristLimits.isFwdLimitSwitchClosed() == 1;
+    // return wristLimits.isFwdLimitSwitchClosed() == 1;
+    fwdLimitSwitch = wristMotor.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
+    return fwdLimitSwitch.isPressed();
   }
 
   /**
@@ -246,7 +263,8 @@ public class Wrist extends SubsystemBase {
    * @return raw encoder ticks, adjusted direction (positive is towards stowed, negative is towards lower hard stop)
    */
   public double getWristEncoderTicksRaw() {
-    return wristMotor.getSelectedSensorPosition(0);
+    // return wristMotor.getSelectedSensorPosition(0);
+    return relativeEncoder.getPosition();
   }
 
   /**
@@ -356,7 +374,7 @@ public class Wrist extends SubsystemBase {
    */
   public void updateWristLog(boolean logWhenDisabled) {
     log.writeLog(logWhenDisabled, "Wrist", "Update Variables",
-        "Volts", wristMotor.getMotorOutputVoltage(), "Amps", wristMotor.getStatorCurrent(),
+        "Volts", wristMotor.getBusVoltage(), "Amps", wristMotor.getOutputCurrent(),
         "WristCalZero", wristCalZero,
         "Enc Raw", getWristEncoderTicksRaw(), "Wrist Angle", getWristAngle(), "Wrist Target", getCurrentWristTarget(),
         "Upper Limit", getWristUpperLimit(), "Lower Limit", getWristLowerLimit()
@@ -375,7 +393,7 @@ public class Wrist extends SubsystemBase {
 			SmartDashboard.putBoolean("Wrist Lower Limit", getWristLowerLimit());
       SmartDashboard.putBoolean("Wrist Upper Limit", getWristUpperLimit());
       SmartDashboard.putNumber("Wrist target", getCurrentWristTarget());
-      SmartDashboard.putNumber("Wrist voltage", wristMotor.getMotorOutputVoltage());
+      SmartDashboard.putNumber("Wrist voltage", wristMotor.getBusVoltage());
     }
     
     // Checks if the wrist is not calibrated and automatically calibrates it once the limit switch is pressed
