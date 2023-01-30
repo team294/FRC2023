@@ -25,6 +25,7 @@ public class LEDSetPattern extends CommandBase {
   /**
    * Set LED strip to a specified shifting pattern, with parameter seconds between each shift.
    * This command never ends.
+   * <p> Note:  This command can run while the robot is disabled.
    * @param pattern pattern library to cycle though
    * @param strip strip number (0 or 1)
    * @param speed how often to shift rainbow, in seconds
@@ -43,6 +44,7 @@ public class LEDSetPattern extends CommandBase {
   /**
    * Set LED strip to a specified shifting pattern, with 0.5 seconds between each shift.
    * This command never ends.
+   * <p> Note:  This command can run while the robot is disabled.
    * @param pattern pattern library to cycle through
    * @param strip strip number (0 or 1)
    * @param led led strip (subsystem)
@@ -87,4 +89,14 @@ public class LEDSetPattern extends CommandBase {
 	public boolean isFinished() {
       return false;
 	}
+
+  /**
+   * Whether the given command should run when the robot is disabled. Override to return true if the
+   * command should run when disabled.
+   * @return whether the command should run when the robot is disabled
+   */
+  @Override
+  public boolean runsWhenDisabled() {
+    return true;
+  }
 }
