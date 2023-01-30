@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import static frc.robot.utilities.StringUtil.*;
@@ -48,6 +49,7 @@ public class Intake extends SubsystemBase implements Loggable {
     logRotationKey = log.allocateLogRotation();
 
     motor.restoreFactoryDefaults();
+    motor.setIdleMode(IdleMode.kCoast);
     motor.setInverted(inverted);
     motor.enableVoltageCompensation(12);
     motor.setOpenLoopRampRate(0.05);    //seconds from neutral to full
