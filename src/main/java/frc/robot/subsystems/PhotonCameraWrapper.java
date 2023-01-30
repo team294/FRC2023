@@ -29,7 +29,8 @@
  import edu.wpi.first.math.geometry.Pose2d;
  import edu.wpi.first.math.geometry.Pose3d;
  import edu.wpi.first.math.geometry.Rotation2d;
- import frc.robot.Constants.FieldConstants;
+import edu.wpi.first.math.util.Units;
+import frc.robot.Constants.FieldConstants;
  import frc.robot.Constants.VisionConstants;
  import java.util.ArrayList;
  import java.util.Optional;
@@ -44,20 +45,20 @@
  
      public PhotonCameraWrapper() {
          // Set up a test arena of two apriltags at the center of each driver station set
-         final AprilTag tag18 =
+         final AprilTag tag03 =
                  new AprilTag(
-                         18,
+                         3,
                          new Pose3d(
                                  new Pose2d(
-                                         FieldConstants.length,
-                                         FieldConstants.width / 2.0,
+                                         0,
+                                         Units.feetToMeters(5.42),
                                          Rotation2d.fromDegrees(180))));
          final AprilTag tag01 =
                  new AprilTag(
                          01,
-                         new Pose3d(new Pose2d(0.0, FieldConstants.width / 2.0, Rotation2d.fromDegrees(0.0))));
+                         new Pose3d(new Pose2d(0.0, 0, Rotation2d.fromDegrees(0.0))));
          ArrayList<AprilTag> atList = new ArrayList<AprilTag>();
-         atList.add(tag18);
+         atList.add(tag03);
          atList.add(tag01);
  
          // TODO - once 2023 happens, replace this with just loading the 2023 field arrangement

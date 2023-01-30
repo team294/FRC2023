@@ -73,8 +73,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * Constructs the DriveTrain subsystem
    * @param log FileLog object for logging
    */
-  public DriveTrain(PhotonCameraWrapper camera, FileLog log) {
-    this.camera = camera;
+  public DriveTrain(FileLog log) {
     this.log = log; // save reference to the fileLog
     logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
 
@@ -369,6 +368,12 @@ public class DriveTrain extends SubsystemBase implements Loggable {
         poseEstimator.addVisionMeasurement(
                 camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
         field.getObject("Cam Est Pos").setPose(camPose.estimatedPose.toPose2d());
+
+        Pose2d pose = camPose.estimatedPose.toPose2d();
+
+        SmartDashboard.putNumber("Drive Pose X", pose.getTranslation().getX());
+        SmartDashboard.putNumber("Drive Pose Y", pose.getTranslation().getY());
+        SmartDashboard.putNumber("Drive Pose Theta", pose.getRotation().getDegrees());
     } else {
         // move it way off the screen to make it disappear
         field.getObject("Cam Est Pos").setPose(new Pose2d(-100, -100, new Rotation2d()));
@@ -416,7 +421,9 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     // Update robot odometry
     double degrees = getGyroRotation();
     odometry.update(Rotation2d.fromDegrees(degrees), getModulePotisions());
-        
+    
+    updateOdometry();
+
     if(fastLogging || log.isMyLogRotation(logRotationKey)) {
       updateDriveLog(false);
 
@@ -425,7 +432,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
       }
 
       // Update data on SmartDashboard
-      field.setRobotPose(odometry.getPoseMeters());
+      // field.setRobotPose(odometry.getPoseMeters());
       // SmartDashboard.putNumber("Drive Average Dist in Meters", Units.inchesToMeters(getAverageDistance()));
       SmartDashboard.putNumber("Drive X Fwd Velocity", getChassisSpeeds().vxMetersPerSecond);
       SmartDashboard.putNumber("Drive Y Left Velocity", getChassisSpeeds().vyMetersPerSecond);
