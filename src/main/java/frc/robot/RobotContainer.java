@@ -58,6 +58,7 @@ public class RobotContainer {
   Grabber grabber = new Grabber("Grabber", log);
 
   Command patternTeamMoving = new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 0.5, led, log);
+  
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     configureButtonBindings(); // configure button bindings
