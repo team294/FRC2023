@@ -172,9 +172,6 @@ public final class Constants {
             public static final double wristDown = -60.0;		// TODO Should be -59.0? // In this position, elevator must be able to go to groundCargo
             public static final double wristMin = -61.0;			// Location of lower limit switch for auto calibration
             public enum WristAngle {stowed, up, straight, cargoShot, vision, down}
-            // public static double wristCalZero;   		// Wrist encoder position at O degrees, in encoder ticks (i.e. the calibration factor)
-	        // public static boolean wristCalibrated = false;     // Default to wrist being uncalibrated.  Calibrate from robot preferences or "Calibrate Wrist Zero" button on dashboard
-            // public static double elevatorWristSafeStow; 	
             public static final double encoderTicksPerRevolution = 4096.0;
             
         }

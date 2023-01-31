@@ -47,6 +47,7 @@ public class Wrist extends SubsystemBase {
   private double encoderDegreesPerTicks = 360.0 / WristConstants.encoderTicksPerRevolution;
   private double encoderTicksPerDegrees = WristConstants.encoderTicksPerRevolution / 360.0;
 
+  private boolean usingPosition = false;
   // kP = (desired-output-1.0max)*1024 / (error-in-encoder-ticks)
   // kP = 2.5 -> output of 0.139 when error is 5 degrees
   private double kP = 2.5;  // was 1.0 with original wrist, 2.5 is better with new wrist
@@ -67,6 +68,8 @@ public class Wrist extends SubsystemBase {
   public double wristCalZero;   		// Wrist encoder position at O degrees, in encoder ticks (i.e. the calibration factor)
   public boolean wristCalibrated = false;     // Default to wrist being uncalibrated.  Calibrate from robot preferences or "Calibrate Wrist Zero" button on dashboard
   public double elevatorWristSafeStow; 	
+
+  private double safeAngle;
 
   public Wrist(FileLog log) {
     this.log = log;
@@ -126,7 +129,7 @@ public class Wrist extends SubsystemBase {
    * Stops wrist motor
    */
   public void stopWrist() {
-    setWristMotorPercentOutput(0.0);
+    wristMotor.stopMotor();
   }
 
   /**
@@ -148,7 +151,7 @@ public class Wrist extends SubsystemBase {
         return;
       }
 
-      double safeAngle = angle;
+      safeAngle = angle;
 
       // Apply interlocks if elevator is low
       if (elevator.getElevatorPos() < ElevatorConstants.groundCargo - 2.0 || elevator.getCurrentElevatorTarget() < ElevatorConstants.groundCargo -2.0) {
@@ -161,8 +164,14 @@ public class Wrist extends SubsystemBase {
       }
 
       // wristMotor.set(ControlMode.Position, degreesToEncoderTicks(safeAngle) + Robot.robotPrefs.wristCalZero);
-      wristMotor.set(ControlMode.Position, degreesToEncoderTicks(safeAngle) + wristCalZero, 
-                     DemandType.ArbitraryFeedForward, kFFconst);
+      // wristMotor.set(ControlMode.Position, degreesToEncoderTicks(safeAngle) + wristCalZero, 
+      //                DemandType.ArbitraryFeedForward, kFFconst);
+      double error = getWristAngle() - safeAngle;
+      usingPosition = true;
+      while(Math.abs(error) > 1){
+        wristMotor.set(error/encoderDegreesPerTicks * kP);
+      }
+      usingPosition = false;
       log.writeLog(false, "Wrist", "Set angle", "Desired angle", angle, "Set angle", safeAngle, "Interlock,Allowed",
        "Elevator Pos", elevator.getElevatorPos(), "Elevator Target", elevator.getCurrentElevatorTarget());  
     }
@@ -338,8 +347,8 @@ public class Wrist extends SubsystemBase {
     double currentTarget;
 
     if (wristCalibrated) {
-      if (wristMotor.getControlMode() == ControlMode.Position) {
-        currentTarget = encoderTicksToDegrees(wristMotor.getClosedLoopTarget(0) - wristCalZero);
+      if (usingPosition) {
+        currentTarget = safeAngle;
       } else {
         // If we are not in position control mode, then we aren't moving towards a target (and the target
         // angle may be undefined).  So, get the actual wrist angle instead.
