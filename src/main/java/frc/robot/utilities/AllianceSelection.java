@@ -13,7 +13,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class AllianceSelection {
 
     private final FileLog log;
-    private Alliance alliance;              // Red, Blue, or Invalid (= both red and blue = keep all ball without ejecting)
+    private int logRotationKey;         // key for the logging cycle for this subsystem
+    private Alliance alliance;              // Red, Blue, or Invalid
 
     private enum AllianceChoice {
         Red,
@@ -27,6 +28,7 @@ public class AllianceSelection {
      */
     public AllianceSelection(FileLog log) {
         this.log = log;
+        logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
 
         // auto selections
 		allianceChooser.setDefaultOption("Automatic", AllianceChoice.Auto);
@@ -69,7 +71,7 @@ public class AllianceSelection {
     public void periodic() {
         Alliance newAlliance = alliance;
 
-        if (log.getLogRotation() == log.ALLIANCE_CYCLE) {
+        if (log.isMyLogRotation(logRotationKey)) {
             switch (allianceChooser.getSelected()) {
                 case Auto:
                     // Do not auto change alliance in Auto or Teleop mode
