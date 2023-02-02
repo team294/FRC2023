@@ -174,6 +174,21 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   // ************ Swerve drive methods
 
   /**
+   * Configures the motors and encoders for every swerve module.
+   * The swerve modules are automatically configured in the SwerveModule constructors.  So, this
+   * method should not need to be called.
+   * <p>However, if the robot browns-out or otherwise partially resets, then this can be used to 
+   * force the motors and encoders to have the right calibration and settings, especially the
+   * calibration angle for each swerve module.
+   */
+  public void configureSwerveModules(){
+    swerveFrontLeft.configSwerveModule();
+    swerveFrontRight.configSwerveModule();
+    swerveBackLeft.configSwerveModule();
+    swerveBackRight.configSwerveModule();
+  }
+
+  /**
    * @param setCoast true = coast mode, false = brake mode
    */
   public void setDriveModeCoast(boolean setCoast) {

@@ -104,9 +104,9 @@ public final class Constants {
         public static final double kNominalAccelerationMetersPerSecondSquare = 0.7*kMaxAccelerationMetersPerSecondSquare;
         // Max turn velocity degrees per second measured values 1/13/2023: FL = 1744.629, FR = 1762.207, BL = 1736.719, BR = 2085.645
         public static final double kMaxTurningRadiansPerSecond = 9.1;   // CALIBRATED-2 took 528 degreesPerSecond and converted to radians
-        public static final double kNominalTurningRadiansPerSecond = 6.0;
+        public static final double kNominalTurningRadiansPerSecond = Math.PI;
         public static final double kMaxAngularAccelerationRadiansPerSecondSquared = 30.0;            // CALIBRATED-2 31.7 rad/sec^2
-        public static final double kNominalAngularAccelerationRadiansPerSecondSquared = 10.0;
+        public static final double kNominalAngularAccelerationRadiansPerSecondSquared = Math.PI;
         public static final double kVDrive = 0.248; // CALIBRATED-2 = 0.248.  in % output per meters per second
         public static final double kADrive = 0.0;                   // TODO -- Calibrate
         public static final double kSDrive = 0.017; // CALIBRATED-2 = 0.017.  in % output
