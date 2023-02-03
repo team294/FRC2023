@@ -266,13 +266,13 @@ public class SwerveControllerLogCommand extends CommandBase {
 
     m_outputModuleStates.accept(targetModuleStates);
 
-    ChassisSpeeds robotSpeeds = m_driveTrain.getChassisSpeeds();
+    ChassisSpeeds robotSpeeds = m_driveTrain.getRobotSpeeds();
     m_log.writeLog(false, "DriveTrajectory", "Execute", 
         "Time", m_timer.get(), 
         "Traj X", desiredState.poseMeters.getTranslation().getX(),
         "Traj Y", desiredState.poseMeters.getTranslation().getY(),
         "Traj Vel", desiredState.velocityMetersPerSecond,
-        "Traj ang", desiredState.poseMeters.getRotation().getDegrees(),
+        "Traj VelAng", desiredState.poseMeters.getRotation().getDegrees(),
         "Target rot", desiredRotation.getDegrees(), 
         "Robot X", robotPose.getTranslation().getX(),
         "Robot Y", robotPose.getTranslation().getY(),
