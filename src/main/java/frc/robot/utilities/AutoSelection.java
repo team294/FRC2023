@@ -6,8 +6,12 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.CoordType;
+import frc.robot.Constants.StopType;
+import frc.robot.commands.DriveTrajectory;
 import frc.robot.commands.ExampleAuto;
 import frc.robot.subsystems.*;
+import frc.robot.utilities.TrajectoryCache.TrajectoryType;
 
 
 /**
@@ -16,6 +20,7 @@ import frc.robot.subsystems.*;
 public class AutoSelection {
 
 	public static final int EXAMPLE = 0;
+	public static final int STRAIGHT = 1;
 	
 	private TrajectoryCache trajectoryCache;
 	private SendableChooser<Integer> autoChooser = new SendableChooser<>();
@@ -29,7 +34,7 @@ public class AutoSelection {
 
 		// auto selections
 		autoChooser.setDefaultOption("Example Auto", EXAMPLE);
-		//autoChooser.addOption("Auto2", AUTO_NAME);
+		autoChooser.addOption("Straight", STRAIGHT);
 	
 		// show auto selection widget on Shuffleboard
 		SmartDashboard.putData("Autonomous routine", autoChooser);
@@ -60,7 +65,14 @@ public class AutoSelection {
 			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime), new ExampleAuto(driveTrain));
 		}
 
-		if (autonomousCommand == null) {
+		if (autoPlan == STRAIGHT) {
+			log.writeLogEcho(true, "AutoSelect", "run Straight");
+		   autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime), 
+		   			new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log)
+		   );
+	   }
+
+	   if (autonomousCommand == null) {
 			log.writeLogEcho(true, "AutoSelect", "No autocommand found");
 			autonomousCommand = new WaitCommand(1);
 		}
