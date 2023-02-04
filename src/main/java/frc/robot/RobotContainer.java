@@ -92,11 +92,11 @@ public class RobotContainer {
     SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
     SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
     SmartDashboard.putData("Drive Trajectory Straight", new DriveTrajectory(
-          CoordType.kAbsolute, StopType.kBrake,
+          CoordType.kRelative, StopType.kBrake,
           TrajectoryGenerator.generateTrajectory(
             new Pose2d(0,0,new Rotation2d(0)), 
             List.of(), 
-            new Pose2d(0.5,0,new Rotation2d(0)), 
+            new Pose2d(1.0,0,new Rotation2d(0)), 
             Constants.TrajectoryConstants.swerveTrajectoryConfig),
           driveTrain, log));
   

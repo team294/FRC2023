@@ -140,7 +140,8 @@ public final class Constants {
 
       public static final class TrajectoryConstants {
         // Max error for robot rotation
-        public static final double maxThetaErrorDegrees = 1.0;     
+        public static final double maxThetaErrorDegrees = 1.0;
+        public static final double maxPositionErrorMeters = 0.02;
 
         // Feedback terms for holonomic drive controllers
         public static final double kPXController = 1;       // X-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)
