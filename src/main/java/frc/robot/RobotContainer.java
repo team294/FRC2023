@@ -86,16 +86,17 @@ public class RobotContainer {
     SmartDashboard.putData("Drive Straight", new DriveStraight(false, false, false, driveTrain, log));
 
     // Testing for autos and trajectories
+    SmartDashboard.putData("Drive To Pose", new DriveToPose(new Pose2d(2.0, 2.0, Rotation2d.fromDegrees(90)), driveTrain, log));
     SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
     SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
     SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
     SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
     SmartDashboard.putData("Drive Trajectory Straight", new DriveTrajectory(
-          CoordType.kRelative, StopType.kBrake,
+          CoordType.kAbsolute, StopType.kBrake,
           TrajectoryGenerator.generateTrajectory(
             new Pose2d(0,0,new Rotation2d(0)), 
             List.of(), 
-            new Pose2d(3,0,new Rotation2d(0)), 
+            new Pose2d(0.5,0,new Rotation2d(0)), 
             Constants.TrajectoryConstants.swerveTrajectoryConfig),
           driveTrain, log));
   
@@ -298,7 +299,8 @@ public class RobotContainer {
     }
 
     // Set initial robot position on field
-    driveTrain.resetPose(new Pose2d(2.0, 2.0, Rotation2d.fromDegrees(0)));
+    // This takes place a while after the drivetrain is created, so after any CanBus delays.
+    driveTrain.resetPose(new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0)));  
   }
 
   /**

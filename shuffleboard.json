@@ -526,7 +526,7 @@
           "5,0": {
             "size": [
               2,
-              4
+              5
             ],
             "content": {
               "_type": "List Layout",
@@ -546,15 +546,15 @@
                 },
                 {
                   "_type": "Text View",
-                  "_source0": "network_table:///SmartDashboard/Drive X Fwd Velocity",
-                  "_title": "Drive X Fwd Velocity",
+                  "_source0": "network_table:///SmartDashboard/Drive X Velocity",
+                  "_title": "Drive X Velocity",
                   "_glyph": 148,
                   "_showGlyph": false
                 },
                 {
                   "_type": "Text View",
-                  "_source0": "network_table:///SmartDashboard/Drive Y Left Velocity",
-                  "_title": "Drive Y Left Velocity",
+                  "_source0": "network_table:///SmartDashboard/Drive Y Velocity",
+                  "_title": "Drive Y Velocity",
                   "_glyph": 148,
                   "_showGlyph": false
                 },
@@ -613,7 +613,7 @@
           "7,0": {
             "size": [
               2,
-              4
+              5
             ],
             "content": {
               "_type": "List Layout",
@@ -689,6 +689,20 @@
                   "_type": "Command",
                   "_source0": "network_table:///SmartDashboard/Drive Trajectory Absolute",
                   "_title": "Drive Trajectory Absolute",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Drive To Pose",
+                  "_title": "Drive To Pose",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Drive Trajectory Straight",
+                  "_title": "Drive Trajectory Straight",
                   "_glyph": 148,
                   "_showGlyph": false
                 }
