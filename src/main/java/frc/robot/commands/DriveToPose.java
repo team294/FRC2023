@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
 import frc.robot.Constants;
@@ -37,6 +38,11 @@ public class DriveToPose extends CommandBase {
   private Translation2d initialTranslation;     // Starting robot translation on the field
   private Translation2d goalDirection;          // Unit vector pointing from initial pose to goal pose = direction of travel
   private TrapezoidProfileBCR profile;      // Relative linear distance/speeds from initial pose to goal pose 
+  private Rotation2d angleTarget;
+  private double xPos;
+  private double yPos;
+
+  private boolean fromShuffleboard;
 
   /**
    * Drives the robot to the desired pose in field coordinates.
@@ -47,14 +53,22 @@ public class DriveToPose extends CommandBase {
    * @param driveTrain DriveTrain subsystem
    * @param log file for logging
    */
-  public DriveToPose(Pose2d goalPose, DriveTrain driveTrain, FileLog log) {
+
+   public DriveToPose(Pose2d goalPose, DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
+    this.fromShuffleboard = false;
     this.goalPose = goalPose;
     goalSupplier = null;
 
     constructorCommonCode();
+
+
   }
+
+
+
+
 
   /**
    * Drives the robot to the desired pose in field coordinates.
@@ -68,9 +82,35 @@ public class DriveToPose extends CommandBase {
   public DriveToPose(Supplier<Pose2d> goalPoseSupplier, DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
+    this.fromShuffleboard = false;
     goalSupplier = goalPoseSupplier;
 
     constructorCommonCode();
+
+  }
+
+  /**
+   * Drives the robot to the desired pose based on numbers inputed in shuffle board.
+   * @param driveTrain DriveTrain subsystem
+   * @param log file for logging
+   */
+  public DriveToPose(DriveTrain driveTrain, FileLog log) {
+    this.driveTrain = driveTrain;
+    this.log = log;
+    this.fromShuffleboard = true;
+    goalSupplier = null;
+
+    constructorCommonCode();
+
+    if(SmartDashboard.getNumber("DriveToPose X Position Manual", -9999) == -9999) {
+      SmartDashboard.putNumber("DriveToPose X Position Manual", 2);
+    }
+    if(SmartDashboard.getNumber("DriveToPose Y Position Manuel", -9999) == -9999){
+      SmartDashboard.putNumber("DriveToPose Y Position Manuel", 2);
+    }
+    if(SmartDashboard.getNumber("DriveToPose Manual Angle", -9999) == -9999) {
+      SmartDashboard.putNumber("DriveToPose Manual Angle", 0);
+    }
   }
 
   /**
@@ -97,6 +137,13 @@ public class DriveToPose extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    if(fromShuffleboard) {
+      xPos = SmartDashboard.getNumber("DriveToPose X Position Manual", 2);
+      yPos = SmartDashboard.getNumber("DriveToPose Y Position Manuel", 2);
+      angleTarget = Rotation2d.fromDegrees(SmartDashboard.getNumber("DriveToPose Manual Angle", 0));
+      goalPose = new Pose2d(xPos, yPos, angleTarget);
+    }
+
     // Reset timer and controllers
     timer.reset();
     timer.start();
