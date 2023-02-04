@@ -18,16 +18,16 @@ import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 
 public class OuterOneConeAuto extends SequentialCommandGroup {
     public OuterOneConeAuto(DriveTrain s_Swerve){
-
-        // An example trajectory to follow.  All units in meters.
-        Trajectory exampleTrajectory =
+        
+        Trajectory oneConeTrajectory =
             TrajectoryGenerator.generateTrajectory(
                 // Start at the origin facing the +X direction
                 new Pose2d(0, 0, new Rotation2d(0)),
+                List.of(),
                 // Pass through these two interior waypoints, making an 's' curve path
-                List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
-                // End 3 meters straight ahead of where we started, facing forward
-                new Pose2d(3, 0, new Rotation2d(0)),
+                // List.of(new Translation2d(-1, 1), new Translation2d(2, -1)),
+                
+                new Pose2d(-4, 0, new Rotation2d(180)),
                 Constants.TrajectoryConstants.swerveTrajectoryConfig);
 
         var thetaController =
@@ -37,18 +37,20 @@ public class OuterOneConeAuto extends SequentialCommandGroup {
 
         SwerveControllerCommand swerveControllerCommand =
             new SwerveControllerCommand(
-                exampleTrajectory,
+                oneConeTrajectory,
                 s_Swerve::getPose,
                 Constants.DriveConstants.kDriveKinematics,
                 new PIDController(Constants.TrajectoryConstants.kPXController, 0, 0),
                 new PIDController(Constants.TrajectoryConstants.kPYController, 0, 0),
                 thetaController,
-                (a) -> s_Swerve.setModuleStates(a, false),
+                (states) -> s_Swerve.setModuleStates(states, false),
                 s_Swerve);
 
 
         addCommands(
-            new InstantCommand(() -> s_Swerve.resetPose(exampleTrajectory.getInitialPose())),
+            //add in drive straight
+            new InstantCommand(() -> s_Swerve.resetPose(oneConeTrajectory.getInitialPose())),
+            //Add in scoring command here when implamented.
             swerveControllerCommand
         );
     }

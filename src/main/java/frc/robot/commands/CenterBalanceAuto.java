@@ -16,18 +16,16 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 
-public class OuterOneConeBalanceLeftAuto extends SequentialCommandGroup {
-    public OuterOneConeBalanceLeftAuto(DriveTrain s_Swerve){
-
-        Trajectory oneConeTrajectory =
+public class CenterBalanceAuto extends SequentialCommandGroup {
+    public CenterBalanceAuto(DriveTrain s_Swerve){
+        
+        Trajectory centerBalanceTrajectory =
             TrajectoryGenerator.generateTrajectory(
-                // Start at the origin facing the +X direction
-                new Pose2d(0, 0, new Rotation2d(0)),
-                // 
-                List.of(new Translation2d(-4.11, 0), new Translation2d(-4.11, 1.37)),
-                // Pass through these two interior waypoints, making an 's' curve path
-
-                new Pose2d(-2.4, 1.37, new Rotation2d(0)),
+                // Start at the position (1.75895, 2.707) facing +X direction
+                new Pose2d(1.75895, 2.707, new Rotation2d(0)),
+                List.of(),
+                // Go straight onto platform
+                new Pose2d(5.75895, 2.707, new Rotation2d(0)),
                 Constants.TrajectoryConstants.swerveTrajectoryConfig);
 
         var thetaController =
@@ -37,7 +35,7 @@ public class OuterOneConeBalanceLeftAuto extends SequentialCommandGroup {
 
         SwerveControllerCommand swerveControllerCommand =
             new SwerveControllerCommand(
-                oneConeTrajectory,
+                centerBalanceTrajectory,
                 s_Swerve::getPose,
                 Constants.DriveConstants.kDriveKinematics,
                 new PIDController(Constants.TrajectoryConstants.kPXController, 0, 0),
@@ -48,7 +46,8 @@ public class OuterOneConeBalanceLeftAuto extends SequentialCommandGroup {
 
 
         addCommands(
-            new InstantCommand(() -> s_Swerve.resetPose(oneConeTrajectory.getInitialPose())),
+            //add in drive straight
+            new InstantCommand(() -> s_Swerve.resetPose(centerBalanceTrajectory.getInitialPose())),
             //Add in scoring command here when implamented.
             swerveControllerCommand
         );

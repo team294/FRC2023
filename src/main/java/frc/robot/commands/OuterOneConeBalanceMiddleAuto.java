@@ -24,10 +24,10 @@ public class OuterOneConeBalanceMiddleAuto extends SequentialCommandGroup {
                 // Start at the origin facing the +X direction
                 new Pose2d(0, 0, new Rotation2d(0)),
                 // 
-                List.of(new Translation2d(-4.11, 0), new Translation2d(-4.11, -1.37)),
+                List.of(new Translation2d(-4.11, 0)),
                 // Pass through these two interior waypoints, making an 's' curve path
 
-                new Pose2d(-2.4, -1.37, new Rotation2d(0)),
+                new Pose2d(-2.4, 0, new Rotation2d(0)),
                 Constants.TrajectoryConstants.swerveTrajectoryConfig);
 
         var thetaController =
