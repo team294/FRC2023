@@ -90,7 +90,7 @@ public class DriveToPose extends CommandBase {
   }
 
   /**
-   * Drives the robot to the desired pose based on numbers inputed in shuffle board.
+   * Drives the robot to the desired pose based on numbers inputed in shuffleboard.
    * @param driveTrain DriveTrain subsystem
    * @param log file for logging
    */
