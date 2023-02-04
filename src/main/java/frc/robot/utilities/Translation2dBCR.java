@@ -32,6 +32,6 @@ public class Translation2dBCR {
     if (len==0) {
       return t1;
     }
-    return t1.div(t1.getNorm());    
+    return t1.div(len);    
   }
 }
