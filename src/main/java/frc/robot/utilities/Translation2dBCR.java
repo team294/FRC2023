@@ -28,6 +28,10 @@ public class Translation2dBCR {
    * @return The normalized translation.
    */
   public static Translation2d normalize(Translation2d t1) {
-    return t1.div(t1.getNorm());
+    double len = t1.getNorm();
+    if (len==0) {
+      return t1;
+    }
+    return t1.div(t1.getNorm());    
   }
 }
