@@ -698,6 +698,13 @@
                   "_title": "Drive To Pose",
                   "_glyph": 148,
                   "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Drive Trajectory Straight",
+                  "_title": "Drive Trajectory Straight",
+                  "_glyph": 148,
+                  "_showGlyph": false
                 }
               ]
             }
