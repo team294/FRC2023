@@ -8,6 +8,8 @@ import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
@@ -206,8 +208,10 @@ public class RobotContainer {
     left[1].onTrue(new DriveResetPose(0,driveTrain,log));
    
     // left joystick right button
+    right[1].onTrue(new DriveToPose( () -> new Pose2d(driveTrain.getPose().getTranslation(), Rotation2d.fromDegrees(0)), driveTrain, log));
+    right[2].onTrue(new DriveToPose( () -> driveTrain.getPose().plus(new Transform2d(new Translation2d(), Rotation2d.fromDegrees(180))), driveTrain, log));
     //left[2].onTrue(new IntakeRetractAndFlush(intakeFront, uptake, feeder, log));
-
+      
     // right joystick left button
     // right[1].onTrue(new IntakeExtendAndTurnOnMotors(intakeFront, uptake, log)); 
 
