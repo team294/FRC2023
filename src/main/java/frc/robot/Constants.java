@@ -139,11 +139,13 @@ public final class Constants {
       }
 
       public static final class TrajectoryConstants {
+        // Max error for robot rotation
+        public static final double maxThetaErrorDegrees = 1.0;     
 
         // Feedback terms for holonomic drive controllers
         public static final double kPXController = 1;       // X-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)
         public static final double kPYController = 1;       // Y-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)
-        public static final double kPThetaController = 1;   // Theta-velocity controller:  kp.  Units = (rad/sec of velocity) / (radians of angle error)
+        public static final double kPThetaController = 3;   // Theta-velocity controller:  kp.  Units = (rad/sec of velocity) / (radians of angle error)
 
         public static final TrajectoryConfig swerveTrajectoryConfig =
             new TrajectoryConfig(

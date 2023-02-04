@@ -99,6 +99,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     lfRunningAvg.reset();
 
     // create and initialize odometery
+    // Set initial location to 0,0.
     odometry = new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(getGyroRotation()), 
         getModulePotisions(), new Pose2d(0, 0, Rotation2d.fromDegrees(0)) );
     SmartDashboard.putData("Field", field);
@@ -417,8 +418,6 @@ public class DriveTrain extends SubsystemBase implements Loggable {
       field.setRobotPose(odometry.getPoseMeters());
       ChassisSpeeds robotSpeeds = getRobotSpeeds();
       // SmartDashboard.putNumber("Drive Average Dist in Meters", Units.inchesToMeters(getAverageDistance()));
-      SmartDashboard.putNumber("Drive X Fwd Velocity", getChassisSpeeds().vxMetersPerSecond);     //TODO delete after verifying robot speeds
-      SmartDashboard.putNumber("Drive Y Left Velocity", getChassisSpeeds().vyMetersPerSecond);    //TODO delete after verifying robot speeds
       SmartDashboard.putNumber("Drive X Velocity", robotSpeeds.vxMetersPerSecond);
       SmartDashboard.putNumber("Drive Y Velocity", robotSpeeds.vyMetersPerSecond);
       SmartDashboard.putBoolean("Drive isGyroReading", isGyroReading());

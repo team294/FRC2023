@@ -34,6 +34,7 @@ public class DriveToPose extends CommandBase {
 
   private final Supplier<Pose2d> goalSupplier;    // Supplier for goalPose.  null = use passed in goalPose, non-null = use supplier
   private Pose2d initialPose, goalPose;     // Starting and destination robot pose (location and rotation) on the field
+  private Translation2d initialTranslation;     // Starting robot translation on the field
   private Translation2d goalDirection;          // Unit vector pointing from initial pose to goal pose = direction of travel
   private TrapezoidProfileBCR profile;      // Relative linear distance/speeds from initial pose to goal pose 
 
@@ -103,6 +104,7 @@ public class DriveToPose extends CommandBase {
 
     // Get the initial pose
     initialPose = driveTrain.getPose();
+    initialTranslation = initialPose.getTranslation();
 
     // Get the goal pose, if using a supplier in the constructor
     if (!(goalSupplier == null)) {
@@ -110,7 +112,7 @@ public class DriveToPose extends CommandBase {
     }
 
     // Calculate the direction and distance of travel
-    Translation2d trapezoidPath = goalPose.getTranslation().minus(initialPose.getTranslation());
+    Translation2d trapezoidPath = goalPose.getTranslation().minus(initialTranslation);
     goalDirection = Translation2dBCR.normalize(trapezoidPath);
     double goalDistance = trapezoidPath.getNorm();
     
@@ -128,8 +130,8 @@ public class DriveToPose extends CommandBase {
       "Goal X", goalPose.getTranslation().getX(),
       "Goal Y", goalPose.getTranslation().getY(),
       "Goal rot", goalPose.getRotation().getDegrees(), 
-      "Robot X", initialPose.getTranslation().getX(),
-      "Robot Y", initialPose.getTranslation().getY(),
+      "Robot X", initialTranslation.getX(),
+      "Robot Y", initialTranslation.getY(),
       "Robot rot", initialPose.getRotation().getDegrees()
     );
   }
@@ -139,8 +141,9 @@ public class DriveToPose extends CommandBase {
   public void execute() {
     double curTime = timer.get();
 
-    // Current robot location, relative to starting position
-    Pose2d robotPose = driveTrain.getPose().relativeTo(initialPose);
+    // Current robot location, translation is relative to starting position, rotation is absolute field rotation
+    Translation2d robotTranslation = driveTrain.getPose().getTranslation().minus(initialTranslation);
+    Pose2d robotPose = new Pose2d(robotTranslation, Rotation2d.fromDegrees(driveTrain.getGyroRotation()));
 
     // Calculate current desired pose and velocity from the Trapezoid profile, relative to starting position
     TrapezoidProfileBCR.State desiredState = profile.calculate(curTime);
@@ -162,8 +165,8 @@ public class DriveToPose extends CommandBase {
         "Trap Vel", desiredVelocityMetersPerSecond,
         "Trap VelAng", desiredPose.getRotation().getDegrees(),
         "Target rot", desiredRotation.getDegrees(), 
-        "Robot X", robotPose.getTranslation().getX(),
-        "Robot Y", robotPose.getTranslation().getY(),
+        "Robot X", robotTranslation.getX(),
+        "Robot Y", robotTranslation.getY(),
         "Robot Vel", Math.hypot(robotSpeeds.vyMetersPerSecond, robotSpeeds.vxMetersPerSecond),
         "Robot VelAng", Math.toDegrees(Math.atan2(robotSpeeds.vyMetersPerSecond, robotSpeeds.vxMetersPerSecond)),
         "Robot rot", robotPose.getRotation().getDegrees()
@@ -180,6 +183,7 @@ public class DriveToPose extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return timer.hasElapsed(profile.totalTime());
+    return timer.hasElapsed(profile.totalTime())  && 
+        ( Math.abs(driveTrain.getGyroRotation() - goalPose.getRotation().getDegrees()) <= TrajectoryConstants.maxThetaErrorDegrees );
   }
 }
