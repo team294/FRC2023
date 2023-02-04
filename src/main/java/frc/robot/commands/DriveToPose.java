@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
 import frc.robot.Constants;
+import frc.robot.Constants.CoordType;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
@@ -37,6 +38,7 @@ public class DriveToPose extends CommandBase {
   private Translation2d initialTranslation;     // Starting robot translation on the field
   private Translation2d goalDirection;          // Unit vector pointing from initial pose to goal pose = direction of travel0
   private TrapezoidProfileBCR profile;      // Relative linear distance/speeds from initial pose to goal pose 
+  private CoordType type;
 
   private Translation2d curRobotTranslation;    // Current robot translation relative to initialTranslation
 
@@ -72,6 +74,14 @@ public class DriveToPose extends CommandBase {
     this.log = log;
     goalSupplier = goalPoseSupplier;
 
+    constructorCommonCode();
+  }
+
+  public DriveToPose(CoordType type, DriveTrain driveTrain, FileLog log ){
+    this.driveTrain = driveTrain;
+    this.log = log;
+    this.type = type; 
+    goalSupplier = null;
     constructorCommonCode();
   }
 
