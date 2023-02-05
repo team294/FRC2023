@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -57,6 +58,9 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   // Odometry class for tracking robot pose
   SwerveDriveOdometry odometry;
   Field2d field = new Field2d();    // Field to dispaly on Shuffleboard
+
+  //Slew rate limiter
+  SlewRateLimiter filter = new SlewRateLimiter(0.5); //0.5 is a placeholder, need to calibrate 
 
   /**
    * Constructs the DriveTrain subsystem
@@ -208,6 +212,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     swerveBackLeft.setDriveMotorPercentOutput(percentOutput);
     swerveBackRight.setDriveMotorPercentOutput(percentOutput);
   }
+  
 
   /**
    * 
@@ -312,6 +317,8 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * False = the provided x and y speeds are relative to the current facing of the robot. 
    */
    public void drive(double xSpeed, double ySpeed, double rot, Translation2d centerOfRotationMeters, boolean fieldRelative, boolean isOpenLoop) {
+    xSpeed = filter.calculate(xSpeed);
+    ySpeed = filter.calculate(ySpeed);
     SwerveModuleState[] swerveModuleStates =
         kDriveKinematics.toSwerveModuleStates(
             fieldRelative
