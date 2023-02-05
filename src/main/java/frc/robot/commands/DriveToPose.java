@@ -79,6 +79,14 @@ public class DriveToPose extends CommandBase {
     constructorCommonCode();
   }
 
+
+  /**
+   * Rotates the robot to the specified rotation using an arbitrary angle without moving laterally
+   * @param type CoordType, kRelative or kAbsolute
+   * @param rotation rotation to turn
+   * @param driveTrain DriveTrain subsytem
+   * @param log log
+   */
   public DriveToPose(CoordType type, Rotation2d rotation, DriveTrain driveTrain, FileLog log ){
     this.driveTrain = driveTrain;
     this.log = log;
@@ -119,6 +127,7 @@ public class DriveToPose extends CommandBase {
     timer.start();
     controller.reset();
 
+    //whether to use relative or absolute, if only rotating the robot that is not moving laterally
     if(useOnlyAngle){
       if(type == CoordType.kRelative){
         goalPose = new Pose2d(0,0, rotation);
