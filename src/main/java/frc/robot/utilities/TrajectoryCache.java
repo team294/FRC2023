@@ -30,7 +30,7 @@ public class TrajectoryCache {
         test(0),
         testCurve(1),
         CenterBalanceAuto(2),
-        LeaveCommuniy(3),
+        LeaveCommunity(3),
         OuterOneConeBalanceLeftAuto(4),
         OuterOneConeBalanceMiddleAuto(5),
         OuterOneConeBalanceRightAuto(6),
@@ -67,7 +67,7 @@ public class TrajectoryCache {
             new Pose2d(5.75895, 2.707, new Rotation2d(0))
         );    
 
-        cache[TrajectoryType.LeaveCommuniy.value] = calcTrajectory("LeaveCommuniy", 0.4, 0.4, false, 
+        cache[TrajectoryType.LeaveCommunity.value] = calcTrajectory("LeaveCommuniy", 0.4, 0.4, false, 
             // Start at the origin facing the +X direction
             new Pose2d(0.0, 0.0, new Rotation2d(0)),
             List.of(

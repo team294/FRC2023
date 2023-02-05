@@ -25,6 +25,7 @@ import frc.robot.Constants.CoordType;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.StopType;
 import frc.robot.commands.*;
+import frc.robot.commands.autos.ExampleAuto;
 import frc.robot.commands.autos.OuterOneConeBalanceMiddleAuto;
 import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;

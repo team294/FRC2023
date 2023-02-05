@@ -4,12 +4,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.CoordType;
 import frc.robot.Constants.StopType;
+import frc.robot.commands.DriveResetPose;
 import frc.robot.commands.DriveTrajectory;
-import frc.robot.commands.ExampleAuto;
+import frc.robot.commands.autos.ExampleAuto;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.TrajectoryCache.TrajectoryType;
 
@@ -21,6 +23,7 @@ public class AutoSelection {
 
 	public static final int EXAMPLE = 0;
 	public static final int STRAIGHT = 1;
+	public static final int LEAVE_COMMUNITY = 2;
 	
 	private TrajectoryCache trajectoryCache;
 	private SendableChooser<Integer> autoChooser = new SendableChooser<>();
@@ -35,6 +38,7 @@ public class AutoSelection {
 		// auto selections
 		autoChooser.setDefaultOption("Example Auto", EXAMPLE);
 		autoChooser.addOption("Straight", STRAIGHT);
+		autoChooser.addOption("Leave Community", LEAVE_COMMUNITY);
 	
 		// show auto selection widget on Shuffleboard
 		SmartDashboard.putData("Autonomous routine", autoChooser);
@@ -72,7 +76,15 @@ public class AutoSelection {
 		   );
 	   }
 
-	   if (autonomousCommand == null) {
+	   if (autoPlan == LEAVE_COMMUNITY) {
+		log.writeLogEcho(true, "AutoSelect", "run Leave Community");
+	   autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+			new DriveResetPose(new Pose2d(), driveTrain, log),
+			new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.LeaveCommunity.value], driveTrain, log)
+	   );
+   }
+
+   if (autonomousCommand == null) {
 			log.writeLogEcho(true, "AutoSelect", "No autocommand found");
 			autonomousCommand = new WaitCommand(1);
 		}
