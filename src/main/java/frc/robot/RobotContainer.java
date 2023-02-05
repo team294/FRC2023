@@ -8,6 +8,8 @@ import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
@@ -87,16 +89,12 @@ public class RobotContainer {
     SmartDashboard.putData("Drive Straight", new DriveStraight(false, false, false, driveTrain, log));
 
     // Testing for autos and trajectories
-    // SmartDashboard.putData("Drive Trajectory Relative", new DriveFollowTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], false, PIDType.kTalon, driveTrain, log));
-    // SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveFollowTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.testCurve.value], false, PIDType.kTalon, driveTrain, log));
-    // SmartDashboard.putData("Drive Trajectory Absolute", new DriveFollowTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
-    SmartDashboard.putData("Example Auto S-Shape", new OuterOneConeBalanceMiddleAuto(driveTrain));
-    // SmartDashboard.putData("Drive Straight", new DriveTrajectory(TrajectoryGenerator.generateTrajectory(new Pose2d(0,0,new Rotation2d(0)), List.of(), new Pose2d(3,0,new Rotation2d(0)), Constants.TrajectoryConstants.swerveTrajectoryConfig), driveTrain, log));
     SmartDashboard.putData("Drive To Pose", new DriveToPose(new Pose2d(2.0, 2.0, Rotation2d.fromDegrees(90)), driveTrain, log));
     SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
     SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
     SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
     SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
+    SmartDashboard.putData("Auto OneConeBalance", new OuterOneConeBalanceMiddleAuto(driveTrain));     // TODO put on auto selector and remove this button
     SmartDashboard.putData("Drive Trajectory Straight", new DriveTrajectory(
           CoordType.kRelative, StopType.kBrake,
           TrajectoryGenerator.generateTrajectory(
@@ -212,8 +210,10 @@ public class RobotContainer {
     left[1].onTrue(new DriveResetPose(0,driveTrain,log));
    
     // left joystick right button
+    right[1].onTrue(new DriveToPose( () -> new Pose2d(driveTrain.getPose().getTranslation(), Rotation2d.fromDegrees(0)), driveTrain, log));
+    right[2].onTrue(new DriveToPose( () -> driveTrain.getPose().plus(new Transform2d(new Translation2d(), Rotation2d.fromDegrees(180))), driveTrain, log));
     //left[2].onTrue(new IntakeRetractAndFlush(intakeFront, uptake, feeder, log));
-
+      
     // right joystick left button
     // right[1].onTrue(new IntakeExtendAndTurnOnMotors(intakeFront, uptake, log)); 
 
