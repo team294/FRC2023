@@ -39,6 +39,8 @@ public class DriveToPose extends CommandBase {
   private Translation2d goalDirection;          // Unit vector pointing from initial pose to goal pose = direction of travel0
   private TrapezoidProfileBCR profile;      // Relative linear distance/speeds from initial pose to goal pose 
   private CoordType type;
+  private Rotation2d rotation;
+  private boolean useOnlyAngle = false;
 
   private Translation2d curRobotTranslation;    // Current robot translation relative to initialTranslation
 
@@ -77,11 +79,14 @@ public class DriveToPose extends CommandBase {
     constructorCommonCode();
   }
 
-  public DriveToPose(CoordType type, DriveTrain driveTrain, FileLog log ){
+  public DriveToPose(CoordType type, Rotation2d rotation, DriveTrain driveTrain, FileLog log ){
     this.driveTrain = driveTrain;
     this.log = log;
     this.type = type; 
+    this.rotation = rotation;
+    useOnlyAngle = true;
     goalSupplier = null;
+
     constructorCommonCode();
   }
 
@@ -114,6 +119,14 @@ public class DriveToPose extends CommandBase {
     timer.start();
     controller.reset();
 
+    if(useOnlyAngle){
+      if(type == CoordType.kRelative){
+        goalPose = new Pose2d(0,0, rotation);
+      }
+      if(type == CoordType.kAbsolute){ //change to absolute reset pose?
+        goalPose = new Pose2d(driveTrain.getPose().getTranslation(), rotation);
+      }
+    }
     // Get the initial pose
     initialPose = driveTrain.getPose();
     initialTranslation = initialPose.getTranslation();
