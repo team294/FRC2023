@@ -11,73 +11,109 @@ import frc.robot.subsystems.DriveTrain;
 /** Add your docs here. */
 public class Field {
     //Robot probably 31" with bumpers
-    private final Pose2d BlueCommunityColumn1Initial = new Pose2d(1.64465, 0.512826, new Rotation2d(Math.PI)); //180 degrees
-    private final Pose2d BlueCommunityColumn1Final = new Pose2d(1.16205, 0.512826, new Rotation2d(Math.PI)); //2' different between initial and final
-    private final Pose2d BlueCommunityColumn2Initial = new Pose2d(1.33985, 1.071372, new Rotation2d(Math.PI));
-    private final Pose2d BlueCommunityColumn2Final = new Pose2d(1.16205, 1.071372, new Rotation2d(Math.PI));
-    private final Pose2d BlueCommunityColumn3Initial = new Pose2d(1.33985, 1.629918, new Rotation2d(Math.PI));
-    private final Pose2d BlueCommunityColumn3Final = new Pose2d(1.16205, 1.629918, new Rotation2d(Math.PI));
-    private final Pose2d BlueCommunityColumn4Initial = new Pose2d(1.33985, 2.189226, new Rotation2d(Math.PI));
-    private final Pose2d BlueCommunityColumn4Final = new Pose2d(1.16205, 2.189226, new Rotation2d(Math.PI));
-    private final Pose2d BlueCommunityColumn5Initial = new Pose2d(1.33985, 2.747772, new Rotation2d(Math.PI));
-    private final Pose2d BlueCommunityColumn5Final = new Pose2d(1.16205, 2.747772, new Rotation2d(Math.PI));
-    private final Pose2d BlueCommunityColumn6Initial = new Pose2d(1.33985, 3.306318, new Rotation2d(Math.PI));
-    private final Pose2d BlueCommunityColumn6Final = new Pose2d(1.16205, 3.306318, new Rotation2d(Math.PI));
-    private final Pose2d BlueCommunityColumn7Initial = new Pose2d(1.33985, 3.865626, new Rotation2d(Math.PI));
-    private final Pose2d BlueCommunityColumn7Final = new Pose2d(1.16205, 3.865626, new Rotation2d(Math.PI));
-    private final Pose2d BlueCommunityColumn8Initial = new Pose2d(1.33985, 4.424172, new Rotation2d(Math.PI));
-    private final Pose2d BlueCommunityColumn8Final = new Pose2d(1.16205, 4.424172, new Rotation2d(Math.PI));
-    private final Pose2d BlueCommunityColumn9Initial = new Pose2d(1.33985, 4.982718, new Rotation2d(Math.PI));
-    private final Pose2d BlueCommunityColumn9Final = new Pose2d(1.16205, 4.982718, new Rotation2d(Math.PI));
 
-    private final Pose2d RedCommunityColumn1Initial = new Pose2d(15.2019, 0.512826, new Rotation2d(0));
-    private final Pose2d RedCommunityColumn1Final = new Pose2d(15.3797, 0.512826, new Rotation2d(0));
-    private final Pose2d RedCommunityColumn2Initial = new Pose2d(15.2019, 1.071372, new Rotation2d(0));
-    private final Pose2d RedCommunityColumn2Final = new Pose2d(15.3797, 1.071372, new Rotation2d(0));
-    private final Pose2d RedCommunityColumn3Initial = new Pose2d(15.2019, 1.629918, new Rotation2d(0));
-    private final Pose2d RedCommunityColumn3Final = new Pose2d(15.3797, 1.629918, new Rotation2d(0));
-    private final Pose2d RedCommunityColumn4Initial = new Pose2d(15.2019, 2.189226, new Rotation2d(0));
-    private final Pose2d RedCommunityColumn4Final = new Pose2d(15.3797, 2.189226, new Rotation2d(0));
-    private final Pose2d RedCommunityColumn5Initial = new Pose2d(15.2019, 2.747772, new Rotation2d(0));
-    private final Pose2d RedCommunityColumn5Final = new Pose2d(15.3797, 2.747772, new Rotation2d(0));
-    private final Pose2d RedCommunityColumn6Initial = new Pose2d(15.2019, 3.306318, new Rotation2d(0));
-    private final Pose2d RedCommunityColumn6Final = new Pose2d(15.3797, 3.306318, new Rotation2d(0));
-    private final Pose2d RedCommunityColumn7Initial = new Pose2d(15.2019, 3.865626, new Rotation2d(0));
-    private final Pose2d RedCommunityColumn7Final = new Pose2d(15.3797, 3.865626, new Rotation2d(0));
-    private final Pose2d RedCommunityColumn8Initial = new Pose2d(15.2019, 4.424172, new Rotation2d(0));
-    private final Pose2d RedCommunityColumn8Final = new Pose2d(15.3797, 4.424172, new Rotation2d(0));
-    private final Pose2d RedCommunityColumn9Initial = new Pose2d(15.2019, 4.982718, new Rotation2d(0));
-    private final Pose2d RedCommunityColumn9Final = new Pose2d(15.3797, 4.982718, new Rotation2d(0));
+    //Community -> Loading
+    private final Pose2d[] BlueCommnuityColumnInitial = {
+        new Pose2d(2.0871258795062873, 0.512826, new Rotation2d(Math.PI)), //54.25+(31/2)*sqrt(2)+6 inches to meters for x value
+        new Pose2d(2.0871258795062873, 1.071626, new Rotation2d(Math.PI)), 
+        new Pose2d(2.0871258795062873, 1.630426, new Rotation2d(Math.PI)), 
+        new Pose2d(2.0871258795062873, 2.189226, new Rotation2d(Math.PI)), 
+        new Pose2d(2.0871258795062873, 2.748026, new Rotation2d(Math.PI)), 
+        new Pose2d(2.0871258795062873, 3.306826, new Rotation2d(Math.PI)), 
+        new Pose2d(2.0871258795062873, 3.865626, new Rotation2d(Math.PI)), 
+        new Pose2d(2.0871258795062873, 4.424426, new Rotation2d(Math.PI)), 
+        new Pose2d(2.0871258795062873, 4.983226, new Rotation2d(Math.PI)) 
+    };
 
-    private final Pose2d BlueChargeHubTopComm = new Pose2d(2.148713, 3.3653095, new Rotation2d(0));
-    private final Pose2d BlueChargeHubMidComm = new Pose2d(2.148713, 2.747772, new Rotation2d(0));
-    private final Pose2d BlueChargeHubBotComm = new Pose2d(2.148713, 2.1302345, new Rotation2d(0));
-    private final Pose2d BlueChargeHubTopOpen = new Pose2d(4.855718, 3.3653095, new Rotation2d(Math.PI));
-    private final Pose2d BlueChargeHubMidOpen = new Pose2d(4.855718, 2.747772, new Rotation2d(Math.PI));
-    private final Pose2d BlueChargeHubBotOpen = new Pose2d(4.855718, 2.1302345, new Rotation2d(Math.PI));
-    private final Pose2d BlueChargeHubTop = new Pose2d(3.8354, 3.3653095, new Rotation2d(0));
-    private final Pose2d BlueChargeHubMid = new Pose2d(3.8354, 2.747772, new Rotation2d(0));
-    private final Pose2d BlueChargeHubBot = new Pose2d(3.8354, 2.1302345, new Rotation2d(0));
+    private final Pose2d[] BlueCommnuityColumnFinal = {
+        new Pose2d(1.77165, 0.512826, new Rotation2d(Math.PI)), //54.25+(31/2) inches to meters for x value
+        new Pose2d(1.77165, 1.071626, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 1.630426, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 2.189226, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 2.748026, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 3.306826, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 3.865626, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 4.424426, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 4.983226, new Rotation2d(Math.PI)) 
+    };
+    //Loading -> Community
+    private final Pose2d[] RedCommnuityColumnInitial = {
+        new Pose2d(2.0871258795062873, 3.020568, new Rotation2d(0)), //118.92 inches
+        new Pose2d(2.0871258795062873, 3.579368, new Rotation2d(0)), //140.92 inches
+        new Pose2d(2.0871258795062873, 4.138168, new Rotation2d(0)), //162.92 inches
+        new Pose2d(2.0871258795062873, 4.696968, new Rotation2d(0)), //184.92 inches
+        new Pose2d(2.0871258795062873, 5.255768, new Rotation2d(0)), //206.92 inches
+        new Pose2d(2.0871258795062873, 5.814568, new Rotation2d(0)), //228.92 inches
+        new Pose2d(2.0871258795062873, 6.373368, new Rotation2d(0)), //250.92 inches
+        new Pose2d(2.0871258795062873, 6.932168, new Rotation2d(0)), //272.92 inches
+        new Pose2d(2.0871258795062873, 7.490968, new Rotation2d(0))  //294.92 inches
+    };
 
-    private final Pose2d RedChargeHubTopComm = new Pose2d(14.393037, 3.3653095, new Rotation2d(Math.PI));
-    private final Pose2d RedChargeHubMidComm = new Pose2d(14.393037, 2.747772, new Rotation2d(Math.PI));
-    private final Pose2d RedChargeHubBotComm = new Pose2d(14.393037, 2.1302345, new Rotation2d(Math.PI));
-    private final Pose2d RedChargeHubTopOpen = new Pose2d(11.686032, 3.3653095, new Rotation2d(0));
-    private final Pose2d RedChargeHubMidOpen = new Pose2d(11.686032, 2.747772, new Rotation2d(0));
-    private final Pose2d RedChargeHubBotOpen = new Pose2d(11.686032, 2.1302345, new Rotation2d(0));
-    private final Pose2d RedChargeHubTop = new Pose2d(12.70635, 3.3653095, new Rotation2d(0));
-    private final Pose2d RedChargeHubMid = new Pose2d(12.70635, 2.747772, new Rotation2d(0));
-    private final Pose2d RedChargeHubBot = new Pose2d(12.70635, 2.1302345, new Rotation2d(0));
+    private final Pose2d[] RedCommnuityColumnFinal = {
+        new Pose2d(1.77165, 3.020568, new Rotation2d(0)), 
+        new Pose2d(1.77165, 3.579368, new Rotation2d(0)), 
+        new Pose2d(1.77165, 4.138168, new Rotation2d(0)), 
+        new Pose2d(1.77165, 4.696968, new Rotation2d(0)), 
+        new Pose2d(1.77165, 5.255768, new Rotation2d(0)), 
+        new Pose2d(1.77165, 5.814568, new Rotation2d(0)), 
+        new Pose2d(1.77165, 6.373368, new Rotation2d(0)), 
+        new Pose2d(1.77165, 6.932168, new Rotation2d(0)), 
+        new Pose2d(1.77165, 7.490968, new Rotation2d(0)) 
+    };
 
-    private final Pose2d AprilTag1 = new Pose2d(15.513558, 1.071626, new Rotation2d(0));//Red April Tags
-    private final Pose2d AprilTag2 = new Pose2d(15.513558, 2.748026, new Rotation2d(0));
-    private final Pose2d AprilTag3 = new Pose2d(15.513558, 4.424426, new Rotation2d(0));
-    private final Pose2d AprilTag4 = new Pose2d(16.178784, 6.749796, new Rotation2d(0));
+    //Bottom/Top refers to height relative to y-axis
+    private final Pose2d[] BlueStationInitial = {
+        new Pose2d(2.148713, 2.130489, new Rotation2d(0)), //Community bottom
+        new Pose2d(2.148713, 2.748026, new Rotation2d(0)), //Same y as column 5
+        new Pose2d(2.148713, 3.365563, new Rotation2d(0)), //Community top
+        new Pose2d(4.855718, 2.130489, new Rotation2d(Math.PI)), //Field bottom
+        new Pose2d(4.855718, 2.748026, new Rotation2d(Math.PI)),
+        new Pose2d(4.855718, 3.365563, new Rotation2d(Math.PI))  //Field top
+    };
+    
+    private final Pose2d[] BlueStationFinal = {
+        new Pose2d(3.8354, 2.130489, new Rotation2d(0)), //Always faces away from communities, this could cause issues
+        new Pose2d(3.8354, 2.748026, new Rotation2d(0)),
+        new Pose2d(3.8354, 3.365563, new Rotation2d(0))  //"Highest" position (on y-axis)
+    };
 
-    private final Pose2d AprilTag5 = new Pose2d(0.36195, 6.749796, new Rotation2d(Math.PI));//Blue April Tags
-    private final Pose2d AprilTag6 = new Pose2d(1.02743, 4.424426, new Rotation2d(Math.PI));
-    private final Pose2d AprilTag7 = new Pose2d(1.02743, 2.748026, new Rotation2d(Math.PI));
-    private final Pose2d AprilTag8 = new Pose2d(1.02743, 1.071626, new Rotation2d(Math.PI));
+    private final Pose2d[] RedStationInitial = {
+        new Pose2d(2.148713, 4.646867, new Rotation2d(0)), //Community bottom
+        new Pose2d(2.148713, 5.264404, new Rotation2d(0)), //Same y as column 5
+        new Pose2d(2.148713, 5.881941, new Rotation2d(0)), //Community top
+        new Pose2d(4.855718, 4.646867, new Rotation2d(Math.PI)), //Field bottom
+        new Pose2d(4.855718, 5.264404, new Rotation2d(Math.PI)),
+        new Pose2d(4.855718, 5.881941, new Rotation2d(Math.PI))  //Field top
+    };
+    
+    private final Pose2d[] RedStationFinal = {
+        new Pose2d(3.8354, 4.646867, new Rotation2d(0)), //Always faces away from communities, this could cause issues
+        new Pose2d(3.8354, 5.264404, new Rotation2d(0)), //Values found by adding loading zone width (99.07 inches) to Blue values
+        new Pose2d(3.8354, 5.881941, new Rotation2d(0))  //"Highest" position (on y-axis)
+    };
+
+    private final Pose2d[] AprilTagsBlue = {
+
+        new Pose2d(15.51356, 1.071626, new Rotation2d(0)),
+        new Pose2d(15.51356, 2.748026, new Rotation2d(0)),
+        new Pose2d(15.51356, 4.424426, new Rotation2d(0)),
+        new Pose2d(16.17878, 6.749796, new Rotation2d(0)),
+        new Pose2d(0.36195, 6.749796, new Rotation2d(Math.PI)),
+        new Pose2d(1.02743, 4.424426, new Rotation2d(Math.PI)),
+        new Pose2d(1.02743, 2.748026, new Rotation2d(Math.PI)),
+        new Pose2d(1.02743, 1.071626, new Rotation2d(Math.PI))
+    };
+    
+    private final Pose2d[] AprilTagsRed = {
+        new Pose2d(1.02743, 6.932168, new Rotation2d(Math.PI)),
+        new Pose2d(1.02743, 5.255768, new Rotation2d(Math.PI)),
+        new Pose2d(1.02743, 3.579368, new Rotation2d(Math.PI)),
+        new Pose2d(0.36195, 1.253998, new Rotation2d(Math.PI)),
+        new Pose2d(16.17878, 1.253998, new Rotation2d(0)),
+        new Pose2d(15.51356, 3.579368, new Rotation2d(0)),
+        new Pose2d(15.51356, 5.255768, new Rotation2d(0)),
+        new Pose2d(15.51356, 6.932168, new Rotation2d(0))
+    };
 
     /**
 	 * Gets the initial column position
@@ -86,52 +122,10 @@ public class Field {
 	 */
     public Pose2d getInitialColumn(int column) {
         if(true) {
-            switch(column){
-                case 1:
-                    return BlueCommunityColumn1Initial;
-                case 2:
-                    return BlueCommunityColumn2Initial;
-                case 3:
-                    return BlueCommunityColumn3Initial;
-                case 4:
-                    return BlueCommunityColumn4Initial;
-                case 5:
-                    return BlueCommunityColumn5Initial;
-                case 6:
-                    return BlueCommunityColumn6Initial;
-                case 7:
-                    return BlueCommunityColumn7Initial;
-                case 8:
-                    return BlueCommunityColumn8Initial;
-                case 9:
-                    return BlueCommunityColumn9Initial;
-                default:
-                    return null;
-            }
+            return BlueCommnuityColumnInitial[column];
         }
         else {
-            switch(column){
-                case 1:
-                    return RedCommunityColumn1Initial;
-                case 2:
-                    return RedCommunityColumn2Initial;
-                case 3:
-                    return RedCommunityColumn3Initial;
-                case 4:
-                    return RedCommunityColumn4Initial;
-                case 5:
-                    return RedCommunityColumn5Initial;
-                case 6:
-                    return RedCommunityColumn6Initial;
-                case 7:
-                    return RedCommunityColumn7Initial;
-                case 8:
-                    return RedCommunityColumn8Initial;
-                case 9:
-                    return RedCommunityColumn9Initial;
-                default:
-                    return null;
-            }
+            return RedCommnuityColumnInitial[column];
         }
     }
 
@@ -142,184 +136,98 @@ public class Field {
 	 */
     public Pose2d getFinalColumn(int column) {
         if(true) {
-            switch(column){
-                case 1:
-                    return BlueCommunityColumn1Final;
-                case 2:
-                    return BlueCommunityColumn2Final;
-                case 3:
-                    return BlueCommunityColumn3Final;
-                case 4:
-                    return BlueCommunityColumn4Final;
-                case 5:
-                    return BlueCommunityColumn5Final;
-                case 6:
-                    return BlueCommunityColumn6Final;
-                case 7:
-                    return BlueCommunityColumn7Final;
-                case 8:
-                    return BlueCommunityColumn8Final;
-                case 9:
-                    return BlueCommunityColumn9Final;
-                default:
-                    return null;
-            }
+            return BlueCommnuityColumnFinal[column];
         }
         else {
-            switch(column){
-                case 1:
-                    return RedCommunityColumn1Final;
-                case 2:
-                    return RedCommunityColumn2Final;
-                case 3:
-                    return RedCommunityColumn3Final;
-                case 4:
-                    return RedCommunityColumn4Final;
-                case 5:
-                    return RedCommunityColumn5Final;
-                case 6:
-                    return RedCommunityColumn6Final;
-                case 7:
-                    return RedCommunityColumn7Final;
-                case 8:
-                    return RedCommunityColumn8Final;
-                case 9:
-                    return RedCommunityColumn9Final;
-                default:
-                    return null;
-            }
+            return RedCommnuityColumnFinal[column];
         }
     }
 
     /**
-	 * Gets the position to approach the station from inside the community
+	 * Gets the position to approach the station from
 	 * 
-	 * @param position 1-3 Lowest-Hightest
+	 * @param position 1-3 Lowest-Highest Communtiy Side | 4-6 Lowest-Highest Field Side
 	 */
-    public Pose2d getChargepadCommunity(int position){
+    public Pose2d getStationInitial(int position){
         if(true) {
-            switch(position){
-                case 1:
-                    return BlueChargeHubBotComm;
-                case 2:
-                    return BlueChargeHubMidComm;
-                case 3:
-                    return BlueChargeHubTopComm;
-                default:
-                    return null;
-            }
+            return BlueStationInitial[position];
         } else {
-            switch(position){
-                case 1:
-                    return RedChargeHubBotComm;
-                case 2:
-                    return RedChargeHubMidComm;
-                case 3:
-                    return RedChargeHubTopComm;
-                default:
-                    return null;
-            }
-        }
-    }
-
-    /**
-	 * Gets the position to approach the station from outside the community
-	 * 
-	 * @param position 1-3 Lowest-Hightest
-	 */
-    public Pose2d getChargepadField(int position){
-        if(true) {
-            switch(position){
-                case 1:
-                    return BlueChargeHubBotOpen;
-                case 2:
-                    return BlueChargeHubMidOpen;
-                case 3:
-                    return BlueChargeHubTopOpen;
-                default:
-                    return null;
-            }
-        } else {
-            switch(position){
-                case 1:
-                    return RedChargeHubBotOpen;
-                case 2:
-                    return RedChargeHubMidOpen;
-                case 3:
-                    return RedChargeHubTopOpen;
-                default:
-                    return null;
-            }
+            return RedStationInitial[position];
         }
     }
 
     /**
 	 * Gets the center positions on the station
 	 * 
-	 * @param position 1-3 Lowest-Hightest
+	 * @param position 1-3 Lowest-Hightest (Y-Axis)
 	 */
-    public Pose2d getChargepadCenter(int position){
+    public Pose2d getStationCenter(int position){
         if(true) {
-            switch(position){
-                case 1:
-                    return BlueChargeHubBot;
-                case 2:
-                    return BlueChargeHubMid;
-                case 3:
-                    return BlueChargeHubTop;
-                default:
-                    return null;
-            }
+            return BlueStationFinal[position];
         } else {
-            switch(position){
-                case 1:
-                    return RedChargeHubBot;
-                case 2:
-                    return RedChargeHubMid;
-                case 3:
-                    return RedChargeHubTop;
-                default:
-                    return null;
-            }
+            return RedStationFinal[position];
         }
     }
 
     /**
 	 * Gets the position of a specified April Tag
 	 * 
-	 * @param position 1-3 Lowest-Highest Community | 4 Loading Station
+	 * @param position
 	 */
     public Pose2d getAprilTag(int ID){
         if(true) {
-            switch(ID){
-                case 1:
-                    return AprilTag1;
-                case 2:
-                    return AprilTag2;
-                case 3:
-                    return AprilTag3;
-                case 4:
-                    return AprilTag4;
-                default:
-                    return null;
-            }
+            return AprilTagsBlue[ID];
         } else {
-            switch(ID){
-                case 1:
-                    return AprilTag5;
-                case 2:
-                    return AprilTag6;
-                case 3:
-                    return AprilTag7;
-                case 4:
-                    return AprilTag8;
-                default:
-                    return null;
-            }
+            return AprilTagsRed[ID];
         }
     }
 
-    public Pose2d getClosestGoal(DriveTrain drivetrain){
-        return null;
+    public Pose2d getClosestGoal(DriveTrain drivetrain/*, Manipulator manipulator*/){
+        Pose2d closestGoal;
+        double robotY = drivetrain.getPose().getY();
+        if(true){//Alliance Blue
+            closestGoal = BlueCommnuityColumnFinal[0];
+            if(true){//Carrying Cone
+                for(int i = 0; i < 9; i++){
+                    if(i == 2 || i == 5 || i == 8){
+                        continue;
+                    }
+                    if(Math.abs(robotY - BlueCommnuityColumnFinal[i].getY()) < Math.abs(robotY - closestGoal.getY())){
+                        closestGoal = BlueCommnuityColumnFinal[i];
+                    }
+                }
+            } else {
+                for(int i = 0; i < 9; i++){
+                    if(i != 2 && i != 5 && i != 8){
+                        continue;
+                    }
+                    if(Math.abs(robotY - BlueCommnuityColumnFinal[i].getY()) < Math.abs(robotY - closestGoal.getY())){
+                        closestGoal = BlueCommnuityColumnFinal[i];
+                    }
+                }
+            }
+        } else {
+            closestGoal = RedCommnuityColumnFinal[0];
+            if(true){//Carrying Cone
+                for(int i = 0; i < 9; i++){
+                    if(i == 2 || i == 5 || i == 8){
+                        continue;
+                    }
+                    if(Math.abs(robotY - RedCommnuityColumnFinal[i].getY()) < Math.abs(robotY - closestGoal.getY())){
+                        closestGoal = RedCommnuityColumnFinal[i];
+                    }
+                }
+            } else {
+                for(int i = 0; i < 9; i++){
+                    if(i != 2 && i != 5 && i != 8){
+                        continue;
+                    }
+                    if(Math.abs(robotY - RedCommnuityColumnFinal[i].getY()) < Math.abs(robotY - closestGoal.getY())){
+                        closestGoal = RedCommnuityColumnFinal[i];
+                    }
+                }
+            }
+        }
+        return closestGoal;
     }
 }
