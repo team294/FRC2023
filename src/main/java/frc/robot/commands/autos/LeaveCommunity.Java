@@ -1,4 +1,4 @@
-package frc.robot.commands;
+package frc.robot.commands.autos;
 
 import frc.robot.Constants;
 import frc.robot.subsystems.DriveTrain;
@@ -16,18 +16,21 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 
-public class OuterOneConeBalanceRightAuto extends SequentialCommandGroup {
-    public OuterOneConeBalanceRightAuto(DriveTrain s_Swerve){
-
+public class RightPickup extends SequentialCommandGroup {
+    public RightPickup(DriveTrain s_Swerve){
+        
         Trajectory oneConeTrajectory =
             TrajectoryGenerator.generateTrajectory(
                 // Start at the origin facing the +X direction
-                new Pose2d(0, 0, new Rotation2d(0)),
-                // 
-                List.of(new Translation2d(-4.11, 0), new Translation2d(-4.11, -1.37)),
+                new Pose2d(0.0, 0.0, new Rotation2d(0)),
+                List.of(
+                ),
+                new Pose2d(-3.168, 0, new Rotation2d(Math.toRadians(Math.PI))),
                 // Pass through these two interior waypoints, making an 's' curve path
-
-                new Pose2d(-2.4, -1.37, new Rotation2d(0)),
+                // List.of(new Translation2d(-1, 1), new Translation2d(2, -1)),
+                
+                
+                
                 Constants.TrajectoryConstants.swerveTrajectoryConfig);
 
         var thetaController =
@@ -48,6 +51,7 @@ public class OuterOneConeBalanceRightAuto extends SequentialCommandGroup {
 
 
         addCommands(
+            //add in drive straight
             new InstantCommand(() -> s_Swerve.resetPose(oneConeTrajectory.getInitialPose())),
             //Add in scoring command here when implamented.
             swerveControllerCommand

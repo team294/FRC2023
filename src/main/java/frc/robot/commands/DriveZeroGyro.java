@@ -22,6 +22,7 @@ public class DriveZeroGyro extends CommandBase {
 
   /**
 	 * Zero the gyro position in software.
+   * <p> Note:  This command can run while the robot is disabled.
    * @param driveTrain DriveTrain subsytem
    * @param log FileLog
 	 */
@@ -35,6 +36,7 @@ public class DriveZeroGyro extends CommandBase {
 
   /**
 	 * Zero the gyro position in software against a specified angle.
+   * <p> Note:  This command can run while the robot is disabled.
 	 * @param zeroAngle current robot angle compared to the zero angle
    * @param driveTrain DriveTrain subsytem
    * @param log2 FileLog
@@ -69,4 +71,15 @@ public class DriveZeroGyro extends CommandBase {
   public boolean isFinished() {
     return true;
   }
+  
+  /**
+   * Whether the given command should run when the robot is disabled. Override to return true if the
+   * command should run when disabled.
+   * @return whether the command should run when the robot is disabled
+   */
+  @Override
+  public boolean runsWhenDisabled() {
+    return true;
+  }
+
 }

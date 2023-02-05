@@ -5,35 +5,31 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.Grabber;
 import frc.robot.utilities.FileLog;
 
-public class DriveStop extends CommandBase {
-
-  private DriveTrain drivetrain;
-  private FileLog log;
-
-  /**
-   * Stops all drivetrain motors
-   * @param drivetrain Drivetrain subsystem
-   */
-  public DriveStop(DriveTrain drivetrain, FileLog log) {
-    this.drivetrain = drivetrain;
+public class GrabberEject extends CommandBase {
+  /** Creates a new GrabberEject. */
+  private final Grabber grabber;
+  private final FileLog log;
+  public GrabberEject(Grabber grabber, FileLog log) {
+    this.grabber = grabber;
     this.log = log;
-    addRequirements(drivetrain);
+
+    addRequirements(grabber);
+    // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    log.writeLog(false, "DriveStop", "Stopping Motors");
+    grabber.setMotorPercentOutput(.2);
+    log.writeLog(false, grabber.getName(), "ejecting");
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-    drivetrain.stopMotors();
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override
@@ -42,6 +38,6 @@ public class DriveStop extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return true;
+    return false;
   }
 }

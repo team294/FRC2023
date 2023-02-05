@@ -15,14 +15,19 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-// import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
+import frc.robot.Constants.CoordType;
 import frc.robot.Constants.OIConstants;
+import frc.robot.Constants.StopType;
 import frc.robot.commands.*;
+import frc.robot.commands.autos.OuterOneConeBalanceMiddleAuto;
 import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
 import frc.robot.utilities.*;
+import frc.robot.utilities.TrajectoryCache.TrajectoryType;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -33,18 +38,24 @@ import frc.robot.utilities.*;
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
   private final FileLog log = new FileLog("A1");
+  private final AllianceSelection allianceSelection = new AllianceSelection(log);
 
   // Define robot subsystems  
   private final DriveTrain driveTrain = new DriveTrain(log);
 
+  // Define other utilities
+  private final TrajectoryCache trajectoryCache = new TrajectoryCache(log);
+  private final AutoSelection autoSelection = new AutoSelection(trajectoryCache, log);
+
   // Define controllers
-  private final Joystick xboxController = new Joystick(OIConstants.usbXboxController); //assuming usbxboxcontroller is int
+  // private final Joystick xboxController = new Joystick(OIConstants.usbXboxController); //assuming usbxboxcontroller is int
   private final Joystick leftJoystick = new Joystick(OIConstants.usbLeftJoystick);
   private final Joystick rightJoystick = new Joystick(OIConstants.usbRightJoystick);
   private final Joystick coPanel = new Joystick(OIConstants.usbCoPanel);
 
+  private final CommandXboxController xboxController = new CommandXboxController(OIConstants.usbXboxController);
   private boolean rumbling = false;
-
+  Grabber grabber = new Grabber("Grabber", log);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -61,15 +72,10 @@ public class RobotContainer {
 
     // display sticky faults
     RobotPreferences.showStickyFaultsOnShuffleboard();
-    SmartDashboard.putData("Clear Sticky Faults", new StickyFaultsClear(log).ignoringDisable(true));
-
-    // DriveTrain subsystem
-    // SmartDashboard.putData("DriveForward", new DriveSetPercentOutput(0.4, 0.4, driveTrain, log));
-
-    // DriveTrain calibration
-    // SmartDashboard.putData("Drive Cal Slow", new DriveCalibrate(0.3, 35, 0.01, CalibrateMode.kStraight, driveTrain, log));
+    SmartDashboard.putData("Clear Sticky Faults", new StickyFaultsClear(log));
 
     // Testing for drivetrain autos and trajectories
+    SmartDashboard.putData("Drive Reset SwerveModules", new DriveResetSwerveModules(driveTrain, log));
     SmartDashboard.putData("Zero Gyro", new DriveZeroGyro(driveTrain, log));
     SmartDashboard.putData("Zero Odometry", new DriveResetPose(0, 0, 0, driveTrain, log));
     SmartDashboard.putData("Calibrate Drive Motors", new DriveCalibration(0.5, 12, 0.05, driveTrain, log));
@@ -85,7 +91,25 @@ public class RobotContainer {
     // SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveFollowTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.testCurve.value], false, PIDType.kTalon, driveTrain, log));
     // SmartDashboard.putData("Drive Trajectory Absolute", new DriveFollowTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
     SmartDashboard.putData("Example Auto S-Shape", new OuterOneConeBalanceMiddleAuto(driveTrain));
-    SmartDashboard.putData("Drive Straight", new DriveTrajectory(TrajectoryGenerator.generateTrajectory(new Pose2d(0,0,new Rotation2d(0)), List.of(), new Pose2d(3,0,new Rotation2d(0)), Constants.TrajectoryConstants.swerveTrajectoryConfig), driveTrain, log));
+    // SmartDashboard.putData("Drive Straight", new DriveTrajectory(TrajectoryGenerator.generateTrajectory(new Pose2d(0,0,new Rotation2d(0)), List.of(), new Pose2d(3,0,new Rotation2d(0)), Constants.TrajectoryConstants.swerveTrajectoryConfig), driveTrain, log));
+    SmartDashboard.putData("Drive To Pose", new DriveToPose(new Pose2d(2.0, 2.0, Rotation2d.fromDegrees(90)), driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
+    SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
+    SmartDashboard.putData("Drive Trajectory Straight", new DriveTrajectory(
+          CoordType.kRelative, StopType.kBrake,
+          TrajectoryGenerator.generateTrajectory(
+            new Pose2d(0,0,new Rotation2d(0)), 
+            List.of(), 
+            new Pose2d(1.0,0,new Rotation2d(0)), 
+            Constants.TrajectoryConstants.swerveTrajectoryConfig),
+          driveTrain, log));
+  
+    //Grabber commands
+    SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
+    SmartDashboard.putData("Grabber Pick Up",new GrabberPickUp(grabber, log));
+    SmartDashboard.putData("Grabber Eject", new GrabberEject(grabber, log));
   }
 
   /**
@@ -104,37 +128,48 @@ public class RobotContainer {
    * Configures XBox buttons and controls
    */
   private void configureXboxButtons(){
-    JoystickButton[] xb = new JoystickButton[11];
     //check povtrigger and axis trigger number bindings
     // Trigger xbPOVUp = new POVTrigger(xboxController, 0);
     // Trigger xbPOVRight = new POVTrigger(xboxController, 90);
     //Trigger xbPOVDown = new POVTrigger(xboxController, 180);
     // Trigger xbPOVLeft = new POVTrigger(xboxController, 270);
     
-    // Trigger xbLT = new AxisTrigger(xboxController, 2, 0.9);
-    // Trigger xbRT = new AxisTrigger(xboxController, 3, 0.9);
+    // Triggers for all xbox buttons
+    Trigger xbLT = xboxController.leftTrigger();
+    Trigger xbRT = xboxController.rightTrigger();
+    Trigger xbA = xboxController.a();
+    // Trigger xbB = xboxController.b();
+    // Trigger xbY = xboxController.y();
+    // Trigger xbX = xboxController.x();
+    // Trigger xbLB = xboxController.leftBumper();
+    // Trigger xbRB = xboxController.rightBumper();
+    // Trigger xbBack = xboxController.back();
+    // Trigger xbStart = xboxController.start();
+    // Trigger xbPOVUp = xboxController.povUp();
+    // Trigger xbPOVRight = xboxController.povRight();
+    // Trigger xbPOVLeft = xboxController.povLeft();
+    // Trigger xbPOVDown = xboxController.povDown();
     
-    // right trigger shoots ball
+    // right trigger 
+    xbRT.whileTrue(new GrabberPickUp(grabber, log));
     // xbRT.whenActive(new ShootSequence(uptake, feeder, shooter, log),false);
 
-    // left trigger aim turret
+    // left trigger
+    xbLT.whileTrue(new GrabberEject(grabber, log));
     // xbLT.whenActive(new TurretTurnAngleTwice(TargetType.kVisionOnScreen, false, turret, pivisionhub, log));
     // xbLT.whenInactive(new TurretStop(turret, log));
 
-    for (int i = 1; i < xb.length; i++) {
-      xb[i] = new JoystickButton(xboxController, i);
-    }
     
-    //a - short shot distance
-    // xb[1].whenHeld(new ShootSetup(false, 3100, pivisionhub, shooter, log));         
+    //a
+    xbA.whileTrue(new GrabberStopMotor(grabber, log));       
     
-    //b - medium shot distance
-    // xb[2].whenHeld(new ShootSetup(false, 3400, pivisionhub, shooter, log));        
+    //b
+    // xbB.whileTrue(command));         
  
-    //y - long shot distance
+    //y
     // xb[4].whenHeld(new ShootSetup(false, 4100, pivisionhub, shooter, log));        
     
-    //x - shot speed using vision
+    //x
     // xb[3].whileTrue(new ShootSetup(true, 3100, pivisionhub, shooter, log));        
     
     // LB = 5, RB = 6
@@ -242,8 +277,8 @@ public class RobotContainer {
    * @param percentRumble The normalized value (0 to 1) to set the rumble to
    */
 	public void setXBoxRumble(double percentRumble) {
-		xboxController.setRumble(RumbleType.kLeftRumble, percentRumble);
-    xboxController.setRumble(RumbleType.kRightRumble, percentRumble);
+		xboxController.getHID().setRumble(RumbleType.kLeftRumble, percentRumble);
+    xboxController.getHID().setRumble(RumbleType.kRightRumble, percentRumble);
 
     if (percentRumble == 0) rumbling = false;
     else rumbling = true;
@@ -256,9 +291,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An ExampleCommand will run in autonomous
-    Command m_autoCommand = null;
-    return m_autoCommand;
+    return autoSelection.getAutoCommand(driveTrain, log);
   }
 
 
@@ -272,7 +305,8 @@ public class RobotContainer {
     }
 
     // Set initial robot position on field
-    driveTrain.resetPose(new Pose2d(2.0, 2.0, Rotation2d.fromDegrees(0)));
+    // This takes place a while after the drivetrain is created, so after any CanBus delays.
+    driveTrain.resetPose(new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0)));  
   }
 
   /**
@@ -280,6 +314,7 @@ public class RobotContainer {
    */
   public void robotPeriodic(){
     log.advanceLogRotation();
+    allianceSelection.periodic();
   }
 
   /**
