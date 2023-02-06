@@ -60,7 +60,8 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   Field2d field = new Field2d();    // Field to dispaly on Shuffleboard
 
   //Slew rate limiter
-  SlewRateLimiter filter = new SlewRateLimiter(0.5); //0.5 is a placeholder, need to calibrate 
+  SlewRateLimiter filterX = new SlewRateLimiter(0.5); //0.5 is a placeholder, need to calibrate 
+  SlewRateLimiter filterY = new SlewRateLimiter(0.5); //0.5 is a placeholder, need to calibrate 
 
   /**
    * Constructs the DriveTrain subsystem
@@ -248,9 +249,17 @@ public class DriveTrain extends SubsystemBase implements Loggable {
         desiredStates, SwerveConstants.kMaxSpeedMetersPerSecond);
 
     // Convert states to chassisspeeds
+    ChassisSpeeds chassisSpeeds = kDriveKinematics.toChassisSpeeds(desiredStates);
+    
     // x slew rate limit chassisspeed
+    double xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
     // y slew rate limit chassisspeed
+    double ySlewed = filterY.calculate(chassisSpeeds.vyMetersPerSecond);
+
     // convert back to swervem module states
+    desiredStates = kDriveKinematics.toSwerveModuleStates(new ChassisSpeeds(xSlewed, ySlewed, chassisSpeeds.omegaRadiansPerSecond), new Translation2d());
+    
+    
     
     swerveFrontLeft.setDesiredState(desiredStates[0], isOpenLoop);
     swerveFrontRight.setDesiredState(desiredStates[1], isOpenLoop);
@@ -323,15 +332,13 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * False = the provided x and y speeds are relative to the current facing of the robot. 
    */
    public void drive(double xSpeed, double ySpeed, double rot, Translation2d centerOfRotationMeters, boolean fieldRelative, boolean isOpenLoop) {
-    xSpeed = filter.calculate(xSpeed);
-    ySpeed = filter.calculate(ySpeed);
+    
     SwerveModuleState[] swerveModuleStates =
         kDriveKinematics.toSwerveModuleStates(
             fieldRelative
                 ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, Rotation2d.fromDegrees(getGyroRotation()))
                 : new ChassisSpeeds(xSpeed, ySpeed, rot),
             centerOfRotationMeters);
-    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, SwerveConstants.kMaxSpeedMetersPerSecond);
 
     setModuleStates(swerveModuleStates, isOpenLoop);
   }
