@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.Manipulator;
 
 /** Add your docs here. */
 public class Field {
@@ -194,7 +195,7 @@ public class Field {
         double robotY = drivetrain.getPose().getY();
         if(alliance.getAlliance() == Alliance.Blue){//Alliance Blue
             closestGoal = BlueCommnuityColumnFinal[0];
-            if(manipulator.getPistonExtended()){//Carrying Cone (Not sure if extended means cone or cube)
+            if(manipulator.getPistonExtended()){//Carrying Cone
                 for(int i = 0; i < 9; i++){
                     if(i == 2 || i == 5 || i == 8){
                         continue;
