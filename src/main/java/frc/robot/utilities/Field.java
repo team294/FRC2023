@@ -6,6 +6,7 @@ package frc.robot.utilities;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.subsystems.DriveTrain;
 
 /** Add your docs here. */
@@ -115,13 +116,19 @@ public class Field {
         new Pose2d(15.51356, 6.932168, new Rotation2d(0))
     };
 
+    private AllianceSelection alliance;
+
+    public Field(AllianceSelection alliance){
+        this.alliance = alliance;
+    }
+
     /**
 	 * Gets the initial column position
 	 * 
 	 * @param column The column that will be returned
 	 */
     public Pose2d getInitialColumn(int column) {
-        if(true) {
+        if(alliance.getAlliance() == Alliance.Blue) {
             return BlueCommnuityColumnInitial[column];
         }
         else {
@@ -135,7 +142,7 @@ public class Field {
 	 * @param column The column that will be returned
 	 */
     public Pose2d getFinalColumn(int column) {
-        if(true) {
+        if(alliance.getAlliance() == Alliance.Blue) {
             return BlueCommnuityColumnFinal[column];
         }
         else {
@@ -149,7 +156,7 @@ public class Field {
 	 * @param position 1-3 Lowest-Highest Communtiy Side | 4-6 Lowest-Highest Field Side
 	 */
     public Pose2d getStationInitial(int position){
-        if(true) {
+        if(alliance.getAlliance() == Alliance.Blue) {
             return BlueStationInitial[position];
         } else {
             return RedStationInitial[position];
@@ -162,7 +169,7 @@ public class Field {
 	 * @param position 1-3 Lowest-Hightest (Y-Axis)
 	 */
     public Pose2d getStationCenter(int position){
-        if(true) {
+        if(alliance.getAlliance() == Alliance.Blue) {
             return BlueStationFinal[position];
         } else {
             return RedStationFinal[position];
@@ -175,19 +182,19 @@ public class Field {
 	 * @param position
 	 */
     public Pose2d getAprilTag(int ID){
-        if(true) {
+        if(alliance.getAlliance() == Alliance.Blue) {
             return AprilTagsBlue[ID];
         } else {
             return AprilTagsRed[ID];
         }
     }
 
-    public Pose2d getClosestGoal(DriveTrain drivetrain/*, Manipulator manipulator*/){
+    public Pose2d getClosestGoal(DriveTrain drivetrain, Manipulator manipulator){
         Pose2d closestGoal;
         double robotY = drivetrain.getPose().getY();
-        if(true){//Alliance Blue
+        if(alliance.getAlliance() == Alliance.Blue){//Alliance Blue
             closestGoal = BlueCommnuityColumnFinal[0];
-            if(true){//Carrying Cone
+            if(manipulator.getPistonExtended()){//Carrying Cone (Not sure if extended means cone or cube)
                 for(int i = 0; i < 9; i++){
                     if(i == 2 || i == 5 || i == 8){
                         continue;
@@ -208,7 +215,7 @@ public class Field {
             }
         } else {
             closestGoal = RedCommnuityColumnFinal[0];
-            if(true){//Carrying Cone
+            if(manipulator.getPistonExtended()){//Carrying Cone
                 for(int i = 0; i < 9; i++){
                     if(i == 2 || i == 5 || i == 8){
                         continue;
