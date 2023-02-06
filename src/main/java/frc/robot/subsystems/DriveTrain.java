@@ -246,6 +246,12 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   public void setModuleStates(SwerveModuleState[] desiredStates, boolean isOpenLoop) {
     SwerveDriveKinematics.desaturateWheelSpeeds(
         desiredStates, SwerveConstants.kMaxSpeedMetersPerSecond);
+
+    // Convert states to chassisspeeds
+    // x slew rate limit chassisspeed
+    // y slew rate limit chassisspeed
+    // convert back to swervem module states
+    
     swerveFrontLeft.setDesiredState(desiredStates[0], isOpenLoop);
     swerveFrontRight.setDesiredState(desiredStates[1], isOpenLoop);
     swerveBackLeft.setDesiredState(desiredStates[2], isOpenLoop);
@@ -327,10 +333,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
             centerOfRotationMeters);
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, SwerveConstants.kMaxSpeedMetersPerSecond);
 
-    swerveFrontLeft.setDesiredState(swerveModuleStates[0], isOpenLoop);
-    swerveFrontRight.setDesiredState(swerveModuleStates[1], isOpenLoop);
-    swerveBackLeft.setDesiredState(swerveModuleStates[2], isOpenLoop);
-    swerveBackRight.setDesiredState(swerveModuleStates[3], isOpenLoop);
+    setModuleStates(swerveModuleStates, isOpenLoop);
   }
 
   // TODO Add version of setModuleStates with acceleration
