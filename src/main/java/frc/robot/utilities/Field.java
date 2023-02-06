@@ -15,7 +15,7 @@ public class Field {
     //Robot probably 31" with bumpers
 
     //Community -> Loading
-    private final Pose2d[] BlueCommnuityColumnInitial = {
+    private final Pose2d[] BlueCommunityColumnInitial = {
         new Pose2d(2.0871258795062873, 0.512826, new Rotation2d(Math.PI)), //54.25+(31/2)*sqrt(2)+6 inches to meters for x value
         new Pose2d(2.0871258795062873, 1.071626, new Rotation2d(Math.PI)), 
         new Pose2d(2.0871258795062873, 1.630426, new Rotation2d(Math.PI)), 
@@ -27,7 +27,7 @@ public class Field {
         new Pose2d(2.0871258795062873, 4.983226, new Rotation2d(Math.PI)) 
     };
 
-    private final Pose2d[] BlueCommnuityColumnFinal = {
+    private final Pose2d[] BlueCommunityColumnFinal = {
         new Pose2d(1.77165, 0.512826, new Rotation2d(Math.PI)), //54.25+(31/2) inches to meters for x value
         new Pose2d(1.77165, 1.071626, new Rotation2d(Math.PI)), 
         new Pose2d(1.77165, 1.630426, new Rotation2d(Math.PI)), 
@@ -39,7 +39,7 @@ public class Field {
         new Pose2d(1.77165, 4.983226, new Rotation2d(Math.PI)) 
     };
     //Loading -> Community
-    private final Pose2d[] RedCommnuityColumnInitial = {
+    private final Pose2d[] RedCommunityColumnInitial = {
         new Pose2d(2.0871258795062873, 3.020568, new Rotation2d(0)), //118.92 inches
         new Pose2d(2.0871258795062873, 3.579368, new Rotation2d(0)), //140.92 inches
         new Pose2d(2.0871258795062873, 4.138168, new Rotation2d(0)), //162.92 inches
@@ -51,7 +51,7 @@ public class Field {
         new Pose2d(2.0871258795062873, 7.490968, new Rotation2d(0))  //294.92 inches
     };
 
-    private final Pose2d[] RedCommnuityColumnFinal = {
+    private final Pose2d[] RedCommunityColumnFinal = {
         new Pose2d(1.77165, 3.020568, new Rotation2d(0)), 
         new Pose2d(1.77165, 3.579368, new Rotation2d(0)), 
         new Pose2d(1.77165, 4.138168, new Rotation2d(0)), 
@@ -126,28 +126,36 @@ public class Field {
     /**
 	 * Gets the initial column position
 	 * 
-	 * @param column The column that will be returned
+	 * @param column The column that will be returned (1-9)
 	 */
     public Pose2d getInitialColumn(int column) {
-        if(alliance.getAlliance() == Alliance.Blue) {
-            return BlueCommnuityColumnInitial[column];
-        }
-        else {
-            return RedCommnuityColumnInitial[column];
+        if(column < 10 && column > 0){
+            if(alliance.getAlliance() == Alliance.Blue) {
+                return BlueCommunityColumnInitial[column-1];
+            }
+            else {
+                return RedCommunityColumnInitial[column-1];
+            }
+        } else {
+            return null;
         }
     }
 
     /**
 	 * Gets the final column position
 	 * 
-	 * @param column The column that will be returned
+	 * @param column The column that will be returned (1-9)
 	 */
     public Pose2d getFinalColumn(int column) {
-        if(alliance.getAlliance() == Alliance.Blue) {
-            return BlueCommnuityColumnFinal[column];
-        }
-        else {
-            return RedCommnuityColumnFinal[column];
+        if(column < 10 && column > 0){
+            if(alliance.getAlliance() == Alliance.Blue) {
+                return BlueCommunityColumnFinal[column-1];
+            }
+            else {
+                return RedCommunityColumnFinal[column-1];
+            }
+        } else {
+            return null;
         }
     }
 
@@ -157,10 +165,15 @@ public class Field {
 	 * @param position 1-3 Lowest-Highest Communtiy Side | 4-6 Lowest-Highest Field Side
 	 */
     public Pose2d getStationInitial(int position){
-        if(alliance.getAlliance() == Alliance.Blue) {
-            return BlueStationInitial[position];
+        if(position < 7 && position > 0){
+            if(alliance.getAlliance() == Alliance.Blue) {
+                return BlueStationInitial[position-1];
+            }
+            else {
+                return RedStationInitial[position-1];
+            }
         } else {
-            return RedStationInitial[position];
+            return null;
         }
     }
 
@@ -170,23 +183,32 @@ public class Field {
 	 * @param position 1-3 Lowest-Hightest (Y-Axis)
 	 */
     public Pose2d getStationCenter(int position){
-        if(alliance.getAlliance() == Alliance.Blue) {
-            return BlueStationFinal[position];
+        if(position < 4 && position > 0){
+            if(alliance.getAlliance() == Alliance.Blue) {
+                return BlueStationFinal[position-1];
+            }
+            else {
+                return RedStationFinal[position-1];
+            }
         } else {
-            return RedStationFinal[position];
+            return null;
         }
     }
 
     /**
-	 * Gets the position of a specified April Tag
+	 * Gets the position of a specified April Tag (1-8)
 	 * 
 	 * @param position
 	 */
     public Pose2d getAprilTag(int ID){
-        if(alliance.getAlliance() == Alliance.Blue) {
-            return AprilTagsBlue[ID];
+        if(ID < 9 && ID > 0) {
+            if(alliance.getAlliance() == Alliance.Blue) {
+                return AprilTagsBlue[ID-1];
+            } else {
+                return AprilTagsRed[ID-1];
+            }
         } else {
-            return AprilTagsRed[ID];
+            return null;
         }
     }
 
@@ -194,14 +216,14 @@ public class Field {
         Pose2d closestGoal;
         double robotY = drivetrain.getPose().getY();
         if(alliance.getAlliance() == Alliance.Blue){//Alliance Blue
-            closestGoal = BlueCommnuityColumnFinal[0];
+            closestGoal = BlueCommunityColumnFinal[0];
             if(manipulator.getPistonExtended()){//Carrying Cone
                 for(int i = 0; i < 9; i++){
                     if(i == 2 || i == 5 || i == 8){
                         continue;
                     }
-                    if(Math.abs(robotY - BlueCommnuityColumnFinal[i].getY()) < Math.abs(robotY - closestGoal.getY())){
-                        closestGoal = BlueCommnuityColumnFinal[i];
+                    if(Math.abs(robotY - BlueCommunityColumnFinal[i].getY()) < Math.abs(robotY - closestGoal.getY())){
+                        closestGoal = BlueCommunityColumnFinal[i];
                     }
                 }
             } else {
@@ -209,20 +231,20 @@ public class Field {
                     if(i != 2 && i != 5 && i != 8){
                         continue;
                     }
-                    if(Math.abs(robotY - BlueCommnuityColumnFinal[i].getY()) < Math.abs(robotY - closestGoal.getY())){
-                        closestGoal = BlueCommnuityColumnFinal[i];
+                    if(Math.abs(robotY - BlueCommunityColumnFinal[i].getY()) < Math.abs(robotY - closestGoal.getY())){
+                        closestGoal = BlueCommunityColumnFinal[i];
                     }
                 }
             }
         } else {
-            closestGoal = RedCommnuityColumnFinal[0];
+            closestGoal = RedCommunityColumnFinal[0];
             if(manipulator.getPistonExtended()){//Carrying Cone
                 for(int i = 0; i < 9; i++){
                     if(i == 2 || i == 5 || i == 8){
                         continue;
                     }
-                    if(Math.abs(robotY - RedCommnuityColumnFinal[i].getY()) < Math.abs(robotY - closestGoal.getY())){
-                        closestGoal = RedCommnuityColumnFinal[i];
+                    if(Math.abs(robotY - RedCommunityColumnFinal[i].getY()) < Math.abs(robotY - closestGoal.getY())){
+                        closestGoal = RedCommunityColumnFinal[i];
                     }
                 }
             } else {
@@ -230,8 +252,8 @@ public class Field {
                     if(i != 2 && i != 5 && i != 8){
                         continue;
                     }
-                    if(Math.abs(robotY - RedCommnuityColumnFinal[i].getY()) < Math.abs(robotY - closestGoal.getY())){
-                        closestGoal = RedCommnuityColumnFinal[i];
+                    if(Math.abs(robotY - RedCommunityColumnFinal[i].getY()) < Math.abs(robotY - closestGoal.getY())){
+                        closestGoal = RedCommunityColumnFinal[i];
                     }
                 }
             }
