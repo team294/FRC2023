@@ -5,13 +5,15 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import frc.robot.Constants.CoordType;
 import frc.robot.Constants.StopType;
-import frc.robot.commands.DriveResetPose;
-import frc.robot.commands.DriveTrajectory;
-import frc.robot.commands.autos.ExampleAuto;
+import frc.robot.commands.*;
+import frc.robot.commands.autos.*;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.TrajectoryCache.TrajectoryType;
 
@@ -57,6 +59,8 @@ public class AutoSelection {
 	 */
 	public Command getAutoCommand(DriveTrain driveTrain, FileLog log) {
 		Command autonomousCommand = null;
+		Rotation2d rotationFront = new Rotation2d();
+		Rotation2d rotationBack = Rotation2d.fromDegrees(180);
 
 		// Get parameters from Shuffleboard
 		int autoPlan = autoChooser.getSelected();
@@ -72,15 +76,15 @@ public class AutoSelection {
 		if (autoPlan == STRAIGHT) {
 			log.writeLogEcho(true, "AutoSelect", "run Straight");
 		   autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime), 
-		   			new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log)
+		   			new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], () -> rotationFront, driveTrain, log)
 		   );
 	   }
 
 	   if (autoPlan == LEAVE_COMMUNITY) {
 		log.writeLogEcho(true, "AutoSelect", "run Leave Community");
 	   autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			new DriveResetPose(new Pose2d(), driveTrain, log),
-			new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.LeaveCommunity.value], driveTrain, log)
+			new DriveResetPose(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(180)), driveTrain, log),
+			new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.LeaveCommunity.value], () -> rotationBack, driveTrain, log)
 	   );
    }
 

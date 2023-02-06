@@ -23,7 +23,7 @@ import frc.robot.Constants.SwerveConstants;
 public class TrajectoryCache {
     private FileLog log;
    
-    private static int trajectoryCount = 2;
+    private static int trajectoryCount = 8;
     public Trajectory[] cache = new Trajectory[trajectoryCount];
 
     public enum TrajectoryType {
@@ -67,14 +67,12 @@ public class TrajectoryCache {
             new Pose2d(5.75895, 2.707, new Rotation2d(0))
         );    
 
-        cache[TrajectoryType.LeaveCommunity.value] = calcTrajectory("LeaveCommuniy", 0.4, 0.4, false, 
-            // Start at the origin facing the +X direction
+        cache[TrajectoryType.LeaveCommunity.value] = calcTrajectory("LeaveCommunity", 0.4, 0.4, false, 
+            // Start at the origin facing the driver station
             new Pose2d(0.0, 0.0, new Rotation2d(0)),
             List.of(
             ),
-            new Pose2d(-3.168, 0, new Rotation2d(Math.toRadians(Math.PI)))
-            // Pass through these two interior waypoints, making an 's' curve path
-            // List.of(new Translation2d(-1, 1), new Translation2d(2, -1)),
+            new Pose2d(3.168, 0, new Rotation2d(0))
         ); 
 
         cache[TrajectoryType.OuterOneConeBalanceLeftAuto.value] = calcTrajectory("OuterOneConeBalanceLeftAuto", 0.4, 0.4, false, 

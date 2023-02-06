@@ -25,8 +25,7 @@ import frc.robot.Constants.CoordType;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.StopType;
 import frc.robot.commands.*;
-import frc.robot.commands.autos.ExampleAuto;
-import frc.robot.commands.autos.OuterOneConeBalanceMiddleAuto;
+import frc.robot.commands.autos.*;
 import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
 import frc.robot.utilities.*;
@@ -91,9 +90,10 @@ public class RobotContainer {
 
     // Testing for autos and trajectories
     SmartDashboard.putData("Drive To Pose", new DriveToPose(new Pose2d(2.0, 2.0, Rotation2d.fromDegrees(90)), driveTrain, log));
-    SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
-    SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
-    SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
+    Rotation2d rotationFront = new Rotation2d();
+    SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], () -> rotationFront, driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.testCurve.value], () -> rotationFront, driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], () -> rotationFront, driveTrain, log));  
     SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
     SmartDashboard.putData("Auto OneConeBalance", new OuterOneConeBalanceMiddleAuto(driveTrain));     // TODO put on auto selector and remove this button
     SmartDashboard.putData("Drive Trajectory Straight", new DriveTrajectory(
@@ -103,6 +103,7 @@ public class RobotContainer {
             List.of(), 
             new Pose2d(1.0,0,new Rotation2d(0)), 
             Constants.TrajectoryConstants.swerveTrajectoryConfig),
+            () -> rotationFront,
           driveTrain, log));
   
     //Grabber commands
