@@ -29,12 +29,13 @@ public class TrajectoryCache {
     public enum TrajectoryType {
         test(0),
         testCurve(1),
-        CenterBalanceAuto(2),
-        LeaveCommunity(3),
-        OuterOneConeBalanceLeftAuto(4),
-        OuterOneConeBalanceMiddleAuto(5),
-        OuterOneConeBalanceRightAuto(6),
-        Pickup(7);
+        CenterBalanceAutoBlue(2),
+        CenterBalanceAutoRed(3),
+        LeaveCommunity(4),
+        OuterOneConeBalanceLeftAuto(5),
+        OuterOneConeBalanceMiddleAuto(6),
+        OuterOneConeBalanceRightAuto(7),
+        Pickup(8);
         @SuppressWarnings({"MemberName", "PMD.SingularField"})
         public final int value;
         TrajectoryType(int value) { this.value = value; }
@@ -59,12 +60,20 @@ public class TrajectoryCache {
             new Pose2d(3, 3, new Rotation2d(Math.toRadians(90.0)))
         );     
         
-        cache[TrajectoryType.CenterBalanceAuto.value] = calcTrajectory("CenterBalanceAuto", 0.4, 0.4, false, 
+        cache[TrajectoryType.CenterBalanceAutoBlue.value] = calcTrajectory("CenterBalanceAutBlue", 0.4, 0.4, false, 
             // Start at the position (1.75895, 2.707) facing +X direction
             new Pose2d(1.75895, 2.707, new Rotation2d(0)),
             List.of(),
             // Go straight onto platform
             new Pose2d(5.75895, 2.707, new Rotation2d(0))
+        );    
+
+        cache[TrajectoryType.CenterBalanceAutoRed.value] = calcTrajectory("CenterBalanceAutoRed", 0.4, 0.4, false,  //Change this to Red side values
+            // Start at the position (1.75895, 2.707) facing +X direction
+            new Pose2d(1.75895, 5.203, new Rotation2d(0)), //CHECK Y VALUES
+            List.of(),
+            // Go straight onto platform
+            new Pose2d(5.75895, 5.203, new Rotation2d(0))//CHECK Y VALUES
         );    
 
         cache[TrajectoryType.LeaveCommunity.value] = calcTrajectory("LeaveCommunity", 0.4, 0.4, false, 
