@@ -29,13 +29,16 @@ public class TrajectoryCache {
     public enum TrajectoryType {
         test(0),
         testCurve(1),
-        CenterBalanceAutoBlue(2),
-        CenterBalanceAutoRed(3),
+        CenterBalanceBlue(2),
+        CenterBalanceRed(3),
         LeaveCommunity(4),
-        OuterOneConeBalanceLeftAuto(5),
-        OuterOneConeBalanceMiddleAuto(6),
-        OuterOneConeBalanceRightAuto(7),
-        Pickup(8);
+        LeftOuterOneConeBalanceBlue(5),
+        LeftOuterOneConeBalanceRed(6),
+        MiddleOuterOneConeBalanceBlue(7),
+        MiddleOuterOneConeBalanceRed(8),
+        RightOuterOneConeBalanceBlue(9),
+        RightOuterOneConeBalanceRed(10),
+        Pickup(11);
         @SuppressWarnings({"MemberName", "PMD.SingularField"})
         public final int value;
         TrajectoryType(int value) { this.value = value; }
@@ -60,7 +63,7 @@ public class TrajectoryCache {
             new Pose2d(3, 3, new Rotation2d(Math.toRadians(90.0)))
         );     
         
-        cache[TrajectoryType.CenterBalanceAutoBlue.value] = calcTrajectory("CenterBalanceAutBlue", 0.4, 0.4, false, 
+        cache[TrajectoryType.CenterBalanceBlue.value] = calcTrajectory("CenterBalanceBlue", 0.4, 0.4, false, 
             // Start at the position (1.75895, 2.707) facing +X direction
             new Pose2d(1.75895, 2.707, new Rotation2d(0)),
             List.of(),
@@ -68,12 +71,12 @@ public class TrajectoryCache {
             new Pose2d(5.75895, 2.707, new Rotation2d(0))
         );    
 
-        cache[TrajectoryType.CenterBalanceAutoRed.value] = calcTrajectory("CenterBalanceAutoRed", 0.4, 0.4, false,  //Change this to Red side values
+        cache[TrajectoryType.CenterBalanceRed.value] = calcTrajectory("CenterBalanceRed", 0.4, 0.4, false,  //Change this to Red side values
             // Start at the position (1.75895, 2.707) facing +X direction
-            new Pose2d(1.75895, 5.203, new Rotation2d(0)), //CHECK Y VALUES
+            new Pose2d(1.75895, 5.307, new Rotation2d(0)), //CHECK Y VALUES
             List.of(),
             // Go straight onto platform
-            new Pose2d(5.75895, 5.203, new Rotation2d(0))//CHECK Y VALUES
+            new Pose2d(5.75895, 5.307, new Rotation2d(0))//CHECK Y VALUES
         );    
 
         cache[TrajectoryType.LeaveCommunity.value] = calcTrajectory("LeaveCommunity", 0.4, 0.4, false, 
@@ -84,31 +87,58 @@ public class TrajectoryCache {
             new Pose2d(3.168, 0, new Rotation2d(0))
         ); 
 
-        cache[TrajectoryType.OuterOneConeBalanceLeftAuto.value] = calcTrajectory("OuterOneConeBalanceLeftAuto", 0.4, 0.4, false, 
-            new Pose2d(0, 0, new Rotation2d(0)),
+        cache[TrajectoryType.LeftOuterOneConeBalanceBlue.value] = calcTrajectory("LeftOuterOneConeBalanceBlue", 0.4, 0.4, false, 
+            new Pose2d(1.75895, 4.921, Rotation2d.fromDegrees(-15)),
             // 
-            List.of(new Translation2d(-4.11, 0), new Translation2d(-4.11, 1.37)),
-            // Pass through these two interior waypoints, making an 's' curve path
+            List.of(new Translation2d(5.907, 3.846)),
+            
 
-            new Pose2d(-2.4, 1.37, new Rotation2d(0))
+            new Pose2d(3.897, 3.384, Rotation2d.fromDegrees(-115))
         ); 
 
-        cache[TrajectoryType.OuterOneConeBalanceMiddleAuto.value] = calcTrajectory("OuterOneConeBalanceMiddleAuto", 0.4, 0.4, false, 
-            new Pose2d(0, 0, new Rotation2d(0)),
+        cache[TrajectoryType.LeftOuterOneConeBalanceRed.value] = calcTrajectory("LeftOuterOneConeBalanceRed", 0.4, 0.4, false, 
+            new Pose2d(1.75895, 3.093, Rotation2d.fromDegrees(15)),
             // 
-            List.of(new Translation2d(-4.11, 0)),
-            // Pass through these two interior waypoints, making an 's' curve path
+            List.of(new Translation2d(5.907, 4.168)),
+            
 
-            new Pose2d(-2.4, 0, new Rotation2d(0))
+            new Pose2d(3.897, 4.63, Rotation2d.fromDegrees(115))
         ); 
 
-        cache[TrajectoryType.OuterOneConeBalanceRightAuto.value] = calcTrajectory("OuterOneConeBalanceRightAuto", 0.4, 0.4, false, 
-        new Pose2d(0, 0, new Rotation2d(0)),
+        cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value] = calcTrajectory("MiddleOuterOneConeBalanceBlue", 0.4, 0.4, false, 
+            new Pose2d(1.75895, 3.309, new Rotation2d(0)),
+            // 
+            List.of(new Translation2d(5.767, 3.266)),
+            // Pass through these two interior waypoints, making an 's' curve path
+
+            new Pose2d(3.897, 2.761, Rotation2d.fromDegrees(-160))
+        ); 
+
+        cache[TrajectoryType.MiddleOuterOneConeBalanceRed.value] = calcTrajectory("MiddleOuterOneConeBalanceRed", 0.4, 0.4, false, 
+            new Pose2d(1.75895, 4.705, new Rotation2d(0)),
+            // 
+            List.of(new Translation2d(5.767, 4.748)),
+            // Pass through these two interior waypoints, making an 's' curve path
+
+            new Pose2d(3.897, 5.253, Rotation2d.fromDegrees(160))
+        ); 
+
+        cache[TrajectoryType.RightOuterOneConeBalanceBlue.value] = calcTrajectory("RightOuterOneConeBalanceBlue", 0.4, 0.4, false, 
+        new Pose2d(1.75895, 0.381, Rotation2d.fromDegrees(10)),
         // 
-        List.of(new Translation2d(-4.11, 0), new Translation2d(-4.11, -1.37)),
+        List.of(new Translation2d(6.304, 1.697)),
         // Pass through these two interior waypoints, making an 's' curve path
 
-        new Pose2d(-2.4, -1.37, new Rotation2d(0))
+        new Pose2d(3.93, 2.116, Rotation2d.fromDegrees(170))
+        ); 
+
+        cache[TrajectoryType.RightOuterOneConeBalanceRed.value] = calcTrajectory("RightOuterOneConeBalanceRed", 0.4, 0.4, false, 
+        new Pose2d(1.75895, 7.633, Rotation2d.fromDegrees(-15)),
+        // 
+        List.of(new Translation2d(6.304, 6.317)),
+        // Pass through these two interior waypoints, making an 's' curve path
+
+        new Pose2d(3.93, 5.898, Rotation2d.fromDegrees(-105))
         ); 
 
         cache[TrajectoryType.Pickup.value] = calcTrajectory("Pickup", 0.4, 0.4, false, 
