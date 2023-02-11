@@ -100,9 +100,6 @@ public class AutoSelection {
 	   if(autoPlan == RIGHT_ONE_CONE_BALANCE){
 			log.writeLogEcho(true, "AutoSelect", "run Right One Cone Balance");
 			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			// if(allianceSelection.getAlliance() == 0){
-			// 	new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache[TrajectoryType.RightOuterOneConeBalanceRed.value], () -> rotationBack, driveTrain, log)
-			// }
 			((allianceSelection.getAlliance() == Alliance.Red) ? 
 			new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceRed.value], () -> rotationBack, driveTrain, log) : 
 			new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceBlue.value], () -> rotationBack, driveTrain, log))
@@ -113,9 +110,6 @@ public class AutoSelection {
 	   if(autoPlan == LEFT_ONE_CONE_BALANCE){
 		log.writeLogEcho(true, "AutoSelect", "run Left One Cone Balance");
 			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			// if(allianceSelection.getAlliance() == 0){
-			// 	new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache[TrajectoryType.RightOuterOneConeBalanceRed.value], () -> rotationBack, driveTrain, log)
-			// }
 			((allianceSelection.getAlliance() == Alliance.Red) ? 
 			new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceRed.value], () -> rotationBack, driveTrain, log) : 
 			new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceBlue.value], () -> rotationBack, driveTrain, log))
@@ -125,9 +119,6 @@ public class AutoSelection {
 	   if(autoPlan == MIDDLE_ONE_CONE_BALANCE){
 		log.writeLogEcho(true, "AutoSelect", "run Left One Cone Balance");
 			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			// if(allianceSelection.getAlliance() == 0){
-			// 	new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache[TrajectoryType.RightOuterOneConeBalanceRed.value], () -> rotationBack, driveTrain, log)
-			// }
 			((allianceSelection.getAlliance() == Alliance.Red) ? 
 			new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceRed.value], () -> rotationBack, driveTrain, log) : 
 			new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value], () -> rotationBack, driveTrain, log))
