@@ -26,7 +26,7 @@ public class DriveWithJoysticksAdvance extends CommandBase {
   FileLog log;
   private int logRotationKey;
   
-  private double fwdVelocity, leftVelocity, turnRate;//, maxVelocity, maxAccel;
+  private double fwdVelocity, currFwdVelocity, leftVelocity, currLeftVelocity, turnRate;//, maxVelocity, maxAccel;
 
   /** Creates a new DriveWithJoysticksAdvance. */
   public DriveWithJoysticksAdvance(Joystick leftJoystick, Joystick rightJoystick, double maxVelocity, Double maxAccel, DriveTrain driveTrain, FileLog log) {
@@ -55,6 +55,7 @@ public class DriveWithJoysticksAdvance extends CommandBase {
   @Override
   public void execute() {
     // curTime = System.currentTimeMillis() / 1000.0;
+
     fwdVelocity = -leftJoystick.getY();
     leftVelocity = -leftJoystick.getX();
     turnRate = -rightJoystick.getX();
