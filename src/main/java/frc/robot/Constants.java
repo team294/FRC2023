@@ -164,4 +164,10 @@ public final class Constants {
         new TrapezoidProfileBCR.Constraints(
             SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare);
       }
+
+      public static final class JoystickConstants {
+        public static final double kPJoystick = 0; // NEEDS TO BE CALIBRATED
+        public static final double kIJoystick = 0; // NEEDS TO BE CALIBRATED
+        public static final double kDJoystick = 0; // NEEDS TO BE CALIBRATED
+      }
 }
