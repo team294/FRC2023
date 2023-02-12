@@ -110,6 +110,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     lfRunningAvg.reset();
 
     // create and initialize odometery
+    // Set initial location to 0,0.
     odometry = new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(getGyroRotation()), 
         getModulePotisions(), new Pose2d(0, 0, Rotation2d.fromDegrees(0)) );
     poseEstimator = new SwerveDrivePoseEstimator(kDriveKinematics, Rotation2d.fromDegrees(getGyroRotation()), 
@@ -187,6 +188,21 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   // ************ Swerve drive methods
 
   /**
+   * Configures the motors and encoders for every swerve module.
+   * The swerve modules are automatically configured in the SwerveModule constructors.  So, this
+   * method should not need to be called.
+   * <p>However, if the robot browns-out or otherwise partially resets, then this can be used to 
+   * force the motors and encoders to have the right calibration and settings, especially the
+   * calibration angle for each swerve module.
+   */
+  public void configureSwerveModules(){
+    swerveFrontLeft.configSwerveModule();
+    swerveFrontRight.configSwerveModule();
+    swerveBackLeft.configSwerveModule();
+    swerveBackRight.configSwerveModule();
+  }
+
+  /**
    * @param setCoast true = coast mode, false = brake mode
    */
   public void setDriveModeCoast(boolean setCoast) {
@@ -259,7 +275,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   }
 
   /**
-   * Returns the speed of the chassis in X, Y, and theta.
+   * Returns the speed of the chassis in X, Y, and theta <b>in the robot frame of reference</b>.
    * <p> Speed of the robot in the x direction, in meters per second (+ = forward)
    * <p> Speed of the robot in the y direction, in meters per second (+ = move to the left)
    * <p> Angular rate of the robot, in radians per second (+ = turn to the left)
@@ -343,8 +359,8 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * to properly reset.
    *
    * @param pose The pose to which to set the odometry.  Pose components include
-   *    <p> Robot X location in the field, in meters (0 = middle of robot wherever the robot starts auto mode, +=away from our drivestation)
-   *    <p> Robot Y location in the field, in meters (0 = middle of robot wherever the robot starts auto mode, +=left when looking from our drivestation)
+   *    <p> Robot X location in the field, in meters (0 = field edge in front of driver station, + = away from our drivestation)
+   *    <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, + = left when looking from our drivestation)
    *    <p> Robot angle on the field (0 = facing away from our drivestation, + to the left, - to the right)
    */
   public void resetPose(Pose2d pose) {
@@ -352,40 +368,22 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     odometry.resetPosition( Rotation2d.fromDegrees(getGyroRotation()),
         getModulePotisions(), pose );
   }
-
-  public void updateOdometry() {
-    poseEstimator.update(
-      Rotation2d.fromDegrees(getGyroRotation()), getModulePotisions());
-
-    // Also apply vision measurements. We use 0.3 seconds in the past as an example
-    // -- on
-    // a real robot, this must be calculated based either on latency or timestamps.
-    Optional<EstimatedRobotPose> result =
-      camera.getEstimatedGlobalPose(poseEstimator.getEstimatedPosition());
-
-    if (result.isPresent()) {
-        EstimatedRobotPose camPose = result.get();
-        poseEstimator.addVisionMeasurement(
-                camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
-        field.getObject("Cam Est Pos").setPose(camPose.estimatedPose.toPose2d());
-
-        Pose2d pose = camPose.estimatedPose.toPose2d();
-
-        SmartDashboard.putNumber("Drive Pose X", pose.getTranslation().getX());
-        SmartDashboard.putNumber("Drive Pose Y", pose.getTranslation().getY());
-        SmartDashboard.putNumber("Drive Pose Theta", pose.getRotation().getDegrees());
-    } else {
-        // move it way off the screen to make it disappear
-        field.getObject("Cam Est Pos").setPose(new Pose2d(-100, -100, new Rotation2d()));
-    }
-
-    // field.getObject("Actual Pos").setPose(m_drivetrainSimulator.getPose());
-    field.setRobotPose(poseEstimator.getEstimatedPosition());
+  
+  /**
+   * Returns the speed of the robot in X, Y, and theta <b>in the field frame of reference</b>.
+   * <p> Speed of the robot in the x direction, in meters per second (+ = away from our drivestation)
+   * <p> Speed of the robot in the y direction, in meters per second (+ = left when looking from our drivestation)
+   * <p> Angular rate of the robot, in radians per second (+ = turn to the left)
+   * @return ChassisSpeeds object representing the chassis speeds.
+   */
+  public ChassisSpeeds getRobotSpeeds() {
+    // Calculation from chassisSpeed to robotSpeed is just the inverse of .fromFieldRelativeSpeeds.
+    // Call .fromFieldRelativeSpeeds with the negative of the robot angle to do this calculation.
+    return ChassisSpeeds.fromFieldRelativeSpeeds(getChassisSpeeds(), Rotation2d.fromDegrees(-getGyroRotation()));
   }
 
-  
-  // ************ Information methods
 
+  // ************ Information methods
 
   /**
    * Turns file logging on every scheduler cycle (~20ms) or every 10 cycles (~0.2 sec)
@@ -433,9 +431,11 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
       // Update data on SmartDashboard
       // field.setRobotPose(odometry.getPoseMeters());
+      field.setRobotPose(odometry.getPoseMeters());
+      ChassisSpeeds robotSpeeds = getRobotSpeeds();
       // SmartDashboard.putNumber("Drive Average Dist in Meters", Units.inchesToMeters(getAverageDistance()));
-      SmartDashboard.putNumber("Drive X Fwd Velocity", getChassisSpeeds().vxMetersPerSecond);
-      SmartDashboard.putNumber("Drive Y Left Velocity", getChassisSpeeds().vyMetersPerSecond);
+      SmartDashboard.putNumber("Drive X Velocity", robotSpeeds.vxMetersPerSecond);
+      SmartDashboard.putNumber("Drive Y Velocity", robotSpeeds.vyMetersPerSecond);
       SmartDashboard.putBoolean("Drive isGyroReading", isGyroReading());
       SmartDashboard.putNumber("Drive Raw Gyro", getGyroRaw());
       SmartDashboard.putNumber("Drive Gyro Rotation", degrees);
@@ -468,14 +468,15 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * @param logWhenDisabled true will log when disabled, false will discard the string
    */
   public void updateDriveLog(boolean logWhenDisabled) {
-    // TODO Add more logging to the log file?
-
     Pose2d pose = odometry.getPoseMeters();
+    ChassisSpeeds robotSpeeds = getRobotSpeeds();
     log.writeLog(logWhenDisabled, "Drive", "Update Variables", 
       "Gyro Angle", getGyroRotation(), "RawGyro", getGyroRaw(), 
-      "Gyro Velocity", angularVelocity, "Pitch", ahrs.getRoll(), "Drive X Fwd Velocity", getChassisSpeeds().vxMetersPerSecond, "Drive Y Left Velocity", getChassisSpeeds().vyMetersPerSecond,
+      "Gyro Velocity", angularVelocity, "Pitch", ahrs.getRoll(), 
       "Odometry X", pose.getTranslation().getX(), "Odometry Y", pose.getTranslation().getY(), 
       "Odometry Theta", pose.getRotation().getDegrees(),
+      "Drive X Velocity", robotSpeeds.vxMetersPerSecond, 
+      "Drive Y Velocity", robotSpeeds.vyMetersPerSecond,
       swerveFrontLeft.getLogString(),
       swerveFrontRight.getLogString(),
       swerveBackLeft.getLogString(),
