@@ -171,31 +171,52 @@ public final class Constants {
 
       public static final class WristConstants {
             // Wrist Angles (in degrees)
+            // TODO Find these values
             public static final double wristMax = 113.0;		// Location of upper limit switch for auto calibration
             public static final double wristStowed = 110.0;
-            public static final double wristKeepOut = 28.0; // Max angle to avoid interference with elevator or climber
-            public static final double wristUp = 15.0;
+            public static final double wristKeepOut = 28.0; // Max angle to avoid interference with elevator(Maybe necessary)
+            public static final double wristScoreCargo = 0;
+            public static final double wristLoadCargo = 0;
+            public static final double wristMinWhenElevatorLow = -45.0;   // If the elevator is in the groundCargo position, don't move the wrist below this!
             public static final double wristStraight = -1.0;	//  needed to bias upward to account for sag and insure that hatch cover gripper engages first
-            public static final double wristVision = -5.0;    // wrist angle for optimal vision tracking
-            public static final double wristCargoShot = -30.0;	// Angle for wrist for cargo ship ball shot
-            public static final double wristLowerCrashWhenElevatorLow = -45.0;   // If the elevator is in the low position, don't move the wrist below this!
-            public static final double wristDown = -60.0;		// TODO Should be -59.0? // In this position, elevator must be able to go to groundCargo
+            public static final double wristDown = -60.0;		// In this position, elevator must be able to go to groundCargo (Not sure we need this)
+            public static final double wristVision = -5.0;    // wrist angle for optimal vision tracking (Maybe to keep out of the way of camera? Might not be necessary)
             public static final double wristMin = -61.0;			// Location of lower limit switch for auto calibration
+            // public static final double wristMax = 113.0;		// Location of upper limit switch for auto calibration
+            // public static final double wristStowed = 110.0;
+            // public static final double wristKeepOut = 28.0; // Max angle to avoid interference with elevator or climber
+            // public static final double wristUp = 15.0;
+            // public static final double wristStraight = -1.0;	//  needed to bias upward to account for sag and insure that hatch cover gripper engages first
+            // public static final double wristVision = -5.0;    // wrist angle for optimal vision tracking
+            // public static final double wristCargoShot = -30.0;	// Angle for wrist for cargo ship ball shot
+            // public static final double wristLowerCrashWhenElevatorLow = -45.0;   // If the elevator is in the low position, don't move the wrist below this!
+            // public static final double wristDown = -60.0;		 // In this position, elevator must be able to go to groundCargo
+            // public static final double wristMin = -61.0;			// Location of lower limit switch for auto calibration
             public enum WristAngle {stowed, up, straight, cargoShot, vision, down}
             public static final double encoderTicksPerRevolution = 4096.0;
             
         }
 
       public static final class ElevatorConstants {
-        public static final double hatchLow = 19.0;
-        public static final double hatchMid = 48.5;
-        public static final double hatchHigh = 69.7;		// was 72.8
-        public static final double cargoShipCargo = 43.0;   // Was 34.75
-        public static final double rocketBallOffset = 2;  // Ball intake is higher than the disc grabber (low position only)
-        public static final double loadCargo = 44.125;
-        public static final double groundCargo = 16.5;  		// At this level, wrist must be able to go to wristDown  // TODO should this be the same as elevatorWristStow (at the hard stop)?
-        public static final double encoderTicksPerRevolution = 4096.0;
+        // TODO Find these values
+        public static final double loadCargo = 0; // NOT REAL NUMBER
+        public static final double scoreCargoLow = 25; // NOT REAL NUMBER
+        public static final double scoreCargoMedium = 50; // NOT REAL NUMBER
+        public static final double scoreCargoHigh = 100; // NOT REAL NUMBER
+        public static final double groundCargo = 16.5;  //NOT REAL NUMBER // At this level, wrist must be able to go to wristDown (Don't know if this is a problem this year or not)
+        public static final double stowed = 0;  //NOT REAL NUMBER // Not sure we need this or if its the same as loading cargo
 
-        public enum ElevatorPosition {bottom, vision, wristStow, hatchLow, hatchMid, hatchHigh, cargoShipCargo, loadCargo, groundCargo}        
+        // public static final double hatchLow = 19.0;
+        // public static final double hatchMid = 48.5;
+        // public static final double hatchHigh = 69.7;		// was 72.8
+        // public static final double cargoShipCargo = 43.0;   // Was 34.75
+        // public static final double rocketBallOffset = 2;  // Ball intake is higher than the disc grabber (low position only)
+        // public static final double loadCargo = 44.125;
+        // public static final double groundCargo = 16.5;  		// At this level, wrist must be able to go to wristDown 
+        public static final double encoderTicksPerRevolution = 2048; // Ticks per revolution for Falcon 550 according to ctre docs
+
+        public enum ElevatorPosition {scoreCargoLow, scoreCargoMedium, scoreCargoHigh, loadCargo, groundCargo, stowed}        
+
+        // public enum ElevatorPosition {bottom, vision, wristStow, hatchLow, hatchMid, hatchHigh, cargoShipCargo, loadCargo, groundCargo}        
       }
 }

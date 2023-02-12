@@ -1,9 +1,6 @@
 package frc.robot.utilities;
 
-import frc.robot.Robot;
 import frc.robot.subsystems.Elevator;
-
-import java.io.File;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -11,6 +8,9 @@ public class ElevatorProfileGenerator {
 
 	Elevator elevator;
 	FileLog log;
+	private int logRotationKey;         // key for the logging cycle for this subsystem
+	private boolean fastLogging = false; // true is enabled to run every cycle; false follows normal logging cycles
+
 	private boolean profileEnabled = false;
 
 	private double currentMPDistance; // Distance that should have been travelled in current motion profile (always positive)
@@ -56,6 +56,7 @@ public class ElevatorProfileGenerator {
 	public ElevatorProfileGenerator(Elevator elevator, FileLog log) {
 		disableProfileControl();
 		this.log = log;
+		logRotationKey = log.allocateLogRotation();
 		this.elevator = elevator;
 	}
 
@@ -178,7 +179,8 @@ public class ElevatorProfileGenerator {
 			percentPowerFB = (percentPowerFB>0.2) ? 0.2 : percentPowerFB;
 			percentPowerFB = (percentPowerFB<-0.2) ? -0.2 : percentPowerFB;
 
-			if (log.getLogLevel()<=1 || currentMPVelocity>0 || Math.abs(percentPowerFB)>0.1) {
+			// Do we want a log rotation for this or just log it with elevator subsystem?
+			if (fastLogging || log.isMyLogRotation(logRotationKey) || currentMPVelocity>0 || Math.abs(percentPowerFB)>0.1) {
 				updateElevatorProfileLog(false);
 			}
 
@@ -187,6 +189,8 @@ public class ElevatorProfileGenerator {
 			return 0.0;
 		}
 	}
+
+	
 
 	/**
     * Writes information about the elevator profile to the filelog

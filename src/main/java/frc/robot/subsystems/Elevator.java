@@ -10,7 +10,6 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Robot;
 import frc.robot.Constants.Ports;
 import frc.robot.Constants.WristConstants;
 import frc.robot.Constants.ElevatorConstants;
@@ -18,8 +17,10 @@ import frc.robot.Constants.ElevatorConstants;
 // import frc.robot.commands.ElevatorWithXBox;
 import frc.robot.utilities.ElevatorProfileGenerator;
 import frc.robot.utilities.FileLog;
+import frc.robot.utilities.Loggable;
 import frc.robot.utilities.RobotPreferences;
 import frc.robot.utilities.Wait;
+import static frc.robot.utilities.StringUtil.*;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -33,11 +34,13 @@ import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
 /**
  * Add your docs here.
  */
-public class Elevator extends SubsystemBase {
+public class Elevator extends SubsystemBase implements Loggable{
 	// Put methods for controlling this subsystem
 	// here. Call these from Commands.
 	FileLog log;
 	private int logRotationKey;         // key for the logging cycle for this subsystem
+	private boolean fastLogging;
+	private String subsystemName;
 	private WPI_TalonFX elevatorMotor1;
 	private WPI_TalonFX elevatorMotor2;
 	private TalonFXSensorCollection elevatorLimits;
@@ -53,6 +56,7 @@ public class Elevator extends SubsystemBase {
 	private boolean elevCalibrated = false; // true is encoder is working and calibrated, false is not calibrated
 	private boolean elevPosControl = false; // true is in position control mode, false is manual motor control (percent output)
 
+	// TODO Calibrate
 	private double rampRate = 0.3;
 	private double kP = 0.5;
 	private double kI = 0;
@@ -62,13 +66,15 @@ public class Elevator extends SubsystemBase {
 	private double kMaxOutput = 1.0; // up max output, was 0.8
 	private double kMinOutput = -1.0; // down max output, was -0.6
 
-	public double elevatorGearCircumference; //circumference of the gear driving the elevator in inches
-	public double elevatorBottomToFloor; //distance of elevator 0 value from the ground
-	public double elevatorWristSafeStow; 	 // highest elevator position (from ground) where wrist can be stowed
+	public double elevatorGearCircumference; //circumference of the gear driving the elevator in inches TODO figure out this value
+	public double elevatorBottomToFloor; //distance of elevator 0 value from the ground (Not sure we want this because of diagonal elevator)
+	// public double elevatorWristSafeStow; 	 // highest elevator position (from ground) where wrist can be stowed (Not sure we need this)
 
-	public Elevator(FileLog log) {
+	public Elevator(String name, FileLog log) {
 		this.log = log;
+		fastLogging = false;
 		logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
+		subsystemName = name;
 		elevatorMotor1 = new WPI_TalonFX(Ports.CANElevatorMotor1);
 		elevatorMotor2 = new WPI_TalonFX(Ports.CANElevatorMotor2);
 		elevatorMotor2.follow(elevatorMotor1);
@@ -97,6 +103,7 @@ public class Elevator extends SubsystemBase {
 		elevatorMotor2.setNeutralMode(NeutralMode.Brake);
 
 		// if (Robot.robotPrefs.neoDrivetrain) {
+			// Not sure what this does
 			elevatorMotor2.setStatusFramePeriod(StatusFrameEnhanced.Status_3_Quadrature, 5);
 		// }
 
@@ -105,7 +112,7 @@ public class Elevator extends SubsystemBase {
 		// from the Rio to the Talon and back to the Rio.  So, reading position could give the wrong value if
 		// we don't wait (random weird behavior).
 		// DO NOT GET RID OF THIS WITHOUT TALKING TO DON OR ROB.
-		Wait.waitTime(250);
+		Wait.waitTime(250); // Not sure what this does
 
 		// start the elevator in manual mode unless it is properly zeroed
 		elevCalibrated = (getElevatorLowerLimit() && getElevatorEncTicks() == 0);
@@ -115,6 +122,13 @@ public class Elevator extends SubsystemBase {
 
 		// ensure the elevator starts in manual mode
 		stopElevator();
+	}
+
+	/**
+	 * Returns the name of the subsystem
+	 */
+	public String getName() {
+		return subsystemName;
 	}
 
 	/**
@@ -133,50 +147,54 @@ public class Elevator extends SubsystemBase {
 	*/
 	public void setProfileTarget(double pos, Wrist wrist) {
 		if (elevEncOK && elevCalibrated &&										// Elevator must be calibrated
-			  wrist.getWristAngle() < WristConstants.wristKeepOut &&  	// Wrist must not be stowed
-			  wrist.getCurrentWristTarget() < WristConstants.wristKeepOut && // Wrist must not be moving to stow
-			  ( wrist.getWristAngle() >= WristConstants.wristLowerCrashWhenElevatorLow &&	// wrist must be at least wristLowerCrashWhenElevatorLow
-				wrist.getCurrentWristTarget() >= WristConstants.wristLowerCrashWhenElevatorLow ||
+			  wrist.getWristAngle() < WristConstants.wristStowed &&  	// Wrist must not be stowed(Maybe different constant here)
+			  wrist.getCurrentWristTarget() < WristConstants.wristStowed && // Wrist must not be moving to stow
+			  ( wrist.getWristAngle() >= WristConstants.wristMinWhenElevatorLow &&	// wrist must be at least wristMinWhenElevatorLow
+				wrist.getCurrentWristTarget() >= WristConstants.wristMinWhenElevatorLow || //Wrist must not be moving to wristMinWhenElevatorLow
 				pos >= ElevatorConstants.groundCargo &&						// Elevator is not going below groundCargo position
 				wrist.getWristAngle() >= WristConstants.wristDown - 3.0 &&	     // wrist must be at least wristDown
-				wrist.getCurrentWristTarget() >= WristConstants.wristDown - 3.0 )
+				wrist.getCurrentWristTarget() >= WristConstants.wristDown - 3.0 ) // Wrist must not be moving below wristDown
 		 ) {
 			elevPosControl = true;
 			elevatorProfile.setProfileTarget(pos);
-			log.writeLog(false,"Elevator", "setProfileTarget", "Target", pos, "Allowed,Yes,Wrist Angle",
+			log.writeLog(false, subsystemName, "setProfileTarget", "Target", pos, "Allowed,Yes,Wrist Angle",
 			   wrist.getWristAngle(), "Wrist Target", wrist.getCurrentWristTarget());
 		} else {
-			log.writeLog(false, "Elevator", "setProfileTarget", "Target", pos, "Allowed,No,Wrist Angle",
+			log.writeLog(false, subsystemName, "setProfileTarget", "Target", pos, "Allowed,No,Wrist Angle",
  			  wrist.getWristAngle(), "Wrist Target", wrist.getCurrentWristTarget());
 		}
 	}
 
 	/**
-	 * Set elevator position using the Talon PID.  This
-	 * only works when encoder is working and elevator is calibrated and the wrist is not interlocked.
+	 * Set elevator position using the Talon PID.
+	 * works same with falcon?
+	 * This only works when encoder is working and elevator is calibrated and the wrist is not interlocked.
 	 * @param inches target height in inches off the floor
+	 *  Should we make it from start of elevator instead of from the floor?
 	 */
 	public void setElevatorPos(Wrist wrist, double inches) {
 		if (elevEncOK && elevCalibrated &&										// Elevator must be calibrated
-			  wrist.getWristAngle() < WristConstants.wristKeepOut &&  	// Wrist must not be stowed
-			  wrist.getCurrentWristTarget() < WristConstants.wristKeepOut && // Wrist must not be moving to stow
+			  wrist.getWristAngle() < WristConstants.wristStowed &&  	// Wrist must not be stowed
+			  wrist.getCurrentWristTarget() < WristConstants.wristStowed && // Wrist must not be moving to stow
 			  ( wrist.getWristAngle() >= WristConstants.wristStraight - 5.0 &&	// wrist must be at least horizontal
-				wrist.getCurrentWristTarget() >= WristConstants.wristStraight - 5.0 ||
+				wrist.getCurrentWristTarget() >= WristConstants.wristStraight - 5.0 || // Wrist must not be moving below horizantal
 				inches >= ElevatorConstants.groundCargo &&						// Elevator is not going below groundCargo position
 				wrist.getWristAngle() >= WristConstants.wristDown - 3.0 &&	     // wrist must be at least wristDown
-				wrist.getCurrentWristTarget() >= WristConstants.wristDown - 3.0 )
+				wrist.getCurrentWristTarget() >= WristConstants.wristDown - 3.0 ) // Wrist must not be moving below wristDown
 		 ) {
 			elevatorMotor1.set(ControlMode.Position, inchesToEncoderTicks(inches - elevatorBottomToFloor));
 			elevPosControl = true;
-			log.writeLog(false, "Elevator", "Position set", "Target", inches, "Allowed,Yes,Wrist Angle",
+			log.writeLog(false, subsystemName, "Position set", "Target", inches, "Allowed,Yes,Wrist Angle",
 			   wrist.getWristAngle(), "Wrist Target", wrist.getCurrentWristTarget());
 		} else {
-			log.writeLog(false, "Elevator", "Position set", "Target", inches, "Allowed,No,Wrist Angle",
+			log.writeLog(false, subsystemName, "Position set", "Target", inches, "Allowed,No,Wrist Angle",
  			  wrist.getWristAngle(), "Wrist Target", wrist.getCurrentWristTarget());
 		}
 	}
 
 	/**
+	 * 2023 - Might not want inches from floor this year because elevator is diagonal
+	 * return stowed position if not calibrated?
 	 * Returns the height that elevator is trying to move to in inches from the floor.
 	 * Returns hatchHigh if the elevator is in manual mode (not calibrated), in order to engage interlocks.
 	 * <p><b>NOTE:</b> This is the target height, not the current height.
@@ -188,6 +206,7 @@ public class Elevator extends SubsystemBase {
 			if (elevPosControl) {
 				if (elevatorMotor1.getControlMode() == ControlMode.Position) {
 					// Closed loop control using Talon PID
+					// same with falcon?
 					return encoderTicksToInches(elevatorMotor1.getClosedLoopTarget(0)) + elevatorBottomToFloor;
 				} else {
 					// Motion profile control
@@ -199,19 +218,20 @@ public class Elevator extends SubsystemBase {
 			}
 		} else {
 			// Elevator not calibrated
-			return ElevatorConstants.hatchHigh;
+			return ElevatorConstants.stowed; // Not sure about this
 		}
 	}
 
 	/**
-	 * @return Current elevator position, in inches from floor.  Returns hatchHigh
-	 * if the elevator is in manual mode (not calibrated), in order to engage interlocks.
+	 * @return Current elevator position, in inches from floor.  
+	 * if the elevator is in manual mode (not calibrated) return stowed?
+	 * 
 	 */
 	public double getElevatorPos() {
 		if (elevCalibrated) {
 			return encoderTicksToInches(getElevatorEncTicks()) + elevatorBottomToFloor;
 		} else {
-			return ElevatorConstants.hatchHigh;   //This could be a problem on next time it is enable it goes to hatchHigh
+			return ElevatorConstants.stowed;   //This could be a problem on next time it is enable it goes to hatchHigh
 		}
 	}
 
@@ -237,7 +257,7 @@ public class Elevator extends SubsystemBase {
 			stopElevator();			// Make sure Talon PID loop or motion profile won't move the robot to the last set position when we reset the enocder position
 			elevatorMotor1.setSelectedSensorPosition(0, 0, 0);
 			elevCalibrated = true;
-			log.writeLog(false, "Elevator", "Calibrate and Zero Encoder", "checkAndZeroElevatorEnc");
+			log.writeLog(false, subsystemName, "Calibrate and Zero Encoder", "checkAndZeroElevatorEnc");
 		}
 	}
 
@@ -294,7 +314,7 @@ public class Elevator extends SubsystemBase {
 		double amps2 = elevatorMotor2.getStatorCurrent();
 
 		if(motorFaultCount >= 5) {
-			RobotPreferences.recordStickyFaults("Elevator", log);
+			RobotPreferences.recordStickyFaults(subsystemName, log);
 			motorFaultCount = 0;
 		}
 
@@ -314,7 +334,7 @@ public class Elevator extends SubsystemBase {
     * @param logWhenDisabled true will log when disabled, false will discard the string
     */
 	public void updateElevatorLog(boolean logWhenDisabled) {
-		log.writeLog(logWhenDisabled, "Elevator", "Update Variables",
+		log.writeLog(logWhenDisabled, subsystemName, "Update Variables",
 				"Volts1," + elevatorMotor1.getMotorOutputVoltage(), "Volts2", elevatorMotor2.getMotorOutputVoltage(),
 				"Amps1", elevatorMotor1.getStatorCurrent(), "Amps2", elevatorMotor2.getStatorCurrent() + 
 				"Enc Ticks", getElevatorEncTicks(), "Enc Inches", getElevatorPos(), 
@@ -331,24 +351,32 @@ public class Elevator extends SubsystemBase {
 	// 	}
 	// }
 
+	/**
+   * Turns file logging on every scheduler cycle (~20ms) or every 10 cycles (~0.2 sec)
+   * @param enabled true = every cycle, false = every 10 cycles
+   */ 
+  @Override
+  public void enableFastLogging(boolean enabled) {
+    fastLogging = enabled;
+  }
 	
 	@Override
 	public void periodic() {
 		
 		// Can some of these be eliminated by competition?
 
-		if (log.getLogRotation() == logRotationKey) {
-			SmartDashboard.putBoolean("Elev encOK", elevEncOK);
-			SmartDashboard.putBoolean("Elev Calibrated", elevCalibrated);
-			SmartDashboard.putBoolean("Elev Mode", elevPosControl);
+		if (fastLogging || log.isMyLogRotation(logRotationKey)) {
+			SmartDashboard.putBoolean(buildString(subsystemName, " encOK"), elevEncOK);
+			SmartDashboard.putBoolean(buildString(subsystemName, " Calibrated"), elevCalibrated);
+			SmartDashboard.putBoolean(buildString(subsystemName, " Mode"), elevPosControl);
 			// SmartDashboard.putNumber("EncSnap", encSnapShot);
 			// SmartDashboard.putNumber("Enc Now", currEnc);
-			SmartDashboard.putNumber("Elev Pos", getElevatorPos());
-			SmartDashboard.putNumber("Elev Target", getCurrentElevatorTarget());
-			SmartDashboard.putNumber("Elev Ticks", getElevatorEncTicks());
+			SmartDashboard.putNumber(buildString(subsystemName, " Pos"), getElevatorPos());
+			SmartDashboard.putNumber(buildString(subsystemName, " Target"), getCurrentElevatorTarget());
+			SmartDashboard.putNumber(buildString(subsystemName, " Ticks"), getElevatorEncTicks());
 			// SmartDashboard.putNumber("Enc Tick", getElevatorEncTicks());
-			SmartDashboard.putBoolean("Elev Lower Limit", getElevatorLowerLimit());
-			SmartDashboard.putBoolean("Elev Upper Limit", getElevatorUpperLimit());
+			SmartDashboard.putBoolean(buildString(subsystemName, " Lower Limit"), getElevatorLowerLimit());
+			SmartDashboard.putBoolean(buildString(subsystemName, " Upper Limit"), getElevatorUpperLimit());
 
 			updateElevatorLog(false);
 			elevatorProfile.updateElevatorProfileLog(false);
@@ -423,7 +451,7 @@ public class Elevator extends SubsystemBase {
 			elevCalibrated = true;
 			stopElevator();
 			elevatorMotor1.setSelectedSensorPosition(0, 0, 0);
-			log.writeLog(false, "Elevator", "Calibrate and Zero Encoder", "periodic");
+			log.writeLog(false, subsystemName, "Calibrate and Zero Encoder", "periodic");
 
 			// posMoveCount = 0;
 			// negMoveCount = 0;

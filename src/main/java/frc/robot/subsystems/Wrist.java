@@ -13,25 +13,21 @@ import frc.robot.Constants.WristConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.Ports;
 import frc.robot.utilities.FileLog;
+import frc.robot.utilities.Loggable;
 import frc.robot.utilities.Wait;
+import static frc.robot.utilities.StringUtil.*;
 
-
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.DemandType;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
-import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxLimitSwitch;
+import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-public class Wrist extends SubsystemBase {
+public class Wrist extends SubsystemBase implements Loggable{
   private CANSparkMax wristMotor = new CANSparkMax(Ports.CANWristMotor, MotorType.kBrushless);
+  private SparkMaxPIDController wristPIDController;
   // private TalonFXSensorCollection wristLimits;
   private RelativeEncoder relativeEncoder;
 
@@ -39,11 +35,16 @@ public class Wrist extends SubsystemBase {
   private SparkMaxLimitSwitch fwdLimitSwitch;
   FileLog log;
   private int logRotationKey;         // key for the logging cycle for this subsystem
+  boolean fastLogging;
 
-	private int posMoveCount = 0; // increments every cycle the wrist moves up
-	private int negMoveCount = 0; // increments every cycle the wrist moves down
-	private double currEnc = 0.0; // current recorded encoder value
-	private double encSnapShot = 0.0; // snapshot of encoder value used to make sure encoder is working
+  private String subsystemName;
+
+  // Don't think we need these
+	// private int posMoveCount = 0; // increments every cycle the wrist moves up
+	// private int negMoveCount = 0; // increments every cycle the wrist moves down
+	// private double currEnc = 0.0; // current recorded encoder value
+	// private double encSnapShot = 0.0; // snapshot of encoder value used to make sure encoder is working
+  
   private double encoderDegreesPerTicks = 360.0 / WristConstants.encoderTicksPerRevolution;
   private double encoderTicksPerDegrees = WristConstants.encoderTicksPerRevolution / 360.0;
 
@@ -56,14 +57,16 @@ public class Wrist extends SubsystemBase {
 	private double kI = 0.0;      // Try 0.036?
   // kD = (desired-output-1.0max)*1024 * (time-ms) / (error-in-encoder-ticks)
   // kD = 200 -> output of 0.2 when error is changing by 90 degrees per second
+
+  // TODO Calibrate
 	private double kD = 0.0;  // was 5.0
   private double kFF = 0.0;   // FF gain is multiplied by sensor value (probably in encoder ticks) and divided by 1024
   private double kFFconst = 0.075;   // Add about 1V (0.075* 12V) feed foward constant
   private double kIz = 10;    // Izone in degrees
-  private double kIAccumMax = 0.3/kI;     // Max Iaccumulator value, in encoderTicks*milliseconds.  Max I power = kI * kIAccumMax.
+  // private double kIAccumMax = 0.3/kI;     // Max Iaccumulator value, in encoderTicks*milliseconds.  Max I power = kI * kIAccumMax.
   private double kMaxOutput = 0.6; // up max output
   private double kMinOutput = -0.6; // down max output
-  private double rampRate = 0.3;
+  // private double rampRate = 0.3;
 
   public double wristCalZero;   		// Wrist encoder position at O degrees, in encoder ticks (i.e. the calibration factor)
   public boolean wristCalibrated = false;     // Default to wrist being uncalibrated.  Calibrate from robot preferences or "Calibrate Wrist Zero" button on dashboard
@@ -71,12 +74,17 @@ public class Wrist extends SubsystemBase {
 
   private double safeAngle;
 
-  public Wrist(FileLog log) {
+  public Wrist(String name, FileLog log) {
     this.log = log;
     logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
+    fastLogging = false;
+    this.subsystemName = name;
+    wristPIDController = wristMotor.getPIDController();
     wristMotor.setInverted(true);
     wristMotor.clearFaults();
     wristMotor.setIdleMode(IdleMode.kCoast);
+
+
     // wristMotor.set(ControlMode.PercentOutput, 0);
     // wristMotor.setInverted(true);
     // wristMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, 0);
@@ -100,7 +108,21 @@ public class Wrist extends SubsystemBase {
     // wristMotor.configPeakOutputReverse(kMinOutput);
     
     // wristLimits =  wristMotor.getSensorCollection();
+    wristPIDController = wristMotor.getPIDController();
     relativeEncoder = wristMotor.getEncoder();
+
+    // Set PID Coefficients
+    wristPIDController.setI(kI);
+    wristPIDController.setD(kD);
+    wristPIDController.setP(kP);
+    wristPIDController.setIZone(kIz);
+    wristPIDController.setFF(kFF);
+    wristPIDController.setOutputRange(kMinOutput, kMaxOutput);
+
+      // wristPIDController.setSmartMotionMaxVelocity(maxVel, smartMotionSlot);
+      // wristPIDController.setSmartMotionMinOutputVelocity(minVel, smartMotionSlot);
+      // wristPIDController.setSmartMotionMaxAccel(maxAcc, smartMotionSlot);
+      // wristPIDController.setSmartMotionAllowedClosedLoopError(allowedErr, smartMotionSlot);
 
     // Wait 0.25 seconds before adjusting the wrist calibration.  The reason is that .setInverted (above)
     // changes the sign of read encoder value, but that change can be delayed up to 50ms for a round trip
@@ -112,6 +134,13 @@ public class Wrist extends SubsystemBase {
   }
 
   /**
+   * Returns the name of the subsystem
+   */
+  public String getName() {
+    return subsystemName;
+  }
+
+  /**
    * Sets percent power of wrist motor
    * @param percentPower between -1.0 (down full speed) and 1.0 (up full speed)
    */
@@ -120,7 +149,7 @@ public class Wrist extends SubsystemBase {
     percentOutput = (percentOutput<kMinOutput ? kMinOutput : percentOutput);  
 
     if (log.getLogLevel() == 1) {
-      log.writeLog(false, "Wrist" , "Percent Output", "Percent Output", percentOutput);
+      log.writeLog(false, subsystemName , "Percent Output", "Percent Output", percentOutput);
     }
     wristMotor.set(percentOutput);
   }
@@ -145,7 +174,7 @@ public class Wrist extends SubsystemBase {
             elevator.getElevatorPos() > elevatorWristSafeStow ||         // Elevator is not safe
             elevator.getCurrentElevatorTarget() > elevatorWristSafeStow) // Elevator is moving to not safe
             && (angle > WristConstants.wristKeepOut || getWristAngle() > WristConstants.wristKeepOut)) {  // We are moving in or out of KeepOut region
-        log.writeLog(false, "Wrist", "Set angle", "Angle", angle , "Set angle,N/A,Interlock,Forbidden",
+        log.writeLog(false, subsystemName, "Set angle", "Angle", angle , "Set angle,N/A,Interlock,Forbidden",
            ",Elevator Position", elevator.getElevatorPos() + 
           ",Elevator Target," + elevator.getCurrentElevatorTarget() + ",Wrist Angle," + getWristAngle());
         return;
@@ -166,13 +195,11 @@ public class Wrist extends SubsystemBase {
       // wristMotor.set(ControlMode.Position, degreesToEncoderTicks(safeAngle) + Robot.robotPrefs.wristCalZero);
       // wristMotor.set(ControlMode.Position, degreesToEncoderTicks(safeAngle) + wristCalZero, 
       //                DemandType.ArbitraryFeedForward, kFFconst);
-      double error = getWristAngle() - safeAngle;
-      usingPosition = true;
-      while(Math.abs(error) > 1){
-        wristMotor.set(error/encoderDegreesPerTicks * kP);
-      }
-      usingPosition = false;
-      log.writeLog(false, "Wrist", "Set angle", "Desired angle", angle, "Set angle", safeAngle, "Interlock,Allowed",
+      // Need usingPosition boolean because there is no way to get controltype from neo
+      usingPosition = true; // Starting to set angle with position
+      wristPIDController.setReference(degreesToEncoderTicks(safeAngle) + wristCalZero, ControlType.kPosition,0, kFFconst);
+      usingPosition = false; //Finished setting angle with position
+      log.writeLog(false, subsystemName, "Set angle", "Desired angle", angle, "Set angle", safeAngle, "Interlock,Allowed",
        "Elevator Pos", elevator.getElevatorPos(), "Elevator Target", elevator.getCurrentElevatorTarget());  
     }
   }
@@ -222,17 +249,17 @@ public class Wrist extends SubsystemBase {
 	 * Note: absolute encoder values don't wrap during operation
 	 */
 	public void adjustWristCalZero() {
-    log.writeLogEcho(false, "Wrist", "Adjust wrist pre", "wrist angle", getWristAngle(), 
+    log.writeLogEcho(false, subsystemName, "Adjust wrist pre", "wrist angle", getWristAngle(), 
       "raw ticks", getWristEncoderTicksRaw(), "wristCalZero", wristCalZero);
 		if(getWristAngle() < WristConstants.wristMin - 15.0) {
-      log.writeLogEcho(false, "Wrist", "Adjust wrist", "Below min angle");
+      log.writeLogEcho(false, subsystemName, "Adjust wrist", "Below min angle");
 			wristCalZero -= WristConstants.encoderTicksPerRevolution;
 		}
 		else if(getWristAngle() > WristConstants.wristMax + 10.0) {
-      log.writeLogEcho(false, "Wrist", "Adjust wrist", "Above max angle");
+      log.writeLogEcho(false, subsystemName, "Adjust wrist", "Above max angle");
 			wristCalZero += WristConstants.encoderTicksPerRevolution;
 		}
-    log.writeLogEcho(false, "Wrist", "Adjust wrist post", "wrist angle", getWristAngle(), 
+    log.writeLogEcho(false, subsystemName, "Adjust wrist post", "wrist angle", getWristAngle(), 
       "raw ticks", getWristEncoderTicksRaw(), "wristCalZero", wristCalZero);
 	}
 
@@ -262,7 +289,7 @@ public class Wrist extends SubsystemBase {
    */
   public double getWristEncoderTicks() {
     if(log.getLogLevel() == 1){
-      log.writeLog(false, "Wrist", "Wrist Encoder Ticks", "Wrist Encoder Ticks," + (getWristEncoderTicksRaw() - wristCalZero));
+      log.writeLog(false, subsystemName, "Wrist Encoder Ticks", "Wrist Encoder Ticks," + (getWristEncoderTicksRaw() - wristCalZero));
     }
     return getWristEncoderTicksRaw() - wristCalZero;
   }
@@ -300,7 +327,7 @@ public class Wrist extends SubsystemBase {
    */
   private double getWristEncoderDegrees() {
     if(log.getLogLevel() == 1){
-      log.writeLog(false, "Wrist", "Wrist Encoder Degrees", "Wrist Encoder Degrees," + encoderTicksToDegrees(getWristEncoderTicks()));
+      log.writeLog(false, subsystemName, "Wrist Encoder Degrees", "Wrist Encoder Degrees," + encoderTicksToDegrees(getWristEncoderTicks()));
     }
     return encoderTicksToDegrees(getWristEncoderTicks());
   }
@@ -326,7 +353,7 @@ public class Wrist extends SubsystemBase {
       wristAngle = (wristAngle > 180) ? wristAngle - 360 : wristAngle; // Change range to -180 to +180
       // wristAngle = (wristAngle <= -180) ? wristAngle + 360 : wristAngle; // Change range to -180 to +180  THIS LINE OF CODE DOESN'T WORK!!!!
       if (log.getLogLevel() == 1){
-        log.writeLog(false, "Wrist", "Get Wrist Angle", "Wrist Angle", wristAngle);
+        log.writeLog(false, subsystemName, "Get Wrist Angle", "Wrist Angle", wristAngle);
       }
       return wristAngle;
     } else {
@@ -359,7 +386,7 @@ public class Wrist extends SubsystemBase {
       currentTarget = (currentTarget > 180) ? currentTarget - 360 : currentTarget; // Change range to -180 to +180
 
       if(log.getLogLevel() == 1){
-        log.writeLog(false, "Wrist", "Wrist Target", "Wrist Target", currentTarget);
+        log.writeLog(false, subsystemName, "Wrist Target", "Wrist Target", currentTarget);
       }
       return currentTarget;
     } else {
@@ -382,7 +409,7 @@ public class Wrist extends SubsystemBase {
    * @param logWhenDisabled true will log when disabled, false will discard the string
    */
   public void updateWristLog(boolean logWhenDisabled) {
-    log.writeLog(logWhenDisabled, "Wrist", "Update Variables",
+    log.writeLog(logWhenDisabled, subsystemName, "Update Variables",
         "Volts", wristMotor.getBusVoltage(), "Amps", wristMotor.getOutputCurrent(),
         "WristCalZero", wristCalZero,
         "Enc Raw", getWristEncoderTicksRaw(), "Wrist Angle", getWristAngle(), "Wrist Target", getCurrentWristTarget(),
@@ -390,19 +417,26 @@ public class Wrist extends SubsystemBase {
         );
   }
 
-
+  /**
+   * Turns file logging on every scheduler cycle (~20ms) or every 10 cycles (~0.2 sec)
+   * @param enabled true = every cycle, false = every 10 cycles
+   */ 
+  @Override
+  public void enableFastLogging(boolean enabled) {
+    fastLogging = enabled;
+  }
   
   @Override
   public void periodic() {
 
-    if (log.getLogRotation() ==   logRotationKey) {
-      SmartDashboard.putBoolean("Wrist calibrated", wristCalibrated);
-      SmartDashboard.putNumber("Wrist Angle", getWristAngle());
-      SmartDashboard.putNumber("Wrist enc raw", getWristEncoderTicksRaw());
-			SmartDashboard.putBoolean("Wrist Lower Limit", getWristLowerLimit());
-      SmartDashboard.putBoolean("Wrist Upper Limit", getWristUpperLimit());
-      SmartDashboard.putNumber("Wrist target", getCurrentWristTarget());
-      SmartDashboard.putNumber("Wrist voltage", wristMotor.getBusVoltage());
+    if (fastLogging || log.isMyLogRotation(logRotationKey)) {
+      SmartDashboard.putBoolean(buildString(subsystemName, " calibrated"), wristCalibrated);
+      SmartDashboard.putNumber(buildString(subsystemName, " Angle"), getWristAngle());
+      SmartDashboard.putNumber(buildString(subsystemName, " enc raw"), getWristEncoderTicksRaw());
+			SmartDashboard.putBoolean(buildString(subsystemName, " Lower Limit"), getWristLowerLimit());
+      SmartDashboard.putBoolean(buildString(subsystemName, " Upper Limit"), getWristUpperLimit());
+      SmartDashboard.putNumber(buildString(subsystemName, " target angle"), getCurrentWristTarget());
+      SmartDashboard.putNumber(buildString(subsystemName, " voltage"), wristMotor.getBusVoltage());
     }
     
     // Checks if the wrist is not calibrated and automatically calibrates it once the limit switch is pressed
@@ -425,7 +459,7 @@ public class Wrist extends SubsystemBase {
       updateWristLog(true);
     }
 
-    if (log.getLogRotation() == logRotationKey) {
+    if (fastLogging || log.isMyLogRotation(logRotationKey)) {
       updateWristLog(false);
     }
 
