@@ -420,8 +420,6 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     double degrees = getGyroRotation();
     odometry.update(Rotation2d.fromDegrees(degrees), getModulePotisions());
     
-    updateOdometry();
-
     if(fastLogging || log.isMyLogRotation(logRotationKey)) {
       updateDriveLog(false);
 
