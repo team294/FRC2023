@@ -416,9 +416,8 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     // calculate angVel in degrees per second
     angularVelocity =  lfRunningAvg.calculate( (currAng - prevAng) / (currTime - prevTime) * 1000 );
 
-    // Update robot odometry
-    double degrees = getGyroRotation();
-    odometry.update(Rotation2d.fromDegrees(degrees), getModulePotisions());
+    // update 
+    updateOdometry();
     
     if(fastLogging || log.isMyLogRotation(logRotationKey)) {
       updateDriveLog(false);
@@ -436,7 +435,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
       SmartDashboard.putNumber("Drive Y Velocity", robotSpeeds.vyMetersPerSecond);
       SmartDashboard.putBoolean("Drive isGyroReading", isGyroReading());
       SmartDashboard.putNumber("Drive Raw Gyro", getGyroRaw());
-      SmartDashboard.putNumber("Drive Gyro Rotation", degrees);
+      SmartDashboard.putNumber("Drive Gyro Rotation", getGyroRotation());
       SmartDashboard.putNumber("Drive AngVel", angularVelocity);
       SmartDashboard.putNumber("Drive Pitch", ahrs.getRoll());
       
@@ -481,4 +480,28 @@ public class DriveTrain extends SubsystemBase implements Loggable {
       swerveBackRight.getLogString()
       );
   }
+
+  public void updateOdometry() {
+    poseEstimator.update(Rotation2d.fromDegrees(getGyroRotation()), getModulePotisions());
+
+    Optional<EstimatedRobotPose> result = camera.getEstimatedGlobalPose(poseEstimator.getEstimatedPosition());
+
+    if (result.isPresent()) {
+        EstimatedRobotPose camPose = result.get();
+        poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
+        field.getObject("Cam Est Pos").setPose(camPose.estimatedPose.toPose2d());
+
+        Pose2d pose = camPose.estimatedPose.toPose2d();
+
+        SmartDashboard.putNumber("Drive Pose X", pose.getTranslation().getX());
+        SmartDashboard.putNumber("Drive Pose Y", pose.getTranslation().getY());
+        SmartDashboard.putNumber("Drive Pose Theta", pose.getRotation().getDegrees());
+    } else {
+        // move it way off the screen to make it disappear
+        field.getObject("Cam Est Pos").setPose(new Pose2d(-100, -100, new Rotation2d()));
+    }
+
+    field.setRobotPose(poseEstimator.getEstimatedPosition());
+  }  
+
 }
