@@ -147,13 +147,14 @@ public class Elevator extends SubsystemBase implements Loggable{
 	*/
 	public void setProfileTarget(double pos, Wrist wrist) {
 		if (elevEncOK && elevCalibrated &&										// Elevator must be calibrated
-			  wrist.getWristAngle() < WristConstants.wristStowed &&  	// Wrist must not be stowed(Maybe different constant here)
-			  wrist.getCurrentWristTarget() < WristConstants.wristStowed && // Wrist must not be moving to stow
+		// Wrist and elevator don't affect eachother 
+			  /*wrist.getWristAngle() < WristConstants.stowed &&  	// Wrist must not be stowed
+			  wrist.getCurrentWristTarget() < WristConstants.stowed && // Wrist must not be moving to stow
 			  ( wrist.getWristAngle() >= WristConstants.wristMinWhenElevatorLow &&	// wrist must be at least wristMinWhenElevatorLow
-				wrist.getCurrentWristTarget() >= WristConstants.wristMinWhenElevatorLow || //Wrist must not be moving to wristMinWhenElevatorLow
-				pos >= ElevatorConstants.groundCargo &&						// Elevator is not going below groundCargo position
-				wrist.getWristAngle() >= WristConstants.wristDown - 3.0 &&	     // wrist must be at least wristDown
-				wrist.getCurrentWristTarget() >= WristConstants.wristDown - 3.0 ) // Wrist must not be moving below wristDown
+				wrist.getCurrentWristTarget() >= WristConstants.wristMinWhenElevatorLow ||*/ //Wrist must not be moving to wristMinWhenElevatorLow
+				pos >= ElevatorConstants.stowed - 5						// Elevator is not going below stowed position
+				/*&& wrist.getWristAngle() >= WristConstants.wristDown - 3.0 &&	     // wrist must be at least wristDown
+				wrist.getCurrentWristTarget() >= WristConstants.wristDown - 3.0 */// Wrist must not be moving below wristDown
 		 ) {
 			elevPosControl = true;
 			elevatorProfile.setProfileTarget(pos);
@@ -174,13 +175,14 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 */
 	public void setElevatorPos(Wrist wrist, double inches) {
 		if (elevEncOK && elevCalibrated &&										// Elevator must be calibrated
-			  wrist.getWristAngle() < WristConstants.wristStowed &&  	// Wrist must not be stowed
-			  wrist.getCurrentWristTarget() < WristConstants.wristStowed && // Wrist must not be moving to stow
-			  ( wrist.getWristAngle() >= WristConstants.wristStraight - 5.0 &&	// wrist must be at least horizontal
-				wrist.getCurrentWristTarget() >= WristConstants.wristStraight - 5.0 || // Wrist must not be moving below horizantal
-				inches >= ElevatorConstants.groundCargo &&						// Elevator is not going below groundCargo position
-				wrist.getWristAngle() >= WristConstants.wristDown - 3.0 &&	     // wrist must be at least wristDown
-				wrist.getCurrentWristTarget() >= WristConstants.wristDown - 3.0 ) // Wrist must not be moving below wristDown
+		// Wrist and elevator don't affect eachother 
+			 /* wrist.getWristAngle() < WristConstants.stowed &&  	// Wrist must not be stowed
+			  wrist.getCurrentWristTarget() < WristConstants.stowed && // Wrist must not be moving to stow
+			  ( wrist.getWristAngle() >= WristConstants.straight - 5.0 &&	// wrist must be at least horizontal
+				wrist.getCurrentWristTarget() >= WristConstants.straight - 5.0 || // Wrist must not be moving below horizantal */
+				inches >= ElevatorConstants.stowed //&&						// Elevator is not going below groundCargo position
+				// wrist.getWristAngle() >= WristConstants.wristDown - 3.0 &&	     // wrist must be at least wristDown
+				// wrist.getCurrentWristTarget() >= WristConstants.wristDown - 3.0 ) // Wrist must not be moving below wristDown
 		 ) {
 			elevatorMotor1.set(ControlMode.Position, inchesToEncoderTicks(inches - elevatorBottomToFloor));
 			elevPosControl = true;

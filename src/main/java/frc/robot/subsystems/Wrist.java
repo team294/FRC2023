@@ -10,7 +10,6 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.WristConstants;
-import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.Ports;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.Loggable;
@@ -148,7 +147,7 @@ public class Wrist extends SubsystemBase implements Loggable{
     percentOutput = (percentOutput>kMaxOutput ? kMaxOutput : percentOutput);
     percentOutput = (percentOutput<kMinOutput ? kMinOutput : percentOutput);  
 
-    if (log.getLogLevel() == 1) {
+    if (log.isMyLogRotation(logRotationKey)) {
       log.writeLog(false, subsystemName , "Percent Output", "Percent Output", percentOutput);
     }
     wristMotor.set(percentOutput);
@@ -170,34 +169,37 @@ public class Wrist extends SubsystemBase implements Loggable{
   public void setWristAngle(double angle, Elevator elevator) {
     if (wristCalibrated) {
       // Don't move wrist in or out of KeepOut if climber > climbWristMovingSafe or elevator > elevatorWristSafeStow.
-      if ( (
-            elevator.getElevatorPos() > elevatorWristSafeStow ||         // Elevator is not safe
+      if (
+            // Not needed because elevator doesn'it interfere with wrist
+            /*(elevator.getElevatorPos() > elevatorWristSafeStow ||         // Elevator is not safe
             elevator.getCurrentElevatorTarget() > elevatorWristSafeStow) // Elevator is moving to not safe
-            && (angle > WristConstants.wristKeepOut || getWristAngle() > WristConstants.wristKeepOut)) {  // We are moving in or out of KeepOut region
+            &&*/ (angle > WristConstants.max || angle < WristConstants.min /*|| getWristAngle() > WristConstants.wristKeepOut*/)) {  // We are moving in or out of KeepOut region
         log.writeLog(false, subsystemName, "Set angle", "Angle", angle , "Set angle,N/A,Interlock,Forbidden",
            ",Elevator Position", elevator.getElevatorPos() + 
           ",Elevator Target," + elevator.getCurrentElevatorTarget() + ",Wrist Angle," + getWristAngle());
         return;
       }
-
+      // Angle should be safe as long as its between min and max limits
+      // Shouldn't be affected by elevator position
       safeAngle = angle;
 
       // Apply interlocks if elevator is low
-      if (elevator.getElevatorPos() < ElevatorConstants.groundCargo - 2.0 || elevator.getCurrentElevatorTarget() < ElevatorConstants.groundCargo -2.0) {
-        // Elevator is very low or is going very low
-        // Wrist can not be below vision level
-        safeAngle = (safeAngle < WristConstants.wristVision) ? WristConstants.wristVision : safeAngle;
-      } else {
+      // if (elevator.getElevatorPos() < ElevatorConstants.groundCargo - 2.0 || elevator.getCurrentElevatorTarget() < ElevatorConstants.groundCargo -2.0) {
+      //   // Elevator is very low or is going very low
+      //   // Wrist can not be below vision level
+      //   safeAngle = (safeAngle < WristConstants.wristVision) ? WristConstants.wristVision : safeAngle;
+      // } else {
         // Wrist is safe to move as far down as wristDown
-        safeAngle = (safeAngle < WristConstants.wristDown) ? WristConstants.wristDown : safeAngle;
-      }
+        // safeAngle = (safeAngle < WristConstants.wristDown) ? WristConstants.wristDown : safeAngle;
+      // }
 
       // wristMotor.set(ControlMode.Position, degreesToEncoderTicks(safeAngle) + Robot.robotPrefs.wristCalZero);
       // wristMotor.set(ControlMode.Position, degreesToEncoderTicks(safeAngle) + wristCalZero, 
       //                DemandType.ArbitraryFeedForward, kFFconst);
       // Need usingPosition boolean because there is no way to get controltype from neo
       usingPosition = true; // Starting to set angle with position
-      wristPIDController.setReference(degreesToEncoderTicks(safeAngle) + wristCalZero, ControlType.kPosition,0, kFFconst);
+      //use arbitrary kFF value?
+      wristPIDController.setReference(degreesToEncoderTicks(safeAngle) + wristCalZero, ControlType.kPosition/*, 0, kFFconst*/);
       usingPosition = false; //Finished setting angle with position
       log.writeLog(false, subsystemName, "Set angle", "Desired angle", angle, "Set angle", safeAngle, "Interlock,Allowed",
        "Elevator Pos", elevator.getElevatorPos(), "Elevator Target", elevator.getCurrentElevatorTarget());  
@@ -251,11 +253,11 @@ public class Wrist extends SubsystemBase implements Loggable{
 	public void adjustWristCalZero() {
     log.writeLogEcho(false, subsystemName, "Adjust wrist pre", "wrist angle", getWristAngle(), 
       "raw ticks", getWristEncoderTicksRaw(), "wristCalZero", wristCalZero);
-		if(getWristAngle() < WristConstants.wristMin - 15.0) {
+		if(getWristAngle() < WristConstants.min - 15.0) {
       log.writeLogEcho(false, subsystemName, "Adjust wrist", "Below min angle");
 			wristCalZero -= WristConstants.encoderTicksPerRevolution;
 		}
-		else if(getWristAngle() > WristConstants.wristMax + 10.0) {
+		else if(getWristAngle() > WristConstants.max + 10.0) {
       log.writeLogEcho(false, subsystemName, "Adjust wrist", "Above max angle");
 			wristCalZero += WristConstants.encoderTicksPerRevolution;
 		}
@@ -288,7 +290,7 @@ public class Wrist extends SubsystemBase implements Loggable{
    * @return raw encoder ticks (based on encoder zero being at horizontal position)
    */
   public double getWristEncoderTicks() {
-    if(log.getLogLevel() == 1){
+    if(log.isMyLogRotation(logRotationKey)){
       log.writeLog(false, subsystemName, "Wrist Encoder Ticks", "Wrist Encoder Ticks," + (getWristEncoderTicksRaw() - wristCalZero));
     }
     return getWristEncoderTicksRaw() - wristCalZero;
@@ -326,7 +328,7 @@ public class Wrist extends SubsystemBase implements Loggable{
    * @return current encoder ticks (based on zero) converted to degrees
    */
   private double getWristEncoderDegrees() {
-    if(log.getLogLevel() == 1){
+    if(log.isMyLogRotation(logRotationKey)){
       log.writeLog(false, subsystemName, "Wrist Encoder Degrees", "Wrist Encoder Degrees," + encoderTicksToDegrees(getWristEncoderTicks()));
     }
     return encoderTicksToDegrees(getWristEncoderTicks());
@@ -352,14 +354,14 @@ public class Wrist extends SubsystemBase implements Loggable{
       wristAngle = wristAngle % 360; // If encoder wraps around 360 degrees
       wristAngle = (wristAngle > 180) ? wristAngle - 360 : wristAngle; // Change range to -180 to +180
       // wristAngle = (wristAngle <= -180) ? wristAngle + 360 : wristAngle; // Change range to -180 to +180  THIS LINE OF CODE DOESN'T WORK!!!!
-      if (log.getLogLevel() == 1){
+      if (log.isMyLogRotation(logRotationKey)){
         log.writeLog(false, subsystemName, "Get Wrist Angle", "Wrist Angle", wristAngle);
       }
       return wristAngle;
     } else {
       // Wrist is not calibrated.  Assume we are at max angle in keepout region to engage all interlocks,
       // since we really don't know where the wrist is at.
-      return WristConstants.wristMax;
+      return WristConstants.max;
     }
   }
 
@@ -385,14 +387,14 @@ public class Wrist extends SubsystemBase implements Loggable{
       currentTarget = currentTarget % 360; // If encoder wraps around 360 degrees
       currentTarget = (currentTarget > 180) ? currentTarget - 360 : currentTarget; // Change range to -180 to +180
 
-      if(log.getLogLevel() == 1){
+      if(log.isMyLogRotation(logRotationKey)){
         log.writeLog(false, subsystemName, "Wrist Target", "Wrist Target", currentTarget);
       }
       return currentTarget;
     } else {
       // Wrist is not calibrated.  Assume we are at max angle in keepout region to engage all interlocks,
       // since we really don't know where the wrist is at.
-      return WristConstants.wristMax;
+      return WristConstants.max;
     }
   }
 
@@ -443,18 +445,18 @@ public class Wrist extends SubsystemBase implements Loggable{
     // If the wrist isn't calibrated at the start of the match, does that mean we can't control the wrist at all?
     if (!wristCalibrated) {
       if (getWristUpperLimit()) {
-        calibrateWristEnc(WristConstants.wristMax);
+        calibrateWristEnc(WristConstants.max);
         updateWristLog(true);
       }
       if (getWristLowerLimit()) {
-        calibrateWristEnc(WristConstants.wristMin);
+        calibrateWristEnc(WristConstants.min);
         updateWristLog(true);
       }
     }
     
     // Un-calibrates the wrist if the angle is outside of bounds
     // TODO change low back to - 10.0
-    if (getWristAngle() > WristConstants.wristMax + 5.0 || getWristAngle() < WristConstants.wristMin - 15.0) {
+    if (getWristAngle() > WristConstants.max + 5.0 || getWristAngle() < WristConstants.min - 15.0) {
       setWristUncalibrated();
       updateWristLog(true);
     }
