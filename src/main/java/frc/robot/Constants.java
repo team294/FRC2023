@@ -78,9 +78,9 @@ public final class Constants {
 
     public static final class RobotDimensions {
         //left to right distance between the drivetrain wheels; should be measured from center to center
-        public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.59127;      // CALIBRATED-2 = 0.59127 (based on robot rotating in place).  CAD geometry = 0.57785.
+        public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.58721;      // CALIBRATED-3 = 0.58721 (based on robot rotating in place).  CAD geometry = 0.57785.
         //front-back distance between the drivetrain wheels; should be measured from center to center
-        public static final double DRIVETRAIN_WHEELBASE_METERS = 0.59127;       // CALIBRATED-2 = 0.59127 (based on robot rotating in place).  CAD geometry = 0.57785.
+        public static final double DRIVETRAIN_WHEELBASE_METERS = 0.58721;       // CALIBRATED-3 = 0.58721 (based on robot rotating in place).  CAD geometry = 0.57785.
 
     }
 
@@ -105,14 +105,13 @@ public final class Constants {
         // Max acceleration measured 2/12/2023 (with new drive gears):  Average ~11 m/sec^2.  Keep value at 10.0 for now.
         public static final double kMaxAccelerationMetersPerSecondSquare = 10; // CALIBRATED-3
         public static final double kNominalAccelerationMetersPerSecondSquare = 0.7*kMaxAccelerationMetersPerSecondSquare;
-        // Max turn velocity degrees per second measured values 1/13/2023: FL = 1744.629, FR = 1762.207, BL = 1736.719, BR = 2085.645
-        public static final double kMaxTurningRadiansPerSecond = 9.1;   // CALIBRATED-2 took 528 degreesPerSecond and converted to radians
+        public static final double kMaxTurningRadiansPerSecond = 11.0;   // CALIBRATED-3 took 633 degreesPerSecond and converted to radians and rounded down
         public static final double kNominalTurningRadiansPerSecond = Math.PI;
-        public static final double kMaxAngularAccelerationRadiansPerSecondSquared = 30.0;            // CALIBRATED-2 31.7 rad/sec^2
+        public static final double kMaxAngularAccelerationRadiansPerSecondSquared = 35.0;            // CALIBRATED-3 37.4 rad/sec^2
         public static final double kNominalAngularAccelerationRadiansPerSecondSquared = Math.PI;
-        public static final double kVDrive = 0.248; // CALIBRATED-2 = 0.248.  in % output per meters per second
+        public static final double kVDrive = 0.2511; // CALIBRATED-3 = 0.2511.  in % output per meters per second
         public static final double kADrive = 0.0;                   // TODO -- Calibrate
-        public static final double kSDrive = 0.017; // CALIBRATED-2 = 0.017.  in % output
+        public static final double kSDrive = 0.016; // CALIBRATED-3 = 0.016.  in % output
 
     }
 
