@@ -109,6 +109,9 @@ public class RobotContainer {
     //LED
     SmartDashboard.putData("LED Rainbow", new LEDSetPattern(LED.rainbowLibrary, 0, 0.5, led, log));
     SmartDashboard.putData("LED OFF", new LEDSetStrip("Red", 0, led, log).ignoringDisable(true));
+    SmartDashboard.putData("LED Yellow", new LEDSetStrip("Yellow", 1, led, log).ignoringDisable(true));
+    SmartDashboard.putData("LED Purple", new LEDSetStrip("Purple", 1, led, log).ignoringDisable(true));
+
   }
 
   /**

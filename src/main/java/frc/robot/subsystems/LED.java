@@ -192,6 +192,17 @@ public class LED extends SubsystemBase {
   }
 
   /**
+   * Sets color of individual pixel on LED strip.
+   * @param index index of pixel to be changed
+   * @param r red value
+   * @param b blue value
+   * @param g green value
+   */
+  public void setColor(int index, int r, int b, int g) {
+    ledBuffer.setRGB(index, r, g, b);
+  }
+
+  /**
    * Sets entire strip to be one color at 0.5 brightness
    * @param color String name of color, case sensitive
    * @param ledStrip (int) chooses which led strip you use 0 = first 1 = second
