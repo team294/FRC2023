@@ -163,6 +163,8 @@ public class DriveStraight extends CommandBase {
     double targetAccel = tStateNext.acceleration;
 
     // Set wheel speeds
+    // Note:  All 4 SwerveModuleStates in the desiredStates[] array point to the same SwerveModuleState object.
+    // So, they will always have the same speed, even if we only update one of the elements of the array.
     desiredStates[0].speedMetersPerSecond = targetVel;
     desiredStates[1].speedMetersPerSecond = targetVel;
     desiredStates[2].speedMetersPerSecond = targetVel;
@@ -171,8 +173,8 @@ public class DriveStraight extends CommandBase {
     
     // Read current module states for logging
     SwerveModuleState[] currentStates = driveTrain.getModuleStates();
-    double linearVel = (currentStates[0].speedMetersPerSecond + currentStates[1].speedMetersPerSecond +
-                    currentStates[2].speedMetersPerSecond + currentStates[3].speedMetersPerSecond)/4.0;
+    double linearVel = (Math.abs(currentStates[0].speedMetersPerSecond) + Math.abs(currentStates[1].speedMetersPerSecond) +
+        Math.abs(currentStates[2].speedMetersPerSecond) + Math.abs(currentStates[3].speedMetersPerSecond))/4.0;
 
     log.writeLog(false, "DriveStraight", "profile", "angT", angleTarget,
       "posT", tStateNext.position, 
