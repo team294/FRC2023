@@ -45,11 +45,13 @@ public class RobotContainer {
   // Define robot subsystems  
   private final DriveTrain driveTrain = new DriveTrain(log);
   private final Grabber grabber = new Grabber("Grabber", log);
+  private final Manipulator manipulator = new Manipulator(log);
   private final LED led = new LED();
 
   // Define other utilities
   private final TrajectoryCache trajectoryCache = new TrajectoryCache(log);
   private final AutoSelection autoSelection = new AutoSelection(trajectoryCache, log);
+  private final Field field = new Field(driveTrain, manipulator, allianceSelection, log);
 
   // Define controllers
   // private final Joystick xboxController = new Joystick(OIConstants.usbXboxController); //assuming usbxboxcontroller is int

@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 // import frc.robot.RobotContainer;
+import frc.robot.Constants.Ports;
 
 /******************************
  *  import frc.robot.utilities.ColorSensor;
@@ -134,30 +135,12 @@ public class LED extends SubsystemBase {
     {kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack, kBlack},
   };
   
-  /**********************
-   * Controls LED strips on the robot.
-   
- public LED (ColorSensor colorSensor) {  
  
-    led = new AddressableLED(0); // must be a PWM port
-                                 // currently port 0 for testing on miniBot
-    ledBuffer = new AddressableLEDBuffer(length);
-    led.setLength(length);
-
-    // save reference to the color sensor
-    this.colorSensor = colorSensor;
-
-    // set prev and curr Color to see if color is changing
-    prevColor = colorSensor.getColor();
-    currColor = colorSensor.getColor();
-  }
-******************************/
-  
   /**
    * Controls LED strips on without the ColorSensor.
    */
   public LED () {
-    led = new AddressableLED(0); // must be a PWM port, currently port 0
+    led = new AddressableLED(Ports.PWMLEDStripTop);        // must be a PWM port, currently port 0
     ledBuffer = new AddressableLEDBuffer(length);
     led.setLength(length);
     /** 
