@@ -112,6 +112,9 @@ public class RobotContainer {
     SmartDashboard.putData("Grabber Eject", new GrabberEject(grabber, log));
     //LED
     SmartDashboard.putData("LED Rainbow", new LEDSetPattern(LED.rainbowLibrary, 0, 0.5, led, log));
+    SmartDashboard.putData("LED Flash Team Color", new LEDSetPattern(LED.teamFlashingColorsLibrary, 0, 0.5, led, log).ignoringDisable(true));
+    SmartDashboard.putData("LED Full Team Color", new LEDSetPattern(LED.teamFullColorsLibrary, 0, 0.5, led, log).ignoringDisable(true));
+    SmartDashboard.putData("LED moving Team Color", new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 0.5, led, log).ignoringDisable(true));
     SmartDashboard.putData("LED OFF", new LEDSetStrip("Red", 0, led, log).ignoringDisable(true));
     SmartDashboard.putData("LED Yellow", new LEDSetStrip("Yellow", 1, led, log).ignoringDisable(true));
     SmartDashboard.putData("LED Purple", new LEDSetStrip("Purple", 1, led, log).ignoringDisable(true));
@@ -344,14 +347,14 @@ public class RobotContainer {
     if (driveTrain.canBusError()) {
       RobotPreferences.recordStickyFaults("CAN Bus", log);
     }  //    TODO May want to flash this to the driver with some obvious signal!
-    boolean error = true;  
-    if (error == false) {
-      if(!patternTeamMoving.isScheduled()) patternTeamMoving.schedule();
-    }
-    else {
-      patternTeamMoving.cancel();
-      led.setStrip("Red", 0.5, 0);
-    }
+    // boolean error = true;  
+    // if (error == false) {
+    //   if(!patternTeamMoving.isScheduled()) patternTeamMoving.schedule();
+    // }
+    // else {
+    //   patternTeamMoving.cancel();
+    //   led.setStrip("Red", 0.5, 0);
+    // }
   }
   
   /**
