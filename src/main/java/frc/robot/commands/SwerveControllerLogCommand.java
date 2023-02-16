@@ -16,7 +16,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-
+import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.HolonomicDriveControllerBCR;
@@ -266,13 +266,13 @@ public class SwerveControllerLogCommand extends CommandBase {
 
     m_outputModuleStates.accept(targetModuleStates);
 
-    ChassisSpeeds robotSpeeds = m_driveTrain.getChassisSpeeds();
-    m_log.writeLog(true, "DriveFollowTrajectory", "Update", 
+    ChassisSpeeds robotSpeeds = m_driveTrain.getRobotSpeeds();
+    m_log.writeLog(false, "DriveTrajectory", "Execute", 
         "Time", m_timer.get(), 
         "Traj X", desiredState.poseMeters.getTranslation().getX(),
         "Traj Y", desiredState.poseMeters.getTranslation().getY(),
         "Traj Vel", desiredState.velocityMetersPerSecond,
-        "Traj ang", desiredState.poseMeters.getRotation().getDegrees(),
+        "Traj VelAng", desiredState.poseMeters.getRotation().getDegrees(),
         "Target rot", desiredRotation.getDegrees(), 
         "Robot X", robotPose.getTranslation().getX(),
         "Robot Y", robotPose.getTranslation().getY(),
@@ -290,6 +290,7 @@ public class SwerveControllerLogCommand extends CommandBase {
 
   @Override
   public boolean isFinished() {
-    return m_timer.hasElapsed(m_trajectory.getTotalTimeSeconds());
+    return m_timer.hasElapsed(m_trajectory.getTotalTimeSeconds()) &&
+        ( Math.abs(m_pose.get().getRotation().getDegrees() - m_desiredRotation.get().getDegrees()) <= TrajectoryConstants.maxThetaErrorDegrees );
   }
 }

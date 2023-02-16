@@ -8,6 +8,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
+import frc.robot.utilities.TrapezoidProfileBCR;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -104,9 +106,9 @@ public final class Constants {
         public static final double kNominalAccelerationMetersPerSecondSquare = 0.7*kMaxAccelerationMetersPerSecondSquare;
         // Max turn velocity degrees per second measured values 1/13/2023: FL = 1744.629, FR = 1762.207, BL = 1736.719, BR = 2085.645
         public static final double kMaxTurningRadiansPerSecond = 9.1;   // CALIBRATED-2 took 528 degreesPerSecond and converted to radians
-        public static final double kNominalTurningRadiansPerSecond = 6.0;
+        public static final double kNominalTurningRadiansPerSecond = Math.PI;
         public static final double kMaxAngularAccelerationRadiansPerSecondSquared = 30.0;            // CALIBRATED-2 31.7 rad/sec^2
-        public static final double kNominalAngularAccelerationRadiansPerSecondSquared = 10.0;
+        public static final double kNominalAngularAccelerationRadiansPerSecondSquared = Math.PI;
         public static final double kVDrive = 0.248; // CALIBRATED-2 = 0.248.  in % output per meters per second
         public static final double kADrive = 0.0;                   // TODO -- Calibrate
         public static final double kSDrive = 0.017; // CALIBRATED-2 = 0.017.  in % output
@@ -137,11 +139,14 @@ public final class Constants {
       }
 
       public static final class TrajectoryConstants {
+        // Max error for robot rotation
+        public static final double maxThetaErrorDegrees = 1.0;
+        public static final double maxPositionErrorMeters = 0.02;
 
         // Feedback terms for holonomic drive controllers
         public static final double kPXController = 1;       // X-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)
         public static final double kPYController = 1;       // Y-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)
-        public static final double kPThetaController = 1;   // Theta-velocity controller:  kp.  Units = (rad/sec of velocity) / (radians of angle error)
+        public static final double kPThetaController = 3;   // Theta-velocity controller:  kp.  Units = (rad/sec of velocity) / (radians of angle error)
 
         public static final TrajectoryConfig swerveTrajectoryConfig =
             new TrajectoryConfig(
@@ -153,5 +158,10 @@ public final class Constants {
         public static final TrapezoidProfile.Constraints kThetaControllerConstraints =
         new TrapezoidProfile.Constraints(
             SwerveConstants.kNominalTurningRadiansPerSecond, SwerveConstants.kNominalAngularAccelerationRadiansPerSecondSquared);
+
+        /* Constraint for the DriveToPose motion profile for distance being travelled */
+        public static final TrapezoidProfileBCR.Constraints kDriveProfileConstraints =
+        new TrapezoidProfileBCR.Constraints(
+            SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare);
       }
 }
