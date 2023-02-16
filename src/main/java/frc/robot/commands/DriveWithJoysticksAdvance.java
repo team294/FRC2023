@@ -17,6 +17,7 @@ import frc.robot.Constants.SwerveConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
 // import frc.robot.utilities.TrapezoidProfileBCR.Constraints;
+import frc.robot.utilities.TrapezoidProfileBCR;
 
 public class DriveWithJoysticksAdvance extends CommandBase {
   Joystick leftJoystick;
@@ -29,7 +30,7 @@ public class DriveWithJoysticksAdvance extends CommandBase {
   private double fwdVelocity, currFwdVelocity, leftVelocity, currLeftVelocity, turnRate;//, maxVelocity, maxAccel;
 
   /** Creates a new DriveWithJoysticksAdvance. */
-  public DriveWithJoysticksAdvance(Joystick leftJoystick, Joystick rightJoystick, double maxVelocity, Double maxAccel, DriveTrain driveTrain, FileLog log) {
+  public DriveWithJoysticksAdvance(Joystick leftJoystick, Joystick rightJoystick, double maxVelocity, double maxAccel, DriveTrain driveTrain, FileLog log) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.leftJoystick = leftJoystick;
     this.rightJoystick = rightJoystick;
@@ -46,6 +47,9 @@ public class DriveWithJoysticksAdvance extends CommandBase {
   @Override
   public void initialize() {
     driveTrain.setDriveModeCoast(false);
+
+    controller.setPID(JoystickConstants.kPJoystick, JoystickConstants.kIJoystick, JoystickConstants.kDJoystick);
+    controller.reset(0.0);
 
     // lastFwdPercent = 0;
     // lastTime = System.currentTimeMillis() / 1000.0;
