@@ -45,6 +45,7 @@ public final class Constants {
 
 
     public static final class Ports{
+        public static final int CANPneumaticHub = 1;
 
         public static final int CANDriveFrontLeftMotor = 1;
         public static final int CANDriveFrontRightMotor = 2;
@@ -65,8 +66,21 @@ public final class Constants {
         public static final int CANTurnEncoderBackRight = 12;
 
         public static final int CANGrabber = 44;
-        public static final int CANManipulator = 0; //CHANGE NUMBER TO REAL PORT 
-        public static final int CANPneumaticHub = 0; //CHANGE NUMBER TO REAL PORT
+        public static final int CANManipulator = 45; //TODO CHANGE NUMBER TO REAL PORT 
+
+        // Digital IO ports
+        // public static final int DIOTurretCalSwitch = 1;
+
+        // PWM ports
+        public static final int PWMLEDStripTop = 0;         // LED Strip on top of robot
+
+        // I2C ports
+        // public static final int I2CcolorSensor = 0x52;       // According to REV docs, color sensor is at 0x52 = 82.  Rob had 39?
+
+        // Pneumatic solenoid ports
+        public static final int SolManipulatorFwd = 0;      // TODO set correct channel
+        public static final int SolManipulatorRev = 1;      // TODO set correct channel
+
     }
 
     public static final class OIConstants {

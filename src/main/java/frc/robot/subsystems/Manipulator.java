@@ -4,22 +4,16 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-import static frc.robot.utilities.StringUtil.*;
-
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.Constants.Ports;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.Loggable;
@@ -30,53 +24,37 @@ public class Manipulator extends SubsystemBase implements Loggable {
   private int logRotationKey;         // key for the logging cycle for this subsystem
   private boolean fastLogging = false; 
 
-  private String subsystemName;
+  private String subsystemName = "Manipulator";
 
   private final CANSparkMax motor;
   private final DoubleSolenoid pneumaticDoubleSolenoid;
 
-  private boolean pistonExtended = false;
+  private boolean pistonCone = false;     // TODO set default state
 
   /**
    * Constructs the Manipulator subsystem, including rollers and a solenoid to change between cube and cone configuration.
-   * @param subsystemName  String name for subsystem
-   * @param inverted inverts the motor, true inverts motor
-   * @param solenoidForwardChannel
-   * @param solenoidReverseChannel
    * @param log object for logging
    */
-  public Manipulator(String subsystemName, boolean inverted, int solenoidForwardChannel, int solenoidReverseChannel, FileLog log) {
+  public Manipulator(FileLog log) {
     motor = new CANSparkMax(Ports.CANManipulator, MotorType.kBrushless);
-    pneumaticDoubleSolenoid = new DoubleSolenoid(Ports.CANPneumaticHub, PneumaticsModuleType.REVPH, solenoidForwardChannel, solenoidReverseChannel);
-    this.subsystemName = subsystemName;
+    pneumaticDoubleSolenoid = new DoubleSolenoid(Ports.CANPneumaticHub, PneumaticsModuleType.REVPH, Ports.SolManipulatorFwd, Ports.SolManipulatorRev);
     this.log = log;
     
     logRotationKey = log.allocateLogRotation();
 
     motor.restoreFactoryDefaults();
     motor.setIdleMode(IdleMode.kCoast);
-    motor.setInverted(inverted);
+    motor.setInverted(false);       // TODO determine if needs to be inverted
     motor.enableVoltageCompensation(12);
     motor.setOpenLoopRampRate(0.05);    //seconds from neutral to full
     motor.setClosedLoopRampRate(0.05);  //seconds from neutral to full
-
-  
-
   }
 
-    /**
+  /**
    * Returns the name of the subsystem
    */
   public String getName(){
     return subsystemName;
-  }
-
-  /**
-   * Sets the voltage of the motor
-   * @param voltage voltage
-   */
-  public void setVoltage(double voltage){
-    motor.setVoltage(voltage);
   }
 
   /**
@@ -102,29 +80,29 @@ public class Manipulator extends SubsystemBase implements Loggable {
   }
 
   /**
-   * Sets if the piston should be extended or not
+   * Sets if the piston should be in cone or cube position
    * 
-   * @param extend true = extend, false = retract
+   * @param cone true = cone, false = cube
    */
-  public void setPistonExtended(boolean extend) {
-    pistonExtended = extend;
-    pneumaticDoubleSolenoid.set(extend ? Value.kForward : Value.kReverse);
+  public void setPistonCone(boolean cone) {
+    pistonCone = cone;
+    pneumaticDoubleSolenoid.set(cone ? Value.kForward : Value.kReverse);
   }
 
   /**
-   * Returns if intake piston is extended or not
-   * @return true = extended, false = retracted
+   * Returns if manipulator piston is set for cone position
+   * @return true = cone, false = cube
    */
-  public boolean getPistonExtended() {
-    return pistonExtended;
+  public boolean getPistonCone() {
+    return pistonCone;
   }
 
   /**
    * Toggles the piston between cone and cube
    */
-  public void togglePistonExtended(){
-    log.writeLog(false, subsystemName, "togglePiston", "from extended", getPistonExtended());
-    setPistonExtended(!getPistonExtended());
+  public void togglePiston(){
+    log.writeLog(false, subsystemName, "togglePiston", "from position is cone", getPistonCone());
+    setPistonCone(!getPistonCone());
   }
 
   
@@ -146,12 +124,11 @@ public class Manipulator extends SubsystemBase implements Loggable {
     if(fastLogging || log.isMyLogRotation(logRotationKey)) {
       updateManipulatorLog(false);
       // Update data on SmartDashboard
-      SmartDashboard.putNumber(buildString(subsystemName, "Amps"), motor.getOutputCurrent());
-      SmartDashboard.putNumber(buildString(subsystemName, "Bus Volt"), motor.getBusVoltage());
-      // SmartDashboard.putNumber(buildString(subsystemName, "Volt"), motor.()); 
-      SmartDashboard.putNumber(buildString(subsystemName, "Out Percent"), motor.get());
-      SmartDashboard.putNumber(buildString(subsystemName, "Out Temperature"), motor.getMotorTemperature());
-      SmartDashboard.putBoolean(buildString(subsystemName, "Piston extend"), pistonExtended);
+      SmartDashboard.putNumber("Manipulator Amps", motor.getOutputCurrent());
+      SmartDashboard.putNumber("Manipulator Bus Volt", motor.getBusVoltage());
+      SmartDashboard.putNumber("Manipulator Out Percent", motor.get());
+      SmartDashboard.putNumber("Manipulator Temperature", motor.getMotorTemperature());
+      SmartDashboard.putBoolean("Manipulator Cone", pistonCone);
     }
   }
 
@@ -163,10 +140,9 @@ public class Manipulator extends SubsystemBase implements Loggable {
     log.writeLog(logWhenDisabled, subsystemName, "Update Variables",
     "Bus Volt", motor.getBusVoltage(),
     "Out Percent", motor.get(),
-    // "Volt", motor.(),
     "Amps", motor.getOutputCurrent(),
     "Temperature", motor.getMotorTemperature(),
-    "Piston extended", getPistonExtended()
+    "Piston cone", getPistonCone()
     );
   }
 

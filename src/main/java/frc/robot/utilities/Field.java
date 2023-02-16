@@ -38,6 +38,7 @@ public class Field {
         new Pose2d(1.77165, 4.424426, new Rotation2d(Math.PI)), 
         new Pose2d(1.77165, 4.983226, new Rotation2d(Math.PI)) 
     };
+
     //Loading -> Community
     private final Pose2d[] RedCommunityColumnInitial = {
         new Pose2d(2.0871258795062873, 3.020568, new Rotation2d(0)), //118.92 inches
@@ -117,10 +118,25 @@ public class Field {
         new Pose2d(15.51356, 6.932168, new Rotation2d(0))
     };
 
-    private AllianceSelection alliance;
+    private final AllianceSelection alliance;
+    private final DriveTrain driveTrain;
+    private final Manipulator manipulator;
+    private final FileLog log;
 
-    public Field(AllianceSelection alliance){
+    /**
+     * Create a field object that can provide various field locations.  All field
+     * locations are Pose2d objects based on the current alliance that is selected.
+     * Pose components include:
+     * <p> Robot X location in the field, in meters (0 = field edge in front of driver station, + = away from our drivestation)
+     * <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, + = left when looking from our drivestation)
+     * <p> Robot angle on the field (0 = facing away from our drivestation, + to the left, - to the right)
+     * @param alliance Alliance object to provide the currently selected alliance
+     */
+    public Field(DriveTrain driveTrain, Manipulator manipulator, AllianceSelection alliance, FileLog log){
         this.alliance = alliance;
+        this.driveTrain = driveTrain;
+        this.manipulator = manipulator;
+        this.log = log;
     }
 
     /**
@@ -212,12 +228,17 @@ public class Field {
         }
     }
 
-    public Pose2d getClosestGoal(DriveTrain drivetrain, Manipulator manipulator){
+    /**
+     * TODO add some documentation!!!!
+     * @return
+     */
+    public Pose2d getClosestGoal() {
         Pose2d closestGoal;
-        double robotY = drivetrain.getPose().getY();
+        double robotY = driveTrain.getPose().getY();
+
         if(alliance.getAlliance() == Alliance.Blue){//Alliance Blue
             closestGoal = BlueCommunityColumnFinal[0];
-            if(manipulator.getPistonExtended()){//Carrying Cone
+            if(manipulator.getPistonCone()){//Carrying Cone
                 for(int i = 0; i < 9; i++){
                     if(i == 2 || i == 5 || i == 8){
                         continue;
@@ -237,9 +258,11 @@ public class Field {
                     }
                 }
             }
+            log.writeLog(true, "Field", "GetClosetGoal", "Alliance", "Blue", "Cone", manipulator.getPistonCone(), "X", closestGoal.getX(),
+                "Y", closestGoal.getY(), "Rot", closestGoal.getRotation().getDegrees());
         } else {
             closestGoal = RedCommunityColumnFinal[0];
-            if(manipulator.getPistonExtended()){//Carrying Cone
+            if(manipulator.getPistonCone()){//Carrying Cone
                 for(int i = 0; i < 9; i++){
                     if(i == 2 || i == 5 || i == 8){
                         continue;
@@ -259,6 +282,8 @@ public class Field {
                     }
                 }
             }
+            log.writeLog(true, "Field", "GetClosetGoal", "Alliance", "Red", "Cone", manipulator.getPistonCone(), "X", closestGoal.getX(),
+                "Y", closestGoal.getY(), "Rot", closestGoal.getRotation().getDegrees());
         }
         return closestGoal;
     }
