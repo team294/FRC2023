@@ -78,18 +78,18 @@ public final class Constants {
 
     public static final class RobotDimensions {
         //left to right distance between the drivetrain wheels; should be measured from center to center
-        public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.59127;      // CALIBRATED-2 = 0.59127 (based on robot rotating in place).  CAD geometry = 0.57785.
+        public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.58721;      // CALIBRATED-3 = 0.58721 (based on robot rotating in place).  CAD geometry = 0.57785.
         //front-back distance between the drivetrain wheels; should be measured from center to center
-        public static final double DRIVETRAIN_WHEELBASE_METERS = 0.59127;       // CALIBRATED-2 = 0.59127 (based on robot rotating in place).  CAD geometry = 0.57785.
+        public static final double DRIVETRAIN_WHEELBASE_METERS = 0.58721;       // CALIBRATED-3 = 0.58721 (based on robot rotating in place).  CAD geometry = 0.57785.
 
     }
 
     public static final class SwerveConstants {
         // Encoder calibration to meters travelled or wheel facing degrees
-        public static final double kEncoderCPR = 2048.0;                // CALIBRATED-2 = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
-        public static final double kDriveGearRatio = (8.14 / 1.0);      // CALIBRATED-2 = 8.14/1.0.  Team364 (MK3i?) = 6.86:1.  Mk4i = 8.14 : 1
-        public static final double kTurningGearRatio = (150.0/7.0 / 1.0); // CALIBRATED-2 = 150.0/7.0.  Team364 (MK3i?) = 12.8:1.  Mk4i = 150/7 : 1
-        public static final double kWheelDiameterMeters = 0.09953;        // CALIBRATED-2 = 0.102.  Depends a little on the tread wear!
+        public static final double kEncoderCPR = 2048.0;                // CALIBRATED-3 = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
+        public static final double kDriveGearRatio = (6.75 / 1.0);      // CALIBRATED-3 = 6.75/1.0.  Team364 (MK3i?) = 6.86:1.  Mk4i = 8.14:1 (L1-std gears).  Mk4i = 6.75:1 (L2-fast gears)
+        public static final double kTurningGearRatio = (150.0/7.0 / 1.0); // CALIBRATED-3 = 150.0/7.0.  Team364 (MK3i?) = 12.8:1.  Mk4i = 150/7 : 1
+        public static final double kWheelDiameterMeters = 0.09712;        // CALIBRATED-3 = 0.09712.  Depends a little on the tread wear!
         public static final double kDriveEncoderMetersPerTick = (kWheelDiameterMeters * Math.PI) / kEncoderCPR / kDriveGearRatio;
         public static final double kTurningEncoderDegreesPerTick = 360.0/kEncoderCPR / kTurningGearRatio;
         
@@ -97,21 +97,21 @@ public final class Constants {
         // Max speed is used to keep each motor from maxing out, which preserves ratio between motors 
         // and ensures that the robot travels in the requested direction.  So, use min value of all 4 motors,
         // and further derate (initial test by 5%) to account for some battery droop under heavy loads.
-        // Max speed measured values 1/25/2023:  FL = 3.98, FR  = 3.97, BL = 3.98, BR = 3.95
-        public static final double kMaxSpeedMetersPerSecond = 3.8;          // CALIBRATED-2
+        // Max speed measured values 2/12/2023:  All 4 motors are between 4.6 an 4.7 meters/sec.  So use 4.5 as a conservative value
+        public static final double kMaxSpeedMetersPerSecond = 4.5;          // CALIBRATED-3
         public static final double kNominalSpeedMetersPerSecond = 0.5*kMaxSpeedMetersPerSecond;
         // Max acceleration measured values 1/13/2023: FL = 28.073, FR = 26.343, BL = 18.482, BR = 19.289
         // Max acceleration measured 1/25/2023 (with ~80lbs on robot):  Average of 4 wheels = 10.0 m/sec^2
-        public static final double kMaxAccelerationMetersPerSecondSquare = 10; // CALIBRATED-2
+        // Max acceleration measured 2/12/2023 (with new drive gears):  Average ~11 m/sec^2.  Keep value at 10.0 for now.
+        public static final double kMaxAccelerationMetersPerSecondSquare = 10; // CALIBRATED-3
         public static final double kNominalAccelerationMetersPerSecondSquare = 0.7*kMaxAccelerationMetersPerSecondSquare;
-        // Max turn velocity degrees per second measured values 1/13/2023: FL = 1744.629, FR = 1762.207, BL = 1736.719, BR = 2085.645
-        public static final double kMaxTurningRadiansPerSecond = 9.1;   // CALIBRATED-2 took 528 degreesPerSecond and converted to radians
+        public static final double kMaxTurningRadiansPerSecond = 11.0;   // CALIBRATED-3 took 633 degreesPerSecond and converted to radians and rounded down
         public static final double kNominalTurningRadiansPerSecond = Math.PI;
-        public static final double kMaxAngularAccelerationRadiansPerSecondSquared = 30.0;            // CALIBRATED-2 31.7 rad/sec^2
+        public static final double kMaxAngularAccelerationRadiansPerSecondSquared = 35.0;            // CALIBRATED-3 37.4 rad/sec^2
         public static final double kNominalAngularAccelerationRadiansPerSecondSquared = Math.PI;
-        public static final double kVDrive = 0.248; // CALIBRATED-2 = 0.248.  in % output per meters per second
+        public static final double kVDrive = 0.2034; // CALIBRATED-3 = 0.2511.  in % output per meters per second.  Calibration says 0.2511, but better match on a trapezoid is 
         public static final double kADrive = 0.0;                   // TODO -- Calibrate
-        public static final double kSDrive = 0.017; // CALIBRATED-2 = 0.017.  in % output
+        public static final double kSDrive = 0.016; // CALIBRATED-3 = 0.016.  in % output
 
     }
 
@@ -132,10 +132,10 @@ public final class Constants {
         // Update the offset angles in RobotPreferences (in Shuffleboard), not in this code!
         // After updating in RobotPreferences, you will need to re-start the robot code for the changes to take effect.
         // When calibrating offset, set the wheels to zero degrees with the bevel gear facing to the right
-        public static double offsetAngleFrontLeftMotor = 0; // 92.2
-        public static double offsetAngleFrontRightMotor = 0; // -12.5
-        public static double offsetAngleBackLeftMotor = 0; // -106.6
-        public static double offsetAngleBackRightMotor = 0; // 157.5
+        public static double offsetAngleFrontLeftMotor = 0; // 92.3
+        public static double offsetAngleFrontRightMotor = 0; // -12.8
+        public static double offsetAngleBackLeftMotor = 0; // -107.6
+        public static double offsetAngleBackRightMotor = 0; // -170.2
       }
 
       public static final class TrajectoryConstants {
