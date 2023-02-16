@@ -227,7 +227,8 @@ public class Field {
                     }
                 }
             } else {
-                for(int i = 0; i < 9; i++){
+                closestGoal = BlueCommunityColumnFinal[1];
+                for(int i = 1; i < 9; i++){
                     if(i != 2 && i != 5 && i != 8){
                         continue;
                     }
@@ -248,7 +249,8 @@ public class Field {
                     }
                 }
             } else {
-                for(int i = 0; i < 9; i++){
+                closestGoal = RedCommunityColumnFinal[1];
+                for(int i = 1; i < 9; i++){
                     if(i != 2 && i != 5 && i != 8){
                         continue;
                     }
