@@ -20,20 +20,18 @@ public class LEDSetStrip extends CommandBase {
   /**
    * Send a solid color to the LED strip, at 0.5 intensity.
    * This command immediately finishes.
+   * <p> Note:  This command can run while the robot is disabled.
    * @param color string of color name, case sensitive (ex: "Blue")
    * @param led led strip (subsystem)
    **/
 	public LEDSetStrip(String color, LED led, FileLog log) {
-    this.led = led;
-    this.log = log;
-    this.color = color;
-    this.intensity = 0.5;
-    addRequirements(led);
+    this(color, 0.5, led, log);
   }
   
   /**
    * Send a solid color to the LED strip, at parameter intensity.
    * This command immediately finishes.
+   * <p> Note:  This command can run while the robot is disabled.
    * @param color string of color name (first letter capital, ex: "Blue")
    * @param intensity percent intensity (0 to 1)
    * @param led led strip (subsystem)
@@ -69,4 +67,14 @@ public class LEDSetStrip extends CommandBase {
 	public boolean isFinished() {
 		return true;
 	}
+
+  /**
+   * Whether the given command should run when the robot is disabled. Override to return true if the
+   * command should run when disabled.
+   * @return whether the command should run when the robot is disabled
+   */
+  @Override
+  public boolean runsWhenDisabled() {
+    return true;
+  }
 }

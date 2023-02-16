@@ -50,13 +50,7 @@ public class LEDSetPattern extends CommandBase {
    * @param led led strip (subsystem)
    */
   public LEDSetPattern(Color[][] pattern, int strip, LED led, FileLog log) {
-    this.led = led;
-    this.log = log;
-    this.pattern = pattern;
-    this.strip = strip;
-    this.speed = 0.5;
-    this.timer = new Timer();
-    addRequirements(led);
+    this(pattern, strip, 0.5, led, log);
   }
 
 	// Called when the command is initially scheduled.

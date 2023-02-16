@@ -22,6 +22,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static edu.wpi.first.wpilibj.util.Color.*;
 
+import edu.wpi.first.math.MathUtil;
+
 public class LED extends SubsystemBase {
   private AddressableLED led; // led strip
   private AddressableLEDBuffer ledBuffer; // data passed to strip
@@ -177,6 +179,8 @@ public class LED extends SubsystemBase {
    * @param color string of color name, case sensitive (ex: "Blue")
    */
   public void setColor(int index, double intensity, String color) {
+    intensity = MathUtil.clamp(intensity, 0.0, 1.0);
+    
     if (color.equals("Yellow")) ledBuffer.setRGB(index, (int)(255*intensity), (int)(255*intensity), 0);
     else if (color.equals("Red")) ledBuffer.setRGB(index, (int)(255*intensity), 0, 0);
     else if (color.equals("Green")) ledBuffer.setRGB(index, 0, (int)(255*intensity), 0);
@@ -216,11 +220,6 @@ public class LED extends SubsystemBase {
     setStrip(color, 0.5, startingInd);
   }
 
-  public void setBallLights(int powerCellsShot) {
-    if(powerCellsShot > 6) powerCellsShot = 6;
-    setPattern(powerCellsLibrary[powerCellsShot], 0.5, 0);
-  }
-
   /**
    * Sets entire strip to be one color
    * @param color String name of color, case sensitive
@@ -241,21 +240,6 @@ public class LED extends SubsystemBase {
     led.setData(ledBuffer);
     led.start();
   }
-
-  // public void setBlink(String color, double brightness, int ledStrip){
-    
-  //   String myColor = color;
-  //   if(timer2.advanceIfElapsed(10)){
-  //     setStrip(myColor, brightness, ledStrip);
-  //     timer2.reset();
-  //     timer2.start();
-  //     if(myColor.equals(color)){
-  //       myColor = "Black";
-  //     } else {
-  //       myColor = color;
-  //     }
-  //   }
-  // }
 
   /**
    * Light up the LED strip in a solid color.

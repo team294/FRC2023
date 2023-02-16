@@ -13,8 +13,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -44,6 +44,7 @@ public class RobotContainer {
 
   // Define robot subsystems  
   private final DriveTrain driveTrain = new DriveTrain(log);
+  private final Grabber grabber = new Grabber("Grabber", log);
   private final LED led = new LED();
 
   // Define other utilities
@@ -58,9 +59,9 @@ public class RobotContainer {
 
   private final CommandXboxController xboxController = new CommandXboxController(OIConstants.usbXboxController);
   private boolean rumbling = false;
-  Grabber grabber = new Grabber("Grabber", log);
 
-  Command patternTeamMoving = new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 0.5, led, log);
+  // Set to this pattern when the robot is disabled
+  private final Command patternTeamMoving = new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 0.5, led, log);
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -110,15 +111,15 @@ public class RobotContainer {
     SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
     SmartDashboard.putData("Grabber Pick Up",new GrabberPickUp(grabber, log));
     SmartDashboard.putData("Grabber Eject", new GrabberEject(grabber, log));
-    //LED
-    SmartDashboard.putData("LED Rainbow", new LEDSetPattern(LED.rainbowLibrary, 0, 0.5, led, log));
-    SmartDashboard.putData("LED Flash Team Color", new LEDSetPattern(LED.teamFlashingColorsLibrary, 0, 0.5, led, log).ignoringDisable(true));
-    SmartDashboard.putData("LED Full Team Color", new LEDSetPattern(LED.teamFullColorsLibrary, 0, 0.5, led, log).ignoringDisable(true));
-    SmartDashboard.putData("LED moving Team Color", new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 0.5, led, log).ignoringDisable(true));
-    SmartDashboard.putData("LED OFF", new LEDSetStrip("Red", 0, led, log).ignoringDisable(true));
-    SmartDashboard.putData("LED Yellow", new LEDSetStrip("Yellow", 1, led, log).ignoringDisable(true));
-    SmartDashboard.putData("LED Purple", new LEDSetStrip("Purple", 1, led, log).ignoringDisable(true));
 
+    //LED commands
+    SmartDashboard.putData("LED Rainbow", new LEDSetPattern(LED.rainbowLibrary, 0, 0.5, led, log));
+    SmartDashboard.putData("LED Flash Team Color", new LEDSetPattern(LED.teamFlashingColorsLibrary, 0, 0.5, led, log));
+    SmartDashboard.putData("LED Full Team Color", new LEDSetPattern(LED.teamFullColorsLibrary, 0, 0.5, led, log));
+    SmartDashboard.putData("LED moving Team Color", new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 0.5, led, log));
+    SmartDashboard.putData("LED OFF", new LEDSetStrip("Red", 0, led, log));
+    SmartDashboard.putData("LED Yellow", new LEDSetStrip("Yellow", 1, led, log));
+    SmartDashboard.putData("LED Purple", new LEDSetStrip("Purple", 1, led, log));
   }
 
   /**
@@ -336,6 +337,7 @@ public class RobotContainer {
 
     driveTrain.setDriveModeCoast(true);     // When pushing a disabled robot by hand, it is a lot easier to push in Coast mode!!!!
     driveTrain.stopMotors();                // SAFETY:  Turn off any closed loop control that may be running, so the robot does not move when re-enabled.
+
     patternTeamMoving.schedule();
   }
 
@@ -365,7 +367,12 @@ public class RobotContainer {
 
     driveTrain.setDriveModeCoast(false);
 
-    led.setStrip("Blue", 0);
+    if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
+    if (allianceSelection.getAlliance() == Alliance.Blue) {
+      led.setStrip("Blue", 0);
+    } else {
+      led.setStrip("Red", 0);
+    }
     // NOTE:  Do NOT reset the gyro or encoder here!!!!!
     // The first command in auto mode initializes before this code is run, and
     // it will read the gyro/encoder before the reset goes into effect.
@@ -385,6 +392,7 @@ public class RobotContainer {
 
     driveTrain.setDriveModeCoast(false);
 
+    if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
     led.setStrip("Orange", 0);
   }
 
