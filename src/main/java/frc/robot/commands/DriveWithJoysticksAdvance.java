@@ -19,14 +19,14 @@ import frc.robot.utilities.MathBCR;
 
 
 public class DriveWithJoysticksAdvance extends CommandBase {
-  Joystick leftJoystick;
-  Joystick rightJoystick;
-  DriveTrain driveTrain;
-  ProfiledPIDController turnRateController;
-  FileLog log;
+  private final Joystick leftJoystick;
+  private final Joystick rightJoystick;
+  private final DriveTrain driveTrain;
+  private final FileLog log;
+  private ProfiledPIDController turnRateController;
   private int logRotationKey;
   private double fwdVelocity, leftVelocity, turnRate, nextTurnRate, goalAngle, prevTime, currTime;
-  Timer timer;
+  private Timer timer;
 
 
     /**
