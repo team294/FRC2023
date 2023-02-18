@@ -33,16 +33,12 @@ public class DriveToPose extends CommandBase {
   private SwerveDriveKinematics kinematics;
   private HolonomicDriveControllerBCR controller;
 
+  private final boolean fromShuffleboard;
   private final Supplier<Pose2d> goalSupplier;    // Supplier for goalPose.  null = use passed in goalPose, non-null = use supplier
   private Pose2d initialPose, goalPose;     // Starting and destination robot pose (location and rotation) on the field
   private Translation2d initialTranslation;     // Starting robot translation on the field
   private Translation2d goalDirection;          // Unit vector pointing from initial pose to goal pose = direction of travel
   private TrapezoidProfileBCR profile;      // Relative linear distance/speeds from initial pose to goal pose 
-  private Rotation2d angleTarget;
-  private double xPos;
-  private double yPos;
-
-  private boolean fromShuffleboard;
 
   /**
    * Drives the robot to the desired pose in field coordinates.
@@ -141,9 +137,9 @@ public class DriveToPose extends CommandBase {
 
     // Get the goal pose, if using Shuffleboard
     if(fromShuffleboard) {
-      xPos = SmartDashboard.getNumber("DriveToPose XPos meters", 0);
-      yPos = SmartDashboard.getNumber("DriveToPose YPos meters", 0);
-      angleTarget = Rotation2d.fromDegrees(SmartDashboard.getNumber("DriveToPose Rot degrees", 0));
+      double xPos = SmartDashboard.getNumber("DriveToPose XPos meters", 0);
+      double yPos = SmartDashboard.getNumber("DriveToPose YPos meters", 0);
+      Rotation2d angleTarget = Rotation2d.fromDegrees(SmartDashboard.getNumber("DriveToPose Rot degrees", 0));
       goalPose = new Pose2d(xPos, yPos, angleTarget);
     }
 
