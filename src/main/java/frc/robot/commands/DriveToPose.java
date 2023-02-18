@@ -62,13 +62,7 @@ public class DriveToPose extends CommandBase {
     goalSupplier = null;
 
     constructorCommonCode();
-
-
   }
-
-
-
-
 
   /**
    * Drives the robot to the desired pose in field coordinates.
@@ -86,7 +80,6 @@ public class DriveToPose extends CommandBase {
     goalSupplier = goalPoseSupplier;
 
     constructorCommonCode();
-
   }
 
   /**
@@ -102,14 +95,14 @@ public class DriveToPose extends CommandBase {
 
     constructorCommonCode();
 
-    if(SmartDashboard.getNumber("DriveToPose X Position Manual", -9999) == -9999) {
-      SmartDashboard.putNumber("DriveToPose X Position Manual", 2);
+    if(SmartDashboard.getNumber("DriveToPose XPos meters", -9999) == -9999) {
+      SmartDashboard.putNumber("DriveToPose XPos meters", 2);
     }
-    if(SmartDashboard.getNumber("DriveToPose Y Position Manuel", -9999) == -9999){
-      SmartDashboard.putNumber("DriveToPose Y Position Manuel", 2);
+    if(SmartDashboard.getNumber("DriveToPose YPos meters", -9999) == -9999){
+      SmartDashboard.putNumber("DriveToPose YPos meters", 2);
     }
-    if(SmartDashboard.getNumber("DriveToPose Manual Angle", -9999) == -9999) {
-      SmartDashboard.putNumber("DriveToPose Manual Angle", 0);
+    if(SmartDashboard.getNumber("DriveToPose Rot degrees", -9999) == -9999) {
+      SmartDashboard.putNumber("DriveToPose Rot degrees", 0);
     }
   }
 
@@ -137,13 +130,6 @@ public class DriveToPose extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    if(fromShuffleboard) {
-      xPos = SmartDashboard.getNumber("DriveToPose X Position Manual", 2);
-      yPos = SmartDashboard.getNumber("DriveToPose Y Position Manuel", 2);
-      angleTarget = Rotation2d.fromDegrees(SmartDashboard.getNumber("DriveToPose Manual Angle", 0));
-      goalPose = new Pose2d(xPos, yPos, angleTarget);
-    }
-
     // Reset timer and controllers
     timer.reset();
     timer.start();
@@ -152,6 +138,14 @@ public class DriveToPose extends CommandBase {
     // Get the initial pose
     initialPose = driveTrain.getPose();
     initialTranslation = initialPose.getTranslation();
+
+    // Get the goal pose, if using Shuffleboard
+    if(fromShuffleboard) {
+      xPos = SmartDashboard.getNumber("DriveToPose XPos meters", 0);
+      yPos = SmartDashboard.getNumber("DriveToPose YPos meters", 0);
+      angleTarget = Rotation2d.fromDegrees(SmartDashboard.getNumber("DriveToPose Rot degrees", 0));
+      goalPose = new Pose2d(xPos, yPos, angleTarget);
+    }
 
     // Get the goal pose, if using a supplier in the constructor
     if (!(goalSupplier == null)) {
