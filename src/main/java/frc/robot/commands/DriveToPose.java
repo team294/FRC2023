@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
 import frc.robot.Constants;
@@ -32,6 +33,7 @@ public class DriveToPose extends CommandBase {
   private SwerveDriveKinematics kinematics;
   private HolonomicDriveControllerBCR controller;
 
+  private final boolean fromShuffleboard;
   private final Supplier<Pose2d> goalSupplier;    // Supplier for goalPose.  null = use passed in goalPose, non-null = use supplier
   private Pose2d initialPose, goalPose;     // Starting and destination robot pose (location and rotation) on the field
   private Translation2d initialTranslation;     // Starting robot translation on the field
@@ -49,9 +51,11 @@ public class DriveToPose extends CommandBase {
    * @param driveTrain DriveTrain subsystem
    * @param log file for logging
    */
-  public DriveToPose(Pose2d goalPose, DriveTrain driveTrain, FileLog log) {
+
+   public DriveToPose(Pose2d goalPose, DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
+    this.fromShuffleboard = false;
     this.goalPose = goalPose;
     goalSupplier = null;
 
@@ -70,9 +74,34 @@ public class DriveToPose extends CommandBase {
   public DriveToPose(Supplier<Pose2d> goalPoseSupplier, DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
+    this.fromShuffleboard = false;
     goalSupplier = goalPoseSupplier;
 
     constructorCommonCode();
+  }
+
+  /**
+   * Drives the robot to the desired pose based on numbers inputed in shuffleboard.
+   * @param driveTrain DriveTrain subsystem
+   * @param log file for logging
+   */
+  public DriveToPose(DriveTrain driveTrain, FileLog log) {
+    this.driveTrain = driveTrain;
+    this.log = log;
+    this.fromShuffleboard = true;
+    goalSupplier = null;
+
+    constructorCommonCode();
+
+    if(SmartDashboard.getNumber("DriveToPose XPos meters", -9999) == -9999) {
+      SmartDashboard.putNumber("DriveToPose XPos meters", 2);
+    }
+    if(SmartDashboard.getNumber("DriveToPose YPos meters", -9999) == -9999){
+      SmartDashboard.putNumber("DriveToPose YPos meters", 2);
+    }
+    if(SmartDashboard.getNumber("DriveToPose Rot degrees", -9999) == -9999) {
+      SmartDashboard.putNumber("DriveToPose Rot degrees", 0);
+    }
   }
 
   /**
@@ -108,6 +137,14 @@ public class DriveToPose extends CommandBase {
     initialPose = driveTrain.getPose();
     initialTranslation = initialPose.getTranslation();
     curRobotTranslation = initialTranslation;
+
+    // Get the goal pose, if using Shuffleboard
+    if(fromShuffleboard) {
+      double xPos = SmartDashboard.getNumber("DriveToPose XPos meters", 0);
+      double yPos = SmartDashboard.getNumber("DriveToPose YPos meters", 0);
+      Rotation2d angleTarget = Rotation2d.fromDegrees(SmartDashboard.getNumber("DriveToPose Rot degrees", 0));
+      goalPose = new Pose2d(xPos, yPos, angleTarget);
+    }
 
     // Get the goal pose, if using a supplier in the constructor
     if (!(goalSupplier == null)) {
