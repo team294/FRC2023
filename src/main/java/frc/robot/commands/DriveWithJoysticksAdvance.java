@@ -8,6 +8,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.Constants.OIConstants;
@@ -15,6 +16,7 @@ import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
+import frc.robot.utilities.MathBCR;
 
 
 public class DriveWithJoysticksAdvance extends CommandBase {
@@ -45,6 +47,8 @@ public class DriveWithJoysticksAdvance extends CommandBase {
     xSpeedController = new ProfiledPIDController(TrajectoryConstants.kPXController, 0, 0, new TrapezoidProfile.Constraints(maxVelocity, maxAccel));
     ySpeedController = new ProfiledPIDController(TrajectoryConstants.kPYController, 0, 0, new TrapezoidProfile.Constraints(maxVelocity, maxAccel));
     turnRateController = new ProfiledPIDController(TrajectoryConstants.kPThetaController, 0, 0, new TrapezoidProfile.Constraints(SwerveConstants.kMaxTurningRadiansPerSecond, SwerveConstants.kMaxAngularAccelerationRadiansPerSecondSquared));
+    turnRateController.enableContinuousInput(-180, 180);
+
     logRotationKey = log.allocateLogRotation();
 
     addRequirements(driveTrain);
@@ -54,9 +58,15 @@ public class DriveWithJoysticksAdvance extends CommandBase {
   public void initialize() {
     driveTrain.setDriveModeCoast(false);
 
+    // TODO    goalAngle = driveTrain.getPose().getRotation().getDegrees();
+    // timer.reset();          //     Timer timer = new Timer();
+    // timer.start();
+    // double prevTime = timer.get();
+
     xSpeedController.reset(0.0);
     ySpeedController.reset(0.0);
-    turnRateController.reset(0.0);
+    turnRateController.reset(goalAngle);      // sets the current measurement and the current setpoint for the controller
+    // turnRateController.setGoal(goalAngle);     // set the goal for the controller
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -67,6 +77,7 @@ public class DriveWithJoysticksAdvance extends CommandBase {
     targetLeftVelocity = -leftJoystick.getX();
     targetTurnRate = -rightJoystick.getX();
     currSpeed = driveTrain.getRobotSpeeds();
+    // currTime = timer.get();
 
     SmartDashboard.putNumber("Left Joystick Y", targetFwdVelocity);
     SmartDashboard.putNumber("Left Joystick X", targetLeftVelocity);
@@ -78,11 +89,15 @@ public class DriveWithJoysticksAdvance extends CommandBase {
     targetLeftVelocity = (Math.abs(targetLeftVelocity) < OIConstants.joystickDeadband) ? 0 : scaleJoystick(targetLeftVelocity) * SwerveConstants.kMaxSpeedMetersPerSecond;
     targetTurnRate = (Math.abs(targetTurnRate) < OIConstants.joystickDeadband) ? 0 : scaleTurn(targetTurnRate) * SwerveConstants.kMaxTurningRadiansPerSecond;
 
+    // Calculate goal angle
+    goalAngle += targetTurnRate*(currTime-prevTime);
+    goalAngle = MathBCR.normalizeAngle(goalAngle);
+
     // Calculates using the profiledPIDController what the next speed should be
 
-    nextFwdVelocity = xSpeedController.calculate(currSpeed.vxMetersPerSecond, targetFwdVelocity);
-    nextLeftVelocity = ySpeedController.calculate(currSpeed.vyMetersPerSecond, targetLeftVelocity);
-    nextTurnRate = ySpeedController.calculate(currSpeed.omegaRadiansPerSecond, targetLeftVelocity);
+    nextFwdVelocity = xSpeedController.calculate(currSpeed.vxMetersPerSecond, targetFwdVelocity);  xxx
+    nextLeftVelocity = ySpeedController.calculate(currSpeed.vyMetersPerSecond, targetLeftVelocity);  xxx
+    nextTurnRate = turnRateController.calculate(driveTrain.getPose().getRotation().getDegrees() , goalAngle);
 
 
 
@@ -93,7 +108,7 @@ public class DriveWithJoysticksAdvance extends CommandBase {
 
     driveTrain.drive(nextFwdVelocity, nextLeftVelocity, nextTurnRate, true, false);
 
-
+    // prevTime = currTime;
   }
 
   // Called once the command ends or is interrupted.
