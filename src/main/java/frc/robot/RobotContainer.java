@@ -227,10 +227,8 @@ public class RobotContainer {
     left[1].onTrue(new DriveResetPose(0,driveTrain,log));
    
     // left joystick right button
-    // right[1].onTrue(new DriveToPose( () -> new Pose2d(driveTrain.getPose().getTranslation(), Rotation2d.fromDegrees(0)), driveTrain, log));
-    // right[2].onTrue(new DriveToPose( () -> driveTrain.getPose().plus(new Transform2d(new Translation2d(), Rotation2d.fromDegrees(180))), driveTrain, log));
-    right[1].onTrue(new DriveToPose(CoordType.kAbsolute, Rotation2d.fromDegrees(-90), driveTrain, log));
-    right[2].onTrue(new DriveToPose(CoordType.kAbsolute, Rotation2d.fromDegrees(180), driveTrain, log));
+    right[1].onTrue(new DriveToPose(CoordType.kAbsolute, 0, driveTrain, log));
+    right[2].onTrue(new DriveToPose(CoordType.kRelative, 180, driveTrain, log));
 
     //left[2].onTrue(new IntakeRetractAndFlush(intakeFront, uptake, feeder, log));
       
