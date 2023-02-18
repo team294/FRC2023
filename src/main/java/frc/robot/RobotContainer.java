@@ -11,8 +11,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -41,6 +43,7 @@ public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
   private final FileLog log = new FileLog("A1");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
+  private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
 
   // Define robot subsystems  
   private final DriveTrain driveTrain = new DriveTrain(log);
@@ -317,6 +320,9 @@ public class RobotContainer {
     if(!RobotPreferences.prefsExist()) {
       RobotPreferences.recordStickyFaults("RobotPreferences", log);
     }
+
+    compressor.disable();
+    // compressor.enableDigital();
 
     // Set initial robot position on field
     // This takes place a while after the drivetrain is created, so after any CanBus delays.
