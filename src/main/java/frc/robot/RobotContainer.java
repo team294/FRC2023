@@ -122,6 +122,7 @@ public class RobotContainer {
     SmartDashboard.putData("LED OFF", new LEDSetStrip("Red", 0, led, log));
     SmartDashboard.putData("LED Yellow", new LEDSetStrip("Yellow", 1, led, log));
     SmartDashboard.putData("LED Purple", new LEDSetStrip("Purple", 1, led, log));
+    SmartDashboard.putData("delete everything", new ManipulatorGet(manipulator,6,5,12));
   }
 
   /**
