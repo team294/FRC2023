@@ -8,8 +8,6 @@ import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -113,6 +111,7 @@ public class RobotContainer {
             new Pose2d(1.0,0,new Rotation2d(0)), 
             Constants.TrajectoryConstants.swerveTrajectoryConfig),
           driveTrain, log));
+    SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal()), driveTrain, log));
   
     //Grabber commands
     SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
@@ -127,8 +126,6 @@ public class RobotContainer {
     SmartDashboard.putData("LED OFF", new LEDSetStrip("Red", 0, led, log));
     SmartDashboard.putData("LED Yellow", new LEDSetStrip("Yellow", 1, led, log));
     SmartDashboard.putData("LED Purple", new LEDSetStrip("Purple", 1, led, log));
-
-    SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getClosestGoal(), driveTrain, log));
   }
 
   /**
