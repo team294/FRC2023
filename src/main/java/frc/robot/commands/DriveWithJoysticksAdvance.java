@@ -5,40 +5,46 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-// import frc.robot.Constants;
-// import frc.robot.Constants.JoystickConstant;
-import frc.robot.Constants.JoystickConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
-// import frc.robot.utilities.TrapezoidProfileBCR.Constraints;
-import frc.robot.utilities.TrapezoidProfileBCR;
+
 
 public class DriveWithJoysticksAdvance extends CommandBase {
   Joystick leftJoystick;
   Joystick rightJoystick;
   DriveTrain driveTrain;
-  ProfiledPIDController controller;
+  ProfiledPIDController xSpeedController, ySpeedController, turnRateController;
   FileLog log;
   private int logRotationKey;
-  
-  private double fwdVelocity, currFwdVelocity, leftVelocity, currLeftVelocity, turnRate;//, maxVelocity, maxAccel;
+  private double targetFwdVelocity, targetLeftVelocity, targetTurnRate, nextFwdVelocity, nextLeftVelocity, nextTurnRate;
+  private ChassisSpeeds currSpeed;
 
-  /** Creates a new DriveWithJoysticksAdvance. */
+    /**
+   * @param leftJoystick left joystick.  X and Y axis control robot movement, relative to front of robot
+   * @param rightJoystick right joystick.  X-axis controls robot rotation.
+   * @param maxVelocity max velocity of the robot
+   * @param maxAccel max acceleration of the robot
+   * @param driveTrain drive train subsystem to use
+   * @param log filelog to use
+   */
+
   public DriveWithJoysticksAdvance(Joystick leftJoystick, Joystick rightJoystick, double maxVelocity, double maxAccel, DriveTrain driveTrain, FileLog log) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.leftJoystick = leftJoystick;
     this.rightJoystick = rightJoystick;
     this.driveTrain = driveTrain;
-    // this.maxVelocity = maxVelocity;
-    // this.maxAccel = maxAccel;
     this.log = log;
-    controller = new ProfiledPIDController(JoystickConstants.kPJoystick, JoystickConstants.kIJoystick, JoystickConstants.kDJoystick, new TrapezoidProfile.Constraints(maxVelocity, maxAccel));
+    xSpeedController = new ProfiledPIDController(TrajectoryConstants.kPXController, 0, 0, new TrapezoidProfile.Constraints(maxVelocity, maxAccel));
+    ySpeedController = new ProfiledPIDController(TrajectoryConstants.kPYController, 0, 0, new TrapezoidProfile.Constraints(maxVelocity, maxAccel));
+    turnRateController = new ProfiledPIDController(TrajectoryConstants.kPThetaController, 0, 0, new TrapezoidProfile.Constraints(SwerveConstants.kMaxTurningRadiansPerSecond, SwerveConstants.kMaxAngularAccelerationRadiansPerSecondSquared));
     logRotationKey = log.allocateLogRotation();
 
     addRequirements(driveTrain);
@@ -48,46 +54,46 @@ public class DriveWithJoysticksAdvance extends CommandBase {
   public void initialize() {
     driveTrain.setDriveModeCoast(false);
 
-    controller.setPID(JoystickConstants.kPJoystick, JoystickConstants.kIJoystick, JoystickConstants.kDJoystick);
-    controller.reset(0.0);
-
-    // lastFwdPercent = 0;
-    // lastTime = System.currentTimeMillis() / 1000.0;
+    xSpeedController.reset(0.0);
+    ySpeedController.reset(0.0);
+    turnRateController.reset(0.0);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // curTime = System.currentTimeMillis() / 1000.0;
 
-    fwdVelocity = -leftJoystick.getY();
-    leftVelocity = -leftJoystick.getX();
-    turnRate = -rightJoystick.getX();
-    SmartDashboard.putNumber("Left Joystick Y", fwdVelocity);
-    SmartDashboard.putNumber("Left Joystick X", leftVelocity);
-    SmartDashboard.putNumber("Right Joystick X", turnRate);
-  
+    targetFwdVelocity = -leftJoystick.getY();
+    targetLeftVelocity = -leftJoystick.getX();
+    targetTurnRate = -rightJoystick.getX();
+    currSpeed = driveTrain.getRobotSpeeds();
+
+    SmartDashboard.putNumber("Left Joystick Y", targetFwdVelocity);
+    SmartDashboard.putNumber("Left Joystick X", targetLeftVelocity);
+    SmartDashboard.putNumber("Right Joystick X", targetTurnRate);
+
     // Apply deadbands
-    fwdVelocity = (Math.abs(fwdVelocity) < OIConstants.joystickDeadband) ? 0 : scaleJoystick(fwdVelocity) * SwerveConstants.kMaxSpeedMetersPerSecond;
-    leftVelocity = (Math.abs(leftVelocity) < OIConstants.joystickDeadband) ? 0 : scaleJoystick(leftVelocity) * SwerveConstants.kMaxSpeedMetersPerSecond;
-    turnRate = (Math.abs(turnRate) < OIConstants.joystickDeadband) ? 0 : scaleTurn(turnRate) * SwerveConstants.kMaxTurningRadiansPerSecond;
+
+    targetFwdVelocity = (Math.abs(targetFwdVelocity) < OIConstants.joystickDeadband) ? 0 : scaleJoystick(targetFwdVelocity) * SwerveConstants.kMaxSpeedMetersPerSecond;
+    targetLeftVelocity = (Math.abs(targetLeftVelocity) < OIConstants.joystickDeadband) ? 0 : scaleJoystick(targetLeftVelocity) * SwerveConstants.kMaxSpeedMetersPerSecond;
+    targetTurnRate = (Math.abs(targetTurnRate) < OIConstants.joystickDeadband) ? 0 : scaleTurn(targetTurnRate) * SwerveConstants.kMaxTurningRadiansPerSecond;
+
+    // Calculates using the profiledPIDController what the next speed should be
+
+    nextFwdVelocity = xSpeedController.calculate(currSpeed.vxMetersPerSecond, targetFwdVelocity);
+    nextLeftVelocity = ySpeedController.calculate(currSpeed.vyMetersPerSecond, targetLeftVelocity);
+    nextTurnRate = ySpeedController.calculate(currSpeed.omegaRadiansPerSecond, targetLeftVelocity);
+
+
 
     if(log.isMyLogRotation(logRotationKey)) {
-      log.writeLog(false, "DriveWithJoystickArcade", "Joystick", "Fwd", fwdVelocity, "Left", leftVelocity, "Turn", turnRate);
+      log.writeLog(false, "DriveWithJoystickAdvance", "Joystick", "Fwd", currSpeed.vxMetersPerSecond, "Left", currSpeed.vyMetersPerSecond, "Turn", targetTurnRate);
     }
     
-    // double fwdRateChange = (fwdPercent - lastFwdPercent) / (curTime - lastTime);
-    // if (fwdRateChange > maxFwdRateChange) {
-    //   fwdPercent = lastFwdPercent + (curTime - lastTime)*maxFwdRateChange;
-    // } else if (fwdRateChange < maxRevRateChange) {
-    //   fwdPercent = lastFwdPercent +(curTime - lastTime)*maxRevRateChange;
 
-    // }
-    
-    driveTrain.drive(fwdVelocity, leftVelocity, turnRate, true, false);
+    driveTrain.drive(nextFwdVelocity, nextLeftVelocity, nextTurnRate, true, false);
 
-    // lastFwdPercent = fwdPercent;
-    // lastTime = curTime;
+
   }
 
   // Called once the command ends or is interrupted.
