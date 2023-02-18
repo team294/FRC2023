@@ -54,15 +54,15 @@ public class Field {
     // #0 = furthest to right (from driver point of view)
     // #8 = furthest to left (from driver point of view)
     private final Pose2d[] RedCommunityColumnInitial = {
-        new Pose2d(2.0871258795062873, 3.020568, new Rotation2d(0)), //118.92 inches
-        new Pose2d(2.0871258795062873, 3.579368, new Rotation2d(0)), //140.92 inches
-        new Pose2d(2.0871258795062873, 4.138168, new Rotation2d(0)), //162.92 inches
-        new Pose2d(2.0871258795062873, 4.696968, new Rotation2d(0)), //184.92 inches
-        new Pose2d(2.0871258795062873, 5.255768, new Rotation2d(0)), //206.92 inches
-        new Pose2d(2.0871258795062873, 5.814568, new Rotation2d(0)), //228.92 inches
-        new Pose2d(2.0871258795062873, 6.373368, new Rotation2d(0)), //250.92 inches
-        new Pose2d(2.0871258795062873, 6.932168, new Rotation2d(0)), //272.92 inches
-        new Pose2d(2.0871258795062873, 7.490968, new Rotation2d(0))  //294.92 inches
+        new Pose2d(2.0871258795062873, 3.020568, new Rotation2d(Math.PI)), //118.92 inches
+        new Pose2d(2.0871258795062873, 3.579368, new Rotation2d(Math.PI)), //140.92 inches
+        new Pose2d(2.0871258795062873, 4.138168, new Rotation2d(Math.PI)), //162.92 inches
+        new Pose2d(2.0871258795062873, 4.696968, new Rotation2d(Math.PI)), //184.92 inches
+        new Pose2d(2.0871258795062873, 5.255768, new Rotation2d(Math.PI)), //206.92 inches
+        new Pose2d(2.0871258795062873, 5.814568, new Rotation2d(Math.PI)), //228.92 inches
+        new Pose2d(2.0871258795062873, 6.373368, new Rotation2d(Math.PI)), //250.92 inches
+        new Pose2d(2.0871258795062873, 6.932168, new Rotation2d(Math.PI)), //272.92 inches
+        new Pose2d(2.0871258795062873, 7.490968, new Rotation2d(Math.PI))  //294.92 inches
     };
 
     //Community -> Place part
@@ -267,7 +267,7 @@ public class Field {
             closestGoal = 0;
             if(manipulator.getPistonCone()){//Carrying Cone
                 for(int i = 0; i < 9; i++){
-                    if(i == 2 || i == 5 || i == 8){
+                    if(i == 1 || i == 4 || i == 7){
                         continue;
                     }
                     if(Math.abs(robotY - BlueCommunityColumnFinal[i].getY()) < Math.abs(robotY - BlueCommunityColumnFinal[closestGoal].getY())){
@@ -277,7 +277,7 @@ public class Field {
             } else {
                 closestGoal = 1;
                 for(int i = 1; i < 9; i++){
-                    if(i != 2 && i != 5 && i != 8){
+                    if(i != 1 && i != 4 && i != 7){
                         continue;
                     }
                     if(Math.abs(robotY - BlueCommunityColumnFinal[i].getY()) < Math.abs(robotY - BlueCommunityColumnFinal[closestGoal].getY())){
@@ -285,14 +285,14 @@ public class Field {
                     }
                 }
             }
-            log.writeLog(true, "Field", "GetClosetGoal", "Alliance", "Blue", "Cone", manipulator.getPistonCone(), 
+            log.writeLogEcho(true, "Field", "GetClosetGoal", "Alliance", "Blue", "Cone", manipulator.getPistonCone(), 
                 "Column", closestGoal+1, "X", BlueCommunityColumnFinal[closestGoal].getX(),
                 "Y", BlueCommunityColumnFinal[closestGoal].getY(), "Rot", BlueCommunityColumnFinal[closestGoal].getRotation().getDegrees());
         } else {
             closestGoal = 0;
             if(manipulator.getPistonCone()){//Carrying Cone
                 for(int i = 0; i < 9; i++){
-                    if(i == 2 || i == 5 || i == 8){
+                    if(i == 1 || i == 4 || i == 7){
                         continue;
                     }
                     if(Math.abs(robotY - RedCommunityColumnFinal[i].getY()) < Math.abs(robotY - RedCommunityColumnFinal[closestGoal].getY())){
@@ -302,7 +302,7 @@ public class Field {
             } else {
                 closestGoal = 1;
                 for(int i = 1; i < 9; i++){
-                    if(i != 2 && i != 5 && i != 8){
+                    if(i != 1 && i != 4 && i != 7){
                         continue;
                     }
                     if(Math.abs(robotY - RedCommunityColumnFinal[i].getY()) < Math.abs(robotY - RedCommunityColumnFinal[closestGoal].getY())){
@@ -310,7 +310,7 @@ public class Field {
                     }
                 }
             }
-            log.writeLog(true, "Field", "GetClosetGoal", "Alliance", "Red", "Cone", manipulator.getPistonCone(), 
+            log.writeLogEcho(true, "Field", "GetClosetGoal", "Alliance", "Red", "Cone", manipulator.getPistonCone(), 
                 "Column", closestGoal+1, "X", RedCommunityColumnFinal[closestGoal].getX(),
                 "Y", RedCommunityColumnFinal[closestGoal].getY(), "Rot", RedCommunityColumnFinal[closestGoal].getRotation().getDegrees());
         }
