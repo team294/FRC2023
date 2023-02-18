@@ -24,6 +24,7 @@ public class DriveResetPose extends CommandBase {
   private double curX, curY, curAngle;    // in meters and degrees
   private boolean fromShuffleboard;
   private boolean onlyAngle;      // true = resent angle but not X-Y position
+  private boolean tolerance;
 
   /**
 	 * Resets the pose, gyro, and encoders on the drive train
@@ -42,6 +43,31 @@ public class DriveResetPose extends CommandBase {
     curAngle = curAngleinDegrees;
     fromShuffleboard = false;
     onlyAngle = false;
+    tolerance = false;
+
+    // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(driveTrain);
+  }
+
+  /**
+	 * Resets the pose, gyro, and encoders on the drive train
+   * <p> Note:  This command can run while the robot is disabled.
+   * @param curXinMeters Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
+   * @param curYinMeters Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
+   * @param curAngleinDegrees Robot angle on the field, in degrees (0 = facing away from our drivestation, + to the left, - to the right)
+   * @param driveTrain DriveTrain subsytem
+   * @param tolerance Reset if within 0.5m or 15 degrees of location
+   * @param log FileLog
+	 */
+  public DriveResetPose(double curXinMeters, double curYinMeters, double curAngleinDegrees, DriveTrain driveTrain, boolean tolerance, FileLog log) {
+    this.driveTrain = driveTrain;
+    this.log = log;
+    curX = curXinMeters;
+    curY = curYinMeters;
+    curAngle = curAngleinDegrees;
+    fromShuffleboard = false;
+    onlyAngle = false;
+    this.tolerance = tolerance;
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(driveTrain);
@@ -122,7 +148,7 @@ public class DriveResetPose extends CommandBase {
     
     log.writeLog(false, "DriveResetPose", "Init", "X", curX, "Y", curY, "Angle", curAngle);
 
-    if(Math.abs(curX - driveTrain.getPose().getX()) > 0.5 || Math.abs(curY - driveTrain.getPose().getY()) > 0.5 || Math.abs(curAngle - driveTrain.getPose().getRotation().getDegrees()) > 15.0){
+    if((Math.abs(curX - driveTrain.getPose().getX()) > 0.5 || Math.abs(curY - driveTrain.getPose().getY()) > 0.5 || Math.abs(curAngle - driveTrain.getPose().getRotation().getDegrees()) > 15.0) || !tolerance){
       driveTrain.resetPose(new Pose2d(curX, curY, Rotation2d.fromDegrees(curAngle)));
     }
   }
