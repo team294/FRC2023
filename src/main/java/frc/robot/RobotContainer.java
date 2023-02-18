@@ -11,9 +11,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -40,13 +43,18 @@ public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
   private final FileLog log = new FileLog("A1");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
+  private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
 
   // Define robot subsystems  
   private final DriveTrain driveTrain = new DriveTrain(log);
+  private final Grabber grabber = new Grabber("Grabber", log);
+  private final Manipulator manipulator = new Manipulator(log);
+  private final LED led = new LED();
 
   // Define other utilities
   private final TrajectoryCache trajectoryCache = new TrajectoryCache(log);
   private final AutoSelection autoSelection = new AutoSelection(trajectoryCache, log);
+  private final Field field = new Field(driveTrain, manipulator, allianceSelection, log);
 
   // Define controllers
   // private final Joystick xboxController = new Joystick(OIConstants.usbXboxController); //assuming usbxboxcontroller is int
@@ -56,8 +64,10 @@ public class RobotContainer {
 
   private final CommandXboxController xboxController = new CommandXboxController(OIConstants.usbXboxController);
   private boolean rumbling = false;
-  Grabber grabber = new Grabber("Grabber", log);
 
+  // Set to this pattern when the robot is disabled
+  private final Command patternTeamMoving = new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 0.5, led, log);
+  
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     configureButtonBindings(); // configure button bindings
@@ -88,7 +98,8 @@ public class RobotContainer {
     SmartDashboard.putData("Drive Straight", new DriveStraight(false, false, false, driveTrain, log));
 
     // Testing for autos and trajectories
-    SmartDashboard.putData("Drive To Pose", new DriveToPose(new Pose2d(2.0, 2.0, Rotation2d.fromDegrees(90)), driveTrain, log));
+    SmartDashboard.putData("Drive To Pose", new DriveToPose(driveTrain, log));
+    SmartDashboard.putData("Drive To Pose Test", new DriveToPose(new Pose2d(1, 1, Rotation2d.fromDegrees(0)), driveTrain, log));
     SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
     SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
     SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
@@ -106,6 +117,15 @@ public class RobotContainer {
     SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
     SmartDashboard.putData("Grabber Pick Up",new GrabberPickUp(grabber, log));
     SmartDashboard.putData("Grabber Eject", new GrabberEject(grabber, log));
+
+    //LED commands
+    SmartDashboard.putData("LED Rainbow", new LEDSetPattern(LED.rainbowLibrary, 0, 0.5, led, log));
+    SmartDashboard.putData("LED Flash Team Color", new LEDSetPattern(LED.teamFlashingColorsLibrary, 0, 0.5, led, log));
+    SmartDashboard.putData("LED Full Team Color", new LEDSetPattern(LED.teamFullColorsLibrary, 0, 0.5, led, log));
+    SmartDashboard.putData("LED moving Team Color", new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 0.5, led, log));
+    SmartDashboard.putData("LED OFF", new LEDSetStrip("Red", 0, led, log));
+    SmartDashboard.putData("LED Yellow", new LEDSetStrip("Yellow", 1, led, log));
+    SmartDashboard.putData("LED Purple", new LEDSetStrip("Purple", 1, led, log));
   }
 
   /**
@@ -208,8 +228,9 @@ public class RobotContainer {
     left[1].onTrue(new DriveResetPose(0,driveTrain,log));
    
     // left joystick right button
-    right[1].onTrue(new DriveToPose( () -> new Pose2d(driveTrain.getPose().getTranslation(), Rotation2d.fromDegrees(0)), driveTrain, log));
-    right[2].onTrue(new DriveToPose( () -> driveTrain.getPose().plus(new Transform2d(new Translation2d(), Rotation2d.fromDegrees(180))), driveTrain, log));
+    right[1].onTrue(new DriveToPose(CoordType.kAbsolute, 0, driveTrain, log));
+    right[2].onTrue(new DriveToPose(CoordType.kRelative, 180, driveTrain, log));
+
     //left[2].onTrue(new IntakeRetractAndFlush(intakeFront, uptake, feeder, log));
       
     // right joystick left button
@@ -302,6 +323,9 @@ public class RobotContainer {
       RobotPreferences.recordStickyFaults("RobotPreferences", log);
     }
 
+    compressor.disable();
+    // compressor.enableDigital();
+
     // Set initial robot position on field
     // This takes place a while after the drivetrain is created, so after any CanBus delays.
     driveTrain.resetPose(new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0)));  
@@ -323,6 +347,8 @@ public class RobotContainer {
 
     driveTrain.setDriveModeCoast(true);     // When pushing a disabled robot by hand, it is a lot easier to push in Coast mode!!!!
     driveTrain.stopMotors();                // SAFETY:  Turn off any closed loop control that may be running, so the robot does not move when re-enabled.
+
+    patternTeamMoving.schedule();
   }
 
   /**
@@ -333,6 +359,14 @@ public class RobotContainer {
     if (driveTrain.canBusError()) {
       RobotPreferences.recordStickyFaults("CAN Bus", log);
     }  //    TODO May want to flash this to the driver with some obvious signal!
+    // boolean error = true;  
+    // if (error == false) {
+    //   if(!patternTeamMoving.isScheduled()) patternTeamMoving.schedule();
+    // }
+    // else {
+    //   patternTeamMoving.cancel();
+    //   led.setStrip("Red", 0.5, 0);
+    // }
   }
   
   /**
@@ -343,6 +377,12 @@ public class RobotContainer {
 
     driveTrain.setDriveModeCoast(false);
 
+    if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
+    if (allianceSelection.getAlliance() == Alliance.Blue) {
+      led.setStrip("Blue", 0);
+    } else {
+      led.setStrip("Red", 0);
+    }
     // NOTE:  Do NOT reset the gyro or encoder here!!!!!
     // The first command in auto mode initializes before this code is run, and
     // it will read the gyro/encoder before the reset goes into effect.
@@ -361,12 +401,15 @@ public class RobotContainer {
     log.writeLogEcho(true, "Teleop", "Mode Init");
 
     driveTrain.setDriveModeCoast(false);
+
+    if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
+    led.setStrip("Orange", 0);
   }
 
   /**
    * Method called once every scheduler cycle when teleop mode is initialized/enabled.
    */
   public void teleopPeriodic() {
-
+    
   }
 }
