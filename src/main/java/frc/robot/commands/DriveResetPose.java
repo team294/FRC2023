@@ -122,7 +122,9 @@ public class DriveResetPose extends CommandBase {
     
     log.writeLog(false, "DriveResetPose", "Init", "X", curX, "Y", curY, "Angle", curAngle);
 
-    driveTrain.resetPose(new Pose2d(curX, curY, Rotation2d.fromDegrees(curAngle)));
+    if(Math.abs(curX - driveTrain.getPose().getX()) > 0.5 || Math.abs(curY - driveTrain.getPose().getY()) > 0.5 || Math.abs(curAngle - driveTrain.getPose().getRotation().getDegrees()) > 15.0){
+      driveTrain.resetPose(new Pose2d(curX, curY, Rotation2d.fromDegrees(curAngle)));
+    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
