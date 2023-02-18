@@ -53,15 +53,15 @@ public class Field {
     };
 
     private final Pose2d[] RedCommunityColumnFinal = {
-        new Pose2d(1.77165, 3.020568, new Rotation2d(0)), 
-        new Pose2d(1.77165, 3.579368, new Rotation2d(0)), 
-        new Pose2d(1.77165, 4.138168, new Rotation2d(0)), 
-        new Pose2d(1.77165, 4.696968, new Rotation2d(0)), 
-        new Pose2d(1.77165, 5.255768, new Rotation2d(0)), 
-        new Pose2d(1.77165, 5.814568, new Rotation2d(0)), 
-        new Pose2d(1.77165, 6.373368, new Rotation2d(0)), 
-        new Pose2d(1.77165, 6.932168, new Rotation2d(0)), 
-        new Pose2d(1.77165, 7.490968, new Rotation2d(0)) 
+        new Pose2d(1.77165, 3.020568, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 3.579368, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 4.138168, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 4.696968, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 5.255768, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 5.814568, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 6.373368, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 6.932168, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 7.490968, new Rotation2d(Math.PI)) 
     };
 
     //Bottom/Top refers to height relative to y-axis

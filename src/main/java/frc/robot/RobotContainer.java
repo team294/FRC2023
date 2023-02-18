@@ -89,6 +89,7 @@ public class RobotContainer {
     SmartDashboard.putData("Drive Reset SwerveModules", new DriveResetSwerveModules(driveTrain, log));
     SmartDashboard.putData("Zero Gyro", new DriveZeroGyro(driveTrain, log));
     SmartDashboard.putData("Zero Odometry", new DriveResetPose(0, 0, 0, driveTrain, log));
+    SmartDashboard.putData("Drive Reset Pose", new DriveResetPose(driveTrain, log));
     SmartDashboard.putData("Calibrate Drive Motors", new DriveCalibration(0.5, 12, 0.05, driveTrain, log));
     SmartDashboard.putData("Calibrate Turn Motors", new DriveTurnCalibration(1.0, 10, 0.2, driveTrain, log));
     SmartDashboard.putData("Drive Wheels 0 deg", new DriveSetState(0, 0, false, driveTrain, log));
@@ -126,6 +127,8 @@ public class RobotContainer {
     SmartDashboard.putData("LED OFF", new LEDSetStrip("Red", 0, led, log));
     SmartDashboard.putData("LED Yellow", new LEDSetStrip("Yellow", 1, led, log));
     SmartDashboard.putData("LED Purple", new LEDSetStrip("Purple", 1, led, log));
+
+    SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getClosestGoal(), driveTrain, log));
   }
 
   /**
