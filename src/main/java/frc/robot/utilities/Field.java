@@ -80,39 +80,54 @@ public class Field {
         new Pose2d(1.77165, 7.490968, new Rotation2d(Math.PI)) 
     };
 
-    //Bottom/Top refers to height relative to y-axis
+    // #0 = close right
+    // #2 = close left
+    // #3 = far right
+    // #5 = far left
     private final Pose2d[] BlueStationInitial = {
-        new Pose2d(2.148713, 2.130489, new Rotation2d(0)), //Community bottom
-        new Pose2d(2.148713, 2.748026, new Rotation2d(0)), //Same y as column 5
-        new Pose2d(2.148713, 3.365563, new Rotation2d(0)), //Community top
-        new Pose2d(4.855718, 2.130489, new Rotation2d(Math.PI)), //Field bottom
+        new Pose2d(2.148713, 2.130489, new Rotation2d(0)),
+        new Pose2d(2.148713, 2.748026, new Rotation2d(0)),
+        new Pose2d(2.148713, 3.365563, new Rotation2d(0)),
+        new Pose2d(4.855718, 2.130489, new Rotation2d(Math.PI)),
         new Pose2d(4.855718, 2.748026, new Rotation2d(Math.PI)),
-        new Pose2d(4.855718, 3.365563, new Rotation2d(Math.PI))  //Field top
+        new Pose2d(4.855718, 3.365563, new Rotation2d(Math.PI))
     };
     
+    //Community/Field -> Station
+    // #0 = furthest to right (from driver point of view)
+    // #2 = furthest to left (from driver point of view)
     private final Pose2d[] BlueStationFinal = {
         new Pose2d(3.8354, 2.130489, new Rotation2d(0)), //Always faces away from communities, this could cause issues
         new Pose2d(3.8354, 2.748026, new Rotation2d(0)),
-        new Pose2d(3.8354, 3.365563, new Rotation2d(0))  //"Highest" position (on y-axis)
+        new Pose2d(3.8354, 3.365563, new Rotation2d(0))
     };
 
+    // #0 = close right
+    // #2 = close left
+    // #3 = far right
+    // #5 = far left
     private final Pose2d[] RedStationInitial = {
-        new Pose2d(2.148713, 4.646867, new Rotation2d(0)), //Community bottom
-        new Pose2d(2.148713, 5.264404, new Rotation2d(0)), //Same y as column 5
-        new Pose2d(2.148713, 5.881941, new Rotation2d(0)), //Community top
-        new Pose2d(4.855718, 4.646867, new Rotation2d(Math.PI)), //Field bottom
+        new Pose2d(2.148713, 4.646867, new Rotation2d(0)),
+        new Pose2d(2.148713, 5.264404, new Rotation2d(0)),
+        new Pose2d(2.148713, 5.881941, new Rotation2d(0)),
+        new Pose2d(4.855718, 4.646867, new Rotation2d(Math.PI)),
         new Pose2d(4.855718, 5.264404, new Rotation2d(Math.PI)),
-        new Pose2d(4.855718, 5.881941, new Rotation2d(Math.PI))  //Field top
+        new Pose2d(4.855718, 5.881941, new Rotation2d(Math.PI))
     };
     
+    //Community/Field -> Station
+    // #0 = furthest to right (from driver point of view)
+    // #2 = furthest to left (from driver point of view)
     private final Pose2d[] RedStationFinal = {
         new Pose2d(3.8354, 4.646867, new Rotation2d(0)), //Always faces away from communities, this could cause issues
         new Pose2d(3.8354, 5.264404, new Rotation2d(0)), //Values found by adding loading zone width (99.07 inches) to Blue values
-        new Pose2d(3.8354, 5.881941, new Rotation2d(0))  //"Highest" position (on y-axis)
+        new Pose2d(3.8354, 5.881941, new Rotation2d(0))
     };
 
+    // #0 -> 3 = far side, right to left
+    // #4 -> 7 = close side, left to right
+    // #3 and 4 are loading zone tags
     private final Pose2d[] AprilTagsBlue = {
-
         new Pose2d(15.51356, 1.071626, new Rotation2d(0)),
         new Pose2d(15.51356, 2.748026, new Rotation2d(0)),
         new Pose2d(15.51356, 4.424426, new Rotation2d(0)),
@@ -123,6 +138,9 @@ public class Field {
         new Pose2d(1.02743, 1.071626, new Rotation2d(Math.PI))
     };
     
+    // #0 -> 3 = close side, left to right
+    // #4 -> 7 = far side, right to left
+    // #3 and 4 are loading zone tags
     private final Pose2d[] AprilTagsRed = {
         new Pose2d(1.02743, 6.932168, new Rotation2d(Math.PI)),
         new Pose2d(1.02743, 5.255768, new Rotation2d(Math.PI)),
