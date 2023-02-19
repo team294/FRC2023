@@ -8,7 +8,6 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -18,7 +17,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import frc.robot.CTREConfigs;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.Ports;
 import frc.robot.utilities.ElevatorProfileGenerator;
@@ -36,7 +35,8 @@ public class Elevator extends SubsystemBase implements Loggable{
 	private final int logRotationKey;         // key for the logging cycle for this subsystem
 	private boolean fastLogging = false;
 	private final String subsystemName;
-	private final WPI_TalonFX elevatorMotor;
+
+	private final WPI_TalonFX elevatorMotor  = new WPI_TalonFX(Ports.CANElevatorMotor);
 	private TalonFXSensorCollection elevatorLimits;
 
 	private ElevatorProfileGenerator elevatorProfile;
@@ -45,14 +45,6 @@ public class Elevator extends SubsystemBase implements Loggable{
 	private boolean elevPosControl = false; // true is in position control mode, false is manual motor control (percent output)
 
 	// TODO Calibrate
-	private double rampRate = 0.3;
-	private double kP = 0.5;
-	private double kI = 0;
-	private double kD = 0;
-	private double kFF = 0;
-	private int kIz = 0;
-	private double kMaxOutput = 1.0; // up max output, was 0.8
-	private double kMinOutput = -1.0; // down max output, was -0.6
 
 	public double elevatorBottomToFloor; //distance of elevator 0 value from the ground (Not sure we want this because of diagonal elevator)
 	// public double elevatorWristSafeStow; 	 // highest elevator position (from ground) where wrist can be stowed (Not sure we need this)
@@ -62,28 +54,27 @@ public class Elevator extends SubsystemBase implements Loggable{
 		logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
 		subsystemName = "Elevator";
 
-		// Set up motor
-		elevatorMotor = new WPI_TalonFX(Ports.CANElevatorMotor);
+		// configure motor
+		elevatorMotor.configFactoryDefault(100);
+		elevatorMotor.configAllSettings(CTREConfigs.elevatorFXConfig, 100);
+		elevatorMotor.selectProfileSlot(0, 0);
 		elevatorMotor.setInverted(false);
+		elevatorMotor.enableVoltageCompensation(true);
+		elevatorMotor.setNeutralMode(NeutralMode.Brake);
+
+		// configure encoder on motor
 		elevatorMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 100);
 		elevatorMotor.setSensorPhase(false);         // True = Flip direction of sensor reading
-		elevatorMotor.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
-		elevatorMotor.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
+
+		// configure limit switches on motor
+		elevatorMotor.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 100);
+		elevatorMotor.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen, 100);
+		elevatorMotor.overrideLimitSwitchesEnable(true);
+		// elevatorMotor.configForwardSoftLimitThreshold(limit, 100);
+		// elevatorMotor.configForwardSoftLimitEnable(true, 100);
 
 		elevatorLimits = elevatorMotor.getSensorCollection();
 		checkAndZeroElevatorEnc();
-
-		elevatorMotor.config_kP(0, kP);
-		elevatorMotor.config_kI(0, kI);
-		elevatorMotor.config_kD(0, kD);
-		elevatorMotor.config_kF(0, kFF);
-		elevatorMotor.config_IntegralZone(0, kIz);
-		elevatorMotor.configClosedloopRamp(rampRate);
-		elevatorMotor.configPeakOutputForward(kMaxOutput);
-		elevatorMotor.configPeakOutputReverse(kMinOutput);
-
-		elevatorMotor.clearStickyFaults();
-		elevatorMotor.setNeutralMode(NeutralMode.Brake);
 
 		// Wait 0.25 seconds before checking the limit switch or encoder ticks.  The reason is that zeroing the encoder (above)
 		// or setting the limit switch type (above) can be delayed up to 50ms for a round trip
