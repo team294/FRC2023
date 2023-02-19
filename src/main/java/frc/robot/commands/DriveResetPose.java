@@ -137,7 +137,7 @@ public class DriveResetPose extends CommandBase {
   public void initialize() {
     if(fromShuffleboard){
       curX = SmartDashboard.getNumber("DriveResetPose X", 0);
-      curX = SmartDashboard.getNumber("DriveResetPose Y", 0);
+      curY = SmartDashboard.getNumber("DriveResetPose Y", 0);
       curAngle = SmartDashboard.getNumber("DriveResetPose Angle", 0);
     }
 

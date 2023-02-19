@@ -29,7 +29,7 @@ public class Manipulator extends SubsystemBase implements Loggable {
   private final CANSparkMax motor;
   private final DoubleSolenoid pneumaticDoubleSolenoid;
 
-  private boolean pistonCone = false;     // TODO set default state
+  private boolean pistonCone = true;     // manipulator piston position (true = cone, false = cube) // TODO set default state
 
   /**
    * Constructs the Manipulator subsystem, including rollers and a solenoid to change between cube and cone configuration.

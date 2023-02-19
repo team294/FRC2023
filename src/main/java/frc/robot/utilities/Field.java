@@ -10,11 +10,19 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Manipulator;
 
-/** Add your docs here. */
+/**
+ * A class representing field coordinates.
+ * <p> Field coordinates include:
+ * <p> Robot X location in the field, in meters (0 = field edge in front of driver station, + = away from our drivestation)
+ * <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, + = left when looking from our drivestation)
+ * <p> Robot angle on the field (0 = facing away from our drivestation, + to the left, - to the right)
+ */
 public class Field {
     //Robot probably 31" with bumpers
 
     //Community -> Loading
+    // #0 = furthest to right (from driver point of view)
+    // #8 = furthest to left (from driver point of view)
     private final Pose2d[] BlueCommunityColumnInitial = {
         new Pose2d(2.0871258795062873, 0.512826, new Rotation2d(Math.PI)), //54.25+(31/2)*sqrt(2)+6 inches to meters for x value
         new Pose2d(2.0871258795062873, 1.071626, new Rotation2d(Math.PI)), 
@@ -27,6 +35,9 @@ public class Field {
         new Pose2d(2.0871258795062873, 4.983226, new Rotation2d(Math.PI)) 
     };
 
+    //Community -> Place part
+    // #0 = furthest to right (from driver point of view)
+    // #8 = furthest to left (from driver point of view)
     private final Pose2d[] BlueCommunityColumnFinal = {
         new Pose2d(1.77165, 0.512826, new Rotation2d(Math.PI)), //54.25+(31/2) inches to meters for x value
         new Pose2d(1.77165, 1.071626, new Rotation2d(Math.PI)), 
@@ -40,28 +51,33 @@ public class Field {
     };
 
     //Loading -> Community
+    // #0 = furthest to right (from driver point of view)
+    // #8 = furthest to left (from driver point of view)
     private final Pose2d[] RedCommunityColumnInitial = {
-        new Pose2d(2.0871258795062873, 3.020568, new Rotation2d(0)), //118.92 inches
-        new Pose2d(2.0871258795062873, 3.579368, new Rotation2d(0)), //140.92 inches
-        new Pose2d(2.0871258795062873, 4.138168, new Rotation2d(0)), //162.92 inches
-        new Pose2d(2.0871258795062873, 4.696968, new Rotation2d(0)), //184.92 inches
-        new Pose2d(2.0871258795062873, 5.255768, new Rotation2d(0)), //206.92 inches
-        new Pose2d(2.0871258795062873, 5.814568, new Rotation2d(0)), //228.92 inches
-        new Pose2d(2.0871258795062873, 6.373368, new Rotation2d(0)), //250.92 inches
-        new Pose2d(2.0871258795062873, 6.932168, new Rotation2d(0)), //272.92 inches
-        new Pose2d(2.0871258795062873, 7.490968, new Rotation2d(0))  //294.92 inches
+        new Pose2d(2.0871258795062873, 3.020568, new Rotation2d(Math.PI)), //118.92 inches
+        new Pose2d(2.0871258795062873, 3.579368, new Rotation2d(Math.PI)), //140.92 inches
+        new Pose2d(2.0871258795062873, 4.138168, new Rotation2d(Math.PI)), //162.92 inches
+        new Pose2d(2.0871258795062873, 4.696968, new Rotation2d(Math.PI)), //184.92 inches
+        new Pose2d(2.0871258795062873, 5.255768, new Rotation2d(Math.PI)), //206.92 inches
+        new Pose2d(2.0871258795062873, 5.814568, new Rotation2d(Math.PI)), //228.92 inches
+        new Pose2d(2.0871258795062873, 6.373368, new Rotation2d(Math.PI)), //250.92 inches
+        new Pose2d(2.0871258795062873, 6.932168, new Rotation2d(Math.PI)), //272.92 inches
+        new Pose2d(2.0871258795062873, 7.490968, new Rotation2d(Math.PI))  //294.92 inches
     };
 
+    //Community -> Place part
+    // #0 = furthest to right (from driver point of view)
+    // #8 = furthest to left (from driver point of view)
     private final Pose2d[] RedCommunityColumnFinal = {
-        new Pose2d(1.77165, 3.020568, new Rotation2d(0)), 
-        new Pose2d(1.77165, 3.579368, new Rotation2d(0)), 
-        new Pose2d(1.77165, 4.138168, new Rotation2d(0)), 
-        new Pose2d(1.77165, 4.696968, new Rotation2d(0)), 
-        new Pose2d(1.77165, 5.255768, new Rotation2d(0)), 
-        new Pose2d(1.77165, 5.814568, new Rotation2d(0)), 
-        new Pose2d(1.77165, 6.373368, new Rotation2d(0)), 
-        new Pose2d(1.77165, 6.932168, new Rotation2d(0)), 
-        new Pose2d(1.77165, 7.490968, new Rotation2d(0)) 
+        new Pose2d(1.77165, 3.020568, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 3.579368, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 4.138168, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 4.696968, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 5.255768, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 5.814568, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 6.373368, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 6.932168, new Rotation2d(Math.PI)), 
+        new Pose2d(1.77165, 7.490968, new Rotation2d(Math.PI)) 
     };
 
     //Bottom/Top refers to height relative to y-axis
@@ -140,7 +156,10 @@ public class Field {
     }
 
     /**
-	 * Gets the initial column position
+	 * Gets the initial column position (in front of scoring position, but backed up with a little room for the robot to rotate).
+     * <p> Note that the position will be different for red vs blue alliance, based on the current alliance in the alliance object.
+     * <p> #1 = furthest to right (from driver point of view)
+     * <p> #9 = furthest to left (from driver point of view)
 	 * 
 	 * @param column The column that will be returned (1-9)
 	 */
@@ -158,7 +177,10 @@ public class Field {
     }
 
     /**
-	 * Gets the final column position
+	 * Gets the column scoring position.
+     * <p> Note that the position will be different for red vs blue alliance, based on the current alliance in the alliance object.
+     * <p> #1 = furthest to right (from driver point of view)
+     * <p> #9 = furthest to left (from driver point of view)
 	 * 
 	 * @param column The column that will be returned (1-9)
 	 */
@@ -177,6 +199,7 @@ public class Field {
 
     /**
 	 * Gets the position to approach the station from
+     * <p> Note that the position will be different for red vs blue alliance, based on the current alliance in the alliance object.
 	 * 
 	 * @param position 1-3 Lowest-Highest Communtiy Side | 4-6 Lowest-Highest Field Side
 	 */
@@ -195,6 +218,7 @@ public class Field {
 
     /**
 	 * Gets the center positions on the station
+     * <p> Note that the position will be different for red vs blue alliance, based on the current alliance in the alliance object.
 	 * 
 	 * @param position 1-3 Lowest-Hightest (Y-Axis)
 	 */
@@ -213,6 +237,7 @@ public class Field {
 
     /**
 	 * Gets the position of a specified April Tag (1-8)
+     * <p> Note that the position will be different for red vs blue alliance, based on the current alliance in the alliance object.
 	 * 
 	 * @param position
 	 */
@@ -229,62 +254,67 @@ public class Field {
     }
 
     /**
-     * TODO add some documentation!!!!
-     * @return
+     * Returns the column of the closest goal (1-9), based on the current game piece setting in the manipulator.
+     * <p> #1 = furthest to right (from driver point of view)
+     * <p> #9 = furthest to left (from driver point of view)
+     * @return Column of the closest goal (1-9) for the current game piece setting in the manipulator
      */
-    public Pose2d getClosestGoal() {
-        Pose2d closestGoal;
+    public int getClosestGoal() {
+        int closestGoal;
         double robotY = driveTrain.getPose().getY();
 
         if(alliance.getAlliance() == Alliance.Blue){//Alliance Blue
-            closestGoal = BlueCommunityColumnFinal[0];
+            closestGoal = 0;
             if(manipulator.getPistonCone()){//Carrying Cone
                 for(int i = 0; i < 9; i++){
-                    if(i == 2 || i == 5 || i == 8){
+                    if(i == 1 || i == 4 || i == 7){
                         continue;
                     }
-                    if(Math.abs(robotY - BlueCommunityColumnFinal[i].getY()) < Math.abs(robotY - closestGoal.getY())){
-                        closestGoal = BlueCommunityColumnFinal[i];
+                    if(Math.abs(robotY - BlueCommunityColumnFinal[i].getY()) < Math.abs(robotY - BlueCommunityColumnFinal[closestGoal].getY())){
+                        closestGoal = i;
                     }
                 }
             } else {
-                closestGoal = BlueCommunityColumnFinal[1];
+                closestGoal = 1;
                 for(int i = 1; i < 9; i++){
-                    if(i != 2 && i != 5 && i != 8){
+                    if(i != 1 && i != 4 && i != 7){
                         continue;
                     }
-                    if(Math.abs(robotY - BlueCommunityColumnFinal[i].getY()) < Math.abs(robotY - closestGoal.getY())){
-                        closestGoal = BlueCommunityColumnFinal[i];
+                    if(Math.abs(robotY - BlueCommunityColumnFinal[i].getY()) < Math.abs(robotY - BlueCommunityColumnFinal[closestGoal].getY())){
+                        closestGoal = i;
                     }
                 }
             }
-            log.writeLog(true, "Field", "GetClosetGoal", "Alliance", "Blue", "Cone", manipulator.getPistonCone(), "X", closestGoal.getX(),
-                "Y", closestGoal.getY(), "Rot", closestGoal.getRotation().getDegrees());
+            log.writeLogEcho(true, "Field", "GetClosetGoal", "Alliance", "Blue", "Cone", manipulator.getPistonCone(), 
+                "Column", closestGoal+1, "X", BlueCommunityColumnFinal[closestGoal].getX(),
+                "Y", BlueCommunityColumnFinal[closestGoal].getY(), "Rot", BlueCommunityColumnFinal[closestGoal].getRotation().getDegrees());
         } else {
-            closestGoal = RedCommunityColumnFinal[0];
+            closestGoal = 0;
             if(manipulator.getPistonCone()){//Carrying Cone
                 for(int i = 0; i < 9; i++){
-                    if(i == 2 || i == 5 || i == 8){
+                    if(i == 1 || i == 4 || i == 7){
                         continue;
                     }
-                    if(Math.abs(robotY - RedCommunityColumnFinal[i].getY()) < Math.abs(robotY - closestGoal.getY())){
-                        closestGoal = RedCommunityColumnFinal[i];
+                    if(Math.abs(robotY - RedCommunityColumnFinal[i].getY()) < Math.abs(robotY - RedCommunityColumnFinal[closestGoal].getY())){
+                        closestGoal = i;
                     }
                 }
             } else {
-                closestGoal = RedCommunityColumnFinal[1];
+                closestGoal = 1;
                 for(int i = 1; i < 9; i++){
-                    if(i != 2 && i != 5 && i != 8){
+                    if(i != 1 && i != 4 && i != 7){
                         continue;
                     }
-                    if(Math.abs(robotY - RedCommunityColumnFinal[i].getY()) < Math.abs(robotY - closestGoal.getY())){
-                        closestGoal = RedCommunityColumnFinal[i];
+                    if(Math.abs(robotY - RedCommunityColumnFinal[i].getY()) < Math.abs(robotY - RedCommunityColumnFinal[closestGoal].getY())){
+                        closestGoal = i;
                     }
                 }
             }
-            log.writeLog(true, "Field", "GetClosetGoal", "Alliance", "Red", "Cone", manipulator.getPistonCone(), "X", closestGoal.getX(),
-                "Y", closestGoal.getY(), "Rot", closestGoal.getRotation().getDegrees());
+            log.writeLogEcho(true, "Field", "GetClosetGoal", "Alliance", "Red", "Cone", manipulator.getPistonCone(), 
+                "Column", closestGoal+1, "X", RedCommunityColumnFinal[closestGoal].getX(),
+                "Y", RedCommunityColumnFinal[closestGoal].getY(), "Rot", RedCommunityColumnFinal[closestGoal].getRotation().getDegrees());
         }
+        closestGoal++;          // Adjust for 0-based index in array
         return closestGoal;
     }
 }

@@ -8,8 +8,6 @@ import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -89,6 +87,7 @@ public class RobotContainer {
     SmartDashboard.putData("Drive Reset SwerveModules", new DriveResetSwerveModules(driveTrain, log));
     SmartDashboard.putData("Zero Gyro", new DriveZeroGyro(driveTrain, log));
     SmartDashboard.putData("Zero Odometry", new DriveResetPose(0, 0, 0, driveTrain, log));
+    SmartDashboard.putData("Drive Reset Pose", new DriveResetPose(driveTrain, log));
     SmartDashboard.putData("Calibrate Drive Motors", new DriveCalibration(0.5, 12, 0.05, driveTrain, log));
     SmartDashboard.putData("Calibrate Turn Motors", new DriveTurnCalibration(1.0, 10, 0.2, driveTrain, log));
     SmartDashboard.putData("Drive Wheels 0 deg", new DriveSetState(0, 0, false, driveTrain, log));
@@ -112,6 +111,7 @@ public class RobotContainer {
             new Pose2d(1.0,0,new Rotation2d(0)), 
             Constants.TrajectoryConstants.swerveTrajectoryConfig),
           driveTrain, log));
+    SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal()), driveTrain, log));
   
     //Grabber commands
     SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
