@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj.util.Color;
 
 import frc.robot.Constants.CoordType;
 import frc.robot.Constants.OIConstants;
@@ -125,9 +126,9 @@ public class RobotContainer {
     SmartDashboard.putData("LED Flash Team Color", new LEDSetPattern(LED.teamFlashingColorsLibrary, 0, 0.5, led, log));
     SmartDashboard.putData("LED Full Team Color", new LEDSetPattern(LED.teamFullColorsLibrary, 0, 0.5, led, log));
     SmartDashboard.putData("LED moving Team Color", new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 0.5, led, log));
-    SmartDashboard.putData("LED OFF", new LEDSetStrip("Red", 0, led, log));
-    SmartDashboard.putData("LED Yellow", new LEDSetStrip("Yellow", 1, led, log));
-    SmartDashboard.putData("LED Purple", new LEDSetStrip("Purple", 1, led, log));
+    SmartDashboard.putData("LED OFF", new LEDSetStrip(Color.kBlack, 0, led, log));
+    SmartDashboard.putData("LED Yellow", new LEDSetStrip(Color.kYellow, 1, led, log));
+    SmartDashboard.putData("LED Purple", new LEDSetStrip(Color.kPurple, 1, led, log));
   }
 
   /**
@@ -381,9 +382,9 @@ public class RobotContainer {
 
     if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
     if (allianceSelection.getAlliance() == Alliance.Blue) {
-      led.setStrip("Blue", 0);
+      led.setStrip(Color.kBlue, 0);
     } else {
-      led.setStrip("Red", 0);
+      led.setStrip(Color.kRed, 0);
     }
     // NOTE:  Do NOT reset the gyro or encoder here!!!!!
     // The first command in auto mode initializes before this code is run, and
@@ -405,7 +406,7 @@ public class RobotContainer {
     driveTrain.setDriveModeCoast(false);
 
     if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
-    led.setStrip("Orange", 0);
+    led.setStrip(Color.kOrange, 0);
   }
 
   /**

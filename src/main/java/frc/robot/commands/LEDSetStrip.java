@@ -7,6 +7,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.LED;
 import frc.robot.utilities.FileLog;
@@ -14,7 +15,7 @@ import frc.robot.utilities.FileLog;
 public class LEDSetStrip extends CommandBase {
   private LED led;
   private FileLog log;
-  private String color;
+  private Color color;
   private double intensity;
  
   /**
@@ -24,7 +25,7 @@ public class LEDSetStrip extends CommandBase {
    * @param color string of color name, case sensitive (ex: "Blue")
    * @param led led strip (subsystem)
    **/
-	public LEDSetStrip(String color, LED led, FileLog log) {
+	public LEDSetStrip(Color color, LED led, FileLog log) {
     this(color, 0.5, led, log);
   }
   
@@ -36,7 +37,7 @@ public class LEDSetStrip extends CommandBase {
    * @param intensity percent intensity (0 to 1)
    * @param led led strip (subsystem)
    **/
-	public LEDSetStrip(String color, double intensity, LED led, FileLog log) {
+	public LEDSetStrip(Color color, double intensity, LED led, FileLog log) {
     this.led = led;
     this.log = log;
     this.color = color;
