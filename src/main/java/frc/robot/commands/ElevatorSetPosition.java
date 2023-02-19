@@ -7,12 +7,13 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Wrist;
 import frc.robot.utilities.FileLog;
 
-public class ElevatorMoveToLevel extends CommandBase {
+public class ElevatorSetPosition extends CommandBase {
 
   private Elevator elevator;
   private Wrist wrist;
@@ -21,22 +22,47 @@ public class ElevatorMoveToLevel extends CommandBase {
   private double target;
 
   private double toleranceCounter;
+  private boolean fromShuffleboard;
 
 
   /**
    * Moves elevator to target height
    * @param target target height in inches from floor
+   * @param elevator elevator subsystem
+   * @param wrist wrist subsystem
+   * @param log log subsystem
    */
-  public ElevatorMoveToLevel(double target, Elevator elevator, Wrist wrist, FileLog log) {
+  public ElevatorSetPosition(double target, Elevator elevator, Wrist wrist, FileLog log) {
     this.elevator = elevator;
     this.wrist = wrist;
     this.target = target;
+    fromShuffleboard = false;
+
+    addRequirements(elevator);
+  }
+
+  /**
+   * Moves elevator to target height from shuffleboard
+   * @param elevator elevator subsystem
+   * @param wrist wrist subsystem
+   * @param log log subsystem
+   */
+  public ElevatorSetPosition(Elevator elevator, Wrist wrist, FileLog log) {
+    this.elevator = elevator;
+    this.wrist = wrist;
+    fromShuffleboard = true;
+    if(SmartDashboard.getNumber("Elevator Position", -9999) == -9999) {
+      SmartDashboard.putNumber("Elevator Position", 0);
+    }
     addRequirements(elevator);
   }
 
   // Called just before this Command runs the first time
   @Override
   public void initialize() {
+    if(fromShuffleboard){
+      target = SmartDashboard.getNumber("Elevator Position", 0);
+    }
     elevator.setProfileTarget(target, wrist);
     log.writeLog(false, "ElevatorMoveToLevel", "Target Position", target);
 

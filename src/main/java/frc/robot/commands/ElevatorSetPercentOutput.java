@@ -7,9 +7,9 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Wrist;
 import frc.robot.utilities.FileLog;
 
 public class ElevatorSetPercentOutput extends CommandBase {
@@ -17,20 +17,39 @@ public class ElevatorSetPercentOutput extends CommandBase {
   private Elevator elevator;
   private FileLog log;
 
+  boolean fromShuffleboard;
+  
   private double percentOutput;
 
-  public ElevatorSetPercentOutput(double percentOutput, Wrist wrist, Elevator elevator, FileLog log) {
+  public ElevatorSetPercentOutput(double percentOutput, Elevator elevator, FileLog log) {
     // Use requires() here to declare subsystem dependencies
     // eg. requires(chassis);
     this.elevator = elevator;
     this.log = log;
     this.percentOutput = percentOutput;
+    fromShuffleboard = false;
     addRequirements(elevator);
+  }
+
+  public ElevatorSetPercentOutput(Elevator elevator, FileLog log) {
+    // Use requires() here to declare subsystem dependencies
+    // eg. requires(chassis);
+    this.elevator = elevator;
+    this.log = log;
+    fromShuffleboard = true;
+    addRequirements(elevator);
+
+    if(SmartDashboard.getNumber("Elevator Percent", -9999) == -9999) {
+      SmartDashboard.putNumber("Elevator Percent", 0);
+    }
   }
 
   // Called just before this Command runs the first time
   @Override
   public void initialize() {
+    if(fromShuffleboard){
+      percentOutput = SmartDashboard.getNumber("Elevator Percent", 0);
+    }
     elevator.setElevatorMotorPercentOutput(percentOutput);
     log.writeLog(false, "ElevatorSetPercentOutput", "Percent", percentOutput);
   }

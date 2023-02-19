@@ -49,6 +49,7 @@ public class RobotContainer {
   private final Grabber grabber = new Grabber("Grabber", log);
   private final Manipulator manipulator = new Manipulator(log);
   private final Elevator elevator = new Elevator(log);
+  private final Wrist wrist = new Wrist("Wrist", log);
   private final LED led = new LED();
 
   // Define other utilities
@@ -120,6 +121,11 @@ public class RobotContainer {
     SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
     SmartDashboard.putData("Grabber Pick Up",new GrabberPickUp(grabber, log));
     SmartDashboard.putData("Grabber Eject", new GrabberEject(grabber, log));
+
+    //Elevator Commands
+    SmartDashboard.putData("Elevator Calibrate", new ElevatorCalibrateIfAtLowerLimit(elevator, log));
+    SmartDashboard.putData("Elevator Set Percent", new ElevatorSetPercentOutput(elevator, log));
+    SmartDashboard.putData("Elevator Set Position", new ElevatorSetPosition(elevator, wrist, log));
 
     //LED commands
     SmartDashboard.putData("LED Rainbow", new LEDSetPattern(LED.rainbowLibrary, 0, 0.5, led, log));
