@@ -23,7 +23,7 @@ import frc.robot.Constants.SwerveConstants;
 public class TrajectoryCache {
     private FileLog log;
    
-    private static int trajectoryCount = 8;
+    private static int trajectoryCount = 12;
     public Trajectory[] cache = new Trajectory[trajectoryCount];
 
     public enum TrajectoryType {
@@ -65,10 +65,12 @@ public class TrajectoryCache {
         
         cache[TrajectoryType.CenterBalanceBlue.value] = calcTrajectory("CenterBalanceBlue", 0.4, 0.4, false, 
             // Start at the position (1.75895, 2.707) facing +X direction
-            new Pose2d(1.75895, 2.707, new Rotation2d(0)),
+            new Pose2d(1.821942, 2.748026, new Rotation2d(0)),
             List.of(),
             // Go straight onto platform
-            new Pose2d(5.75895, 2.707, new Rotation2d(0))
+            new Pose2d(4.25, 2.748026, Rotation2d.fromDegrees(0))
+            // new Pose2d(3.821942, 2.748026, Rotation2d.fromDegrees(0))
+            // new Pose2d(5.75895, 2.707, new Rotation2d(0))
         );    
 
         cache[TrajectoryType.CenterBalanceRed.value] = calcTrajectory("CenterBalanceRed", 0.4, 0.4, false,  //Change this to Red side values
@@ -106,12 +108,16 @@ public class TrajectoryCache {
         ); 
 
         cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value] = calcTrajectory("MiddleOuterOneConeBalanceBlue", 0.4, 0.4, false, 
-            new Pose2d(1.75895, 3.309, new Rotation2d(0)),
+            new Pose2d(1.821942, 2.748026, new Rotation2d(0)),
             // 
-            List.of(new Translation2d(5.767, 3.266)),
+            List.of(new Translation2d(6, 2.748026)),
+            // List.of(new Translation2d(5.767, 3.266)),
             // Pass through these two interior waypoints, making an 's' curve path
 
-            new Pose2d(3.897, 2.761, Rotation2d.fromDegrees(-160))
+            new Pose2d(4.25, 2.748026, Rotation2d.fromDegrees(180))
+
+            // new Pose2d(4.25, 2.748026, Rotation2d.fromDegrees(180))
+            // new Pose2d(3.897, 2.761, Rotation2d.fromDegrees(-160))
         ); 
 
         cache[TrajectoryType.MiddleOuterOneConeBalanceRed.value] = calcTrajectory("MiddleOuterOneConeBalanceRed", 0.4, 0.4, false, 
