@@ -65,7 +65,6 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   private PhotonCameraWrapper camera = new PhotonCameraWrapper();
 
   // Odometry class for tracking robot pose
-  SwerveDriveOdometry odometry;
   SwerveDrivePoseEstimator poseEstimator; 
   Field2d field = new Field2d();    // Field to dispaly on Shuffleboard
 
@@ -111,8 +110,6 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
     // create and initialize odometery
     // Set initial location to 0,0.
-    odometry = new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(getGyroRotation()), 
-        getModulePotisions(), new Pose2d(0, 0, Rotation2d.fromDegrees(0)) );
     poseEstimator = new SwerveDrivePoseEstimator(kDriveKinematics, Rotation2d.fromDegrees(getGyroRotation()), 
        getModulePotisions(), new Pose2d(0, 0, Rotation2d.fromDegrees(0)) );
     SmartDashboard.putData("Field", field);
@@ -349,24 +346,24 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * @return The robot's pose
    */
   public Pose2d getPose() {
-    return odometry.getPoseMeters();
+    return poseEstimator.getEstimatedPosition();
   }
 
   /**
-   * Resets the odometry to the specified pose.  I.e. defines the robot's
+   * Resets the pose estimator to the specified pose.  I.e. defines the robot's
    * position and orientation on the field.
    * This method also resets the gyro, which is required for the pose
    * to properly reset.
    *
-   * @param pose The pose to which to set the odometry.  Pose components include
+   * @param pose The pose to which to set the pose estimator.  Pose components include
    *    <p> Robot X location in the field, in meters (0 = field edge in front of driver station, + = away from our drivestation)
    *    <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, + = left when looking from our drivestation)
    *    <p> Robot angle on the field (0 = facing away from our drivestation, + to the left, - to the right)
    */
   public void resetPose(Pose2d pose) {
     zeroGyroRotation(pose.getRotation().getDegrees());
-    odometry.resetPosition( Rotation2d.fromDegrees(getGyroRotation()),
-        getModulePotisions(), pose );
+    poseEstimator.resetPosition( Rotation2d.fromDegrees(getGyroRotation()),
+    getModulePotisions(), pose );
   }
   
   /**
@@ -427,8 +424,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
       }
 
       // Update data on SmartDashboard
-      // field.setRobotPose(odometry.getPoseMeters());
-      field.setRobotPose(odometry.getPoseMeters());
+      field.setRobotPose(poseEstimator.getEstimatedPosition());
       ChassisSpeeds robotSpeeds = getRobotSpeeds();
       // SmartDashboard.putNumber("Drive Average Dist in Meters", Units.inchesToMeters(getAverageDistance()));
       SmartDashboard.putNumber("Drive X Velocity", robotSpeeds.vxMetersPerSecond);
@@ -439,8 +435,8 @@ public class DriveTrain extends SubsystemBase implements Loggable {
       SmartDashboard.putNumber("Drive AngVel", angularVelocity);
       SmartDashboard.putNumber("Drive Pitch", ahrs.getRoll());
       
-      // position from odometry (helpful for autos)
-      Pose2d pose = odometry.getPoseMeters();
+      // position from poseEstimator (helpful for autos)
+      Pose2d pose = poseEstimator.getEstimatedPosition();
       SmartDashboard.putNumber("Drive Odometry X", pose.getTranslation().getX());
       SmartDashboard.putNumber("Drive Odometry Y", pose.getTranslation().getY());
       SmartDashboard.putNumber("Drive Odometry Theta", pose.getRotation().getDegrees());
@@ -465,7 +461,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * @param logWhenDisabled true will log when disabled, false will discard the string
    */
   public void updateDriveLog(boolean logWhenDisabled) {
-    Pose2d pose = odometry.getPoseMeters();
+    Pose2d pose = poseEstimator.getEstimatedPosition();
     ChassisSpeeds robotSpeeds = getRobotSpeeds();
     log.writeLog(logWhenDisabled, "Drive", "Update Variables", 
       "Gyro Angle", getGyroRotation(), "RawGyro", getGyroRaw(), 
