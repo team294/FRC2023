@@ -218,8 +218,8 @@ public final class Constants {
       public static final class ElevatorConstants {
         // TODO Find these values
         public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
-        public static final double kElevGearRatio = (8.0 / 1.0);        // TODO CALIBRATE.  Gear reduction ratio between Falcon and gear driving the elevator
-        public static final double kElevGearDiameterInches = 4.0;       // TODO CALIBRATE.  Diameter of the gear driving the elevator in inches
+        public static final double kElevGearRatio = (12.0 / 1.0);        // CALIBRATED.  Gear reduction ratio between Falcon and gear driving the elevator
+        public static final double kElevGearDiameterInches = 1.25;       // TODO CALIBRATE.  Diameter of the gear driving the elevator in inches
         public static final double kElevEncoderInchesPerTick = (kElevGearDiameterInches * Math.PI) / kEncoderCPR / kElevGearRatio;
 
         public static final double loadCargo = 0; // NOT REAL NUMBER

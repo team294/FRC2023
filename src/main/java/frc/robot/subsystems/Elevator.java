@@ -12,6 +12,7 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
@@ -33,7 +34,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	// here. Call these from Commands.
 	private final FileLog log;
 	private final int logRotationKey;         // key for the logging cycle for this subsystem
-	private boolean fastLogging;
+	private boolean fastLogging = false;
 	private final String subsystemName;
 	private final WPI_TalonFX elevatorMotor;
 	private TalonFXSensorCollection elevatorLimits;
@@ -58,15 +59,14 @@ public class Elevator extends SubsystemBase implements Loggable{
 
 	public Elevator(FileLog log) {
 		this.log = log;
-		fastLogging = false;
 		logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
 		subsystemName = "Elevator";
 
 		// Set up motor
 		elevatorMotor = new WPI_TalonFX(Ports.CANElevatorMotor);
 		elevatorMotor.setInverted(false);
-		elevatorMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 0);
-		elevatorMotor.setSensorPhase(true);         // Flip direction of sensor reading
+		elevatorMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 100);
+		elevatorMotor.setSensorPhase(false);         // True = Flip direction of sensor reading
 		elevatorMotor.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
 		elevatorMotor.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
 
