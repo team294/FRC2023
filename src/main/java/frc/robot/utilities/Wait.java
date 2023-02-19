@@ -18,9 +18,8 @@ public class Wait {
      * @param millis how long to wait, in milliseconds
      */
     public static void waitTime(long millis) {
-        long t = System.currentTimeMillis();
+        long t = System.currentTimeMillis() + millis;
 
-        while (System.currentTimeMillis() - t < millis);
-
+        while (System.currentTimeMillis() < t);
     }
 }

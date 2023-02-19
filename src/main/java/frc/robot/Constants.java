@@ -65,8 +65,8 @@ public final class Constants {
         public static final int CANTurnEncoderBackLeft = 11;
         public static final int CANTurnEncoderBackRight = 12;
 
-        public static final int CANElevatorMotor1 = 21;
-        public static final int CANElevatorMotor2 = 22;
+        public static final int CANElevatorMotor = 21;
+        // public static final int CANElevatorMotor2 = 22;
         public static final int CANWristMotor = 23;
 
         public static final int CANGrabber = 44;
@@ -217,6 +217,11 @@ public final class Constants {
 
       public static final class ElevatorConstants {
         // TODO Find these values
+        public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
+        public static final double kElevGearRatio = (8.0 / 1.0);        // TODO CALIBRATE.  Gear reduction ratio between Falcon and gear driving the elevator
+        public static final double kElevGearDiameterInches = 4.0;       // TODO CALIBRATE.  Diameter of the gear driving the elevator in inches
+        public static final double kElevEncoderInchesPerTick = (kElevGearDiameterInches * Math.PI) / kEncoderCPR / kElevGearRatio;
+
         public static final double loadCargo = 0; // NOT REAL NUMBER
         public static final double scoreCargoLow = 25; // NOT REAL NUMBER
         public static final double scoreCargoMedium = 50; // NOT REAL NUMBER
@@ -231,7 +236,6 @@ public final class Constants {
         // public static final double rocketBallOffset = 2;  // Ball intake is higher than the disc grabber (low position only)
         // public static final double loadCargo = 44.125;
         // public static final double groundCargo = 16.5;  		// At this level, wrist must be able to go to wristDown 
-        public static final double encoderTicksPerRevolution = 4096; // Ticks per revolution for Falcon?
 
         public enum ElevatorPosition {scoreCargoLow, scoreCargoMedium, scoreCargoHigh, loadCargo, groundCargo, stowed}        
 
