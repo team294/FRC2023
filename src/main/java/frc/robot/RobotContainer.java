@@ -54,7 +54,7 @@ public class RobotContainer {
 
   // Define other utilities
   private final TrajectoryCache trajectoryCache = new TrajectoryCache(log);
-  private final AutoSelection autoSelection = new AutoSelection(trajectoryCache, log);
+  private final AutoSelection autoSelection = new AutoSelection(trajectoryCache,allianceSelection,log);
   private final Field field = new Field(driveTrain, manipulator, allianceSelection, log);
 
   // Define controllers
