@@ -92,7 +92,7 @@ public class AutoSelection {
 	   if (autoPlan == LEAVE_COMMUNITY) {
 			log.writeLogEcho(true, "AutoSelect", "run Leave Community");
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			new DriveResetPose(new Pose2d(new Translation2d(0, 0), rotationBack), driveTrain, log),
+			new DriveResetPose(new Pose2d(new Translation2d(0, 0), rotationBack), false, driveTrain, log),
 			new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.LeaveCommunity.value], () -> rotationBack, driveTrain, log)
 	   		);
    	   }
