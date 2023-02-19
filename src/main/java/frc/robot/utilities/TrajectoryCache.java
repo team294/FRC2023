@@ -110,11 +110,11 @@ public class TrajectoryCache {
         cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value] = calcTrajectory("MiddleOuterOneConeBalanceBlue", 0.4, 0.4, false, 
             new Pose2d(1.821942, 2.748026, new Rotation2d(0)),
             // 
-            List.of(new Translation2d(6, 2.748026)),
+            List.of(new Translation2d(6, 2.748026), new Translation2d(4.24, 2.748026)),
             // List.of(new Translation2d(5.767, 3.266)),
             // Pass through these two interior waypoints, making an 's' curve path
 
-            new Pose2d(4.25, 2.748026, Rotation2d.fromDegrees(180))
+            new Pose2d(4.25, 2.748026, Rotation2d.fromDegrees(0))
 
             // new Pose2d(4.25, 2.748026, Rotation2d.fromDegrees(180))
             // new Pose2d(3.897, 2.761, Rotation2d.fromDegrees(-160))
