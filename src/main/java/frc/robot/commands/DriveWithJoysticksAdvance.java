@@ -4,8 +4,8 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -15,7 +15,6 @@ import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
-import frc.robot.utilities.MathBCR;
 
 
 public class DriveWithJoysticksAdvance extends CommandBase {
@@ -25,7 +24,8 @@ public class DriveWithJoysticksAdvance extends CommandBase {
   private final FileLog log;
   private ProfiledPIDController turnRateController;
   private int logRotationKey;
-  private double fwdVelocity, leftVelocity, turnRate, nextTurnRate, goalAngle, prevTime, currTime;
+  private double fwdVelocity, leftVelocity, turnRate, nextTurnRate, prevTime, currTime;
+  private double goalAngle;       // in radians
   private final Timer timer = new Timer();
 
 
@@ -43,7 +43,7 @@ public class DriveWithJoysticksAdvance extends CommandBase {
     this.driveTrain = driveTrain;
     this.log = log;
     turnRateController = new ProfiledPIDController(TrajectoryConstants.kPThetaController, 0, 0, TrajectoryConstants.kThetaControllerConstraints);
-    turnRateController.enableContinuousInput(-180, 180);
+    turnRateController.enableContinuousInput(-Math.PI, Math.PI);
 
     logRotationKey = log.allocateLogRotation();
 
@@ -54,7 +54,7 @@ public class DriveWithJoysticksAdvance extends CommandBase {
   public void initialize() {
     driveTrain.setDriveModeCoast(false);
 
-    goalAngle = driveTrain.getPose().getRotation().getDegrees();
+    goalAngle = driveTrain.getPose().getRotation().getRadians();
     timer.reset();
     timer.start();
     prevTime = timer.get();
@@ -84,19 +84,15 @@ public class DriveWithJoysticksAdvance extends CommandBase {
 
     // Calculate goal angle
     goalAngle += turnRate*(currTime-prevTime);
-    goalAngle = MathBCR.normalizeAngle(goalAngle);
+    goalAngle = MathUtil.angleModulus(goalAngle);
 
     // Calculates using the profiledPIDController what the next speed should be
-
-    nextTurnRate = turnRateController.calculate(driveTrain.getPose().getRotation().getDegrees(), goalAngle);
-
-
+    nextTurnRate = turnRateController.calculate(driveTrain.getPose().getRotation().getRadians(), goalAngle);
 
     if(log.isMyLogRotation(logRotationKey)) {
       log.writeLog(false, "DriveWithJoystickAdvance", "Joystick", "Fwd", fwdVelocity, "Left", leftVelocity, "Turn", nextTurnRate);
     }
     
-
     driveTrain.drive(fwdVelocity, leftVelocity, nextTurnRate, true, false);
 
     prevTime = currTime;
