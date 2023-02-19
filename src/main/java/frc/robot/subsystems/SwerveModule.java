@@ -22,6 +22,7 @@ import frc.robot.Constants.SwerveConstants;
 import frc.robot.utilities.CTRESwerveModuleState;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.MathBCR;
+import frc.robot.utilities.Wait;
 
 import static frc.robot.utilities.StringUtil.*;
 
@@ -127,8 +128,7 @@ public class SwerveModule {
     // may take longer than this code.
     // The timeouts in the configuration code above (100ms) should take care of this, but it does not always wait long enough.
     // So, add a wait time here:
-    double finishTime = System.currentTimeMillis() + 200;
-    while (System.currentTimeMillis() < finishTime) {}
+    Wait.waitTime(200);
 
     // System.out.println(swName + " CanCoder " + getCanCoderDegrees() + " FX " + getTurningEncoderDegrees() + " pre-CAN");
     zeroDriveEncoder();
