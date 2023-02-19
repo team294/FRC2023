@@ -694,15 +694,15 @@
                 },
                 {
                   "_type": "Command",
-                  "_source0": "network_table:///SmartDashboard/Drive To Pose",
-                  "_title": "Drive To Pose",
+                  "_source0": "network_table:///SmartDashboard/Drive Trajectory Straight",
+                  "_title": "Drive Trajectory Straight",
                   "_glyph": 148,
                   "_showGlyph": false
                 },
                 {
                   "_type": "Command",
-                  "_source0": "network_table:///SmartDashboard/Drive Trajectory Straight",
-                  "_title": "Drive Trajectory Straight",
+                  "_source0": "network_table:///SmartDashboard/Drive to closest goal",
+                  "_title": "Drive to closest goal",
                   "_glyph": 148,
                   "_showGlyph": false
                 }
@@ -753,6 +753,105 @@
                   "_type": "Command",
                   "_source0": "network_table:///SmartDashboard/Drive Straight",
                   "_title": "Drive Straight",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                }
+              ]
+            }
+          },
+          "9,2": {
+            "size": [
+              2,
+              2
+            ],
+            "content": {
+              "_type": "List Layout",
+              "_title": "DriveToPose",
+              "_glyph": 149,
+              "_showGlyph": false,
+              "Layout/Label position": "LEFT",
+              "_children": [
+                {
+                  "_type": "Text View",
+                  "_source0": "network_table:///SmartDashboard/DriveToPose Rot degrees",
+                  "_title": "Rot degrees",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Text View",
+                  "_source0": "network_table:///SmartDashboard/DriveToPose XPos meters",
+                  "_title": "XPos meters",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Text View",
+                  "_source0": "network_table:///SmartDashboard/DriveToPose YPos meters",
+                  "_title": "YPos meters",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Drive To Pose",
+                  "_title": "Drive To Pose",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                }
+              ]
+            }
+          },
+          "3,5": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Command",
+              "_source0": "network_table:///SmartDashboard/LED moving Team Color",
+              "_title": "SmartDashboard/LED moving Team Color",
+              "_glyph": 148,
+              "_showGlyph": false
+            }
+          },
+          "9,4": {
+            "size": [
+              2,
+              2
+            ],
+            "content": {
+              "_type": "List Layout",
+              "_title": "Reset Pose",
+              "_glyph": 149,
+              "_showGlyph": false,
+              "Layout/Label position": "LEFT",
+              "_children": [
+                {
+                  "_type": "Text View",
+                  "_source0": "network_table:///SmartDashboard/DriveResetPose Angle",
+                  "_title": "Pose Angle",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Text View",
+                  "_source0": "network_table:///SmartDashboard/DriveResetPose X",
+                  "_title": "Pose X",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Text View",
+                  "_source0": "network_table:///SmartDashboard/DriveResetPose Y",
+                  "_title": "Pose Y",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Drive Reset Pose",
+                  "_title": "Drive Reset Pose",
                   "_glyph": 148,
                   "_showGlyph": false
                 }
