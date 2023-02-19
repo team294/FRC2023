@@ -47,6 +47,7 @@ public class RobotContainer {
   private final DriveTrain driveTrain = new DriveTrain(log);
   private final Grabber grabber = new Grabber("Grabber", log);
   private final Manipulator manipulator = new Manipulator(log);
+  private final Elevator elevator = new Elevator(log);
   private final LED led = new LED();
 
   // Define other utilities
