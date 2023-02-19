@@ -48,6 +48,7 @@ public final class Constants {
 
 
     public static final class Ports{
+        public static final int CANPneumaticHub = 1;
 
         public static final int CANDriveFrontLeftMotor = 1;
         public static final int CANDriveFrontRightMotor = 2;
@@ -67,7 +68,26 @@ public final class Constants {
         public static final int CANTurnEncoderBackLeft = 11;
         public static final int CANTurnEncoderBackRight = 12;
 
+        public static final int CANElevatorMotor = 21;
+        // public static final int CANElevatorMotor2 = 22;
+        public static final int CANWristMotor = 23;
+
         public static final int CANGrabber = 44;
+        public static final int CANManipulator = 45; //TODO CHANGE NUMBER TO REAL PORT 
+
+        // Digital IO ports
+        // public static final int DIOTurretCalSwitch = 1;
+
+        // PWM ports
+        public static final int PWMLEDStripTop = 0;         // LED Strip on top of robot
+
+        // I2C ports
+        // public static final int I2CcolorSensor = 0x52;       // According to REV docs, color sensor is at 0x52 = 82.  Rob had 39?
+
+        // Pneumatic solenoid ports
+        public static final int SolManipulatorFwd = 0;      // TODO set correct channel
+        public static final int SolManipulatorRev = 1;      // TODO set correct channel
+
     }
 
     public static final class OIConstants {
@@ -81,18 +101,18 @@ public final class Constants {
 
     public static final class RobotDimensions {
         //left to right distance between the drivetrain wheels; should be measured from center to center
-        public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.59127;      // CALIBRATED-2 = 0.59127 (based on robot rotating in place).  CAD geometry = 0.57785.
+        public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.58721;      // CALIBRATED-3 = 0.58721 (based on robot rotating in place).  CAD geometry = 0.57785.
         //front-back distance between the drivetrain wheels; should be measured from center to center
-        public static final double DRIVETRAIN_WHEELBASE_METERS = 0.59127;       // CALIBRATED-2 = 0.59127 (based on robot rotating in place).  CAD geometry = 0.57785.
+        public static final double DRIVETRAIN_WHEELBASE_METERS = 0.58721;       // CALIBRATED-3 = 0.58721 (based on robot rotating in place).  CAD geometry = 0.57785.
 
     }
 
     public static final class SwerveConstants {
         // Encoder calibration to meters travelled or wheel facing degrees
-        public static final double kEncoderCPR = 2048.0;                // CALIBRATED-2 = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
-        public static final double kDriveGearRatio = (8.14 / 1.0);      // CALIBRATED-2 = 8.14/1.0.  Team364 (MK3i?) = 6.86:1.  Mk4i = 8.14 : 1
-        public static final double kTurningGearRatio = (150.0/7.0 / 1.0); // CALIBRATED-2 = 150.0/7.0.  Team364 (MK3i?) = 12.8:1.  Mk4i = 150/7 : 1
-        public static final double kWheelDiameterMeters = 0.09953;        // CALIBRATED-2 = 0.102.  Depends a little on the tread wear!
+        public static final double kEncoderCPR = 2048.0;                // CALIBRATED-3 = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
+        public static final double kDriveGearRatio = (6.75 / 1.0);      // CALIBRATED-3 = 6.75/1.0.  Team364 (MK3i?) = 6.86:1.  Mk4i = 8.14:1 (L1-std gears).  Mk4i = 6.75:1 (L2-fast gears)
+        public static final double kTurningGearRatio = (150.0/7.0 / 1.0); // CALIBRATED-3 = 150.0/7.0.  Team364 (MK3i?) = 12.8:1.  Mk4i = 150/7 : 1
+        public static final double kWheelDiameterMeters = 0.09712;        // CALIBRATED-3 = 0.09712.  Depends a little on the tread wear!
         public static final double kDriveEncoderMetersPerTick = (kWheelDiameterMeters * Math.PI) / kEncoderCPR / kDriveGearRatio;
         public static final double kTurningEncoderDegreesPerTick = 360.0/kEncoderCPR / kTurningGearRatio;
         
@@ -100,21 +120,21 @@ public final class Constants {
         // Max speed is used to keep each motor from maxing out, which preserves ratio between motors 
         // and ensures that the robot travels in the requested direction.  So, use min value of all 4 motors,
         // and further derate (initial test by 5%) to account for some battery droop under heavy loads.
-        // Max speed measured values 1/25/2023:  FL = 3.98, FR  = 3.97, BL = 3.98, BR = 3.95
-        public static final double kMaxSpeedMetersPerSecond = 3.8;          // CALIBRATED-2
+        // Max speed measured values 2/12/2023:  All 4 motors are between 4.6 an 4.7 meters/sec.  So use 4.5 as a conservative value
+        public static final double kMaxSpeedMetersPerSecond = 4.5;          // CALIBRATED-3
         public static final double kNominalSpeedMetersPerSecond = 0.5*kMaxSpeedMetersPerSecond;
         // Max acceleration measured values 1/13/2023: FL = 28.073, FR = 26.343, BL = 18.482, BR = 19.289
         // Max acceleration measured 1/25/2023 (with ~80lbs on robot):  Average of 4 wheels = 10.0 m/sec^2
-        public static final double kMaxAccelerationMetersPerSecondSquare = 10; // CALIBRATED-2
+        // Max acceleration measured 2/12/2023 (with new drive gears):  Average ~11 m/sec^2.  Keep value at 10.0 for now.
+        public static final double kMaxAccelerationMetersPerSecondSquare = 10; // CALIBRATED-3
         public static final double kNominalAccelerationMetersPerSecondSquare = 0.7*kMaxAccelerationMetersPerSecondSquare;
-        // Max turn velocity degrees per second measured values 1/13/2023: FL = 1744.629, FR = 1762.207, BL = 1736.719, BR = 2085.645
-        public static final double kMaxTurningRadiansPerSecond = 9.1;   // CALIBRATED-2 took 528 degreesPerSecond and converted to radians
+        public static final double kMaxTurningRadiansPerSecond = 11.0;   // CALIBRATED-3 took 633 degreesPerSecond and converted to radians and rounded down
         public static final double kNominalTurningRadiansPerSecond = Math.PI;
-        public static final double kMaxAngularAccelerationRadiansPerSecondSquared = 30.0;            // CALIBRATED-2 31.7 rad/sec^2
+        public static final double kMaxAngularAccelerationRadiansPerSecondSquared = 35.0;            // CALIBRATED-3 37.4 rad/sec^2
         public static final double kNominalAngularAccelerationRadiansPerSecondSquared = Math.PI;
-        public static final double kVDrive = 0.248; // CALIBRATED-2 = 0.248.  in % output per meters per second
+        public static final double kVDrive = 0.2034; // CALIBRATED-3 = 0.2511.  in % output per meters per second.  Calibration says 0.2511, but better match on a trapezoid is 
         public static final double kADrive = 0.0;                   // TODO -- Calibrate
-        public static final double kSDrive = 0.017; // CALIBRATED-2 = 0.017.  in % output
+        public static final double kSDrive = 0.016; // CALIBRATED-3 = 0.016.  in % output
 
     }
 
@@ -135,10 +155,10 @@ public final class Constants {
         // Update the offset angles in RobotPreferences (in Shuffleboard), not in this code!
         // After updating in RobotPreferences, you will need to re-start the robot code for the changes to take effect.
         // When calibrating offset, set the wheels to zero degrees with the bevel gear facing to the right
-        public static double offsetAngleFrontLeftMotor = 0; // 92.2
-        public static double offsetAngleFrontRightMotor = 0; // -12.5
-        public static double offsetAngleBackLeftMotor = 0; // -106.6
-        public static double offsetAngleBackRightMotor = 0; // 157.5
+        public static double offsetAngleFrontLeftMotor = 0; // 92.3
+        public static double offsetAngleFrontRightMotor = 0; // -12.8
+        public static double offsetAngleBackLeftMotor = 0; // -107.6
+        public static double offsetAngleBackRightMotor = 0; // -170.2
       }
 
       public static final class TrajectoryConstants {
@@ -190,4 +210,60 @@ public final class Constants {
         public static final String cameraName = "AprilTagCamera";
         public static final double targetSideLength = Units.inchesToMeters(6);
     }
+      public static final class WristConstants {
+            // Wrist Angles (in degrees)
+            // TODO Find these values
+            public static final double max = 113.0;		// Location of upper limit switch for auto calibration
+            public static final double stowed = 0; // Starting angle
+            // public static final double wristKeepOut = 28.0; // Max angle to avoid interference with elevator(Maybe necessary)
+            public static final double scoreCargo = 100; // Angle to score cargo
+            public static final double loadCargoStation = -45; // Angle to pick up cargo from loading station
+            public static final double loadCargoGround = 0; // Angle to pick up cargo from ground intake
+            // public static final double wristMinWhenElevatorLow = -45.0;   // If the elevator is in the groundCargo position, don't move the wrist below this!
+            public static final double straight = 90;	//  needed to bias upward to account for sag and insure that hatch cover gripper engages first
+            // public static final double wristDown = -60.0;		// In this position, elevator must be able to go to groundCargo (Not sure we need this)
+            public static final double vision = 60;    // wrist angle for optimal vision tracking (Maybe to keep out of the way of camera? Might not be necessary)
+            public static final double min = -61.0;			// Location of lower limit switch for auto calibration
+            // public static final double wristMax = 113.0;		// Location of upper limit switch for auto calibration
+            // public static final double wristStowed = 110.0;
+            // public static final double wristKeepOut = 28.0; // Max angle to avoid interference with elevator or climber
+            // public static final double wristUp = 15.0;
+            // public static final double wristStraight = -1.0;	//  needed to bias upward to account for sag and insure that hatch cover gripper engages first
+            // public static final double wristVision = -5.0;    // wrist angle for optimal vision tracking
+            // public static final double wristCargoShot = -30.0;	// Angle for wrist for cargo ship ball shot
+            // public static final double wristLowerCrashWhenElevatorLow = -45.0;   // If the elevator is in the low position, don't move the wrist below this!
+            // public static final double wristDown = -60.0;		 // In this position, elevator must be able to go to groundCargo
+            // public static final double wristMin = -61.0;			// Location of lower limit switch for auto calibration
+            public enum WristAngle {stowed, loadCargoStation, loadCargoGround, scoreCargo, straight, vision}
+            // public enum WristAngle {stowed, up, straight, scoreCargo, vision, down}
+            public static final double encoderTicksPerRevolution = 4096.0; // Neo ticks per revolution?
+            
+        }
+
+      public static final class ElevatorConstants {
+        // TODO Find these values
+        public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
+        public static final double kElevGearRatio = (8.0 / 1.0);        // TODO CALIBRATE.  Gear reduction ratio between Falcon and gear driving the elevator
+        public static final double kElevGearDiameterInches = 4.0;       // TODO CALIBRATE.  Diameter of the gear driving the elevator in inches
+        public static final double kElevEncoderInchesPerTick = (kElevGearDiameterInches * Math.PI) / kEncoderCPR / kElevGearRatio;
+
+        public static final double loadCargo = 0; // NOT REAL NUMBER
+        public static final double scoreCargoLow = 25; // NOT REAL NUMBER
+        public static final double scoreCargoMedium = 50; // NOT REAL NUMBER
+        public static final double scoreCargoHigh = 100; // NOT REAL NUMBER
+        // public static final double groundCargo = 16.5;  //NOT REAL NUMBER // At this level, wrist must be able to go to wristDown (Don't know if this is a problem this year or not)
+        public static final double stowed = 0;  //NOT REAL NUMBER // Not sure we need this or if its the same as loading cargo
+
+        // public static final double hatchLow = 19.0;
+        // public static final double hatchMid = 48.5;
+        // public static final double hatchHigh = 69.7;		// was 72.8
+        // public static final double cargoShipCargo = 43.0;   // Was 34.75
+        // public static final double rocketBallOffset = 2;  // Ball intake is higher than the disc grabber (low position only)
+        // public static final double loadCargo = 44.125;
+        // public static final double groundCargo = 16.5;  		// At this level, wrist must be able to go to wristDown 
+
+        public enum ElevatorPosition {scoreCargoLow, scoreCargoMedium, scoreCargoHigh, loadCargo, groundCargo, stowed}        
+
+        // public enum ElevatorPosition {bottom, vision, wristStow, hatchLow, hatchMid, hatchHigh, cargoShipCargo, loadCargo, groundCargo}        
+      }
 }
