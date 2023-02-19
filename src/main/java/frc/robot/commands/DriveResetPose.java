@@ -13,28 +13,31 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
+import frc.robot.utilities.MathBCR;
 
 public class DriveResetPose extends CommandBase {
   /**
    * Resets the pose, gyro, and encoders on the drive train
    */
 
-  private DriveTrain driveTrain;
-  private FileLog log;
+  private final DriveTrain driveTrain;
+  private final FileLog log;
+  private final boolean fromShuffleboard;
+  private final boolean onlyAngle;      // true = resent angle but not X-Y position
+  private final boolean tolerance;      // true = Don't reset if within 0.5m or 15 degrees of location, false = always reset
   private double curX, curY, curAngle;    // in meters and degrees
-  private boolean fromShuffleboard;
-  private boolean onlyAngle;      // true = resent angle but not X-Y position
-
+  
   /**
 	 * Resets the pose, gyro, and encoders on the drive train
    * <p> Note:  This command can run while the robot is disabled.
    * @param curXinMeters Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
    * @param curYinMeters Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
    * @param curAngleinDegrees Robot angle on the field, in degrees (0 = facing away from our drivestation, + to the left, - to the right)
+   * @param tolerance true = Don't reset if within 0.5m or 15 degrees of location, false = always reset
    * @param driveTrain DriveTrain subsytem
    * @param log FileLog
 	 */
-  public DriveResetPose(double curXinMeters, double curYinMeters, double curAngleinDegrees, DriveTrain driveTrain, FileLog log) {
+  public DriveResetPose(double curXinMeters, double curYinMeters, double curAngleinDegrees, boolean tolerance, DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
     curX = curXinMeters;
@@ -42,6 +45,7 @@ public class DriveResetPose extends CommandBase {
     curAngle = curAngleinDegrees;
     fromShuffleboard = false;
     onlyAngle = false;
+    this.tolerance = tolerance;
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(driveTrain);
@@ -54,11 +58,12 @@ public class DriveResetPose extends CommandBase {
    *    <p> Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
    *    <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
    *    <p> Robot angle on the field (0 = facing away from our drivestation, + to the left, - to the right)
+   * @param tolerance true = Don't reset if within 0.5m or 15 degrees of location, false = always reset
    * @param driveTrain DriveTrain subsytem
    * @param log FileLog
 	 */
-  public DriveResetPose(Pose2d curPose, DriveTrain driveTrain, FileLog log) {
-    this(curPose.getX(), curPose.getY(), curPose.getRotation().getDegrees(),
+  public DriveResetPose(Pose2d curPose, boolean tolerance, DriveTrain driveTrain, FileLog log) {
+    this(curPose.getX(), curPose.getY(), curPose.getRotation().getDegrees(), tolerance,
         driveTrain, log);
   }
 
@@ -67,15 +72,17 @@ public class DriveResetPose extends CommandBase {
    * Reset the angle but keep the current position (use the current measured position as the new position).
    * <p> Note:  This command can run while the robot is disabled.
    * @param curAngleinDegrees Robot angle on the field, in degrees (0 = facing away from our drivestation)
+   * @param tolerance true = Don't reset if within 0.5m or 15 degrees of location, false = always reset
    * @param driveTrain DriveTrain subsytem
    * @param log FileLog
 	 */
-  public DriveResetPose(double curAngleinDegrees, DriveTrain driveTrain, FileLog log) {
+  public DriveResetPose(double curAngleinDegrees, boolean tolerance, DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
     curAngle = curAngleinDegrees;
     fromShuffleboard = false;
     onlyAngle = true;
+    this.tolerance = tolerance;
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(driveTrain);
@@ -92,6 +99,7 @@ public class DriveResetPose extends CommandBase {
     this.log = log;
     fromShuffleboard = true;
     onlyAngle = false;
+    tolerance = false;
 
     addRequirements(driveTrain);
     
@@ -111,7 +119,7 @@ public class DriveResetPose extends CommandBase {
   public void initialize() {
     if(fromShuffleboard){
       curX = SmartDashboard.getNumber("DriveResetPose X", 0);
-      curX = SmartDashboard.getNumber("DriveResetPose Y", 0);
+      curY = SmartDashboard.getNumber("DriveResetPose Y", 0);
       curAngle = SmartDashboard.getNumber("DriveResetPose Angle", 0);
     }
 
@@ -122,7 +130,12 @@ public class DriveResetPose extends CommandBase {
     
     log.writeLog(false, "DriveResetPose", "Init", "X", curX, "Y", curY, "Angle", curAngle);
 
-    driveTrain.resetPose(new Pose2d(curX, curY, Rotation2d.fromDegrees(curAngle)));
+    if( !tolerance ||
+        Math.abs(curX - driveTrain.getPose().getX()) > 0.5 || 
+        Math.abs(curY - driveTrain.getPose().getY()) > 0.5 || 
+        Math.abs(MathBCR.normalizeAngle(curAngle - driveTrain.getPose().getRotation().getDegrees())) > 15.0 ) {
+      driveTrain.resetPose(new Pose2d(curX, curY, Rotation2d.fromDegrees(curAngle)));
+    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.

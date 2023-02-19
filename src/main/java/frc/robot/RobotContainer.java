@@ -8,11 +8,11 @@ import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
@@ -42,11 +42,13 @@ public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
   private final FileLog log = new FileLog("A1");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
+  private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
 
   // Define robot subsystems  
   private final DriveTrain driveTrain = new DriveTrain(log);
   private final Grabber grabber = new Grabber("Grabber", log);
   private final Manipulator manipulator = new Manipulator(log);
+  private final Elevator elevator = new Elevator(log);
   private final LED led = new LED();
 
   // Define other utilities
@@ -86,7 +88,9 @@ public class RobotContainer {
     // Testing for drivetrain autos and trajectories
     SmartDashboard.putData("Drive Reset SwerveModules", new DriveResetSwerveModules(driveTrain, log));
     SmartDashboard.putData("Zero Gyro", new DriveZeroGyro(driveTrain, log));
-    SmartDashboard.putData("Zero Odometry", new DriveResetPose(0, 0, 0, driveTrain, log));
+    SmartDashboard.putData("Zero Odometry", new DriveResetPose(0, 0, 0, false, driveTrain, log));
+    // SmartDashboard.putData("Set Odometry if out of tol", new DriveResetPose(2, 2, 180, true, driveTrain, log));      // For testing only
+    SmartDashboard.putData("Drive Reset Pose", new DriveResetPose(driveTrain, log));
     SmartDashboard.putData("Calibrate Drive Motors", new DriveCalibration(0.5, 12, 0.05, driveTrain, log));
     SmartDashboard.putData("Calibrate Turn Motors", new DriveTurnCalibration(1.0, 10, 0.2, driveTrain, log));
     SmartDashboard.putData("Drive Wheels 0 deg", new DriveSetState(0, 0, false, driveTrain, log));
@@ -96,7 +100,8 @@ public class RobotContainer {
     SmartDashboard.putData("Drive Straight", new DriveStraight(false, false, false, driveTrain, log));
 
     // Testing for autos and trajectories
-    SmartDashboard.putData("Drive To Pose", new DriveToPose(new Pose2d(2.0, 2.0, Rotation2d.fromDegrees(90)), driveTrain, log));
+    SmartDashboard.putData("Drive To Pose", new DriveToPose(driveTrain, log));
+    SmartDashboard.putData("Drive To Pose Test", new DriveToPose(new Pose2d(1, 1, Rotation2d.fromDegrees(0)), driveTrain, log));
     SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
     SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
     SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
@@ -109,6 +114,7 @@ public class RobotContainer {
             new Pose2d(1.0,0,new Rotation2d(0)), 
             Constants.TrajectoryConstants.swerveTrajectoryConfig),
           driveTrain, log));
+    SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal()), driveTrain, log));
   
     //Grabber commands
     SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
@@ -222,11 +228,12 @@ public class RobotContainer {
     // left joystick left button
     //left[1].onTrue(new IntakeRetractAndFlush(intakeFront, uptake, feeder, log));
     // resets current angle to 0, keeps current X and Y
-    left[1].onTrue(new DriveResetPose(0,driveTrain,log));
+    left[1].onTrue(new DriveResetPose(0, false, driveTrain, log));
    
     // left joystick right button
-    right[1].onTrue(new DriveToPose( () -> new Pose2d(driveTrain.getPose().getTranslation(), Rotation2d.fromDegrees(0)), driveTrain, log));
-    right[2].onTrue(new DriveToPose( () -> driveTrain.getPose().plus(new Transform2d(new Translation2d(), Rotation2d.fromDegrees(180))), driveTrain, log));
+    right[1].onTrue(new DriveToPose(CoordType.kAbsolute, 0, driveTrain, log));
+    right[2].onTrue(new DriveToPose(CoordType.kRelative, 180, driveTrain, log));
+
     //left[2].onTrue(new IntakeRetractAndFlush(intakeFront, uptake, feeder, log));
       
     // right joystick left button
@@ -318,6 +325,9 @@ public class RobotContainer {
     if(!RobotPreferences.prefsExist()) {
       RobotPreferences.recordStickyFaults("RobotPreferences", log);
     }
+
+    compressor.disable();
+    // compressor.enableDigital();
 
     // Set initial robot position on field
     // This takes place a while after the drivetrain is created, so after any CanBus delays.
