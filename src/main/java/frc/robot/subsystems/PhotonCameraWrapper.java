@@ -45,9 +45,12 @@ public class PhotonCameraWrapper {
 
         public PhotonCameraWrapper() {
                 // Set up a test arena of two apriltags at the center of each driver station set
-                final AprilTag tag03 = new AprilTag(3, new Pose3d(new Pose2d(0, Units.feetToMeters(5.42), Rotation2d.fromDegrees(180))));
-                final AprilTag tag01 = new AprilTag(1, new Pose3d(new Pose2d(0.0, 0, Rotation2d.fromDegrees(0.0)))); ArrayList<AprilTag> atList = new ArrayList<AprilTag>();
+                final AprilTag tag03 = new AprilTag(3, new Pose3d(new Pose2d(1.02743, 1.1, new Rotation2d(0))));
+                final AprilTag tag02 = new AprilTag(2, new Pose3d(new Pose2d(1.02743, 2.76, new Rotation2d(0))));
+                final AprilTag tag01 = new AprilTag(1, new Pose3d(new Pose2d(1.02743, 4.42, new Rotation2d(0)))); 
+                ArrayList<AprilTag> atList = new ArrayList<AprilTag>();
                 atList.add(tag03);
+                atList.add(tag02);
                 atList.add(tag01);
 
                 // TODO - once 2023 happens, replace this with just loading the 2023 field arrangement
