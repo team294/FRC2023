@@ -26,7 +26,7 @@ public class DriveWithJoysticksAdvance extends CommandBase {
   private ProfiledPIDController turnRateController;
   private int logRotationKey;
   private double fwdVelocity, leftVelocity, turnRate, nextTurnRate, goalAngle, prevTime, currTime;
-  private Timer timer;
+  private final Timer timer = new Timer();
 
 
     /**
@@ -42,7 +42,7 @@ public class DriveWithJoysticksAdvance extends CommandBase {
     this.rightJoystick = rightJoystick;
     this.driveTrain = driveTrain;
     this.log = log;
-    turnRateController = new ProfiledPIDController(TrajectoryConstants.kPThetaController, 0, 0, new TrapezoidProfile.Constraints(SwerveConstants.kMaxTurningRadiansPerSecond, SwerveConstants.kMaxAngularAccelerationRadiansPerSecondSquared));
+    turnRateController = new ProfiledPIDController(TrajectoryConstants.kPThetaController, 0, 0, TrajectoryConstants.kThetaControllerConstraints);
     turnRateController.enableContinuousInput(-180, 180);
 
     logRotationKey = log.allocateLogRotation();
@@ -54,14 +54,12 @@ public class DriveWithJoysticksAdvance extends CommandBase {
   public void initialize() {
     driveTrain.setDriveModeCoast(false);
 
-
     goalAngle = driveTrain.getPose().getRotation().getDegrees();
-    timer = new Timer();
     timer.reset();
     timer.start();
     prevTime = timer.get();
 
-    turnRateController.reset(goalAngle);      // sets the current measurement and the current setpoint for the controller
+    turnRateController.reset(goalAngle);      // sets the current setpoint for the controller
     turnRateController.setGoal(goalAngle);    // set the goal for the controller
   }
 
