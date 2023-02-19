@@ -114,7 +114,7 @@ public class RobotContainer {
             Constants.TrajectoryConstants.swerveTrajectoryConfig),
           driveTrain, log));
     SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal()), driveTrain, log));
-  
+
     //Grabber commands
     SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
     SmartDashboard.putData("Grabber Pick Up",new GrabberPickUp(grabber, log));

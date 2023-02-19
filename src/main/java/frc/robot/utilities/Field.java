@@ -7,6 +7,7 @@ package frc.robot.utilities;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Manipulator;
 
@@ -337,6 +338,7 @@ public class Field {
                 "Y", RedCommunityColumnFinal[closestGoal].getY(), "Rot", RedCommunityColumnFinal[closestGoal].getRotation().getDegrees());
         }
         closestGoal++;          // Adjust for 0-based index in array
+        SmartDashboard.putNumber("Closest Goal", closestGoal);
         return closestGoal;
     }
 }
