@@ -5,10 +5,14 @@ import frc.robot.Constants.CoordType;
 import frc.robot.Constants.StopType;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
+import frc.robot.utilities.TrajectoryCache.TrajectoryFacing;
+
+import java.util.function.Supplier;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -18,7 +22,21 @@ public class DriveTrajectory extends SequentialCommandGroup {
 
     // Save initial pose for relative trajectories
     private Pose2d initialPose;
-    
+
+    /**
+     * Follows a trajectory with swerve drive.
+     * @param trajectoryType Specify what robot starting position to use
+     * kRelative = path starts where robot is, kAbsolute = path starts where it was told to regardless of whether the robot is actually there
+     * kAbsoluteResetPose = path starts where it was told to and robot is set at that starting point
+     * @param stopAtEnd  True = robot stops at end of trajectory, False = robot does not end stopped
+     * @param trajectoryFacing The trajectory to follow and the final facing of the robot.  Note that
+     * the trajectoryFacing.initialRotation is *ignored*.
+     * @param driveTrain The driveTrain subsystem to be controlled.
+     * @param log        File for logging
+     */
+    public DriveTrajectory(CoordType trajectoryType, StopType stopAtEnd, TrajectoryFacing trajectoryFacing, DriveTrain driveTrain, FileLog log) { 
+        this(trajectoryType, stopAtEnd, trajectoryFacing.trajectory, () -> trajectoryFacing.finalRotation, driveTrain, log);
+    }
     
     /**
      * Follows a trajectory with swerve drive.
@@ -26,11 +44,13 @@ public class DriveTrajectory extends SequentialCommandGroup {
      * kRelative = path starts where robot is, kAbsolute = path starts where it was told to regardless of whether the robot is actually there
      * kAbsoluteResetPose = path starts where it was told to and robot is set at that starting point
      * @param stopAtEnd  True = robot stops at end of trajectory, False = robot does not end stopped
-     * @param trajectory The trajectory to 
+     * @param trajectory The trajectory to follow
+     * @param desiredRotation The angle that the drivetrain should be facing. This is sampled at each
+     *     time step.
      * @param driveTrain The driveTrain subsystem to be controlled.
      * @param log        File for logging
      */
-    public DriveTrajectory(CoordType trajectoryType, StopType stopAtEnd, Trajectory trajectory, DriveTrain driveTrain, FileLog log) { 
+    public DriveTrajectory(CoordType trajectoryType, StopType stopAtEnd, Trajectory trajectory, Supplier<Rotation2d> desiredRotation, DriveTrain driveTrain, FileLog log) { 
         // Log that the command started
         addCommands(new FileLogWrite(false, false, "DriveTrajectory", "Start", log));
 
@@ -56,13 +76,14 @@ public class DriveTrajectory extends SequentialCommandGroup {
                     new PIDController(Constants.TrajectoryConstants.kPXController, 0, 0),
                     new PIDController(Constants.TrajectoryConstants.kPYController, 0, 0),
                     thetaController,
+                    desiredRotation,
                     (a) -> driveTrain.setModuleStates(a, false),
                     log,
                     driveTrain);
         } else {
             if (trajectoryType == CoordType.kAbsoluteResetPose) {
                 // For AbsoluteResetPose trajectories, first command needs to be to reset the robot Pose
-                addCommands(new InstantCommand(() -> driveTrain.resetPose(trajectory.getInitialPose())));
+                addCommands(new InstantCommand(() -> driveTrain.resetPose(trajectory.getInitialPose())));  //TODO fix this.  The trajectory does not have robot rotations!!!  It has velocity angles!
             }
 
             swerveControllerLogCommand =
@@ -73,6 +94,7 @@ public class DriveTrajectory extends SequentialCommandGroup {
                     new PIDController(Constants.TrajectoryConstants.kPXController, 0, 0),
                     new PIDController(Constants.TrajectoryConstants.kPYController, 0, 0),
                     thetaController,
+                    desiredRotation,
                     (a) -> driveTrain.setModuleStates(a, false),
                     log,
                     driveTrain);

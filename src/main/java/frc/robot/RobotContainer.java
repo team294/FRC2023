@@ -27,6 +27,7 @@ import frc.robot.Constants.CoordType;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.StopType;
 import frc.robot.commands.*;
+import frc.robot.commands.autos.*;
 import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
 import frc.robot.utilities.*;
@@ -53,7 +54,7 @@ public class RobotContainer {
 
   // Define other utilities
   private final TrajectoryCache trajectoryCache = new TrajectoryCache(log);
-  private final AutoSelection autoSelection = new AutoSelection(trajectoryCache, log);
+  private final AutoSelection autoSelection = new AutoSelection(trajectoryCache, allianceSelection, log);
   private final Field field = new Field(driveTrain, manipulator, allianceSelection, log);
 
   // Define controllers
@@ -99,13 +100,16 @@ public class RobotContainer {
     SmartDashboard.putData("Drive 1.5 mps 0 deg", new DriveSetState(1.5, 0, false, driveTrain, log));
     SmartDashboard.putData("Drive Straight", new DriveStraight(false, false, false, driveTrain, log));
 
-    // Testing for autos and trajectories
+    // Testing for trajectories
+    Rotation2d rotationFront = new Rotation2d();          // Facing away from drivers
     SmartDashboard.putData("Drive To Pose", new DriveToPose(driveTrain, log));
     SmartDashboard.putData("Drive To Pose Test", new DriveToPose(new Pose2d(1, 1, Rotation2d.fromDegrees(0)), driveTrain, log));
-    SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
-    SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
-    SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
-    SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
+    SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
+        trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
+        trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
+        trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
     SmartDashboard.putData("Drive Trajectory Straight", new DriveTrajectory(
           CoordType.kRelative, StopType.kBrake,
           TrajectoryGenerator.generateTrajectory(
@@ -113,8 +117,17 @@ public class RobotContainer {
             List.of(), 
             new Pose2d(1.0,0,new Rotation2d(0)), 
             Constants.TrajectoryConstants.swerveTrajectoryConfig),
+            () -> rotationFront,
           driveTrain, log));
     SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal()), driveTrain, log));
+
+    // Testing for autos
+    SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
+    SmartDashboard.putData("Center Balance Blue", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
+        trajectoryCache.cache[TrajectoryType.CenterBalanceBlue.value], driveTrain, log));
+    SmartDashboard.putData("Center Balance Community Blue", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
+        trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value], driveTrain, log));
+    SmartDashboard.putData("Auto OneConeBalance", new OuterOneConeBalanceMiddleAuto(driveTrain));     // TODO put on auto selector and remove this button
   
     //Grabber commands
     SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
