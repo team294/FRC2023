@@ -8,12 +8,14 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Manipulator;
 import frc.robot.utilities.FileLog;
 
-public class ManipulatorPickUp extends CommandBase {
+public class ManipulatorSetSpeed extends CommandBase {
   /** Creates a new ManipulatorStopMotor. */
+  private final double speed;
   private final Manipulator manipulator;
   private final FileLog log;
 
-  public ManipulatorPickUp(Manipulator manipulator, FileLog log) {
+  public ManipulatorSetSpeed(double speed, Manipulator manipulator, FileLog log) {
+    this.speed = speed;
     this.manipulator = manipulator;
     this.log = log;
 
@@ -24,8 +26,8 @@ public class ManipulatorPickUp extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    manipulator.setMotorPercentOutput(0.5);
-    log.writeLog(false, "ManipulatorPickUp", "Initialize");
+    manipulator.setMotorPercentOutput(speed);
+    log.writeLog(false, "ManipulatorEject", "Initialize");
   }
 
   // Called every time the scheduler runs while the command is scheduled.
