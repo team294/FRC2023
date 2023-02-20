@@ -29,9 +29,8 @@ public class Manipulator extends SubsystemBase implements Loggable {
 
   private final CANSparkMax motor;
   private final DoubleSolenoid pneumaticDoubleSolenoid;
-
-  private DigitalInput cubeSensor = new DigitalInput(Ports.DIOManipulatorCubeSensor);
-  private DigitalInput coneSensor = new DigitalInput(Ports.DIOManipulatorConeSensor);
+  private final DigitalInput cubeSensor = new DigitalInput(Ports.DIOManipulatorCubeSensor);
+  private final DigitalInput coneSensor = new DigitalInput(Ports.DIOManipulatorConeSensor);
 
   private boolean pistonCone = false;     // TODO set default state
 
