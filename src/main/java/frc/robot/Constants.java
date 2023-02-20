@@ -21,26 +21,19 @@ import frc.robot.utilities.TrapezoidProfileBCR;
 public final class Constants {
 
     public enum CoordType {
-        kRelative(0),
-        kAbsolute(1),
-        kAbsoluteResetPose(2);
-    
-        @SuppressWarnings({"MemberName", "PMD.SingularField"})
-        public final int value;
-        CoordType(int value) { this.value = value; }
+        kRelative,              // Relative to current robot location/facing
+        kAbsolute,              // Absolute field coordinates, don't reset robot pose
+        kAbsoluteResetPose,     // Absolute field coordinates, reset robot pose always
+        kAbsoluteResetPoseTol;  // Absolute field coordinates, reset robot pose if robot is not close to specified position
     }
 
     /**
      * Options to select driving stopping types.
      */
     public enum StopType {
-        kNoStop(0),
-        kCoast(1),
-        kBrake(2);
-    
-        @SuppressWarnings({"MemberName", "PMD.SingularField"})
-        public final int value;
-        StopType(int value) { this.value = value; }
+        kNoStop,
+        kCoast,
+        kBrake;
     }
 
 
