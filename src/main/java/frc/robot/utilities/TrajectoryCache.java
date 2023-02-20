@@ -48,7 +48,7 @@ public class TrajectoryCache {
     /**
      * A trajectory with initial and final facing for the robot
      */
-    public class TrajectoryFacing {
+    public static class TrajectoryFacing {
         public final Rotation2d initialRotation, finalRotation;
         public final Trajectory trajectory;
 
