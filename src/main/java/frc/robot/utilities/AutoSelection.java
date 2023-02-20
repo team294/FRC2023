@@ -89,61 +89,42 @@ public class AutoSelection {
 	   if (autoPlan == LEAVE_COMMUNITY) {
 			log.writeLogEcho(true, "AutoSelect", "run Leave Community");
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-				new DriveResetPose(trajectoryCache.cache[TrajectoryType.LeaveCommunity.value].getInitialPose(), false, driveTrain, log),
-				new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
+				new DriveTrajectory(CoordType.kAbsoluteResetPose, StopType.kBrake, 
 						trajectoryCache.cache[TrajectoryType.LeaveCommunity.value], driveTrain, log)
 	   		);
    	   }
 
 	   if(autoPlan == RIGHT_ONE_CONE_BALANCE){
 			log.writeLogEcho(true, "AutoSelect", "run Right One Cone Balance");
-			if (allianceSelection.getAlliance() == Alliance.Red) {
-				autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-					new DriveResetPose(trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceRed.value].getInitialPose(), true, driveTrain, log),
-					new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-							trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceRed.value], driveTrain, log) 
-				);
-			} else {
-				autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-					new DriveResetPose(trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceBlue.value].getInitialPose(), true, driveTrain, log),
-					new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-							trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceBlue.value], driveTrain, log) 
-				);			
-			}
+			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+				new DriveTrajectory(CoordType.kAbsoluteResetPoseTol, StopType.kBrake, 
+					((allianceSelection.getAlliance() == Alliance.Red) ? 
+						trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceRed.value]:
+						trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceBlue.value] ), 
+					driveTrain, log)
+			);
 	   }
 
 	   if(autoPlan == LEFT_ONE_CONE_BALANCE){
 			log.writeLogEcho(true, "AutoSelect", "run Left One Cone Balance");
-			if (allianceSelection.getAlliance() == Alliance.Red) {
-				autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-					new DriveResetPose(trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceRed.value].getInitialPose(), true, driveTrain, log),
-					new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-							trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceRed.value], driveTrain, log) 
-				);
-			} else {
-				autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-					new DriveResetPose(trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceBlue.value].getInitialPose(), true, driveTrain, log),
-					new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-							trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceBlue.value], driveTrain, log) 
-				);			
-			}
+			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+				new DriveTrajectory(CoordType.kAbsoluteResetPoseTol, StopType.kBrake, 
+					((allianceSelection.getAlliance() == Alliance.Red) ? 
+						trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceRed.value]:
+						trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceBlue.value] ), 
+					driveTrain, log)
+			);
 	   }
 
 	   if(autoPlan == MIDDLE_ONE_CONE_BALANCE){
 			log.writeLogEcho(true, "AutoSelect", "run Middle One Cone Balance");
-			if (allianceSelection.getAlliance() == Alliance.Red) {
-				autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-					new DriveResetPose(trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceRed.value].getInitialPose(), true, driveTrain, log),
-					new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-							trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceRed.value], driveTrain, log) 
-				);
-			} else {
-				autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-					new DriveResetPose(trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value].getInitialPose(), true, driveTrain, log),
-					new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-							trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value], driveTrain, log) 
-				);			
-			}
+			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+				new DriveTrajectory(CoordType.kAbsoluteResetPoseTol, StopType.kBrake, 
+					((allianceSelection.getAlliance() == Alliance.Red) ? 
+						trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceRed.value]:
+						trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value] ), 
+					driveTrain, log)
+			);
 	   }
 
    if (autonomousCommand == null) {

@@ -31,6 +31,7 @@ import frc.robot.commands.autos.*;
 import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
 import frc.robot.utilities.*;
+import frc.robot.utilities.TrajectoryCache.TrajectoryFacing;
 import frc.robot.utilities.TrajectoryCache.TrajectoryType;
 
 /**
@@ -112,12 +113,14 @@ public class RobotContainer {
         trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
     SmartDashboard.putData("Drive Trajectory Straight", new DriveTrajectory(
           CoordType.kRelative, StopType.kBrake,
-          TrajectoryGenerator.generateTrajectory(
-            new Pose2d(0,0,new Rotation2d(0)), 
-            List.of(), 
-            new Pose2d(1.0,0,new Rotation2d(0)), 
-            Constants.TrajectoryConstants.swerveTrajectoryConfig),
-            () -> rotationFront,
+          new TrajectoryFacing(rotationFront, rotationFront, 
+            TrajectoryGenerator.generateTrajectory(
+              new Pose2d(0,0,new Rotation2d(0)), 
+              List.of(), 
+              new Pose2d(1.0,0,new Rotation2d(0)), 
+              Constants.TrajectoryConstants.swerveTrajectoryConfig
+            )
+          ),
           driveTrain, log));
     SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal()), driveTrain, log));
 
