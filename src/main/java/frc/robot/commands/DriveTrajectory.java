@@ -5,6 +5,7 @@ import frc.robot.Constants.CoordType;
 import frc.robot.Constants.StopType;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
+import frc.robot.utilities.TrajectoryCache.TrajectoryFacing;
 
 import java.util.function.Supplier;
 
@@ -21,7 +22,21 @@ public class DriveTrajectory extends SequentialCommandGroup {
 
     // Save initial pose for relative trajectories
     private Pose2d initialPose;
-    
+
+    /**
+     * Follows a trajectory with swerve drive.
+     * @param trajectoryType Specify what robot starting position to use
+     * kRelative = path starts where robot is, kAbsolute = path starts where it was told to regardless of whether the robot is actually there
+     * kAbsoluteResetPose = path starts where it was told to and robot is set at that starting point
+     * @param stopAtEnd  True = robot stops at end of trajectory, False = robot does not end stopped
+     * @param trajectoryFacing The trajectory to follow and the final facing of the robot.  Note that
+     * the trajectoryFacing.initialRotation is *ignored*.
+     * @param driveTrain The driveTrain subsystem to be controlled.
+     * @param log        File for logging
+     */
+    public DriveTrajectory(CoordType trajectoryType, StopType stopAtEnd, TrajectoryFacing trajectoryFacing, DriveTrain driveTrain, FileLog log) { 
+        this(trajectoryType, stopAtEnd, trajectoryFacing.trajectory, () -> trajectoryFacing.finalRotation, driveTrain, log);
+    }
     
     /**
      * Follows a trajectory with swerve drive.
@@ -29,7 +44,7 @@ public class DriveTrajectory extends SequentialCommandGroup {
      * kRelative = path starts where robot is, kAbsolute = path starts where it was told to regardless of whether the robot is actually there
      * kAbsoluteResetPose = path starts where it was told to and robot is set at that starting point
      * @param stopAtEnd  True = robot stops at end of trajectory, False = robot does not end stopped
-     * @param trajectory The trajectory to 
+     * @param trajectory The trajectory to follow
      * @param desiredRotation The angle that the drivetrain should be facing. This is sampled at each
      *     time step.
      * @param driveTrain The driveTrain subsystem to be controlled.

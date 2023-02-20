@@ -105,14 +105,11 @@ public class RobotContainer {
     SmartDashboard.putData("Drive To Pose", new DriveToPose(driveTrain, log));
     SmartDashboard.putData("Drive To Pose Test", new DriveToPose(new Pose2d(1, 1, Rotation2d.fromDegrees(0)), driveTrain, log));
     SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
-        trajectoryCache.cache[TrajectoryType.test.value].trajectory, 
-        () -> trajectoryCache.cache[TrajectoryType.test.value].finalRotation, driveTrain, log));
+        trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
     SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
-        trajectoryCache.cache[TrajectoryType.testCurve.value].trajectory, 
-        () -> trajectoryCache.cache[TrajectoryType.testCurve.value].finalRotation, driveTrain, log));
+        trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
     SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-        trajectoryCache.cache[TrajectoryType.test.value].trajectory, 
-        () -> trajectoryCache.cache[TrajectoryType.test.value].finalRotation, driveTrain, log));  
+        trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
     SmartDashboard.putData("Drive Trajectory Straight", new DriveTrajectory(
           CoordType.kRelative, StopType.kBrake,
           TrajectoryGenerator.generateTrajectory(
@@ -127,11 +124,9 @@ public class RobotContainer {
     // Testing for autos
     SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
     SmartDashboard.putData("Center Balance Blue", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-        trajectoryCache.cache[TrajectoryType.CenterBalanceBlue.value].trajectory, 
-        () -> trajectoryCache.cache[TrajectoryType.CenterBalanceBlue.value].finalRotation, driveTrain, log));
+        trajectoryCache.cache[TrajectoryType.CenterBalanceBlue.value], driveTrain, log));
     SmartDashboard.putData("Center Balance Community Blue", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-        trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value].trajectory, 
-        () -> trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value].finalRotation, driveTrain, log));
+        trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value], driveTrain, log));
     SmartDashboard.putData("Auto OneConeBalance", new OuterOneConeBalanceMiddleAuto(driveTrain));     // TODO put on auto selector and remove this button
   
     //Grabber commands

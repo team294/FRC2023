@@ -4,9 +4,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -69,8 +66,6 @@ public class AutoSelection {
 	 */
 	public Command getAutoCommand(DriveTrain driveTrain, FileLog log) {
 		Command autonomousCommand = null;
-		Rotation2d rotationFront = new Rotation2d();				// Facing away from drivers
-		Rotation2d rotationBack = Rotation2d.fromDegrees(180);		// Facing towards drivers
 
 		// Get parameters from Shuffleboard
 		int autoPlan = autoChooser.getSelected();
@@ -87,8 +82,7 @@ public class AutoSelection {
 			log.writeLogEcho(true, "AutoSelect", "run Straight");
 		   autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime), 
 		   		new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
-						trajectoryCache.cache[TrajectoryType.test.value].trajectory, 
-						() -> trajectoryCache.cache[TrajectoryType.test.value].finalRotation, driveTrain, log)
+						trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log)
 		   );
 	   }
 
@@ -97,8 +91,7 @@ public class AutoSelection {
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 				new DriveResetPose(trajectoryCache.cache[TrajectoryType.LeaveCommunity.value].getInitialPose(), false, driveTrain, log),
 				new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-						trajectoryCache.cache[TrajectoryType.LeaveCommunity.value].trajectory, 
-						() -> trajectoryCache.cache[TrajectoryType.LeaveCommunity.value].finalRotation, driveTrain, log)
+						trajectoryCache.cache[TrajectoryType.LeaveCommunity.value], driveTrain, log)
 	   		);
    	   }
 
@@ -108,15 +101,13 @@ public class AutoSelection {
 				autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 					new DriveResetPose(trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceRed.value].getInitialPose(), true, driveTrain, log),
 					new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-							trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceRed.value].trajectory, 
-							() -> trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceRed.value].finalRotation, driveTrain, log) 
+							trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceRed.value], driveTrain, log) 
 				);
 			} else {
 				autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 					new DriveResetPose(trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceBlue.value].getInitialPose(), true, driveTrain, log),
 					new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-							trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceBlue.value].trajectory, 
-							() -> trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceBlue.value].finalRotation, driveTrain, log) 
+							trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceBlue.value], driveTrain, log) 
 				);			
 			}
 	   }
@@ -127,15 +118,13 @@ public class AutoSelection {
 				autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 					new DriveResetPose(trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceRed.value].getInitialPose(), true, driveTrain, log),
 					new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-							trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceRed.value].trajectory, 
-							() -> trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceRed.value].finalRotation, driveTrain, log) 
+							trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceRed.value], driveTrain, log) 
 				);
 			} else {
 				autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 					new DriveResetPose(trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceBlue.value].getInitialPose(), true, driveTrain, log),
 					new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-							trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceBlue.value].trajectory, 
-							() -> trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceBlue.value].finalRotation, driveTrain, log) 
+							trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceBlue.value], driveTrain, log) 
 				);			
 			}
 	   }
@@ -146,15 +135,13 @@ public class AutoSelection {
 				autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 					new DriveResetPose(trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceRed.value].getInitialPose(), true, driveTrain, log),
 					new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-							trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceRed.value].trajectory, 
-							() -> trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceRed.value].finalRotation, driveTrain, log) 
+							trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceRed.value], driveTrain, log) 
 				);
 			} else {
 				autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 					new DriveResetPose(trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value].getInitialPose(), true, driveTrain, log),
 					new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-							trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value].trajectory, 
-							() -> trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value].finalRotation, driveTrain, log) 
+							trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value], driveTrain, log) 
 				);			
 			}
 	   }
