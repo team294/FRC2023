@@ -127,6 +127,14 @@ public class RobotContainer {
     SmartDashboard.putData("LED OFF", new LEDSetStrip("Red", 0, led, log));
     SmartDashboard.putData("LED Yellow", new LEDSetStrip("Yellow", 1, led, log));
     SmartDashboard.putData("LED Purple", new LEDSetStrip("Purple", 1, led, log));
+
+    //Manipulator Commands
+    SmartDashboard.putData("Manipulator Stop", new ManipulatorStopMotor(manipulator, log));
+    SmartDashboard.putData("Manipulator Pick Up",new ManipulatorSetSpeed(0.5, manipulator, log));
+    SmartDashboard.putData("Manipulator Eject", new ManipulatorSetSpeed(-0.5, manipulator, log));
+    SmartDashboard.putData("Manipulator Cone", new ManipulatorSetPistonPosition(true, manipulator, log));
+    SmartDashboard.putData("Manipulator Cube", new ManipulatorSetPistonPosition(false, manipulator, log));
+    SmartDashboard.putData("Manipulator Toggle", new ManipulatorTogglePiston(manipulator, log));
   }
 
   /**
