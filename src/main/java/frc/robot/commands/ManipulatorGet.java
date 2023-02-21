@@ -22,8 +22,8 @@ public class ManipulatorGet extends CommandBase {
 
     private double motorPercent = 0.0;
     private double ampSensitivity = 0.0;
-    private boolean coneGrab = false;
-    private boolean cubeGrab = false;
+    //false is cube, true is cone
+    private Boolean grabType = null;
 
     private BehaviorType behaviorType;
 
@@ -59,6 +59,7 @@ public class ManipulatorGet extends CommandBase {
 
    @Override
   public void initialize() {
+    grabType = null;
     manipulator.setMotorPercentOutput(motorPercent);
 
     if(behaviorType == BehaviorType.waitForCone){
@@ -68,7 +69,7 @@ public class ManipulatorGet extends CommandBase {
       manipulator.setPistonCone(false);
 
     }
-    log.writeLog(false, "ManipulatorGet", "Amps", manipulator.getAmps(), "Motor Percent Output", motorPercent);
+    log.writeLog(false, "ManipulatorGet", "Start");
   }
 
   //Called in a loop every time the command is executed
@@ -79,12 +80,13 @@ public class ManipulatorGet extends CommandBase {
     if(manipulator.getAmps() > ampSensitivity){
 
         if(manipulator.getPistonCone()){
-          coneGrab = true;
+          grabType = true;
         } else {
-          cubeGrab = true;
+          grabType = false;
         }
 
     }
+    log.writeLog(false, "ManipulatorGet", "Amps", manipulator.getAmps(), "Motor Percent Output", motorPercent);
     
 
   }
@@ -99,23 +101,25 @@ public class ManipulatorGet extends CommandBase {
    */
   @Override
   public boolean isFinished(){
+    boolean notNull = grabType != null;
+
     switch (behaviorType) {
       case immediatelyEnd:
         return true;  
       case runForever:
         return false;
       case waitForCone:
-        if(coneGrab)
+        if(notNull && grabType)
           manipulator.stopMotor();
-        return coneGrab;
+        return (notNull && grabType);
       case waitForCube:
-        if(cubeGrab)
+        if(notNull && !grabType)
           manipulator.stopMotor();
-        return cubeGrab;
+        return (notNull && !grabType);
       case waitForConeOrCube:
-        if(cubeGrab||coneGrab)
+        if(notNull)
           manipulator.stopMotor();
-        return (coneGrab||cubeGrab);
+        return notNull;
   
       default:
         manipulator.stopMotor();;
