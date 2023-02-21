@@ -4,12 +4,17 @@
 
 package frc.robot.utilities;
 
+import java.util.Arrays;
+import java.util.List;
+
+import edu.wpi.first.apriltag.AprilTag;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.subsystems.DriveTrain;
-import frc.robot.subsystems.Manipulator;
+import frc.robot.Constants.FieldConstants;
 
 /**
  * A class representing field coordinates.
@@ -132,34 +137,32 @@ public class Field {
     // #0 -> 3 = red(far) side, right to left (from driver point of view)
     // #4 -> 7 = blue(close) side, left to right (from driver point of view)
     // #3 and 4 are loading zone tags
-    private final Pose2d[] AprilTagsBlue = {
-        new Pose2d(15.51356, 1.071626, new Rotation2d(0)),
-        new Pose2d(15.51356, 2.748026, new Rotation2d(0)),
-        new Pose2d(15.51356, 4.424426, new Rotation2d(0)),
-        new Pose2d(16.17878, 6.749796, new Rotation2d(0)),
-        new Pose2d(0.36195, 6.749796, new Rotation2d(Math.PI)),
-        new Pose2d(1.02743, 4.424426, new Rotation2d(Math.PI)),
-        new Pose2d(1.02743, 2.748026, new Rotation2d(Math.PI)),
-        new Pose2d(1.02743, 1.071626, new Rotation2d(Math.PI))
+    private final AprilTag[] AprilTagsBlue = {
+        new AprilTag(1, new Pose3d(new Pose2d(15.51356, 1.071626, new Rotation2d(0)))),
+        new AprilTag(2, new Pose3d(new Pose2d(15.51356, 2.748026, new Rotation2d(0)))),
+        new AprilTag(3, new Pose3d(new Pose2d(15.51356, 4.424426, new Rotation2d(0)))),
+        new AprilTag(4, new Pose3d(new Pose2d(16.17878, 6.749796, new Rotation2d(0)))),
+        new AprilTag(5, new Pose3d(new Pose2d(0.36195, 6.749796, new Rotation2d(Math.PI)))),
+        new AprilTag(6, new Pose3d(new Pose2d(1.02743, 4.424426, new Rotation2d(Math.PI)))),
+        new AprilTag(7, new Pose3d(new Pose2d(1.02743, 2.748026, new Rotation2d(Math.PI)))),
+        new AprilTag(8, new Pose3d(new Pose2d(1.02743, 1.071626, new Rotation2d(Math.PI))))
     };
     
     // #0 -> 3 = red(close) side, left to right (from driver point of view)
     // #4 -> 7 = blue(far) side, right to left (from driver point of view)
     // #3 and 4 are loading zone tags
-    private final Pose2d[] AprilTagsRed = {
-        new Pose2d(1.02743, 6.932168, new Rotation2d(Math.PI)),
-        new Pose2d(1.02743, 5.255768, new Rotation2d(Math.PI)),
-        new Pose2d(1.02743, 3.579368, new Rotation2d(Math.PI)),
-        new Pose2d(0.36195, 1.253998, new Rotation2d(Math.PI)),
-        new Pose2d(16.17878, 1.253998, new Rotation2d(0)),
-        new Pose2d(15.51356, 3.579368, new Rotation2d(0)),
-        new Pose2d(15.51356, 5.255768, new Rotation2d(0)),
-        new Pose2d(15.51356, 6.932168, new Rotation2d(0))
+    private final AprilTag[] AprilTagsRed = {
+        new AprilTag(1, new Pose3d(new Pose2d(1.02743, 6.932168, new Rotation2d(Math.PI)))),
+        new AprilTag(2, new Pose3d(new Pose2d(1.02743, 5.255768, new Rotation2d(Math.PI)))),
+        new AprilTag(3, new Pose3d(new Pose2d(1.02743, 3.579368, new Rotation2d(Math.PI)))),
+        new AprilTag(4, new Pose3d(new Pose2d(0.36195, 1.253998, new Rotation2d(Math.PI)))),
+        new AprilTag(5, new Pose3d(new Pose2d(16.17878, 1.253998, new Rotation2d(0)))),
+        new AprilTag(6, new Pose3d(new Pose2d(15.51356, 3.579368, new Rotation2d(0)))),
+        new AprilTag(7, new Pose3d(new Pose2d(15.51356, 5.255768, new Rotation2d(0)))),
+        new AprilTag(8, new Pose3d(new Pose2d(15.51356, 6.932168, new Rotation2d(0))))
     };
 
     private final AllianceSelection alliance;
-    private final DriveTrain driveTrain;
-    private final Manipulator manipulator;
     private final FileLog log;
 
     /**
@@ -171,10 +174,8 @@ public class Field {
      * <p> Robot angle on the field (0 = facing away from our drivestation, + to the left, - to the right)
      * @param alliance Alliance object to provide the currently selected alliance
      */
-    public Field(DriveTrain driveTrain, Manipulator manipulator, AllianceSelection alliance, FileLog log){
+    public Field(AllianceSelection alliance, FileLog log){
         this.alliance = alliance;
-        this.driveTrain = driveTrain;
-        this.manipulator = manipulator;
         this.log = log;
     }
 
@@ -186,7 +187,7 @@ public class Field {
 	 * 
 	 * @param column The column that will be returned (1-9)
 	 */
-    public Pose2d getInitialColumn(int column) {
+    public Pose2d getInitialColumn(int column) throws IndexOutOfBoundsException {
         if(column < 10 && column > 0){
             if(alliance.getAlliance() == Alliance.Blue) {
                 return BlueCommunityColumnInitial[column-1];
@@ -195,7 +196,7 @@ public class Field {
                 return RedCommunityColumnInitial[column-1];
             }
         } else {
-            return null;
+            throw new IndexOutOfBoundsException(String.format("Initial Column %d out of range", column));
         }
     }
 
@@ -207,7 +208,7 @@ public class Field {
 	 * 
 	 * @param column The column that will be returned (1-9)
 	 */
-    public Pose2d getFinalColumn(int column) {
+    public Pose2d getFinalColumn(int column) throws IndexOutOfBoundsException {
         if(column < 10 && column > 0){
             if(alliance.getAlliance() == Alliance.Blue) {
                 return BlueCommunityColumnFinal[column-1];
@@ -216,7 +217,7 @@ public class Field {
                 return RedCommunityColumnFinal[column-1];
             }
         } else {
-            return null;
+            throw new IndexOutOfBoundsException(String.format("Column ID %d out of range", column));
         }
     }
 
@@ -226,7 +227,7 @@ public class Field {
 	 * 
 	 * @param position 1-3 Lowest-Highest Communtiy Side | 4-6 Lowest-Highest Field Side
 	 */
-    public Pose2d getStationInitial(int position){
+    public Pose2d getStationInitial(int position) throws IndexOutOfBoundsException {
         if(position < 7 && position > 0){
             if(alliance.getAlliance() == Alliance.Blue) {
                 return BlueStationInitial[position-1];
@@ -235,7 +236,7 @@ public class Field {
                 return RedStationInitial[position-1];
             }
         } else {
-            return null;
+            throw new IndexOutOfBoundsException(String.format("Station Position %d out of range", position));
         }
     }
 
@@ -245,7 +246,7 @@ public class Field {
 	 * 
 	 * @param position 1-3 Lowest-Hightest (Y-Axis)
 	 */
-    public Pose2d getStationCenter(int position){
+    public Pose2d getStationCenter(int position) throws IndexOutOfBoundsException {
         if(position < 4 && position > 0){
             if(alliance.getAlliance() == Alliance.Blue) {
                 return BlueStationFinal[position-1];
@@ -254,7 +255,7 @@ public class Field {
                 return RedStationFinal[position-1];
             }
         } else {
-            return null;
+            throw new IndexOutOfBoundsException(String.format("Station Center position %d out of range", position));
         }
     }
 
@@ -264,7 +265,7 @@ public class Field {
 	 * 
 	 * @param position
 	 */
-    public Pose2d getAprilTag(int ID){
+    public AprilTag getAprilTag(int ID) throws IndexOutOfBoundsException {
         if(ID < 9 && ID > 0) {
             if(alliance.getAlliance() == Alliance.Blue) {
                 return AprilTagsBlue[ID-1];
@@ -272,8 +273,23 @@ public class Field {
                 return AprilTagsRed[ID-1];
             }
         } else {
-            return null;
+            throw new IndexOutOfBoundsException(String.format("AprilTag ID %d out of range", ID));
         }
+    }
+
+    public AprilTagFieldLayout getAprilTagFieldLayout() {
+        List<AprilTag> atList;
+
+        
+        if(alliance.getAlliance() == Alliance.Blue) {
+            atList = Arrays.asList(AprilTagsBlue);
+        } else {
+            atList = Arrays.asList(AprilTagsRed);
+        }
+
+        
+
+        return new AprilTagFieldLayout(atList, FieldConstants.length, FieldConstants.width);
     }
 
     /**
@@ -282,13 +298,13 @@ public class Field {
      * <p> #9 = furthest to left (from driver point of view)
      * @return Column of the closest goal (1-9) for the current game piece setting in the manipulator
      */
-    public int getClosestGoal() {
+    public int getClosestGoal(Pose2d robotPose, boolean isCone) {
         int closestGoal;
-        double robotY = driveTrain.getPose().getY();
+        double robotY = robotPose.getY();
 
         if(alliance.getAlliance() == Alliance.Blue){//Alliance Blue
             closestGoal = 0;
-            if(manipulator.getPistonCone()){//Carrying Cone
+            if(isCone){//Carrying Cone
                 for(int i = 0; i < 9; i++){
                     if(i == 1 || i == 4 || i == 7){
                         continue;
@@ -308,12 +324,12 @@ public class Field {
                     }
                 }
             }
-            log.writeLogEcho(true, "Field", "GetClosetGoal", "Alliance", "Blue", "Cone", manipulator.getPistonCone(), 
+            log.writeLogEcho(true, "Field", "GetClosetGoal", "Alliance", "Blue", "Cone", isCone, 
                 "Column", closestGoal+1, "X", BlueCommunityColumnFinal[closestGoal].getX(),
                 "Y", BlueCommunityColumnFinal[closestGoal].getY(), "Rot", BlueCommunityColumnFinal[closestGoal].getRotation().getDegrees());
         } else {
             closestGoal = 0;
-            if(manipulator.getPistonCone()){//Carrying Cone
+            if(isCone){//Carrying Cone
                 for(int i = 0; i < 9; i++){
                     if(i == 1 || i == 4 || i == 7){
                         continue;
@@ -333,7 +349,7 @@ public class Field {
                     }
                 }
             }
-            log.writeLogEcho(true, "Field", "GetClosetGoal", "Alliance", "Red", "Cone", manipulator.getPistonCone(), 
+            log.writeLogEcho(true, "Field", "GetClosetGoal", "Alliance", "Red", "Cone", isCone, 
                 "Column", closestGoal+1, "X", RedCommunityColumnFinal[closestGoal].getX(),
                 "Y", RedCommunityColumnFinal[closestGoal].getY(), "Rot", RedCommunityColumnFinal[closestGoal].getRotation().getDegrees());
         }

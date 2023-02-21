@@ -62,7 +62,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   private LinearFilter lfRunningAvg = LinearFilter.movingAverage(4); //calculate running average to smooth quantization error in angular velocity calc
 
   // variable to store vision camera
-  private PhotonCameraWrapper camera = new PhotonCameraWrapper();
+  private PhotonCameraWrapper camera;
 
   // Odometry class for tracking robot pose
   SwerveDrivePoseEstimator poseEstimator; 
@@ -72,8 +72,9 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * Constructs the DriveTrain subsystem
    * @param log FileLog object for logging
    */
-  public DriveTrain(FileLog log) {
+  public DriveTrain(Field fieldUtil, FileLog log) {
     this.log = log; // save reference to the fileLog
+    this.camera = new PhotonCameraWrapper(fieldUtil);
     logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
 
     // create swerve modules

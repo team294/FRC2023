@@ -31,6 +31,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
+import frc.robot.utilities.Field;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -43,37 +44,19 @@ public class PhotonCameraWrapper {
         public PhotonCamera photonCamera;
         public PhotonPoseEstimator photonPoseEstimator;
 
-        public PhotonCameraWrapper() {
+        public PhotonCameraWrapper(Field field) {
                 // Set up a test arena of two apriltags at the center of each driver station set
-                final AprilTag tag03 = new AprilTag(8, new Pose3d(new Pose2d(1.02743, 1.1, new Rotation2d(0))));
-                final AprilTag tag02 = new AprilTag(7, new Pose3d(new Pose2d(1.02743, 2.76, new Rotation2d(0))));
-                final AprilTag tag01 = new AprilTag(6, new Pose3d(new Pose2d(1.02743, 4.42, new Rotation2d(0)))); 
-                ArrayList<AprilTag> atList = new ArrayList<AprilTag>();
-                atList.add(tag03);
-                atList.add(tag02);
-                atList.add(tag01);
-                
-                
+                // final AprilTag tag03 = new AprilTag(8, new Pose3d(new Pose2d(1.02743, 1.1, new Rotation2d(0))));
+                // final AprilTag tag02 = new AprilTag(7, new Pose3d(new Pose2d(1.02743, 2.76, new Rotation2d(0))));
+                // final AprilTag tag01 = new AprilTag(6, new Pose3d(new Pose2d(1.02743, 4.42, new Rotation2d(0)))); 
                 // ArrayList<AprilTag> atList = new ArrayList<AprilTag>();
-                // atList.add(VisionConstants.tag01);
-                // atList.add(VisionConstants.tag02);
-                // atList.add(VisionConstants.tag03);
-                // atList.add(VisionConstants.tag04);
-                // atList.add(VisionConstants.tag05);
-                // atList.add(VisionConstants.tag06);
-                // atList.add(VisionConstants.tag07);
-                // atList.add(VisionConstants.tag08);
-
-                AprilTagFieldLayout aprilTagFieldLayout = new AprilTagFieldLayout(atList, FieldConstants.length, FieldConstants.width);
-
-                // TODO DOES NOT WORK PROPERLY IF ON RED ALLIANCE
 
                 // Forward Camera
                 photonCamera = new PhotonCamera(VisionConstants.cameraName); 
 
                 // Create pose estimator
                 photonPoseEstimator = new PhotonPoseEstimator(
-                        aprilTagFieldLayout, 
+                        field.getAprilTagFieldLayout(), 
                         PoseStrategy.CLOSEST_TO_REFERENCE_POSE, 
                         photonCamera, 
                         VisionConstants.robotToCam);
