@@ -488,19 +488,9 @@ public class DriveTrain extends SubsystemBase implements Loggable {
         // TODO change how it decides if it's too far
         if (camPose.estimatedPose.getX() < 3.3) {
           poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
-          // field.getObject("Cam Est Pos").setPose(camPose.estimatedPose.toPose2d());
 
-          field.setRobotPose(camPose.estimatedPose.toPose2d());
-
-          Pose2d pose = camPose.estimatedPose.toPose2d();
-
-          SmartDashboard.putNumber("Drive Pose X", pose.getTranslation().getX());
-          SmartDashboard.putNumber("Drive Pose Y", pose.getTranslation().getY());
-          SmartDashboard.putNumber("Drive Pose Theta", pose.getRotation().getDegrees());
+          // field.setRobotPose(camPose.estimatedPose.toPose2d());
         }
-    } else {
-        // move it way off the screen to make it disappear
-        field.getObject("Cam Est Pos").setPose(new Pose2d(-100, -100, new Rotation2d()));
     }
     
     field.setRobotPose(poseEstimator.getEstimatedPosition());
