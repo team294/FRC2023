@@ -31,26 +31,19 @@ import frc.robot.utilities.TrapezoidProfileBCR;
 public final class Constants {
 
     public enum CoordType {
-        kRelative(0),
-        kAbsolute(1),
-        kAbsoluteResetPose(2);
-    
-        @SuppressWarnings({"MemberName", "PMD.SingularField"})
-        public final int value;
-        CoordType(int value) { this.value = value; }
+        kRelative,              // Relative to current robot location/facing
+        kAbsolute,              // Absolute field coordinates, don't reset robot pose
+        kAbsoluteResetPose,     // Absolute field coordinates, reset robot pose always
+        kAbsoluteResetPoseTol;  // Absolute field coordinates, reset robot pose if robot is not close to specified position
     }
 
     /**
      * Options to select driving stopping types.
      */
     public enum StopType {
-        kNoStop(0),
-        kCoast(1),
-        kBrake(2);
-    
-        @SuppressWarnings({"MemberName", "PMD.SingularField"})
-        public final int value;
-        StopType(int value) { this.value = value; }
+        kNoStop,
+        kCoast,
+        kBrake;
     }
 
 
@@ -83,7 +76,8 @@ public final class Constants {
         public static final int CANManipulator = 45; //TODO CHANGE NUMBER TO REAL PORT 
 
         // Digital IO ports
-        // public static final int DIOTurretCalSwitch = 1;
+        public static final int DIOManipulatorCubeSensor = 0; //TODO PLACE HOLDER SET TO CORRET PORT
+        public static final int DIOManipulatorConeSensor = 1; //TODO PLACE HOLDER SET TO CORRECT PORT
 
         // PWM ports
         public static final int PWMLEDStripTop = 0;         // LED Strip on top of robot
@@ -258,8 +252,8 @@ public final class Constants {
       public static final class ElevatorConstants {
         // TODO Find these values
         public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
-        public static final double kElevGearRatio = (8.0 / 1.0);        // TODO CALIBRATE.  Gear reduction ratio between Falcon and gear driving the elevator
-        public static final double kElevGearDiameterInches = 4.0;       // TODO CALIBRATE.  Diameter of the gear driving the elevator in inches
+        public static final double kElevGearRatio = (12.0 / 1.0);        // CALIBRATED.  Gear reduction ratio between Falcon and gear driving the elevator
+        public static final double kElevGearDiameterInches = 1.25;       // TODO CALIBRATE.  Diameter of the gear driving the elevator in inches
         public static final double kElevEncoderInchesPerTick = (kElevGearDiameterInches * Math.PI) / kEncoderCPR / kElevGearRatio;
 
         public static final double loadCargo = 0; // NOT REAL NUMBER
