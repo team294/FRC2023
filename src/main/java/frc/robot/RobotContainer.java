@@ -419,6 +419,10 @@ public class RobotContainer {
    * Method called once every scheduler cycle when teleop mode is initialized/enabled.
    */
   public void teleopPeriodic() {
-    
+    if(manipulator.getPistonCone()){
+      led.setStrip("Yellow", 0);
+    } else {
+      led.setStrip("Purple", 0);
+    }
   }
 }
