@@ -135,33 +135,6 @@ public class Elevator extends SubsystemBase implements Loggable{
 		}
 	}
 
-	/**
-	 * Set elevator position using the Talon PID.
-	 * works same with falcon?
-	 * This only works when encoder is working and elevator is calibrated and the wrist is not interlocked.
-	 * @param inches target height in inches off the floor
-	 *  Should we make it from start of elevator instead of from the floor?
-	 */
-	public void setElevatorPos(Wrist wrist, double inches) {
-		if (elevCalibrated &&										// Elevator must be calibrated
-		// Wrist and elevator don't affect eachother 
-			 /* wrist.getWristAngle() < WristConstants.stowed &&  	// Wrist must not be stowed
-			  wrist.getCurrentWristTarget() < WristConstants.stowed && // Wrist must not be moving to stow
-			  ( wrist.getWristAngle() >= WristConstants.straight - 5.0 &&	// wrist must be at least horizontal
-				wrist.getCurrentWristTarget() >= WristConstants.straight - 5.0 || // Wrist must not be moving below horizantal */
-				inches >= ElevatorConstants.stowed //&&						// Elevator is not going below groundCargo position
-				// wrist.getWristAngle() >= WristConstants.wristDown - 3.0 &&	     // wrist must be at least wristDown
-				// wrist.getCurrentWristTarget() >= WristConstants.wristDown - 3.0 ) // Wrist must not be moving below wristDown
-		 ) {
-			elevatorMotor.set(ControlMode.Position, inchesToEncoderTicks(inches - elevatorBottomToFloor));
-			elevPosControl = true;
-			log.writeLog(false, subsystemName, "Position set", "Target", inches, "Allowed,Yes,Wrist Angle",
-			   wrist.getWristAngle(), "Wrist Target", wrist.getCurrentWristTarget());
-		} else {
-			log.writeLog(false, subsystemName, "Position set", "Target", inches, "Allowed,No,Wrist Angle",
- 			  wrist.getWristAngle(), "Wrist Target", wrist.getCurrentWristTarget());
-		}
-	}
 
 	/**
 	 * 2023 - Might not want inches from floor this year because elevator is diagonal
@@ -175,14 +148,8 @@ public class Elevator extends SubsystemBase implements Loggable{
 	public double getCurrentElevatorTarget() {
 		if (elevCalibrated) {
 			if (elevPosControl) {
-				if (elevatorMotor.getControlMode() == ControlMode.Position) {
-					// Closed loop control using Talon PID
-					// same with falcon?
-					return encoderTicksToInches(elevatorMotor.getClosedLoopTarget(0)) + elevatorBottomToFloor;
-				} else {
-					// Motion profile control
-					return elevatorProfile.getFinalPosition();
-				}
+				// Motion profile control
+				return elevatorProfile.getFinalPosition();
 			} else {
 				// Manual control mode
 				return getElevatorPos();
@@ -200,7 +167,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 */
 	public double getElevatorPos() {
 		if (elevCalibrated) {
-			return encoderTicksToInches(getElevatorEncTicks()) + elevatorBottomToFloor;
+			return getElevatorEncTicks()*ElevatorConstants.kElevEncoderInchesPerTick + elevatorBottomToFloor;
 		} else {
 			return ElevatorConstants.stowed;   //This could be a problem on next time it is enable it goes to hatchHigh
 		}
@@ -210,7 +177,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 * @return Current elevator velocity in in/s, + equals up, - equals down
 	 */
 	public double getElevatorVelocity() {
-		return encoderTicksToInches(elevatorMotor.getSelectedSensorVelocity(0) * 10.0);
+		return elevatorMotor.getSelectedSensorVelocity(0) * ElevatorConstants.kElevEncoderInchesPerTick * 10.0;
 	}
 
 	/**
@@ -226,7 +193,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	public void checkAndZeroElevatorEnc() {
 		if (getElevatorLowerLimit()) {
 			stopElevator();			// Make sure Talon PID loop or motion profile won't move the robot to the last set position when we reset the enocder position
-			elevatorMotor.setSelectedSensorPosition(0, 0, 0);
+			elevatorMotor.setSelectedSensorPosition(0, 0, 100);
 			elevCalibrated = true;
 			log.writeLog(false, subsystemName, "Calibrate and Zero Encoder", "checkAndZeroElevatorEnc");
 		}
@@ -245,22 +212,6 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 */
 	public double getElevatorEncTicks() {
 		return elevatorMotor.getSelectedSensorPosition(0);
-	}
-
-	/**
-	 * @param encoderTicks in enocder Ticks
-	 * @return parameter encoder ticks converted to equivalent inches
-	 */
-	public double encoderTicksToInches(double encoderTicks) {
-		return (encoderTicks * ElevatorConstants.kElevEncoderInchesPerTick);
-	}
-
-	/**
-	 * @param inches in inches
-	 * @return parameter inches converted to equivalent encoder ticks
-	 */
-	public double inchesToEncoderTicks(double inches) {
-		return (inches / ElevatorConstants.kElevEncoderInchesPerTick);
 	}
 
 	/**
@@ -309,7 +260,6 @@ public class Elevator extends SubsystemBase implements Loggable{
 			SmartDashboard.putNumber("Elev Pos", getElevatorPos());
 			SmartDashboard.putNumber("Elev Target", getCurrentElevatorTarget());
 			SmartDashboard.putNumber("Elev Ticks", getElevatorEncTicks());
-			// SmartDashboard.putNumber("Elev Enc Tick", getElevatorEncTicks());
 			SmartDashboard.putBoolean("Elev Lower Limit", getElevatorLowerLimit());
 			SmartDashboard.putBoolean("Elev Upper Limit", getElevatorUpperLimit());
 		}
@@ -323,12 +273,12 @@ public class Elevator extends SubsystemBase implements Loggable{
 		// Only set percent power IF the motion profile is enabled.
 		// Note:  If we are using our motion profile control loop, then set the power directly using elevatorMotor1.set().
 		// Do not call setElevatorMotorPercentOutput(), since that will change the elevPosControl to false (manual control).
-		if (elevPosControl && elevatorMotor.getControlMode() != ControlMode.Position) {
+		if (elevPosControl) {
 			elevatorMotor.set(ControlMode.PercentOutput, elevatorProfile.trackProfilePeriodic());  
 		}
 
 		// Autocalibrate in the encoder is OK and the elevator is at the lower limit switch
-		if ((!elevCalibrated || Math.abs(getElevatorEncTicks()) > 600) && getElevatorLowerLimit()) {
+		if ((!elevCalibrated || Math.abs(getElevatorEncTicks()) > 600) && getElevatorLowerLimit()) {		// TODO recalibrate the auto-cal value?  (< 600)
 			setDefaultCommand(null);
 			elevCalibrated = true;
 			stopElevator();

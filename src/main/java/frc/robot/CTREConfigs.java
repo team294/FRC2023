@@ -77,7 +77,7 @@ public final class CTREConfigs {
         elevatorFXConfig.openloopRamp = 0.3;        // 2019 elevator used 0.3   // TODO calibrate
         elevatorFXConfig.closedloopRamp = 0.3;      // 2019 elevator used 0.3   // TODO calibrate
 
-        elevatorFXConfig.slot0.kP = 0.5;     // 2019 elevator used 0.5   // TODO calibrate
+        elevatorFXConfig.slot0.kP = 0.0;     // 2019 elevator used 0.5   // TODO calibrate
         elevatorFXConfig.slot0.kI = 0.0;
         elevatorFXConfig.slot0.kD = 0.0;
         elevatorFXConfig.slot0.kF = 0.0;     // Use arbitrary FF instead

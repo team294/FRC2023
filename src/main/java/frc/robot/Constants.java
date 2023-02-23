@@ -216,23 +216,22 @@ public final class Constants {
         public static final double kElevGearDiameterInches = 1.25;       // TODO CALIBRATE.  Diameter of the gear driving the elevator in inches
         public static final double kElevEncoderInchesPerTick = (kElevGearDiameterInches * Math.PI) / kEncoderCPR / kElevGearRatio;
 
-        public static final double loadCargo = 0; // NOT REAL NUMBER
-        public static final double scoreCargoLow = 25; // NOT REAL NUMBER
-        public static final double scoreCargoMedium = 50; // NOT REAL NUMBER
-        public static final double scoreCargoHigh = 100; // NOT REAL NUMBER
-        // public static final double groundCargo = 16.5;  //NOT REAL NUMBER // At this level, wrist must be able to go to wristDown (Don't know if this is a problem this year or not)
-        public static final double stowed = 0;  //NOT REAL NUMBER // Not sure we need this or if its the same as loading cargo
+        // Elevator regions
+        public enum ElevatorRegion {bottom, lower, main, interRegionTransit}    // See diagram (TODO - reference file).  interRegionTransit = profile moving to another region.
+        // Elevator region boundaries
+        public static final double lowerMin = 2.0;      // TODO CALIBRATE
+        public static final double lowerMax = 10.0;     // TODO CALIBRATE
 
-        // public static final double hatchLow = 19.0;
-        // public static final double hatchMid = 48.5;
-        // public static final double hatchHigh = 69.7;		// was 72.8
-        // public static final double cargoShipCargo = 43.0;   // Was 34.75
-        // public static final double rocketBallOffset = 2;  // Ball intake is higher than the disc grabber (low position only)
-        // public static final double loadCargo = 44.125;
-        // public static final double groundCargo = 16.5;  		// At this level, wrist must be able to go to wristDown 
-
-        public enum ElevatorPosition {scoreCargoLow, scoreCargoMedium, scoreCargoHigh, loadCargo, groundCargo, stowed}        
-
-        // public enum ElevatorPosition {bottom, vision, wristStow, hatchLow, hatchMid, hatchHigh, cargoShipCargo, loadCargo, groundCargo}        
+        // Elevator pre-defined positions (in inches from bottom of elevator)
+        public enum ElevatorPosition {
+            bottom(0.0),            // TODO CALIBRATE
+            loadingStation(20.0),   // TODO CALIBRATE
+            scoreMid(25.0),         // TODO CALIBRATE
+            scoreHigh(30.0);        // TODO CALIBRATE
+        
+            @SuppressWarnings({"MemberName", "PMD.SingularField"})
+            public final double value;
+            ElevatorPosition(double value) { this.value = value; }
+        }
       }
 }
