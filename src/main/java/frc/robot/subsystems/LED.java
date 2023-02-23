@@ -159,23 +159,12 @@ public class LED extends SubsystemBase {
    * Set color of individual pixel on LED strip.
    * @param index index of pixel to be changed
    * @param intensity multiplier for brightness (0 to 1)
-   * @param color string of color name, case sensitive (ex: "Blue")
+   * @param color desired LED color (ex: kBlue or kRed)
    */
-  public void setColor(int index, double intensity, String color) {
+  public void setColor(int index, double intensity, Color color) {
     intensity = MathUtil.clamp(intensity, 0.0, 1.0);
-    
-    if (color.equals("Yellow")) ledBuffer.setRGB(index, (int)(255*intensity), (int)(255*intensity), 0);
-    else if (color.equals("Red")) ledBuffer.setRGB(index, (int)(255*intensity), 0, 0);
-    else if (color.equals("Green")) ledBuffer.setRGB(index, 0, (int)(255*intensity), 0);
-    else if (color.equals("Blue")) ledBuffer.setRGB(index, 0, 0, (int)(255*intensity));
-    else if (color.equals("Cyan")) ledBuffer.setRGB(index, 0, (int)(255*intensity), (int)(255*intensity));
-    else if (color.equals("Pink")) ledBuffer.setRGB(index, (int)(255*intensity), 0, (int)(255*intensity));
-    else if (color.equals("Purple")) ledBuffer.setRGB(index, (int)(94*intensity), 0, (int)(255*intensity));
-    else if (color.equals("Grey")) ledBuffer.setRGB(index, (int)(111*intensity), (int)(111*intensity), (int)(111*intensity));
-    else if (color.equals("White")) ledBuffer.setRGB(index, (int)(255*intensity), (int)(255*intensity), (int)(255*intensity));
-    else if (color.equals("Orange")) ledBuffer.setRGB(index, (int)(255*intensity), (int)(102*intensity), 0);
-    else if (color.equals("Turquoise")) ledBuffer.setRGB(index, 0, (int)(255*intensity), (int)(128*intensity));
-    else ledBuffer.setRGB(index, 0, 0, 0);
+
+    ledBuffer.setRGB(index, (int)(255*intensity * color.red), (int)(255*intensity * color.green), (int)(255*intensity * color.blue));
   }
 
   /**
@@ -194,7 +183,7 @@ public class LED extends SubsystemBase {
    * @param color String name of color, case sensitive
    * @param ledStrip (int) chooses which led strip you use 0 = first 1 = second
    */
-  public void setStrip(String color, int ledStrip) {
+  public void setStrip(Color color, int ledStrip) {
     if(ledStrip == 0){
       startingInd = 0;
     } else {
@@ -209,7 +198,7 @@ public class LED extends SubsystemBase {
    * @param brightness is the multiplier for brightness (0.5 is half)
    * @param ledStrip (int) chooses which led strip you use 0 = first 1 = second 
    */
-  public void setStrip(String color, double brightness, int ledStrip) {
+  public void setStrip(Color color, double brightness, int ledStrip) {
     int myLength = length;
     if(ledStrip == 0){
       startingInd = 0;

@@ -10,6 +10,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -18,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
 import frc.robot.Constants;
+import frc.robot.Constants.CoordType;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
@@ -33,8 +35,14 @@ public class DriveToPose extends CommandBase {
   private SwerveDriveKinematics kinematics;
   private HolonomicDriveControllerBCR controller;
 
-  private final boolean fromShuffleboard;
-  private final Supplier<Pose2d> goalSupplier;    // Supplier for goalPose.  null = use passed in goalPose, non-null = use supplier
+  // Options to control how the goal is specified
+  public enum GoalMode {
+    pose, poseSupplier, angleRelative, angleAbsolute, shuffleboard
+  }
+
+  private final GoalMode goalMode;
+  private Supplier<Pose2d> goalSupplier;    // Supplier for goalPose
+  private Rotation2d rotation;              // Rotation for goalPose
   private Pose2d initialPose, goalPose;     // Starting and destination robot pose (location and rotation) on the field
   private Translation2d initialTranslation;     // Starting robot translation on the field
   private Translation2d goalDirection;          // Unit vector pointing from initial pose to goal pose = direction of travel0
@@ -51,13 +59,11 @@ public class DriveToPose extends CommandBase {
    * @param driveTrain DriveTrain subsystem
    * @param log file for logging
    */
-
    public DriveToPose(Pose2d goalPose, DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
-    this.fromShuffleboard = false;
     this.goalPose = goalPose;
-    goalSupplier = null;
+    goalMode = GoalMode.pose;
 
     constructorCommonCode();
   }
@@ -74,8 +80,30 @@ public class DriveToPose extends CommandBase {
   public DriveToPose(Supplier<Pose2d> goalPoseSupplier, DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
-    this.fromShuffleboard = false;
     goalSupplier = goalPoseSupplier;
+    goalMode = GoalMode.poseSupplier;
+
+    constructorCommonCode();
+  }
+
+
+  /**
+   * Rotates the robot to the specified rotation using an arbitrary angle without moving laterally
+   * @param type CoordType, kRelative (turn relative to current angle) or kAbsolute (turn to field angle)
+   * @param rotation rotation to turn to, in degrees (+=turn left, -=turn right).  For absolute rotation,
+   * the 0 degrees is facing away from the driver station.
+   * @param driveTrain DriveTrain subsytem
+   * @param log log
+   */
+  public DriveToPose(CoordType type, double rotation, DriveTrain driveTrain, FileLog log ){
+    this.driveTrain = driveTrain;
+    this.log = log;
+    this.rotation = Rotation2d.fromDegrees(rotation);
+    if (type==CoordType.kRelative) {
+      goalMode = GoalMode.angleRelative;
+    } else {
+      goalMode = GoalMode.angleAbsolute;
+    }
 
     constructorCommonCode();
   }
@@ -88,8 +116,7 @@ public class DriveToPose extends CommandBase {
   public DriveToPose(DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
-    this.fromShuffleboard = true;
-    goalSupplier = null;
+    goalMode = GoalMode.shuffleboard;
 
     constructorCommonCode();
 
@@ -138,18 +165,26 @@ public class DriveToPose extends CommandBase {
     initialTranslation = initialPose.getTranslation();
     curRobotTranslation = initialTranslation;
 
-    // Get the goal pose, if using Shuffleboard
-    if(fromShuffleboard) {
-      double xPos = SmartDashboard.getNumber("DriveToPose XPos meters", 0);
-      double yPos = SmartDashboard.getNumber("DriveToPose YPos meters", 0);
-      Rotation2d angleTarget = Rotation2d.fromDegrees(SmartDashboard.getNumber("DriveToPose Rot degrees", 0));
-      goalPose = new Pose2d(xPos, yPos, angleTarget);
-    }
-
-    // Get the goal pose, if using a supplier in the constructor
-    if (!(goalSupplier == null)) {
-      goalPose = goalSupplier.get();
-    }
+    // Get the goal pose
+    switch (goalMode) {
+      case pose:  // Goal pose directly specified
+        break;
+      case poseSupplier:  // using a supplier in the constructor
+        goalPose = goalSupplier.get();
+        break;
+      case shuffleboard:  // using Shuffleboard
+        double xPos = SmartDashboard.getNumber("DriveToPose XPos meters", 0);
+        double yPos = SmartDashboard.getNumber("DriveToPose YPos meters", 0);
+        Rotation2d angleTarget = Rotation2d.fromDegrees(SmartDashboard.getNumber("DriveToPose Rot degrees", 0));
+        goalPose = new Pose2d(xPos, yPos, angleTarget);
+        break;
+      case angleAbsolute:  // absolute angle, keep robot position
+        goalPose = new Pose2d(driveTrain.getPose().getTranslation(), rotation);
+        break;
+      case angleRelative:  // relative angle, keep robot position
+        goalPose = driveTrain.getPose().plus(new Transform2d(new Translation2d(), rotation));
+        break;
+  }
 
     // Calculate the direction and distance of travel
     Translation2d trapezoidPath = goalPose.getTranslation().minus(initialTranslation);

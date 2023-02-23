@@ -9,6 +9,7 @@ import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
@@ -28,6 +29,8 @@ public class Manipulator extends SubsystemBase implements Loggable {
 
   private final CANSparkMax motor;
   private final DoubleSolenoid pneumaticDoubleSolenoid;
+  private final DigitalInput cubeSensor = new DigitalInput(Ports.DIOManipulatorCubeSensor);
+  private final DigitalInput coneSensor = new DigitalInput(Ports.DIOManipulatorConeSensor);
 
   private boolean pistonCone = false;     // TODO set default state
 
@@ -55,6 +58,23 @@ public class Manipulator extends SubsystemBase implements Loggable {
    */
   public String getName(){
     return subsystemName;
+  }
+
+  /**
+   * 
+   * @return true if cone is in manipulator
+   */
+  //Check whether false represents the cone being in manipulator
+  public boolean isConePresent(){
+    return !coneSensor.get();
+  }
+
+  /**
+   * 
+   * @return true if cube is in manipulator 
+   */
+  public boolean isCubePresent(){
+    return !cubeSensor.get();
   }
 
   /**
