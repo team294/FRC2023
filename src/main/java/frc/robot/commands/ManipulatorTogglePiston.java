@@ -5,12 +5,14 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Manipulator;
 import frc.robot.utilities.FileLog;
 
 public class ManipulatorTogglePiston extends CommandBase {
   /** Creates a new ManipulatorStopMotor. */
   private final Manipulator manipulator;
+  private final LED led = new LED();
   private final FileLog log;
 
   public ManipulatorTogglePiston(Manipulator manipulator, FileLog log) {
@@ -25,6 +27,11 @@ public class ManipulatorTogglePiston extends CommandBase {
   @Override
   public void initialize() {
     manipulator.togglePiston();
+    if(manipulator.getPistonCone()){
+      new LEDSetStrip("Yellow", led, log);
+    } else {
+      new LEDSetStrip("Purple", led, log);
+    }
     log.writeLog(false, "ManipulatorTogglePiston", "Initialize");
   }
 

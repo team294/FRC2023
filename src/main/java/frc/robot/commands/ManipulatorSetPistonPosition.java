@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Manipulator;
 import frc.robot.utilities.FileLog;
 
@@ -14,6 +15,7 @@ public class ManipulatorSetPistonPosition extends CommandBase {
   private final Manipulator manipulator;
   private final FileLog log;
 
+  private final LED led = new LED();
   /**
    * Sets piston position to handle either cone or cube
    * @param cone true = cone, false = cube
@@ -33,6 +35,11 @@ public class ManipulatorSetPistonPosition extends CommandBase {
   @Override
   public void initialize() {
     manipulator.setPistonCone(cone);
+    if(cone){
+      new LEDSetStrip("Yellow", led, log);
+    } else {
+      new LEDSetStrip("Purple", led, log);
+    }
     log.writeLog(false, "ManipulatorSetPistonCone", "Initialize");
   }
 
