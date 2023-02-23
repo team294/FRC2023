@@ -94,6 +94,11 @@ public class ManipulatorGet extends CommandBase {
         }
     }
     //using sensor
+    if(manipulator.isConePresent()){
+      coneGrab = true;
+    } else if(manipulator.isCubePresent()){
+      cubeGrab = true;
+    }
     
     log.writeLog(false, "ManipulatorGet", "Amps", manipulator.getAmps(), "Motor Percent Output", motorPercent);
     
