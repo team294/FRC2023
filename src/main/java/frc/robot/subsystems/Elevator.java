@@ -24,6 +24,7 @@ import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.Ports;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
+import frc.robot.Constants.WristConstants.WristRegion;
 import frc.robot.utilities.ElevatorProfileGenerator;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.Loggable;
@@ -46,8 +47,8 @@ public class Elevator extends SubsystemBase implements Loggable{
 
 	private boolean elevCalibrated = false; // true is encoder is working and calibrated, false is not calibrated
 	private boolean elevPosControl = false; // true is in position control mode (motion profile), false is manual motor control (percent output)
-	private ElevatorRegion curElevatorRegion = ElevatorRegion.uncalibrated;		// The current elevator region.  If the elevator is moving between regions, value should be "main".
 
+	
 	public Elevator(Wrist wrist, FileLog log) {
 		this.log = log;
 		logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
@@ -112,23 +113,24 @@ public class Elevator extends SubsystemBase implements Loggable{
 
 	/**
 	 * Sets elevator to manual control mode with the specified percent output voltage.
+	 * Does not move the elevator up if the wrist is not in the main region (interlock to prevent crashing).
 	 * @param percentOutput between -1.0 (down) and 1.0 (up)
 	 */
 	public void setElevatorMotorPercentOutput(double percentOutput) {
 		elevPosControl = false;
 
-		if (elevCalibrated) {
-			elevatorMotor.set(ControlMode.PercentOutput, percentOutput);
-		} else {
-			elevatorMotor.set(ControlMode.PercentOutput, MathUtil.clamp(percentOutput, 
-				-ElevatorConstants.maxUncalibratedPercentOutput, ElevatorConstants.maxUncalibratedPercentOutput) );
+		// Clamp speed if not calibrated
+		if (!elevCalibrated) {
+			percentOutput = MathUtil.clamp(percentOutput, 
+			-ElevatorConstants.maxUncalibratedPercentOutput, ElevatorConstants.maxUncalibratedPercentOutput);
 		}
 
-		if (percentOutput > 0.0) {
-			curElevatorRegion = ElevatorRegion.main;		// Elevator is moving up.  For safety, assume we are in the main region
-		} else {
-			curElevatorRegion = calcElevatorRegion(getElevatorPos());
+		// Do not move the elevator up if the wrist is not in the main region (interlock to prevent crashing).
+		if (wrist.getWristRegion() != WristRegion.main && percentOutput > 0.0) {
+			percentOutput = 0.0;
 		}
+
+		elevatorMotor.set(ControlMode.PercentOutput, percentOutput);
 	}
 
 	/**
@@ -139,9 +141,16 @@ public class Elevator extends SubsystemBase implements Loggable{
 	public void setProfileTarget(double pos) {
 		if (elevCalibrated) {
 			elevPosControl = true;
-			pos = MathUtil.clamp(pos, ElevatorPosition.lowerLimit.value, ElevatorPosition.upperLimit.value) + ElevatorPosition.lowerLimit.value;
+
+			pos = MathUtil.clamp(pos, ElevatorPosition.lowerLimit.value, ElevatorPosition.upperLimit.value);
+
+			// Do not move the elevator out of the bottom region if the wrist is not in the main region (interlock to prevent crashing).
+			if (wrist.getWristRegion() != WristRegion.main && pos > ElevatorConstants.mainBottom) {
+				pos = ElevatorConstants.mainBottom;
+			}
 
 			elevatorProfile.setProfileTarget(pos);
+
 			log.writeLog(false, subsystemName, "setProfileTarget", "Target", pos, "Allowed,Yes,Wrist Angle",
 			   wrist.getWristAngle(), "Wrist Target", wrist.getCurrentWristTarget());
 		} else {
@@ -177,7 +186,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 			stopElevator();			// Make sure Talon PID loop or motion profile won't move the robot to the last set position when we reset the enocder position
 			elevatorMotor.setSelectedSensorPosition(ElevatorPosition.lowerLimit.value, 0, 100);
 			elevCalibrated = true;
-			curElevatorRegion = ElevatorRegion.bottom;
+
 			log.writeLog(true, subsystemName, "Calibrate and Zero Encoder", "checkAndZeroElevatorEnc");
 		}
 	}
@@ -225,11 +234,19 @@ public class Elevator extends SubsystemBase implements Loggable{
 	}
 
 	/**
-	 * Returns the elevator region that the elevator is currently in.  If the elevator is moving between regions, value will return "main".
+	 * Returns the elevator region that the elevator is currently in.  If the elevator is moving up, value will return "main".
 	 * @return current elevatorRegion
 	 */
 	public ElevatorRegion getElevatorRegion() {
-		return curElevatorRegion;
+		if (elevCalibrated) {
+			if (elevatorMotor.getMotorOutputPercent() > 0.0) {
+				return ElevatorRegion.main;		// Elevator is moving up.  For safety, assume we are in the main region
+			} else {
+				return calcElevatorRegion(getElevatorPos());
+			}
+		} else {
+			return ElevatorRegion.uncalibrated;
+		}
 	}
 
 	/**
@@ -267,7 +284,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 				"Enc Ticks", getElevatorEncTicks(), "Enc Inches", getElevatorPos(), 
 				"Elev Target", getCurrentElevatorTarget(), "Elev Vel", getElevatorVelocity(),
 				"Upper Limit", isElevatorAtUpperLimit(), "Lower Limit", isElevatorAtLowerLimit(),
-				"Elev Mode", elevCalibrated);
+				"Elev Calibrated", elevCalibrated, "Elev Pos Control", elevPosControl);
 	}
 
 	/**
@@ -284,7 +301,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 		
 		if (log.isMyLogRotation(logRotationKey)) {
 			SmartDashboard.putBoolean("Elev Calibrated", elevCalibrated);
-			SmartDashboard.putBoolean("Elev Mode", elevPosControl);
+			SmartDashboard.putBoolean("Elev Pos Control", elevPosControl);
 			SmartDashboard.putNumber("Elev Pos", getElevatorPos());
 			SmartDashboard.putNumber("Elev Target", getCurrentElevatorTarget());
 			SmartDashboard.putNumber("Elev Ticks", getElevatorEncTicks());
@@ -294,25 +311,19 @@ public class Elevator extends SubsystemBase implements Loggable{
 
 		if (fastLogging || log.isMyLogRotation(logRotationKey)) {
 			updateElevatorLog(false);
-			elevatorProfile.updateElevatorProfileLog(false);
 		}
 
 		// Sets elevator motors to percent power required as determined by motion profile.
 		// Only set percent power IF the motion profile is enabled.
-		// Note:  If we are using our motion profile control loop, then set the power directly using elevatorMotor1.set().
+		// Note:  If we are using our motion profile control loop, then set the power directly using elevatorMotor.set().
 		// Do not call setElevatorMotorPercentOutput(), since that will change the elevPosControl to false (manual control).
 		if (elevPosControl) {
 			elevatorMotor.set(ControlMode.PercentOutput, elevatorProfile.trackProfilePeriodic());  
 		}
 
-		// Autocalibrate in the encoder is OK and the elevator is at the lower limit switch
-		if ((!elevCalibrated || Math.abs(getElevatorEncTicks()) > 600) && isElevatorAtLowerLimit()) {		// TODO recalibrate the auto-cal value?  (< 600)
-			setDefaultCommand(null);
-			elevCalibrated = true;
-			stopElevator();
-			elevatorMotor.setSelectedSensorPosition(ElevatorPosition.lowerLimit.value, 0, 100);
-			log.writeLog(false, subsystemName, "Calibrate and Zero Encoder", "periodic");
+		// Autocalibrate if the encoder is OK and the elevator is at the lower limit switch
+		if (!elevCalibrated || Math.abs(getElevatorEncTicks()) > 600) {		// TODO recalibrate the auto-cal value?  (> 600???)
+			checkAndZeroElevatorEnc();
 		}
-		
 	}
 }
