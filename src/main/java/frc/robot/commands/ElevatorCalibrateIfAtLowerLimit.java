@@ -12,8 +12,9 @@ import frc.robot.subsystems.Elevator;
 import frc.robot.utilities.FileLog;
 
 public class ElevatorCalibrateIfAtLowerLimit extends CommandBase{
-  private Elevator elevator;
-  private FileLog log;
+  private final Elevator elevator;
+  private final FileLog log;
+
   public ElevatorCalibrateIfAtLowerLimit(Elevator elevator, FileLog log) {
     this.elevator = elevator;
     this.log = log;
@@ -24,7 +25,7 @@ public class ElevatorCalibrateIfAtLowerLimit extends CommandBase{
   @Override
   public void initialize() {
     elevator.checkAndZeroElevatorEnc();
-    log.writeLog(false, elevator.getName(), "Calibrating at lower limit");
+    log.writeLog(false, "ElevatorCalibrateIfAtLowerLimit", "Calibrating at lower limit");
   }
 
   // Called repeatedly when this Command is scheduled to run

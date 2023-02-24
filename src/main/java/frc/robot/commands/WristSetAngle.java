@@ -18,17 +18,15 @@ public class WristSetAngle extends CommandBase {
   private double target;
   private final double angle;
   private final Wrist wrist;
-  private final Elevator elevator;
   private final FileLog log;
 
   /**
    * Moves wrist to target angle
    * @param angle target angle in degrees
    */
-  public WristSetAngle(double angle, Wrist wrist, Elevator elevator, FileLog log) {
+  public WristSetAngle(double angle, Wrist wrist, FileLog log) {
     this.angle = angle;
     this.wrist = wrist;
-    this.elevator = elevator;
     this.log = log;
 
     addRequirements(wrist);
@@ -37,7 +35,8 @@ public class WristSetAngle extends CommandBase {
   // Called just before this Command runs the first time
   @Override
   public void initialize() {
-    wrist.setWristAngle(target + wrist.getCurrentWristTarget(), elevator);
+    wrist.setWristAngle(target + wrist.getCurrentWristTarget());
+    log.writeLog(false, "WristSetAngle", "Initialize", "Target", target + wrist.getCurrentWristTarget());
   }
 
   // Called repeatedly when this Command is scheduled to run

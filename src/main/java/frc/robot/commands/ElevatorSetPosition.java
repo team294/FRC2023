@@ -9,32 +9,30 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.Wrist;
 import frc.robot.utilities.FileLog;
 
 public class ElevatorSetPosition extends CommandBase {
 
-  private Elevator elevator;
-  private Wrist wrist;
-  private FileLog log;
+  private final Elevator elevator;
+  private final FileLog log;
 
   private double target;
 
   private double toleranceCounter;
-  private boolean fromShuffleboard;
+  private final boolean fromShuffleboard;
 
 
   /**
    * Moves elevator to target height
-   * @param target target height in inches from floor
+   * @param target target height in inches, per ElevatorConstants.ElevatorPosition
    * @param elevator elevator subsystem
-   * @param wrist wrist subsystem
    * @param log log subsystem
    */
-  public ElevatorSetPosition(double target, Elevator elevator, Wrist wrist, FileLog log) {
+  public ElevatorSetPosition(double target, Elevator elevator, FileLog log) {
     this.elevator = elevator;
-    this.wrist = wrist;
+    this.log = log;
     this.target = target;
     fromShuffleboard = false;
 
@@ -42,17 +40,26 @@ public class ElevatorSetPosition extends CommandBase {
   }
 
   /**
-   * Moves elevator to target height from shuffleboard
+   * Moves elevator to target position
+   * @param position target ElevatorPosition (see Constants)
    * @param elevator elevator subsystem
-   * @param wrist wrist subsystem
    * @param log log subsystem
    */
-  public ElevatorSetPosition(Elevator elevator, Wrist wrist, FileLog log) {
+  public ElevatorSetPosition(ElevatorPosition position, Elevator elevator, FileLog log) {
+    this(position.value, elevator, log);
+  }
+
+  /**
+   * Moves elevator to target height from shuffleboard
+   * @param elevator elevator subsystem
+   * @param log log subsystem
+   */
+  public ElevatorSetPosition(Elevator elevator, FileLog log) {
     this.elevator = elevator;
-    this.wrist = wrist;
+    this.log = log;
     fromShuffleboard = true;
-    if(SmartDashboard.getNumber("Elevator Position", -9999) == -9999) {
-      SmartDashboard.putNumber("Elevator Position", 0);
+    if(SmartDashboard.getNumber("Elevator Set Position", -9999) == -9999) {
+      SmartDashboard.putNumber("Elevator Set Position", 0);
     }
     addRequirements(elevator);
   }
@@ -61,9 +68,9 @@ public class ElevatorSetPosition extends CommandBase {
   @Override
   public void initialize() {
     if(fromShuffleboard){
-      target = SmartDashboard.getNumber("Elevator Position", 0);
+      target = SmartDashboard.getNumber("Elevator Set Position", 0);
     }
-    elevator.setProfileTarget(target, wrist);
+    elevator.setProfileTarget(target);
     log.writeLog(false, "ElevatorMoveToLevel", "Target Position", target);
 
   }
@@ -75,7 +82,7 @@ public class ElevatorSetPosition extends CommandBase {
 
   // Called once after isFinished returns true
   @Override
-  public void end(boolean interuppppppted) {
+  public void end(boolean interrupted) {
   }
 
   // Make this return true when this Command no longer needs to run execute()

@@ -8,10 +8,8 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Robot;
 import frc.robot.Constants.WristConstants;
 import frc.robot.Constants.WristConstants.WristAngle;
-import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Wrist;
 import frc.robot.utilities.FileLog;
 
@@ -21,18 +19,16 @@ public class WristMoveToPosition extends CommandBase {
   private boolean targetAngle; // true if target is angle, false if target is position
   private WristAngle pos;
   private final Wrist wrist;
-  private final Elevator elevator;
   private final FileLog log;
 
   /**
    * Moves wrist to target angle
    * @param angle target angle in degrees
    */
-  public WristMoveToPosition(double angle, Wrist wrist, Elevator elevator, FileLog log) {
+  public WristMoveToPosition(double angle, Wrist wrist, FileLog log) {
     target = angle;
     targetAngle = true;
     this.wrist = wrist;
-    this.elevator = elevator;
     this.log = log;
 
     addRequirements(wrist);
@@ -42,11 +38,10 @@ public class WristMoveToPosition extends CommandBase {
    * Moves wrist to target position
    * @param pos target position based on WristAngle from RobotPrefs
    */
-  public WristMoveToPosition(WristAngle pos, Wrist wrist, Elevator elevator, FileLog log) {
+  public WristMoveToPosition(WristAngle pos, Wrist wrist, FileLog log) {
     this.pos = pos;
     targetAngle = true;
     this.wrist = wrist;
-    this.elevator = elevator;
     this.log = log;
 
     addRequirements(wrist);
@@ -56,23 +51,25 @@ public class WristMoveToPosition extends CommandBase {
   @Override
   public void initialize() {
     if (targetAngle) {
-      wrist.setWristAngle(target, elevator);
+      wrist.setWristAngle(target);
     } else {
       switch (pos) {
         case stowed:
-          wrist.setWristAngle(WristConstants.stowed, elevator);
+          wrist.setWristAngle(WristConstants.stowed);
           break;
         case straight:
-          wrist.setWristAngle(WristConstants.straight, elevator);
+          wrist.setWristAngle(WristConstants.straight);
           break;
         case scoreCargo:
-          wrist.setWristAngle(WristConstants.scoreCargo, elevator);
+          wrist.setWristAngle(WristConstants.scoreCargo);
           break;
         case vision:
-          wrist.setWristAngle(WristConstants.vision, elevator);
+          wrist.setWristAngle(WristConstants.vision);
           break;
       }
     }
+
+    log.writeLog(false, "WristMoveToPosition", "Initialize", "Target", targetAngle);    // TODO fix this
   }
 
   // Called repeatedly when this Command is scheduled to run

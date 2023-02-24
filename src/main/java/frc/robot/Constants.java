@@ -58,9 +58,9 @@ public final class Constants {
         public static final int CANTurnEncoderBackLeft = 11;
         public static final int CANTurnEncoderBackRight = 12;
 
-        public static final int CANElevatorMotor = 21;
+        public static final int CANElevatorMotor = 21;      //TODO CHANGE NUMBER TO REAL PORT 
         // public static final int CANElevatorMotor2 = 22;
-        public static final int CANWristMotor = 23;
+        public static final int CANWristMotor = 23;         //TODO CHANGE NUMBER TO REAL PORT 
 
         public static final int CANGrabber = 44;
         public static final int CANManipulator = 45; //TODO CHANGE NUMBER TO REAL PORT 
