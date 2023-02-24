@@ -138,6 +138,11 @@ public class RobotContainer {
     SmartDashboard.putData("Grabber Pick Up",new GrabberPickUp(grabber, log));
     SmartDashboard.putData("Grabber Eject", new GrabberEject(grabber, log));
 
+    //Elevator Commands
+    SmartDashboard.putData("Elevator Calibrate", new ElevatorCalibrateIfAtLowerLimit(elevator, log));
+    SmartDashboard.putData("Elevator Set Percent", new ElevatorSetPercentOutput(elevator, log));
+    SmartDashboard.putData("Elevator Set Position", new ElevatorSetPosition(elevator, wrist, log));
+
     //LED commands
     SmartDashboard.putData("LED Rainbow", new LEDSetPattern(LED.rainbowLibrary, 0, 0.5, led, log));
     SmartDashboard.putData("LED Flash Team Color", new LEDSetPattern(LED.teamFlashingColorsLibrary, 0, 0.5, led, log));
