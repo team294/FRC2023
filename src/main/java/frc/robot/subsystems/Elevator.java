@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.CTREConfigs;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.Ports;
+import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
 import frc.robot.utilities.ElevatorProfileGenerator;
 import frc.robot.utilities.FileLog;
@@ -44,7 +45,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	private final ElevatorProfileGenerator elevatorProfile;
 
 	private boolean elevCalibrated = false; // true is encoder is working and calibrated, false is not calibrated
-	private boolean elevPosControl = false; // true is in position control mode, false is manual motor control (percent output)
+	private boolean elevPosControl = false; // true is in position control mode (motion profile), false is manual motor control (percent output)
 	private ElevatorRegion curElevatorRegion = ElevatorRegion.uncalibrated;		// The current elevator region.  If the elevator is moving between regions, value should be "main".
 
 	public Elevator(Wrist wrist, FileLog log) {
@@ -84,7 +85,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 		Wait.waitTime(250);
 
 		// start the elevator in manual mode unless it is properly zeroed
-		elevCalibrated = (getElevatorLowerLimit() && getElevatorEncTicks() == 0);
+		elevCalibrated = (isElevatorAtLowerLimit() && getElevatorEncTicks() == 0);
 
 		// create elevator motion profile object
 		elevatorProfile = new ElevatorProfileGenerator(this, log);	
@@ -115,6 +116,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 */
 	public void setElevatorMotorPercentOutput(double percentOutput) {
 		elevPosControl = false;
+
 		if (elevCalibrated) {
 			elevatorMotor.set(ControlMode.PercentOutput, percentOutput);
 		} else {
@@ -125,27 +127,20 @@ public class Elevator extends SubsystemBase implements Loggable{
 		if (percentOutput > 0.0) {
 			curElevatorRegion = ElevatorRegion.main;		// Elevator is moving up.  For safety, assume we are in the main region
 		} else {
-			curElevatorRegion = calcNowElevatorRegion();
+			curElevatorRegion = calcElevatorRegion(getElevatorPos());
 		}
 	}
 
 	/**
 	 * Sets target position for elevator, using motion profile movement.
 	 * This only works when encoder is working and elevator is calibrated and the wrist is not interlocked.
-	 * @param pos in inches from the floor.
+	 * @param pos in inches, per ElevatorConstants.ElevatorPosition
 	*/
 	public void setProfileTarget(double pos) {
-		if (elevCalibrated &&										// Elevator must be calibrated
-		// Wrist and elevator don't affect eachother 
-			  /*wrist.getWristAngle() < WristConstants.stowed &&  	// Wrist must not be stowed
-			  wrist.getCurrentWristTarget() < WristConstants.stowed && // Wrist must not be moving to stow
-			  ( wrist.getWristAngle() >= WristConstants.wristMinWhenElevatorLow &&	// wrist must be at least wristMinWhenElevatorLow
-				wrist.getCurrentWristTarget() >= WristConstants.wristMinWhenElevatorLow ||*/ //Wrist must not be moving to wristMinWhenElevatorLow
-				pos >= ElevatorConstants.stowed - 5						// Elevator is not going below stowed position
-				/*&& wrist.getWristAngle() >= WristConstants.wristDown - 3.0 &&	     // wrist must be at least wristDown
-				wrist.getCurrentWristTarget() >= WristConstants.wristDown - 3.0 */// Wrist must not be moving below wristDown
-		 ) {
+		if (elevCalibrated) {
 			elevPosControl = true;
+			pos = MathUtil.clamp(pos, ElevatorPosition.lowerLimit.value, ElevatorPosition.upperLimit.value) + ElevatorPosition.lowerLimit.value;
+
 			elevatorProfile.setProfileTarget(pos);
 			log.writeLog(false, subsystemName, "setProfileTarget", "Target", pos, "Allowed,Yes,Wrist Angle",
 			   wrist.getWristAngle(), "Wrist Target", wrist.getCurrentWristTarget());
@@ -156,26 +151,19 @@ public class Elevator extends SubsystemBase implements Loggable{
 	}
 
 	/**
-	 * 2023 - Might not want inches from floor this year because elevator is diagonal
-	 * return stowed position if not calibrated?
-	 * Returns the height that elevator is trying to move to in inches from the floor.
-	 * Returns hatchHigh if the elevator is in manual mode (not calibrated), in order to engage interlocks.
+	 * Returns the height that elevator is trying to move to, in inches relative to ElevatorConstants.ElevatorPosition.
 	 * <p><b>NOTE:</b> This is the target height, not the current height.
 	 * If the elevator is in manual control mode, returns the actual elevator position.
+	 * If the elevator is not calibrated, then returns +10in into the main region (where wrist interlock is engaged).
 	 * @return desired inches of elevator height
 	 */
 	public double getCurrentElevatorTarget() {
-		if (elevCalibrated) {
-			if (elevPosControl) {
-				// Motion profile control
-				return elevatorProfile.getFinalPosition();
-			} else {
-				// Manual control mode
-				return getElevatorPos();
-			}
+		if (elevCalibrated && elevPosControl) {
+			// Motion profile control
+			return elevatorProfile.getFinalPosition();
 		} else {
-			// Elevator not calibrated
-			return ElevatorConstants.stowed; // Not sure about this
+			// Manual control mode
+			return getElevatorPos();
 		}
 	}
 
@@ -185,9 +173,9 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 * only zeros elevator encoder when it is at the zero position (lower limit)
 	 */
 	public void checkAndZeroElevatorEnc() {
-		if (getElevatorLowerLimit()) {
+		if (isElevatorAtLowerLimit()) {
 			stopElevator();			// Make sure Talon PID loop or motion profile won't move the robot to the last set position when we reset the enocder position
-			elevatorMotor.setSelectedSensorPosition(0, 0, 100);
+			elevatorMotor.setSelectedSensorPosition(ElevatorPosition.lowerLimit.value, 0, 100);
 			elevCalibrated = true;
 			curElevatorRegion = ElevatorRegion.bottom;
 			log.writeLog(true, subsystemName, "Calibrate and Zero Encoder", "checkAndZeroElevatorEnc");
@@ -210,26 +198,27 @@ public class Elevator extends SubsystemBase implements Loggable{
 	}
 
 	/**
-	 * @return Current elevator position, in inches from lower limit.  
-	 * if the elevator is in manual mode (not calibrated) returns +10in (in main region).
+	 * @return Current elevator position, per ElevatorConstants.ElevatorPosition 
+	 * If the elevator is not calibrated, then returns +10in into the main region (where wrist interlock is engaged).
 	 * 
 	 */
 	public double getElevatorPos() {
 		if (elevCalibrated) {
 			return getElevatorEncTicks()*ElevatorConstants.kElevEncoderInchesPerTick;
 		} else {
-			return 10.0;
+			return ElevatorConstants.mainBottom + 10.0;
 		}
 	}
 
 	/**
-	 * Returns the region where elevator is right now.  Note that it could be moving to another region.
+	 * Returns the elevator region for a given position, relative to ElevatorConstants.ElevatorPosition (in inches).
 	 * <p> This is a private method, only for use in this subsystem!!!!
+	 * @param pos in inches, per ElevatorConstants.ElevatorPosition
 	 * @return current elevatorRegion
 	 */
-	private ElevatorRegion calcNowElevatorRegion() {
+	private ElevatorRegion calcElevatorRegion(double pos) {
 		if (elevCalibrated) {
-			return (getElevatorPos() >= ElevatorConstants.mainBottom) ? ElevatorRegion.main : ElevatorRegion.bottom;
+			return (pos >= ElevatorConstants.mainBottom) ? ElevatorRegion.main : ElevatorRegion.bottom;
 		} else {
 			return ElevatorRegion.uncalibrated;
 		}
@@ -255,14 +244,14 @@ public class Elevator extends SubsystemBase implements Loggable{
 	/**
 	 * reads whether the elevator is at the upper limit
 	 */
-	public boolean getElevatorUpperLimit() {
+	public boolean isElevatorAtUpperLimit() {
 		return elevatorLimits.isFwdLimitSwitchClosed() == 1;
 	}
 
 	/**
 	 * reads whether the elevator is at the lower limit
 	 */
-	public boolean getElevatorLowerLimit() {
+	public boolean isElevatorAtLowerLimit() {
 		return elevatorLimits.isRevLimitSwitchClosed() == 1;
 	}
 
@@ -277,7 +266,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 				"Volts", elevatorMotor.getMotorOutputVoltage(), "Amps", elevatorMotor.getStatorCurrent(),
 				"Enc Ticks", getElevatorEncTicks(), "Enc Inches", getElevatorPos(), 
 				"Elev Target", getCurrentElevatorTarget(), "Elev Vel", getElevatorVelocity(),
-				"Upper Limit", getElevatorUpperLimit(), "Lower Limit", getElevatorLowerLimit(),
+				"Upper Limit", isElevatorAtUpperLimit(), "Lower Limit", isElevatorAtLowerLimit(),
 				"Elev Mode", elevCalibrated);
 	}
 
@@ -299,8 +288,8 @@ public class Elevator extends SubsystemBase implements Loggable{
 			SmartDashboard.putNumber("Elev Pos", getElevatorPos());
 			SmartDashboard.putNumber("Elev Target", getCurrentElevatorTarget());
 			SmartDashboard.putNumber("Elev Ticks", getElevatorEncTicks());
-			SmartDashboard.putBoolean("Elev Lower Limit", getElevatorLowerLimit());
-			SmartDashboard.putBoolean("Elev Upper Limit", getElevatorUpperLimit());
+			SmartDashboard.putBoolean("Elev Lower Limit", isElevatorAtLowerLimit());
+			SmartDashboard.putBoolean("Elev Upper Limit", isElevatorAtUpperLimit());
 		}
 
 		if (fastLogging || log.isMyLogRotation(logRotationKey)) {
@@ -317,11 +306,11 @@ public class Elevator extends SubsystemBase implements Loggable{
 		}
 
 		// Autocalibrate in the encoder is OK and the elevator is at the lower limit switch
-		if ((!elevCalibrated || Math.abs(getElevatorEncTicks()) > 600) && getElevatorLowerLimit()) {		// TODO recalibrate the auto-cal value?  (< 600)
+		if ((!elevCalibrated || Math.abs(getElevatorEncTicks()) > 600) && isElevatorAtLowerLimit()) {		// TODO recalibrate the auto-cal value?  (< 600)
 			setDefaultCommand(null);
 			elevCalibrated = true;
 			stopElevator();
-			elevatorMotor.setSelectedSensorPosition(0, 0, 0);
+			elevatorMotor.setSelectedSensorPosition(ElevatorPosition.lowerLimit.value, 0, 100);
 			log.writeLog(false, subsystemName, "Calibrate and Zero Encoder", "periodic");
 		}
 		

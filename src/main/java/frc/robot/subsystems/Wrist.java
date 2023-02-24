@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Ports;
 import frc.robot.Constants.WristConstants;
+import frc.robot.Constants.WristConstants.WristRegion;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.Loggable;
 import frc.robot.utilities.MathBCR;
@@ -423,6 +424,15 @@ public class Wrist extends SubsystemBase implements Loggable{
       return WristConstants.max;
     }
   }
+
+
+	/**
+	 * Returns the wrist region that the wrist is currently in.  If the wrist is moving between regions, value will return "back".
+	 * @return current wristRegion
+	 */
+	public WristRegion getWristRegion() {
+		return WristRegion.main;   //curWristRegion;    // TODO fix this!!!!!!
+	}
 
   /**
 	 * returns whether encoder is calibrated or not

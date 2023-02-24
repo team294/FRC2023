@@ -209,7 +209,7 @@ public final class Constants {
         public static final double encoderTicksPerRevolution = 4096.0; // Neo ticks per revolution?
             
         // Wrist regions
-        public enum WristRegion {back, main}  
+        public enum WristRegion {back, main, uncalibrated}  
       }
 
       public static final class ElevatorConstants {
