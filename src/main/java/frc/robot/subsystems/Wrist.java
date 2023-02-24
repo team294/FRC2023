@@ -25,19 +25,19 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 public class Wrist extends SubsystemBase implements Loggable{
-  private CANSparkMax wristMotor = new CANSparkMax(Ports.CANWristMotor, MotorType.kBrushless);
+  private final FileLog log;
+  private int logRotationKey;         // key for the logging cycle for this subsystem
+  private boolean fastLogging;
+  private final String subsystemName;
+  private Elevator elevator;        // Do not call this elevator object in the Wrist constructor!  The elevator constructor will set this variable (after the wrist constructor).
+
+  private final CANSparkMax wristMotor = new CANSparkMax(Ports.CANWristMotor, MotorType.kBrushless);
   private SparkMaxPIDController wristPIDController;
   // private TalonFXSensorCollection wristLimits;
   private RelativeEncoder relativeEncoder;
 
   private SparkMaxLimitSwitch revLimitSwitch;
   private SparkMaxLimitSwitch fwdLimitSwitch;
-  FileLog log;
-  private int logRotationKey;         // key for the logging cycle for this subsystem
-  boolean fastLogging;
-
-  private String subsystemName;
-
   // Don't think we need these
 	// private int posMoveCount = 0; // increments every cycle the wrist moves up
 	// private int negMoveCount = 0; // increments every cycle the wrist moves down
@@ -73,11 +73,11 @@ public class Wrist extends SubsystemBase implements Loggable{
 
   private double safeAngle;
 
-  public Wrist(String name, FileLog log) {
+  public Wrist(FileLog log) {
     this.log = log;
     logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
     fastLogging = false;
-    this.subsystemName = name;
+    subsystemName = "Wrist";
     wristPIDController = wristMotor.getPIDController();
     wristMotor.setInverted(true);
     wristMotor.clearFaults();
@@ -140,6 +140,15 @@ public class Wrist extends SubsystemBase implements Loggable{
   }
 
   /**
+   * Saves a copy of the elevator object for future use.
+   * <p> The Elevator constructor <b>must</b> call this method.
+   * @param elevator elevator subsystem
+   */
+  public void saveElevatorObject(Elevator elevator) {
+    this.elevator = elevator;
+  }
+
+  /**
    * Sets percent power of wrist motor
    * @param percentPower between -1.0 (down full speed) and 1.0 (up full speed)
    */
@@ -166,7 +175,7 @@ public class Wrist extends SubsystemBase implements Loggable{
    * and target must be at the bottom.
    * @param angle target angle, in degrees (0 = horizontal in front of robot, + = up, - = down)
    */
-  public void setWristAngle(double angle, Elevator elevator) {
+  public void setWristAngle(double angle) {
     if (wristCalibrated) {
       // Don't move wrist in or out of KeepOut if climber > climbWristMovingSafe or elevator > elevatorWristSafeStow.
       if (

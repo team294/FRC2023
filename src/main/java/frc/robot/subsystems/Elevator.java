@@ -15,11 +15,14 @@ import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import frc.robot.CTREConfigs;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.Ports;
+import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
 import frc.robot.utilities.ElevatorProfileGenerator;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.Loggable;
@@ -29,30 +32,27 @@ import frc.robot.utilities.Wait;
  * Add your docs here.
  */
 public class Elevator extends SubsystemBase implements Loggable{
-	// Put methods for controlling this subsystem
-	// here. Call these from Commands.
 	private final FileLog log;
 	private final int logRotationKey;         // key for the logging cycle for this subsystem
 	private boolean fastLogging = false;
 	private final String subsystemName;
+	private final Wrist wrist;				// the wrist subsystem
 
 	private final WPI_TalonFX elevatorMotor  = new WPI_TalonFX(Ports.CANElevatorMotor);
-	private TalonFXSensorCollection elevatorLimits;
+	private final TalonFXSensorCollection elevatorLimits;
 
-	private ElevatorProfileGenerator elevatorProfile;
+	private final ElevatorProfileGenerator elevatorProfile;
 
 	private boolean elevCalibrated = false; // true is encoder is working and calibrated, false is not calibrated
 	private boolean elevPosControl = false; // true is in position control mode, false is manual motor control (percent output)
+	private ElevatorRegion curElevatorRegion = ElevatorRegion.uncalibrated;		// The current elevator region.  If the elevator is moving between regions, value should be "main".
 
-	// TODO Calibrate
-
-	public double elevatorBottomToFloor; //distance of elevator 0 value from the ground (Not sure we want this because of diagonal elevator)
-	// public double elevatorWristSafeStow; 	 // highest elevator position (from ground) where wrist can be stowed (Not sure we need this)
-
-	public Elevator(FileLog log) {
+	public Elevator(Wrist wrist, FileLog log) {
 		this.log = log;
 		logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
 		subsystemName = "Elevator";
+		this.wrist = wrist;								// Save the wrist subsystem (so elevator can get wrist status)
+		wrist.saveElevatorObject(this);					// Pass elevator subsystem to wrist (so wrist can get elevator status)
 
 		// configure motor
 		elevatorMotor.configFactoryDefault(100);
@@ -100,13 +100,33 @@ public class Elevator extends SubsystemBase implements Loggable{
 		return subsystemName;
 	}
 
+	// ************ Elevator movement methods
+
+	/**
+	 * stops elevator motors
+	 */
+	public void stopElevator() {
+		setElevatorMotorPercentOutput(0.0);
+	}
+
 	/**
 	 * Sets elevator to manual control mode with the specified percent output voltage.
 	 * @param percentOutput between -1.0 (down) and 1.0 (up)
 	 */
 	public void setElevatorMotorPercentOutput(double percentOutput) {
-		elevatorMotor.set(ControlMode.PercentOutput, percentOutput);
 		elevPosControl = false;
+		if (elevCalibrated) {
+			elevatorMotor.set(ControlMode.PercentOutput, percentOutput);
+		} else {
+			elevatorMotor.set(ControlMode.PercentOutput, MathUtil.clamp(percentOutput, 
+				-ElevatorConstants.maxUncalibratedPercentOutput, ElevatorConstants.maxUncalibratedPercentOutput) );
+		}
+
+		if (percentOutput > 0.0) {
+			curElevatorRegion = ElevatorRegion.main;		// Elevator is moving up.  For safety, assume we are in the main region
+		} else {
+			curElevatorRegion = calcNowElevatorRegion();
+		}
 	}
 
 	/**
@@ -114,7 +134,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 * This only works when encoder is working and elevator is calibrated and the wrist is not interlocked.
 	 * @param pos in inches from the floor.
 	*/
-	public void setProfileTarget(double pos, Wrist wrist) {
+	public void setProfileTarget(double pos) {
 		if (elevCalibrated &&										// Elevator must be calibrated
 		// Wrist and elevator don't affect eachother 
 			  /*wrist.getWristAngle() < WristConstants.stowed &&  	// Wrist must not be stowed
@@ -134,7 +154,6 @@ public class Elevator extends SubsystemBase implements Loggable{
  			  wrist.getWristAngle(), "Wrist Target", wrist.getCurrentWristTarget());
 		}
 	}
-
 
 	/**
 	 * 2023 - Might not want inches from floor this year because elevator is diagonal
@@ -160,32 +179,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 		}
 	}
 
-	/**
-	 * @return Current elevator position, in inches from floor.  
-	 * if the elevator is in manual mode (not calibrated) return stowed?
-	 * 
-	 */
-	public double getElevatorPos() {
-		if (elevCalibrated) {
-			return getElevatorEncTicks()*ElevatorConstants.kElevEncoderInchesPerTick + elevatorBottomToFloor;
-		} else {
-			return ElevatorConstants.stowed;   //This could be a problem on next time it is enable it goes to hatchHigh
-		}
-	}
-
-	/**
-	 * @return Current elevator velocity in in/s, + equals up, - equals down
-	 */
-	public double getElevatorVelocity() {
-		return elevatorMotor.getSelectedSensorVelocity(0) * ElevatorConstants.kElevEncoderInchesPerTick * 10.0;
-	}
-
-	/**
-	 * stops elevator motors
-	 */
-	public void stopElevator() {
-		setElevatorMotorPercentOutput(0.0);
-	}
+	// ************ Encoder methods
 
 	/**
 	 * only zeros elevator encoder when it is at the zero position (lower limit)
@@ -195,7 +189,8 @@ public class Elevator extends SubsystemBase implements Loggable{
 			stopElevator();			// Make sure Talon PID loop or motion profile won't move the robot to the last set position when we reset the enocder position
 			elevatorMotor.setSelectedSensorPosition(0, 0, 100);
 			elevCalibrated = true;
-			log.writeLog(false, subsystemName, "Calibrate and Zero Encoder", "checkAndZeroElevatorEnc");
+			curElevatorRegion = ElevatorRegion.bottom;
+			log.writeLog(true, subsystemName, "Calibrate and Zero Encoder", "checkAndZeroElevatorEnc");
 		}
 	}
 
@@ -215,6 +210,49 @@ public class Elevator extends SubsystemBase implements Loggable{
 	}
 
 	/**
+	 * @return Current elevator position, in inches from lower limit.  
+	 * if the elevator is in manual mode (not calibrated) returns +10in (in main region).
+	 * 
+	 */
+	public double getElevatorPos() {
+		if (elevCalibrated) {
+			return getElevatorEncTicks()*ElevatorConstants.kElevEncoderInchesPerTick;
+		} else {
+			return 10.0;
+		}
+	}
+
+	/**
+	 * Returns the region where elevator is right now.  Note that it could be moving to another region.
+	 * <p> This is a private method, only for use in this subsystem!!!!
+	 * @return current elevatorRegion
+	 */
+	private ElevatorRegion calcNowElevatorRegion() {
+		if (elevCalibrated) {
+			return (getElevatorPos() >= ElevatorConstants.mainBottom) ? ElevatorRegion.main : ElevatorRegion.bottom;
+		} else {
+			return ElevatorRegion.uncalibrated;
+		}
+	}
+
+	/**
+	 * Returns the elevator region that the elevator is currently in.  If the elevator is moving between regions, value will return "main".
+	 * @return current elevatorRegion
+	 */
+	public ElevatorRegion getElevatorRegion() {
+		return curElevatorRegion;
+	}
+
+	/**
+	 * @return Current elevator velocity in in/s, + equals up, - equals down
+	 */
+	public double getElevatorVelocity() {			// TODO verify speed is correct
+		return elevatorMotor.getSelectedSensorVelocity(0) * ElevatorConstants.kElevEncoderInchesPerTick * 10.0;
+	}
+
+	// ************ Sensor methods
+
+	/**
 	 * reads whether the elevator is at the upper limit
 	 */
 	public boolean getElevatorUpperLimit() {
@@ -228,6 +266,8 @@ public class Elevator extends SubsystemBase implements Loggable{
 		return elevatorLimits.isRevLimitSwitchClosed() == 1;
 	}
 
+	// ************ Periodic and information methods
+
 	/**
     * Writes information about the subsystem to the filelog
     * @param logWhenDisabled true will log when disabled, false will discard the string
@@ -240,7 +280,6 @@ public class Elevator extends SubsystemBase implements Loggable{
 				"Upper Limit", getElevatorUpperLimit(), "Lower Limit", getElevatorLowerLimit(),
 				"Elev Mode", elevCalibrated);
 	}
-
 
 	/**
 	 * Turns file logging on every scheduler cycle (~20ms) or every 10 cycles (~0.2 sec)

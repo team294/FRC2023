@@ -206,28 +206,36 @@ public final class Constants {
             public enum WristAngle {stowed, loadCargoStation, loadCargoGround, scoreCargo, straight, vision}
             // public enum WristAngle {stowed, up, straight, scoreCargo, vision, down}
             public static final double encoderTicksPerRevolution = 4096.0; // Neo ticks per revolution?
-            
+
+            // Wrist regions
+            public enum WristRegion {back, main}            
         }
 
       public static final class ElevatorConstants {
-        // TODO Find these values
         public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
         public static final double kElevGearRatio = (12.0 / 1.0);        // CALIBRATED.  Gear reduction ratio between Falcon and gear driving the elevator
         public static final double kElevGearDiameterInches = 1.25;       // TODO CALIBRATE.  Diameter of the gear driving the elevator in inches
         public static final double kElevEncoderInchesPerTick = (kElevGearDiameterInches * Math.PI) / kEncoderCPR / kElevGearRatio;
 
+        public static final double maxUncalibratedPercentOutput = 0.10;     // TODO CALIBRATE
+
         // Elevator regions
-        public enum ElevatorRegion {bottom, lower, main, interRegionTransit}    // See diagram (TODO - reference file).  interRegionTransit = profile moving to another region.
+        public enum ElevatorRegion {
+            bottom,     // In the elevator bottom region, the wrist may be in any wrist region.
+            main,       // In the elevator main region, the wrist must be in the wrist main region (not allowed to go to wrist back region).
+            uncalibrated;       // Unknown region, elevator is not calibrated.
+        }     
         // Elevator region boundaries
-        public static final double lowerMin = 2.0;      // TODO CALIBRATE
-        public static final double lowerMax = 10.0;     // TODO CALIBRATE
+        public static final double mainBottom = 2.0;      // Boundary between bottom and main regions.  TODO CALIBRATE
 
         // Elevator pre-defined positions (in inches from bottom of elevator)
         public enum ElevatorPosition {
+            lowerLimit(0.0),
             bottom(0.0),            // TODO CALIBRATE
             loadingStation(20.0),   // TODO CALIBRATE
             scoreMid(25.0),         // TODO CALIBRATE
-            scoreHigh(30.0);        // TODO CALIBRATE
+            scoreHigh(30.0),        // TODO CALIBRATE
+            upperLimit(35.0);       // TODO CALIBRATE
         
             @SuppressWarnings({"MemberName", "PMD.SingularField"})
             public final double value;
