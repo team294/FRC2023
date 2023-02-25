@@ -37,11 +37,13 @@ public class ElevatorProfileGenerator {
 	double percentPowerFB = 0;
 
 	private double kFF = 0.0;    // 2019 calibrated to 0.14		// TODO CALIBRATE all of these values!!!
+	private double kSu = 0.0;
 	private double kVu = 0.0;  // 2019 calibrated to 0.0139
 	private double kAu = 0.000;   // 2019 used 0.002
 	private double kPu = 0.0;    // 2019 calibrated to 0.15
 	private double kIu = 0;
 	private double kDu = 0;
+	private double kSd = 0.0;
 	private double kVd = 0.0;  // 2019 calibrated to 0.0125
 	private double kAd = 0.00;   // 2019 used 0.002
 	private double kPd = 0.0;	  // 2019 calibrated to 0.05
@@ -152,25 +154,25 @@ public class ElevatorProfileGenerator {
 	 */
 	public double trackProfilePeriodic() {
 		if(profileEnabled) {
+			if (currentMPVelocity>0 || Math.abs(percentPowerFB)>0.08) {
+				updateElevatorProfileLog(false);
+			}
+
 			updateProfileCalcs();
 			error = getCurrentPosition() - elevator.getElevatorPos();
 			intError = intError + error * dt;
 
 			if (directionSign == 1) {
-				percentPowerFF = kFF + kVu*currentMPVelocity*directionSign + kAu*currentMPAcceleration*directionSign;
+				percentPowerFF = kFF + kSu*Math.signum(currentMPVelocity*directionSign) + kVu*currentMPVelocity*directionSign + kAu*currentMPAcceleration*directionSign;
 				percentPowerFB = kPu * error + ((error - prevError) * kDu) + (kIu * intError);
 			} else if(directionSign == -1) {
-				percentPowerFF = kFF + kVd*currentMPVelocity*directionSign + kAd*currentMPAcceleration*directionSign;
+				percentPowerFF = kFF + kSd*Math.signum(currentMPVelocity*directionSign) + kVd*currentMPVelocity*directionSign + kAd*currentMPAcceleration*directionSign;
 				percentPowerFB = kPd * error + ((error - prevError) * kDd) + (kId * intError);
 			} 
 			prevError = error;
 
 			// Cap feedback power to prevent jerking the elevator
 			percentPowerFB = MathUtil.clamp(percentPowerFB, -0.2, 0.2);
-
-			if (currentMPVelocity>0 || Math.abs(percentPowerFB)>0.1) {
-				updateElevatorProfileLog(false);
-			}
 
 			return percentPowerFF + percentPowerFB;
 		} else {

@@ -118,6 +118,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 */
 	public void setElevatorMotorPercentOutput(double percentOutput) {
 		elevPosControl = false;
+		elevatorProfile.disableProfileControl();
 
 		// Clamp speed if not calibrated
 		if (!elevCalibrated) {
@@ -322,7 +323,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 		}
 
 		// Autocalibrate if the encoder is OK and the elevator is at the lower limit switch
-		if (!elevCalibrated || Math.abs(getElevatorEncTicks()) > 5000) {		// TODO recalibrate the auto-cal value?  (> 600???)
+		if (!elevCalibrated || Math.abs(getElevatorEncTicks()) > 5000) {
 			checkAndZeroElevatorEnc();
 		}
 	}

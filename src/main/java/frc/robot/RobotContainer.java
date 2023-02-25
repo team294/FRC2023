@@ -141,7 +141,8 @@ public class RobotContainer {
     SmartDashboard.putData("Grabber Eject", new GrabberEject(grabber, log));
 
     //Elevator Commands
-    SmartDashboard.putData("Elevator Calibrate", new ElevatorCalibrateIfAtLowerLimit(elevator, log));
+    SmartDashboard.putData("Elevator Cal Encoder", new ElevatorCalibrateEncoderIfAtLowerLimit(elevator, log));
+    SmartDashboard.putData("Elevator Calibration", new ElevatorCalibration(0.05, elevator, log));
     SmartDashboard.putData("Elevator Set Percent", new ElevatorSetPercentOutput(elevator, log));
     SmartDashboard.putData("Elevator Set Position", new ElevatorSetPosition(elevator, log));
     SmartDashboard.putData("Elevator Move To Bottom", new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
