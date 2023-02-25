@@ -66,8 +66,8 @@ public final class Constants {
         public static final int CANManipulator = 45; //TODO CHANGE NUMBER TO REAL PORT 
 
         // Digital IO ports
-        public static final int DIOManipulatorCubeSensor = 0; //TODO PLACE HOLDER SET TO CORRET PORT
-        public static final int DIOManipulatorConeSensor = 1; //TODO PLACE HOLDER SET TO CORRECT PORT
+        public static final int DIOManipulatorCubeSensor = 5; //TODO PLACE HOLDER SET TO CORRET PORT
+        public static final int DIOManipulatorConeSensor = 6; //TODO PLACE HOLDER SET TO CORRECT PORT
 
         // PWM ports
         public static final int PWMLEDStripTop = 0;         // LED Strip on top of robot
@@ -215,7 +215,7 @@ public final class Constants {
       public static final class ElevatorConstants {
         public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
         public static final double kElevGearRatio = (12.0 / 1.0);        // CALIBRATED.  Gear reduction ratio between Falcon and gear driving the elevator
-        public static final double kElevGearDiameterInches = 1.25;       // TODO CALIBRATE.  Diameter of the gear driving the elevator in inches
+        public static final double kElevGearDiameterInches = 1.273;       // TODO CALIBRATE.  Diameter of the gear driving the elevator in inches
         public static final double kElevEncoderInchesPerTick = (kElevGearDiameterInches * Math.PI) / kEncoderCPR / kElevGearRatio;
 
         public static final double maxUncalibratedPercentOutput = 0.10;     // TODO CALIBRATE

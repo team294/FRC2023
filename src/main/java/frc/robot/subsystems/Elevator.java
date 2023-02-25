@@ -60,7 +60,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 		elevatorMotor.configFactoryDefault(100);
 		elevatorMotor.configAllSettings(CTREConfigs.elevatorFXConfig, 100);
 		elevatorMotor.selectProfileSlot(0, 0);
-		elevatorMotor.setInverted(false);
+		elevatorMotor.setInverted(true);
 		elevatorMotor.enableVoltageCompensation(true);
 		elevatorMotor.setNeutralMode(NeutralMode.Brake);
 
