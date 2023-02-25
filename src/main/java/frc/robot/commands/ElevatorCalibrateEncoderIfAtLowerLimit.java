@@ -11,11 +11,11 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Elevator;
 import frc.robot.utilities.FileLog;
 
-public class ElevatorCalibrateIfAtLowerLimit extends CommandBase{
+public class ElevatorCalibrateEncoderIfAtLowerLimit extends CommandBase{
   private final Elevator elevator;
   private final FileLog log;
 
-  public ElevatorCalibrateIfAtLowerLimit(Elevator elevator, FileLog log) {
+  public ElevatorCalibrateEncoderIfAtLowerLimit(Elevator elevator, FileLog log) {
     this.elevator = elevator;
     this.log = log;
     addRequirements(elevator);
@@ -25,7 +25,7 @@ public class ElevatorCalibrateIfAtLowerLimit extends CommandBase{
   @Override
   public void initialize() {
     elevator.checkAndZeroElevatorEnc();
-    log.writeLog(false, "ElevatorCalibrateIfAtLowerLimit", "Calibrating at lower limit");
+    log.writeLog(false, "ElevatorCalibrateEncoderIfAtLowerLimit", "Calibrating at lower limit");
   }
 
   // Called repeatedly when this Command is scheduled to run
