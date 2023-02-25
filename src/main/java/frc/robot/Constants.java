@@ -195,15 +195,7 @@ public final class Constants {
     }
 
     public static class VisionConstants {
-        // TODO TEST
-        public static final AprilTag tag01 = new AprilTag(1, new Pose3d(new Pose2d(15.51356, 1.071626, new Rotation2d(0))));
-        public static final AprilTag tag02 = new AprilTag(2, new Pose3d(new Pose2d(15.51356, 2.748026, new Rotation2d(0))));
-        public static final AprilTag tag03 = new AprilTag(3, new Pose3d(new Pose2d(15.51356, 4.424426, new Rotation2d(0))));
-        public static final AprilTag tag04 = new AprilTag(4, new Pose3d(new Pose2d(16.17878, 6.749796, new Rotation2d(0))));
-        public static final AprilTag tag05 = new AprilTag(5, new Pose3d(new Pose2d(0.36195, 6.749796, new Rotation2d(Math.PI))));
-        public static final AprilTag tag06 = new AprilTag(6, new Pose3d(new Pose2d(1.02743, 4.424426, new Rotation2d(Math.PI))));
-        public static final AprilTag tag07 = new AprilTag(7, new Pose3d(new Pose2d(1.02743, 2.748026, new Rotation2d(Math.PI))));
-        public static final AprilTag tag08 = new AprilTag(8, new Pose3d(new Pose2d(1.02743, 1.071626, new Rotation2d(Math.PI))));
+
         public static final Transform3d robotToCam =
                 new Transform3d(
                         new Translation3d(0.2, 0.0, 0.8),

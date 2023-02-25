@@ -414,6 +414,7 @@ public class RobotContainer {
     log.writeLogEcho(true, "Auto", "Mode Init");
 
     driveTrain.setDriveModeCoast(false);
+    driveTrain.cameraInit();
 
     if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
     if (allianceSelection.getAlliance() == Alliance.Blue) {
@@ -439,6 +440,7 @@ public class RobotContainer {
     log.writeLogEcho(true, "Teleop", "Mode Init");
 
     driveTrain.setDriveModeCoast(false);
+    driveTrain.cameraInit();
 
     if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
     led.setStrip(Color.kOrange, 0);

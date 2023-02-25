@@ -22,55 +22,86 @@
  * SOFTWARE.
  */
 
-package frc.robot.subsystems;
+ package frc.robot.subsystems;
 
-import edu.wpi.first.apriltag.AprilTag;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import frc.robot.Constants.FieldConstants;
-import frc.robot.Constants.VisionConstants;
-import frc.robot.utilities.Field;
-
-import java.util.ArrayList;
-import java.util.Optional;
-import org.photonvision.EstimatedRobotPose;
-import org.photonvision.PhotonCamera;
-import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.PhotonPoseEstimator.PoseStrategy;
-
-public class PhotonCameraWrapper {
-        public PhotonCamera photonCamera;
-        public PhotonPoseEstimator photonPoseEstimator;
-
-        public PhotonCameraWrapper(Field field) {
-                // Set up a test arena of two apriltags at the center of each driver station set
-                // final AprilTag tag03 = new AprilTag(8, new Pose3d(new Pose2d(1.02743, 1.1, new Rotation2d(0))));
-                // final AprilTag tag02 = new AprilTag(7, new Pose3d(new Pose2d(1.02743, 2.76, new Rotation2d(0))));
-                // final AprilTag tag01 = new AprilTag(6, new Pose3d(new Pose2d(1.02743, 4.42, new Rotation2d(0)))); 
-                // ArrayList<AprilTag> atList = new ArrayList<AprilTag>();
-
-                // Forward Camera
-                photonCamera = new PhotonCamera(VisionConstants.cameraName); 
-
-                // Create pose estimator
-                photonPoseEstimator = new PhotonPoseEstimator(
-                        field.getAprilTagFieldLayout(), 
-                        PoseStrategy.CLOSEST_TO_REFERENCE_POSE, 
-                        photonCamera, 
-                        VisionConstants.robotToCam);
-        }
-
-        /**
-         * @param estimatedRobotPose The current best guess at robot pose
-         * @return A pair of the fused camera observations to a single Pose2d on the
-         *         field, and the time
-         *         of the observation. Assumes a planar field and the robot is always
-         *         firmly on the ground
-         */
-        public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
-                photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
-                return photonPoseEstimator.update();
-        }
-}
+ import edu.wpi.first.apriltag.AprilTagFieldLayout;
+ import edu.wpi.first.math.geometry.Pose2d;
+ import frc.robot.Constants.VisionConstants;
+ import frc.robot.utilities.Field;
+ import frc.robot.utilities.FileLog;
+ 
+ import java.util.Optional;
+ import org.photonvision.EstimatedRobotPose;
+ import org.photonvision.PhotonCamera;
+ import org.photonvision.PhotonPoseEstimator;
+ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+ 
+ public class PhotonCameraWrapper {
+   public PhotonCamera photonCamera;
+   public PhotonPoseEstimator photonPoseEstimator;
+   private AprilTagFieldLayout aprilTagFieldLayout;
+   private Field field;
+   private FileLog log;
+   private boolean hasInit = false;
+ 
+   public PhotonCameraWrapper(Field field, FileLog log) {
+     this.log = log;
+     this.field = field;
+   }
+ 
+   public void init() {
+     log.writeLogEcho(true, "PhotonCameraWrapper", "Init", "Starting");
+ 
+     if (photonCamera == null) {
+       photonCamera = new PhotonCamera(VisionConstants.cameraName);
+     }
+ 
+     aprilTagFieldLayout = field.getAprilTagFieldLayout();
+     log.writeLogEcho(true, "PhotonCameraWrapper", "Init", "Loaded april tags from field");
+     log.writeLogEcho(true, "PhotonCameraWrapper", "Init", 
+       "AT8 x",aprilTagFieldLayout.getTagPose(8).get().getX(),
+       "AT8 y",aprilTagFieldLayout.getTagPose(8).get().getY(),
+       "AT8 rot",aprilTagFieldLayout.getTagPose(8).get().getRotation());
+ 
+     // try {
+     //   aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
+     //   log.writeLogEcho(true, "PhotonCameraWrapper", "Init", "Loaded april tags from file");
+     // } catch (IOException e) {
+     //   log.writeLogEcho(true, "PhotonCameraWrapper", "Init", "Error loading april tags from file");
+     //   e.printStackTrace();
+     // }
+ 
+     // Create pose estimator
+     photonPoseEstimator = new PhotonPoseEstimator(
+         aprilTagFieldLayout,
+         PoseStrategy.CLOSEST_TO_REFERENCE_POSE,
+         photonCamera,
+         VisionConstants.robotToCam);
+ 
+     hasInit = true;
+ 
+     log.writeLogEcho(true, "PhotonCameraWrapper", "Init", "Done");
+   }
+ 
+   public boolean hasInit() {
+     return hasInit;
+   }
+ 
+   /**
+    * @param estimatedRobotPose The current best guess at robot pose
+    * @return A pair of the fused camera observations to a single Pose2d on the
+    *         field, and the time
+    *         of the observation. Assumes a planar field and the robot is always
+    *         firmly on the ground
+    */
+   public Optional<EstimatedRobotPose> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
+     photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
+     var newPoseOptional = photonPoseEstimator.update();
+     if (newPoseOptional.isPresent()) {
+       log.writeLog(true, "PhotonCameraWrapper", "getEstimatedGlobalPose", "PreviousPose", "X",prevEstimatedRobotPose.getX(),"Y",prevEstimatedRobotPose.getY());
+       EstimatedRobotPose newPose = newPoseOptional.get();
+       log.writeLog(true, "PhotonCameraWrapper", "getEstimatedGlobalPose", "NewPose", "X",newPose.estimatedPose.getX(),"Y",newPose.estimatedPose.getY());
+     }
+     return newPoseOptional;
+   }
+ }

@@ -16,6 +16,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -74,7 +75,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    */
   public DriveTrain(Field fieldUtil, FileLog log) {
     this.log = log; // save reference to the fileLog
-    this.camera = new PhotonCameraWrapper(fieldUtil);
+    this.camera = new PhotonCameraWrapper(fieldUtil, log);
     logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
 
     // create swerve modules
@@ -481,20 +482,34 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   public void updateOdometry() {
     poseEstimator.update(Rotation2d.fromDegrees(getGyroRotation()), getModulePotisions());
 
-    Optional<EstimatedRobotPose> result = camera.getEstimatedGlobalPose(poseEstimator.getEstimatedPosition());
+    if (camera.hasInit()) {
+      Optional<EstimatedRobotPose> result = camera.getEstimatedGlobalPose(poseEstimator.getEstimatedPosition());
 
-    if (result.isPresent()) {
+      if (result.isPresent()) {
         EstimatedRobotPose camPose = result.get();
-        // only updates odometry if close enough 
+        // only updates odometry if close enough
         // TODO change how it decides if it's too far
-        if (camPose.estimatedPose.getX() < 3.3) {
+        //if (camPose.estimatedPose.getX() < 3.3) {
           poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
 
-          // field.setRobotPose(camPose.estimatedPose.toPose2d());
-        }
+          field.getObject("Vision").setPose(camPose.estimatedPose.toPose2d());
+          SmartDashboard.putNumber("Vision X", camPose.estimatedPose.toPose2d().getX());
+          SmartDashboard.putNumber("Vision Y", camPose.estimatedPose.toPose2d().getY());
+          SmartDashboard.putNumber("Vision rot", camPose.estimatedPose.toPose2d().getRotation().getDegrees());
+          
+          SmartDashboard.putNumber("Odo X", poseEstimator.getEstimatedPosition().getX());
+          SmartDashboard.putNumber("Odo Y", poseEstimator.getEstimatedPosition().getY());
+          SmartDashboard.putNumber("Odo rot", poseEstimator.getEstimatedPosition().getRotation().getDegrees());
+       // }
+      }
+
     }
-    
+
     field.setRobotPose(poseEstimator.getEstimatedPosition());
   }  
+
+  public void cameraInit() {
+    camera.init();
+  }
 
 }
