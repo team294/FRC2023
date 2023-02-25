@@ -7,37 +7,45 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import static frc.robot.utilities.StringUtil.buildString;
+
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.DemandType;
+import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
+import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
+import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
+
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Constants.WristConstants;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.Ports;
+import frc.robot.Constants.WristConstants;
+import frc.robot.Constants.WristConstants.WristRegion;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.Loggable;
+import frc.robot.utilities.MathBCR;
 import frc.robot.utilities.Wait;
-import static frc.robot.utilities.StringUtil.*;
-
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkMaxLimitSwitch;
-import com.revrobotics.SparkMaxPIDController;
-import com.revrobotics.CANSparkMax.ControlType;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 public class Wrist extends SubsystemBase implements Loggable{
-  private CANSparkMax wristMotor = new CANSparkMax(Ports.CANWristMotor, MotorType.kBrushless);
-  private SparkMaxPIDController wristPIDController;
-  // private TalonFXSensorCollection wristLimits;
-  private RelativeEncoder relativeEncoder;
-
-  private SparkMaxLimitSwitch revLimitSwitch;
-  private SparkMaxLimitSwitch fwdLimitSwitch;
-  FileLog log;
+  private final FileLog log;
   private int logRotationKey;         // key for the logging cycle for this subsystem
-  boolean fastLogging;
+  private boolean fastLogging;
+  private final String subsystemName;
+  private Elevator elevator;        // Do not call this elevator object in the Wrist constructor!  The elevator constructor will set this variable (after the wrist constructor).
 
-  private String subsystemName;
+  private TalonFX wristMotor = new TalonFX(Ports.CANWristMotor);
+  // private SparkMaxPIDController wristPIDController;
+  private TalonFXSensorCollection wristLimits;
+  
+  Encoder encoder = new Encoder(0, 1);
 
+  private double encoderZero = 0;          // Reference raw encoder reading for encoder.  Calibration sets this to the absolute position from RobotPreferences.
+  private double wristEncoderZero = 0;         //Reference raw encoder reading for drive FalconFX encoder.  Calibration sets this to zero.
+  
   // Don't think we need these
 	// private int posMoveCount = 0; // increments every cycle the wrist moves up
 	// private int negMoveCount = 0; // increments every cycle the wrist moves down
@@ -62,10 +70,10 @@ public class Wrist extends SubsystemBase implements Loggable{
   private double kFF = 0.0;   // FF gain is multiplied by sensor value (probably in encoder ticks) and divided by 1024
   private double kFFconst = 0.075;   // Add about 1V (0.075* 12V) feed foward constant
   private double kIz = 10;    // Izone in degrees
-  // private double kIAccumMax = 0.3/kI;     // Max Iaccumulator value, in encoderTicks*milliseconds.  Max I power = kI * kIAccumMax.
+  private double kIAccumMax = 0.3/kI;     // Max Iaccumulator value, in encoderTicks*milliseconds.  Max I power = kI * kIAccumMax.
   private double kMaxOutput = 0.6; // up max output
   private double kMinOutput = -0.6; // down max output
-  // private double rampRate = 0.3;
+  private double rampRate = 0.3;
 
   public double wristCalZero;   		// Wrist encoder position at O degrees, in encoder ticks (i.e. the calibration factor)
   public boolean wristCalibrated = false;     // Default to wrist being uncalibrated.  Calibrate from robot preferences or "Calibrate Wrist Zero" button on dashboard
@@ -73,50 +81,59 @@ public class Wrist extends SubsystemBase implements Loggable{
 
   private double safeAngle;
 
-  public Wrist(String name, FileLog log) {
+  public Wrist(FileLog log) {
     this.log = log;
     logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
     fastLogging = false;
-    this.subsystemName = name;
-    wristPIDController = wristMotor.getPIDController();
-    wristMotor.setInverted(true);
-    wristMotor.clearFaults();
-    wristMotor.setIdleMode(IdleMode.kCoast);
-
-
-    // wristMotor.set(ControlMode.PercentOutput, 0);
+    subsystemName = "Wrist";
+    // wristPIDController = wristMotor.getPIDController();
     // wristMotor.setInverted(true);
-    // wristMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 0, 0);
-    // wristMotor.configFeedbackNotContinuous(true, 0);
-    // wristMotor.setSensorPhase(false);         // Flip sign of sensor reading
-    // wristMotor.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
-    // wristMotor.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
-    // wristMotor.setNeutralMode(NeutralMode.Brake);
-    // wristMotor.configVoltageCompSaturation(12.0);
-    // wristMotor.enableVoltageCompensation(true);
-    // wristMotor.clearStickyFaults();
+    // wristMotor.clearFaults();
+    // wristMotor.setIdleMode(IdleMode.kCoast);
 
-    // wristMotor.config_kP(0, kP);
-		// wristMotor.config_kI(0, kI);
-		// wristMotor.config_kD(0, kD);
-		// wristMotor.config_kF(0, kFF);
-    // wristMotor.config_IntegralZone(0, (int)degreesToEncoderTicks(kIz));
-    // wristMotor.configMaxIntegralAccumulator(0, kIAccumMax);
-		// wristMotor.configClosedloopRamp(rampRate);
-		// wristMotor.configPeakOutputForward(kMaxOutput);
-    // wristMotor.configPeakOutputReverse(kMinOutput);
+
+    wristMotor.set(ControlMode.PercentOutput, 0);
+    wristMotor.setInverted(true);
+    wristMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 0);
+    wristMotor.configFeedbackNotContinuous(true, 0);
+    wristMotor.setSensorPhase(false);         // Flip sign of sensor reading
+    wristMotor.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
+    wristMotor.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
+    wristMotor.setNeutralMode(NeutralMode.Brake);
+    wristMotor.configVoltageCompSaturation(12.0);
+    wristMotor.enableVoltageCompensation(true);
+    wristMotor.clearStickyFaults();
+
+    wristMotor.config_kP(0, kP);
+		wristMotor.config_kI(0, kI);
+		wristMotor.config_kD(0, kD);
+		wristMotor.config_kF(0, kFF);
+    wristMotor.config_IntegralZone(0, (int)degreesToEncoderTicks(kIz));
+    wristMotor.configMaxIntegralAccumulator(0, kIAccumMax);
+		wristMotor.configClosedloopRamp(rampRate);
+		wristMotor.configPeakOutputForward(kMaxOutput);
+    wristMotor.configPeakOutputReverse(kMinOutput);
     
+    wristLimits = wristMotor.getSensorCollection();
+    // TODO  find wrist gear ratio
+    encoder.setDistancePerPulse(4/256);
+    // Configures the encoder to consider itself stopped after .1 seconds
+    // encoder.setMinRate(0.1);
+    // encoder.setMinRate(10);
+    encoder.setReverseDirection(false);
+    calibrateEncoderDegrees(WristConstants.offsetAngleWrist);
+    // encoder.setSamplesToAverage(5);
     // wristLimits =  wristMotor.getSensorCollection();
-    wristPIDController = wristMotor.getPIDController();
-    relativeEncoder = wristMotor.getEncoder();
+    // wristPIDController = wristMotor.getPIDController();
+    // relativeEncoder = wristMotor.getEncoder();
 
     // Set PID Coefficients
-    wristPIDController.setI(kI);
-    wristPIDController.setD(kD);
-    wristPIDController.setP(kP);
-    wristPIDController.setIZone(kIz);
-    wristPIDController.setFF(kFF);
-    wristPIDController.setOutputRange(kMinOutput, kMaxOutput);
+    // wristPIDController.setI(kI);
+    // wristPIDController.setD(kD);
+    // wristPIDController.setP(kP);
+    // wristPIDController.setIZone(kIz);
+    // wristPIDController.setFF(kFF);
+    // wristPIDController.setOutputRange(kMinOutput, kMaxOutput);
 
       // wristPIDController.setSmartMotionMaxVelocity(maxVel, smartMotionSlot);
       // wristPIDController.setSmartMotionMinOutputVelocity(minVel, smartMotionSlot);
@@ -140,24 +157,32 @@ public class Wrist extends SubsystemBase implements Loggable{
   }
 
   /**
+   * Saves a copy of the elevator object for future use.
+   * <p> The Elevator constructor <b>must</b> call this method.
+   * @param elevator elevator subsystem
+   */
+  public void saveElevatorObject(Elevator elevator) {
+    this.elevator = elevator;
+  }
+
+  /**
    * Sets percent power of wrist motor
    * @param percentPower between -1.0 (down full speed) and 1.0 (up full speed)
    */
   public void setWristMotorPercentOutput(double percentOutput) {
-    percentOutput = (percentOutput>kMaxOutput ? kMaxOutput : percentOutput);
-    percentOutput = (percentOutput<kMinOutput ? kMinOutput : percentOutput);  
+    percentOutput = MathUtil.clamp(percentOutput, kMinOutput, kMaxOutput);
 
     if (log.isMyLogRotation(logRotationKey)) {
       log.writeLog(false, subsystemName , "Percent Output", "Percent Output", percentOutput);
     }
-    wristMotor.set(percentOutput);
+    wristMotor.set(ControlMode.PercentOutput, percentOutput);
   }
 
   /**
    * Stops wrist motor
    */
   public void stopWrist() {
-    wristMotor.stopMotor();
+    wristMotor.set(ControlMode.PercentOutput, 0);
   }
 
   /**
@@ -166,7 +191,7 @@ public class Wrist extends SubsystemBase implements Loggable{
    * and target must be at the bottom.
    * @param angle target angle, in degrees (0 = horizontal in front of robot, + = up, - = down)
    */
-  public void setWristAngle(double angle, Elevator elevator) {
+  public void setWristAngle(double angle) {
     if (wristCalibrated) {
       // Don't move wrist in or out of KeepOut if climber > climbWristMovingSafe or elevator > elevatorWristSafeStow.
       if (
@@ -197,10 +222,12 @@ public class Wrist extends SubsystemBase implements Loggable{
       // wristMotor.set(ControlMode.Position, degreesToEncoderTicks(safeAngle) + wristCalZero, 
       //                DemandType.ArbitraryFeedForward, kFFconst);
       // Need usingPosition boolean because there is no way to get controltype from neo
-      usingPosition = true; // Starting to set angle with position
+      // usingPosition = true; // Starting to set angle with position
       //use arbitrary kFF value?
-      wristPIDController.setReference(degreesToEncoderTicks(safeAngle) + wristCalZero, ControlType.kPosition/*, 0, kFFconst*/);
-      usingPosition = false; //Finished setting angle with position
+      wristMotor.set(ControlMode.Position, degreesToEncoderTicks(safeAngle) + wristCalZero, 
+                     DemandType.ArbitraryFeedForward, kFFconst);
+      // wristPIDController.setReference(degreesToEncoderTicks(safeAngle) + wristCalZero, ControlType.kPosition/*, 0, kFFconst*/);
+      // usingPosition = false; //Finished setting angle with position
       log.writeLog(false, subsystemName, "Set angle", "Desired angle", angle, "Set angle", safeAngle, "Interlock,Allowed",
        "Elevator Pos", elevator.getElevatorPos(), "Elevator Target", elevator.getCurrentElevatorTarget());  
     }
@@ -270,9 +297,9 @@ public class Wrist extends SubsystemBase implements Loggable{
    * @return true if wrist is at lower limit, false if not
    */
   public boolean getWristLowerLimit() {
-    // return wristLimits.isRevLimitSwitchClosed() == 1;
-    revLimitSwitch = wristMotor.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
-    return revLimitSwitch.isPressed();
+    return wristLimits.isRevLimitSwitchClosed() == 1;
+    // revLimitSwitch = wristMotor.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
+    // return revLimitSwitch.isPressed();
   }
 
   /**
@@ -280,9 +307,9 @@ public class Wrist extends SubsystemBase implements Loggable{
    * @return true if wrist is at upper limit, false if not
    */
   public boolean getWristUpperLimit() {
-    // return wristLimits.isFwdLimitSwitchClosed() == 1;
-    fwdLimitSwitch = wristMotor.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
-    return fwdLimitSwitch.isPressed();
+    return wristLimits.isFwdLimitSwitchClosed() == 1;
+    // fwdLimitSwitch = wristMotor.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
+    // return fwdLimitSwitch.isPressed();
   }
 
   /**
@@ -301,8 +328,8 @@ public class Wrist extends SubsystemBase implements Loggable{
    * @return raw encoder ticks, adjusted direction (positive is towards stowed, negative is towards lower hard stop)
    */
   public double getWristEncoderTicksRaw() {
-    // return wristMotor.getSelectedSensorPosition(0);
-    return relativeEncoder.getPosition();
+    return wristMotor.getSelectedSensorPosition(0);
+    // return relativeEncoder.getPosition();
   }
 
   /**
@@ -398,6 +425,15 @@ public class Wrist extends SubsystemBase implements Loggable{
     }
   }
 
+
+	/**
+	 * Returns the wrist region that the wrist is currently in.  If the wrist is moving between regions, value will return "back".
+	 * @return current wristRegion
+	 */
+	public WristRegion getWristRegion() {
+		return WristRegion.main;   //curWristRegion;    // TODO fix this!!!!!!
+	}
+
   /**
 	 * returns whether encoder is calibrated or not
 	 * @return true if encoder is calibrated and working, false if encoder broke
@@ -407,12 +443,49 @@ public class Wrist extends SubsystemBase implements Loggable{
   }
 
   /**
+   * Calibrates the through bore encoder, so that 0 should be with the wheel pointing toward the front of robot.
+   * @param offsetDegrees Desired encoder zero point, in absolute magnet position reading
+   */
+  public void calibrateEncoderDegrees(double offsetDegrees) {
+    // System.out.println(swName + " " + turningOffsetDegrees);
+    // turningCanCoder.configMagnetOffset(offsetDegrees, 100);
+    encoderZero = -offsetDegrees;
+    log.writeLogEcho(true, subsystemName, "calibrateThroughBoreEncoder", "encoderZero", encoderZero, "raw encoder", encoder.getRaw(), "encoder degrees", getEncoderDegrees());
+  }
+
+  /**
+   * @return turning through bore encoder wrist facing, in degrees [-180,+180).
+   * When calibrated, 0 should be with the wrist pointing down?
+   * + = up, - = down?
+   */
+  public double getEncoderDegrees() {
+    return MathBCR.normalizeAngle(encoder.getRaw() - encoderZero);
+  }
+
+  /**
+   * @return turning through bore encoder rotational velocity for wrist, in degrees per second.
+   * + = counterclockwise, - = clockwise
+   */
+  public double getEncoderVelocityDPS() {
+    return encoder.getRate();
+  }
+
+  /**
+	 * Set the wrist encoder position to zero in software.
+	 */
+  public void zeroWristEncoder() {
+    wristEncoderZero = wristMotor.getSelectedSensorPosition();
+    log.writeLogEcho(true, subsystemName, "ZeroDriveEncoder", "wristEncoderZero", wristEncoderZero, "raw encoder", getWristEncoderDegreesRaw(), "encoder degrees", getWristAngle());
+  }
+
+
+  /**
    * Writes information about the subsystem to the filelog
    * @param logWhenDisabled true will log when disabled, false will discard the string
    */
   public void updateWristLog(boolean logWhenDisabled) {
     log.writeLog(logWhenDisabled, subsystemName, "Update Variables",
-        "Volts", wristMotor.getBusVoltage(), "Amps", wristMotor.getOutputCurrent(),
+        "Volts", wristMotor.getBusVoltage(), "Amps", wristMotor.getStatorCurrent(),
         "WristCalZero", wristCalZero,
         "Enc Raw", getWristEncoderTicksRaw(), "Wrist Angle", getWristAngle(), "Wrist Target", getCurrentWristTarget(),
         "Upper Limit", getWristUpperLimit(), "Lower Limit", getWristLowerLimit()

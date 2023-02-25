@@ -34,6 +34,8 @@ public class RobotPreferences {
         DriveConstants.offsetAngleBackLeftMotor = readDouble("Drive.offsetAngleBackLeftMotor", DriveConstants.offsetAngleBackLeftMotor);        
         DriveConstants.offsetAngleBackRightMotor = readDouble("Drive.offsetAngleBackRightMotor", DriveConstants.offsetAngleBackRightMotor);        
         // DriveConstants.updateDerivedConstants();
+
+        WristConstants.offsetAngleWrist = readDouble("Wrist.offsetAngleWrist", WristConstants.offsetAngleWrist);
     }
 
     /**

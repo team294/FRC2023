@@ -26,6 +26,8 @@ import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.Constants.CoordType;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.StopType;
+import frc.robot.Constants.WristConstants;
+import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.commands.*;
 import frc.robot.commands.autos.*;
 import frc.robot.subsystems.*;
@@ -51,7 +53,8 @@ public class RobotContainer {
   private final DriveTrain driveTrain = new DriveTrain(field, log);
   private final Grabber grabber = new Grabber("Grabber", log);
   private final Manipulator manipulator = new Manipulator(log);
-  private final Elevator elevator = new Elevator(log);
+  private final Wrist wrist = new Wrist(log);
+  private final Elevator elevator = new Elevator(wrist, log);
   private final LED led = new LED();
 
   // Define other utilities
@@ -136,6 +139,22 @@ public class RobotContainer {
     SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
     SmartDashboard.putData("Grabber Pick Up",new GrabberPickUp(grabber, log));
     SmartDashboard.putData("Grabber Eject", new GrabberEject(grabber, log));
+
+    //Elevator Commands
+    SmartDashboard.putData("Elevator Cal Encoder", new ElevatorCalibrateEncoderIfAtLowerLimit(elevator, log));
+    SmartDashboard.putData("Elevator Calibration", new ElevatorCalibration(0.05, elevator, log));
+    SmartDashboard.putData("Elevator Set Percent", new ElevatorSetPercentOutput(elevator, log));
+    SmartDashboard.putData("Elevator Set Position", new ElevatorSetPosition(elevator, log));
+    SmartDashboard.putData("Elevator Move To Bottom", new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
+    
+    //Wrist Commands
+    SmartDashboard.putData("Wrist Eject", new WristSetPercentOutput(0.5, wrist, log));
+    SmartDashboard.putData("Wrist Stowed Position", new WristMoveToPosition(WristConstants.stowed, wrist, log));
+    SmartDashboard.putData("Wrist Straight Position", new WristMoveToPosition(WristConstants.straight, wrist, log));
+    SmartDashboard.putData("Wrist Scoring Position", new WristMoveToPosition(WristConstants.scoreCargo, wrist, log));//Need to find correct value
+    SmartDashboard.putData("Wrist Vision Position", new WristMoveToPosition(WristConstants.vision, wrist, log));//Need to find correct value
+    SmartDashboard.putData("Wrist 90 Degrees", new WristSetAngle(90.0, wrist, log));
+    SmartDashboard.putData("Wrist -30 Degrees", new WristSetAngle(-30.0, wrist, log));
 
     //LED commands
     SmartDashboard.putData("LED Rainbow", new LEDSetPattern(LED.rainbowLibrary, 0, 0.5, led, log));
