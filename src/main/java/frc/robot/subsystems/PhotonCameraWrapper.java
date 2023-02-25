@@ -25,12 +25,14 @@
  package frc.robot.subsystems;
 
  import edu.wpi.first.apriltag.AprilTagFieldLayout;
- import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Pose2d;
  import frc.robot.Constants.VisionConstants;
  import frc.robot.utilities.Field;
  import frc.robot.utilities.FileLog;
- 
- import java.util.Optional;
+
+import java.io.IOException;
+import java.util.Optional;
  import org.photonvision.EstimatedRobotPose;
  import org.photonvision.PhotonCamera;
  import org.photonvision.PhotonPoseEstimator;
@@ -56,20 +58,22 @@
        photonCamera = new PhotonCamera(VisionConstants.cameraName);
      }
  
-     aprilTagFieldLayout = field.getAprilTagFieldLayout();
-     log.writeLogEcho(true, "PhotonCameraWrapper", "Init", "Loaded april tags from field");
-     log.writeLogEcho(true, "PhotonCameraWrapper", "Init", 
-       "AT8 x",aprilTagFieldLayout.getTagPose(8).get().getX(),
-       "AT8 y",aprilTagFieldLayout.getTagPose(8).get().getY(),
-       "AT8 rot",aprilTagFieldLayout.getTagPose(8).get().getRotation());
+
+    //  aprilTagFieldLayout = field.getAprilTagFieldLayout();
  
-     // try {
-     //   aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
-     //   log.writeLogEcho(true, "PhotonCameraWrapper", "Init", "Loaded april tags from file");
-     // } catch (IOException e) {
-     //   log.writeLogEcho(true, "PhotonCameraWrapper", "Init", "Error loading april tags from file");
-     //   e.printStackTrace();
-     // }
+    try {
+      aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
+      log.writeLogEcho(true, "PhotonCameraWrapper", "Init", "Loaded april tags from file");
+    } catch (IOException e) {
+      log.writeLogEcho(true, "PhotonCameraWrapper", "Init", "Error loading april tags from file");
+      e.printStackTrace();
+    }
+
+    log.writeLogEcho(true, "PhotonCameraWrapper", "Init", "Loaded april tags from field");
+    log.writeLogEcho(true, "PhotonCameraWrapper", "Init", 
+      "AT8 x",aprilTagFieldLayout.getTagPose(8).get().getX(),
+      "AT8 y",aprilTagFieldLayout.getTagPose(8).get().getY(),
+      "AT8 rot",aprilTagFieldLayout.getTagPose(8).get().getRotation());
  
      // Create pose estimator
      photonPoseEstimator = new PhotonPoseEstimator(
