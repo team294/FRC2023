@@ -322,7 +322,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 		}
 
 		// Autocalibrate if the encoder is OK and the elevator is at the lower limit switch
-		if (!elevCalibrated || Math.abs(getElevatorEncTicks()) > 600) {		// TODO recalibrate the auto-cal value?  (> 600???)
+		if (!elevCalibrated || Math.abs(getElevatorEncTicks()) > 5000) {		// TODO recalibrate the auto-cal value?  (> 600???)
 			checkAndZeroElevatorEnc();
 		}
 	}

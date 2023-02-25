@@ -58,8 +58,8 @@ public class ElevatorSetPosition extends CommandBase {
     this.elevator = elevator;
     this.log = log;
     fromShuffleboard = true;
-    if(SmartDashboard.getNumber("Elevator Set Position", -9999) == -9999) {
-      SmartDashboard.putNumber("Elevator Set Position", 0);
+    if(SmartDashboard.getNumber("Elevator Position", -9999) == -9999) {
+      SmartDashboard.putNumber("Elevator Position", 0);
     }
     addRequirements(elevator);
   }
@@ -68,7 +68,7 @@ public class ElevatorSetPosition extends CommandBase {
   @Override
   public void initialize() {
     if(fromShuffleboard){
-      target = SmartDashboard.getNumber("Elevator Set Position", 0);
+      target = SmartDashboard.getNumber("Elevator Position", 0);
     }
     elevator.setProfileTarget(target);
     log.writeLog(false, "ElevatorMoveToLevel", "Target Position", target);

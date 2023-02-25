@@ -39,8 +39,8 @@ public class ElevatorSetPercentOutput extends CommandBase {
     fromShuffleboard = true;
     addRequirements(elevator);
 
-    if(SmartDashboard.getNumber("Elevator Set Percent", -9999) == -9999) {
-      SmartDashboard.putNumber("Elevator Set Percent", 0);
+    if(SmartDashboard.getNumber("Elevator Percent", -9999) == -9999) {
+      SmartDashboard.putNumber("Elevator Percent", 0);
     }
   }
 
@@ -48,7 +48,7 @@ public class ElevatorSetPercentOutput extends CommandBase {
   @Override
   public void initialize() {
     if(fromShuffleboard){
-      percentOutput = SmartDashboard.getNumber("Elevator Set Percent", 0);
+      percentOutput = SmartDashboard.getNumber("Elevator Percent", 0);
     }
     elevator.setElevatorMotorPercentOutput(percentOutput);
     log.writeLog(false, "ElevatorSetPercentOutput", "Percent", percentOutput);
