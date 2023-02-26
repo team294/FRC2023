@@ -63,7 +63,7 @@ public final class Constants {
         public static final int CANWristMotor = 23;         //TODO CHANGE NUMBER TO REAL PORT 
 
         public static final int CANGrabber = 44;
-        public static final int CANManipulator = 45; //TODO CHANGE NUMBER TO REAL PORT 
+        public static final int CANManipulator = 43; //TODO CHANGE NUMBER TO REAL PORT 
 
         // Digital IO ports
         public static final int DIOManipulatorCubeSensor = 1; //TODO PLACE HOLDER SET TO CORRET PORT

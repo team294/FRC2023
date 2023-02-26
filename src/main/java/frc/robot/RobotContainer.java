@@ -369,8 +369,8 @@ public class RobotContainer {
       RobotPreferences.recordStickyFaults("RobotPreferences", log);
     }
 
-    compressor.disable();
-    // compressor.enableDigital();
+    // compressor.disable();
+    compressor.enableDigital();
 
     // Set initial robot position on field
     // This takes place a while after the drivetrain is created, so after any CanBus delays.
