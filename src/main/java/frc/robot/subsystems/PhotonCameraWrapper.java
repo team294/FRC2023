@@ -87,7 +87,6 @@ public void updateAlliance() {
         break;
     }
     log.writeLog(true, "PhotonCameraWrapper", "UpdateAlliance", "Alliance changed", currAlliance);
-    aprilTagFieldLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
   }
 }
 
