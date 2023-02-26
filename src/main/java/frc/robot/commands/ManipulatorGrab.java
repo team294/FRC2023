@@ -7,7 +7,7 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.FileLog;
-public class ManipulatorGet extends CommandBase {
+public class ManipulatorGrab extends CommandBase {
 
     public enum BehaviorType{
       immediatelyEnd,
@@ -21,11 +21,8 @@ public class ManipulatorGet extends CommandBase {
     private final FileLog log;
 
     private double motorPercent = 0.0;
-    private double ampSensitivity = 0.0;
-    //false is cube, true is cone
-    //private Boolean grabType = null;
-    private boolean coneGrab;
-    private boolean cubeGrab;
+    // private double ampSensitivity = 0.0;
+   
     private BehaviorType behaviorType;
 
     
@@ -42,12 +39,12 @@ public class ManipulatorGet extends CommandBase {
    * @param BehaviorType [BehaviorType] enum that defines behavior of manipulator (0-4)
    * @param ampSensitivity [Double] minimum value sensitivity must change by to detect that manipulator has picked up object
    */
-  public ManipulatorGet(double motorPercent, double ampSensitivity, BehaviorType behaviorType,  Manipulator manipulator, FileLog log) {
+  public ManipulatorGrab(double motorPercent, BehaviorType behaviorType,  Manipulator manipulator, FileLog log) {
     this.manipulator = manipulator;
     this.log = log;
     this.motorPercent = motorPercent;
     this.behaviorType = behaviorType;
-    this.ampSensitivity = ampSensitivity;
+    // this.ampSensitivity = ampSensitivity;
 
     addRequirements(manipulator);
   }
@@ -60,9 +57,6 @@ public class ManipulatorGet extends CommandBase {
 
    @Override
   public void initialize() {
-    //grabType = null;
-    cubeGrab = false;
-    coneGrab = false;
     manipulator.setMotorPercentOutput(motorPercent);
 
     if(behaviorType == BehaviorType.waitForCone){
@@ -82,27 +76,7 @@ public class ManipulatorGet extends CommandBase {
   //checks for amp spike greater than ampSensitivity parameter, toggles coneGrab and cubeGrab booleans depending on the configuration of the manipulator
   @Override
   public void execute(){
-    //using amps
-    if(manipulator.getAmps() > ampSensitivity){
-
-        if(manipulator.getPistonCone()){
-          //grabType = true;
-          coneGrab = true;
-        } else {
-          //grabType = false;
-          cubeGrab = true;
-        }
-    }
-    //using sensor
-    if(manipulator.isConePresent()){
-      coneGrab = true;
-    } else if(manipulator.isCubePresent()){
-      cubeGrab = true;
-    }
-    
     log.writeLog(false, "ManipulatorGet", "Amps", manipulator.getAmps(), "Motor Percent Output", motorPercent);
-    
-
   }
 
   /*end condition behaviors for finished command
@@ -116,27 +90,28 @@ public class ManipulatorGet extends CommandBase {
   @Override
   public boolean isFinished(){
     //boolean notNull = grabType != null;
-
+    //using amps
+    // boolean hasObject = manipulator.getAmps() > ampSensitivity;
+    //using sensor
     switch (behaviorType) {
       case immediatelyEnd:
         return true;  
       case runForever:
         return false;
       case waitForCone:
-        if(coneGrab)
-          manipulator.stopMotor();
-        return (coneGrab);
+        // return hasObject;
+        return manipulator.isConePresent();
       case waitForCube:
-        if(cubeGrab)
-          manipulator.stopMotor();
-        return (cubeGrab);
+        // return hasObject;
+        return (manipulator.isCubePresent());
       case waitForConeOrCube:
-        if(cubeGrab || coneGrab)
-          manipulator.stopMotor();
-        return cubeGrab || coneGrab;
+        // return hasObject;
+        if(manipulator.getPistonCone()){
+          return manipulator.isConePresent();
+        }
+        return manipulator.isCubePresent();
   
       default:
-        manipulator.stopMotor();;
         return true;
     }
   }

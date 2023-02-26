@@ -8,21 +8,16 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Manipulator;
 import frc.robot.utilities.FileLog;
 
-public class ManipulatorSetSpeed extends CommandBase {
+public class ManipulatorSetPercent extends CommandBase {
   /** Creates a new ManipulatorStopMotor. */
-  private final double speed;
+  private final double percent;
   private final Manipulator manipulator;
   private final FileLog log;
-  public enum ManipulatorEnd {
-    runForever, stopOnSensor
-  }
-  private final ManipulatorEnd type;
 
-  public ManipulatorSetSpeed(double speed, ManipulatorEnd type, Manipulator manipulator, FileLog log) {
-    this.speed = speed;
+  public ManipulatorSetPercent(double percent, Manipulator manipulator, FileLog log) {
+    this.percent = percent;
     this.manipulator = manipulator;
     this.log = log;
-    this.type = type;
     addRequirements(manipulator);
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -30,7 +25,7 @@ public class ManipulatorSetSpeed extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    manipulator.setMotorPercentOutput(speed);
+    manipulator.setMotorPercentOutput(percent);
     log.writeLog(false, "ManipulatorEject", "Initialize");
   }
 
@@ -48,16 +43,6 @@ public class ManipulatorSetSpeed extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if(type == ManipulatorEnd.stopOnSensor){
-      if(manipulator.getPistonCone()){
-        if(manipulator.isConePresent()){
-          return true;
-        }else return false;
-      }else{
-        if(manipulator.isCubePresent()){
-          return true;
-        }else return false;
-      }
-    }else return false;
+    return false;
   }
 }

@@ -6,8 +6,8 @@ package frc.robot.subsystems;
 
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -44,10 +44,9 @@ public class Manipulator extends SubsystemBase implements Loggable {
     
     logRotationKey = log.allocateLogRotation();
 
-    // motor.restoreFactoryDefaults();
-    // motor.setIdleMode(IdleMode.kCoast);
-    // motor.setInverted(false);       // TODO determine if needs to be inverted
-    // motor.enableVoltageCompensation(12);
+    motor.setNeutralMode(NeutralMode.Coast);
+    motor.setInverted(false);      
+    motor.enableVoltageCompensation(true);
     // motor.setOpenLoopRampRate(0.05);    //seconds from neutral to full
     // motor.setClosedLoopRampRate(0.05);  //seconds from neutral to full
   }
@@ -143,7 +142,7 @@ public class Manipulator extends SubsystemBase implements Loggable {
     if(fastLogging || log.isMyLogRotation(logRotationKey)) {
       updateManipulatorLog(false);
       // Update data on SmartDashboard
-      SmartDashboard.putNumber("Manipulator Amps", motor.getOutputCurrent());
+      SmartDashboard.putNumber("Manipulator Amps", motor.getStatorCurrent());
       SmartDashboard.putNumber("Manipulator Bus Volt", motor.getBusVoltage());
       SmartDashboard.putNumber("Manipulator Out Percent", motor.getMotorOutputPercent());
       SmartDashboard.putNumber("Manipulator Temperature", motor.getTemperature());
@@ -151,6 +150,7 @@ public class Manipulator extends SubsystemBase implements Loggable {
       SmartDashboard.putBoolean("Cone Sensor", isConePresent());
       SmartDashboard.putBoolean("Cube Sensor", isCubePresent());
     }
+    pistonCone = pneumaticDoubleSolenoid.get() == Value.kForward;
   }
 
   /**

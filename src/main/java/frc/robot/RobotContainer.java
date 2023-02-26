@@ -29,7 +29,7 @@ import frc.robot.Constants.StopType;
 import frc.robot.Constants.WristConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.commands.*;
-import frc.robot.commands.ManipulatorSetSpeed.ManipulatorEnd;
+import frc.robot.commands.ManipulatorGrab.BehaviorType;
 import frc.robot.commands.autos.*;
 import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
@@ -167,8 +167,9 @@ public class RobotContainer {
 
     //Manipulator Commands
     SmartDashboard.putData("Manipulator Stop", new ManipulatorStopMotor(manipulator, log));
-    SmartDashboard.putData("Manipulator Pick Up",new ManipulatorSetSpeed(0.8, ManipulatorEnd.stopOnSensor, manipulator, log));
-    SmartDashboard.putData("Manipulator Eject", new ManipulatorSetSpeed(-0.5, ManipulatorEnd.runForever, manipulator, log));
+    SmartDashboard.putData("Manipulator Pick Up",new ManipulatorGrab(0.8, BehaviorType.waitForConeOrCube, manipulator, log));
+    SmartDashboard.putData("Manipulator Eject",new ManipulatorSetPercent(-0.5, manipulator, log));
+    SmartDashboard.putData("Manipulator Set Percent", new ManipulatorSetPercent(-0.5, manipulator, log));
     SmartDashboard.putData("Manipulator Cone", new ManipulatorSetPistonPosition(true, led, manipulator, log));
     SmartDashboard.putData("Manipulator Cube", new ManipulatorSetPistonPosition(false, led, manipulator, log));
     SmartDashboard.putData("Manipulator Toggle", new ManipulatorTogglePiston(manipulator, led, log));
