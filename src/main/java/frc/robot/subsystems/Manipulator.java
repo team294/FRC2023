@@ -5,9 +5,8 @@
 package frc.robot.subsystems;
 
 
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMax.IdleMode;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
@@ -26,7 +25,7 @@ public class Manipulator extends SubsystemBase implements Loggable {
 
   private String subsystemName = "Manipulator";
 
-  private final CANSparkMax motor;
+  private final TalonSRX motor;
   private final DoubleSolenoid pneumaticDoubleSolenoid;
 
   private boolean pistonCone = true;     // manipulator piston position (true = cone, false = cube) // TODO set default state
@@ -36,18 +35,18 @@ public class Manipulator extends SubsystemBase implements Loggable {
    * @param log object for logging
    */
   public Manipulator(FileLog log) {
-    motor = new CANSparkMax(Ports.CANManipulator, MotorType.kBrushless);
+    motor = new TalonSRX(Ports.CANManipulator);
     pneumaticDoubleSolenoid = new DoubleSolenoid(Ports.CANPneumaticHub, PneumaticsModuleType.REVPH, Ports.SolManipulatorFwd, Ports.SolManipulatorRev);
     this.log = log;
     
     logRotationKey = log.allocateLogRotation();
 
-    motor.restoreFactoryDefaults();
-    motor.setIdleMode(IdleMode.kCoast);
-    motor.setInverted(false);       // TODO determine if needs to be inverted
-    motor.enableVoltageCompensation(12);
-    motor.setOpenLoopRampRate(0.05);    //seconds from neutral to full
-    motor.setClosedLoopRampRate(0.05);  //seconds from neutral to full
+    // motor.restoreFactoryDefaults();
+    // motor.setIdleMode(IdleMode.kCoast);
+    // motor.setInverted(false);       // TODO determine if needs to be inverted
+    // motor.enableVoltageCompensation(12);
+    // motor.setOpenLoopRampRate(0.05);    //seconds from neutral to full
+    // motor.setClosedLoopRampRate(0.05);  //seconds from neutral to full
   }
 
   /**
@@ -62,21 +61,21 @@ public class Manipulator extends SubsystemBase implements Loggable {
    * @param percent
    */
   public void setMotorPercentOutput(double percent){
-    motor.set(percent);
+    motor.set(ControlMode.PercentOutput, percent);
   }
 
   /**
    * Stops the motor
    */
   public void stopMotor(){
-    motor.stopMotor();
+    motor.set(ControlMode.PercentOutput, 0);
   }
 
   /**
    * @return stator current of the motor in amps
    */
   public double getAmps(){
-    return motor.getOutputCurrent();
+    return motor.getStatorCurrent();
   }
 
   /**
@@ -126,8 +125,8 @@ public class Manipulator extends SubsystemBase implements Loggable {
       // Update data on SmartDashboard
       SmartDashboard.putNumber("Manipulator Amps", motor.getOutputCurrent());
       SmartDashboard.putNumber("Manipulator Bus Volt", motor.getBusVoltage());
-      SmartDashboard.putNumber("Manipulator Out Percent", motor.get());
-      SmartDashboard.putNumber("Manipulator Temperature", motor.getMotorTemperature());
+      SmartDashboard.putNumber("Manipulator Out Percent", motor.getMotorOutputPercent());
+      SmartDashboard.putNumber("Manipulator Temperature", motor.getTemperature());
       SmartDashboard.putBoolean("Manipulator Cone", pistonCone);
     }
   }
@@ -139,9 +138,9 @@ public class Manipulator extends SubsystemBase implements Loggable {
   public void updateManipulatorLog(boolean logWhenDisabled){
     log.writeLog(logWhenDisabled, subsystemName, "Update Variables",
     "Bus Volt", motor.getBusVoltage(),
-    "Out Percent", motor.get(),
-    "Amps", motor.getOutputCurrent(),
-    "Temperature", motor.getMotorTemperature(),
+    "Out Percent", motor.getMotorOutputPercent(),
+    "Amps", motor.getStatorCurrent(),
+    "Temperature", motor.getTemperature(),
     "Piston cone", getPistonCone()
     );
   }
