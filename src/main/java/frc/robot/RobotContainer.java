@@ -166,10 +166,10 @@ public class RobotContainer {
 
     //Manipulator Commands
     SmartDashboard.putData("Manipulator Stop", new ManipulatorStopMotor(manipulator, log));
-    SmartDashboard.putData("Manipulator Pick Up",new ManipulatorSetSpeed(0.5, manipulator, log));
+    SmartDashboard.putData("Manipulator Pick Up",new ManipulatorSetSpeed(0.8, manipulator, log));
     SmartDashboard.putData("Manipulator Eject", new ManipulatorSetSpeed(-0.5, manipulator, log));
-    SmartDashboard.putData("Manipulator Cone", new ManipulatorSetPistonPosition(true, manipulator, log));
-    SmartDashboard.putData("Manipulator Cube", new ManipulatorSetPistonPosition(false, manipulator, log));
+    SmartDashboard.putData("Manipulator Cone", new ManipulatorSetPistonPosition(true, led, manipulator, log));
+    SmartDashboard.putData("Manipulator Cube", new ManipulatorSetPistonPosition(false, led, manipulator, log));
     SmartDashboard.putData("Manipulator Toggle", new ManipulatorTogglePiston(manipulator, led, log));
   }
 

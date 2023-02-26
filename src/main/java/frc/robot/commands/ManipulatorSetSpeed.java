@@ -13,12 +13,16 @@ public class ManipulatorSetSpeed extends CommandBase {
   private final double speed;
   private final Manipulator manipulator;
   private final FileLog log;
+  public enum ManipulatorEnd {
+    runForever, stopOnSensor
+  }
+  private final ManipulatorEnd type;
 
-  public ManipulatorSetSpeed(double speed, Manipulator manipulator, FileLog log) {
+  public ManipulatorSetSpeed(double speed, ManipulatorEnd type, Manipulator manipulator, FileLog log) {
     this.speed = speed;
     this.manipulator = manipulator;
     this.log = log;
-
+    this.type = type;
     addRequirements(manipulator);
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -32,7 +36,8 @@ public class ManipulatorSetSpeed extends CommandBase {
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {}
+  public void execute() {
+  }
 
   // Called once the command ends or is interrupted.
   @Override
@@ -43,6 +48,16 @@ public class ManipulatorSetSpeed extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return true;
+    if(type == ManipulatorEnd.stopOnSensor){
+      if(manipulator.getPistonCone()){
+        if(manipulator.isConePresent()){
+          return true;
+        }else return false;
+      }else{
+        if(manipulator.isCubePresent()){
+          return true;
+        }else return false;
+      }
+    }else return false;
   }
 }

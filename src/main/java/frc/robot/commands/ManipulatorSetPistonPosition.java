@@ -16,16 +16,17 @@ public class ManipulatorSetPistonPosition extends CommandBase {
   private final Manipulator manipulator;
   private final FileLog log;
 
-  private final LED led = new LED();
+  private final LED led;
   /**
    * Sets piston position to handle either cone or cube
    * @param cone true = cone, false = cube
    * @param manipulator manipulator subsystem
    * @param log filelog
    */
-  public ManipulatorSetPistonPosition(boolean cone, Manipulator manipulator, FileLog log) {
+  public ManipulatorSetPistonPosition(boolean cone, LED led, Manipulator manipulator, FileLog log) {
     this.cone = cone;
     this.manipulator = manipulator;
+    this.led = led;
     this.log = log;
 
     addRequirements(manipulator);
