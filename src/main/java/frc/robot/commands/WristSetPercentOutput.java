@@ -32,8 +32,8 @@ public class WristSetPercentOutput extends CommandBase {
     this.log = log;
     fromShuffleboard = true;
 
-    if(SmartDashboard.getNumber("Wrist Output", -9999) == -9999) {
-      SmartDashboard.putNumber("Wrist Output", 0);
+    if(SmartDashboard.getNumber("Wrist Output to set", -9999) == -9999) {
+      SmartDashboard.putNumber("Wrist Output to set", 0);
     }
     addRequirements(wrist);
   }
@@ -42,7 +42,7 @@ public class WristSetPercentOutput extends CommandBase {
   @Override
   public void initialize() {
     if(fromShuffleboard){
-      percent = SmartDashboard.getNumber("Wrist Output", 0);
+      percent = SmartDashboard.getNumber("Wrist Output to set", 0);
     }
     wrist.setWristMotorPercentOutput(percent);
     log.writeLog(false, "WristSetPercentOutput", "Initialize");

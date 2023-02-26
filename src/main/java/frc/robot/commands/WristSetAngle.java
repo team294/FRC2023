@@ -9,8 +9,6 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Robot;
-import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Wrist;
 import frc.robot.utilities.FileLog;
 
@@ -43,8 +41,8 @@ public class WristSetAngle extends CommandBase {
     this.log = log;
     fromShuffleboard = true;
 
-    if(SmartDashboard.getNumber("Wrist Angle", -9999) == -9999) {
-      SmartDashboard.putNumber("Wrist Angle", 0);
+    if(SmartDashboard.getNumber("Wrist Angle to set", -9999) == -9999) {
+      SmartDashboard.putNumber("Wrist Angle to set", 0);
     }
     addRequirements(wrist);
   }
@@ -53,7 +51,7 @@ public class WristSetAngle extends CommandBase {
   @Override
   public void initialize() {
     if(fromShuffleboard){
-      target = SmartDashboard.getNumber("Wrist Angle", 0);
+      target = SmartDashboard.getNumber("Wrist Angle to set", 0);
     }
     wrist.setWristAngle(target + wrist.getCurrentWristTarget());
     log.writeLog(false, "WristSetAngle", "Initialize", "Target", target + wrist.getCurrentWristTarget());

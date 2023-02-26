@@ -72,8 +72,8 @@ public class Wrist extends SubsystemBase implements Loggable{
     // Rev Through-Bore Encoder settings
     // Wait for through-bore encoder to connect, up to 0.25 sec
     long t = System.currentTimeMillis() + 250;
-    while (System.currentTimeMillis() < t && !revEncoder.isConnected());    
-    if (revEncoder.isConnected()) {
+    while (System.currentTimeMillis() < t && !isRevEncoderConnected());    
+    if (isRevEncoderConnected()) {
       // Copy calibration to wrist encoder
       // if it works:
       wristCalibrated = true;
@@ -83,8 +83,8 @@ public class Wrist extends SubsystemBase implements Loggable{
     }
 
     // TODO Fix calibrations
-    
-    calibrateEncoderDegrees(WristConstants.offsetAngleWrist);
+
+    calibrateRevEncoderDegrees(WristConstants.offsetAngleWrist);
     // relativeEncoder = wristMotor.getEncoder();
 
     // Wait 0.25 seconds before adjusting the wrist calibration.  The reason is that .setInverted (above)
@@ -347,34 +347,42 @@ public class Wrist extends SubsystemBase implements Loggable{
 		return wristCalibrated;
   }
 
- 	// ************ REV through-bore encoder methods
-
-  /**
-   * Calibrates the through bore encoder, so that 0 should be with the wheel pointing toward the front of robot.
-   * @param offsetDegrees Desired encoder zero point, in absolute magnet position reading
-   */
-  public void calibrateEncoderDegrees(double offsetDegrees) {
-    // System.out.println(swName + " " + turningOffsetDegrees);
-    // turningCanCoder.configMagnetOffset(offsetDegrees, 100);
-    revEncoderZero = -offsetDegrees;
-    log.writeLogEcho(true, subsystemName, "calibrateThroughBoreEncoder", "encoderZero", revEncoderZero, "raw encoder", revEncoder.get(), "encoder degrees", getEncoderDegrees());
-  }
-
-  /**
-   * @return turning through bore encoder wrist facing, in degrees [-180,+180).
-   * When calibrated, 0 should be with the wrist pointing down?
-   * + = up, - = down?
-   */
-  public double getEncoderDegrees() {
-    return MathBCR.normalizeAngle(revEncoder.get() - revEncoderZero);
-  }
-
   /**
 	 * Set the wrist encoder position to zero in software.
 	 */
   public void zeroWristEncoder() {
     wristEncoderZero = wristMotor.getSelectedSensorPosition();
     log.writeLogEcho(true, subsystemName, "ZeroDriveEncoder", "wristEncoderZero", wristEncoderZero, "raw encoder", getWristEncoderDegreesRaw(), "encoder degrees", getWristAngle());
+  }
+
+ 	// ************ REV through-bore encoder methods
+
+  /**
+   * Calibrates the REV through bore encoder, so that 0 should be with the CG of the wrist horizontal 
+   * facing away from the robot, and -90 deg is with the CG of the wrist resting downward.
+   * @param offsetDegrees Desired encoder zero angle, in absolute magnet position reading
+   */
+  public void calibrateRevEncoderDegrees(double offsetDegrees) {
+    revEncoderZero = -offsetDegrees;
+    log.writeLogEcho(true, subsystemName, "calibrateThroughBoreEncoder", "encoderZero", revEncoderZero, 
+        "raw encoder", revEncoder.get()*360.0, "encoder degrees", getRevEncoderDegrees());
+  }
+
+  /**
+   * Returns status of the Rev through bore encoder
+   * @return true = encoder is connected, false = encoder not connected
+   */
+  public boolean isRevEncoderConnected() {
+    return revEncoder.isConnected();
+  }
+
+  /**
+   * @return Wrist orientation measured by the REV through bore encoder wrist facing, in degrees [-180,+180).
+   * When calibrated, 0 should be with the CG of the wrist horizontal 
+   * facing away from the robot, and -90 deg is with the CG of the wrist resting downward.
+   */
+  public double getRevEncoderDegrees() {
+    return MathBCR.normalizeAngle(revEncoder.get()*360.0 - revEncoderZero);
   }
 
  	// ************ Periodic and information methods
@@ -389,7 +397,8 @@ public class Wrist extends SubsystemBase implements Loggable{
       "Amps", wristMotor.getStatorCurrent(),
       "WristCalZero", wristCalZero, "Enc Raw", getWristEncoderTicksRaw(), 
       "Wrist Degrees", getWristEncoderDegrees(),
-      "Wrist Angle", getWristAngle(), "Wrist Target", getCurrentWristTarget()
+      "Wrist Angle", getWristAngle(), "Wrist Target", getCurrentWristTarget(),
+      "Rev Connected", isRevEncoderConnected(), "Rev Degrees", getRevEncoderDegrees()
     );
   }
 
@@ -406,8 +415,10 @@ public class Wrist extends SubsystemBase implements Loggable{
   public void periodic() {
 
     if (fastLogging || log.isMyLogRotation(logRotationKey)) {
+      SmartDashboard.putBoolean("Wrist Rev connected", isRevEncoderConnected());
       SmartDashboard.putBoolean("Wrist calibrated", wristCalibrated);
-      SmartDashboard.putNumber("Wrist Angle", getWristAngle());
+      SmartDashboard.putNumber("Wrist Rev angle", getRevEncoderDegrees());
+      SmartDashboard.putNumber("Wrist angle", getWristAngle());
       SmartDashboard.putNumber("Wrist enc raw", getWristEncoderTicksRaw());
       SmartDashboard.putNumber("Wrist target angle", getCurrentWristTarget());
       SmartDashboard.putNumber("Wrist voltage", wristMotor.getBusVoltage());

@@ -120,7 +120,12 @@ public final class CTREConfigs {
         wristFXConfig.slot0.integralZone = 0.0/WristConstants.kWristDegreesPerTick;      // Need to convert I-zone from degrees to encoder ticks
         // Max Iaccumulator value, in encoderTicks*milliseconds.  Max I power = kI * kIAccumMax.
         wristFXConfig.slot0.maxIntegralAccumulator = 100.0 / wristFXConfig.slot0.kI;
+
         wristFXConfig.initializationStrategy = SensorInitializationStrategy.BootToZero;
+        // wristFXConfig.forwardSoftLimitThreshold = 0.0;           //  Set in constructor instead, after calibrating encoder
+        // wristFXConfig.forwardSoftLimitEnable = true;         
+        // wristFXConfig.reverseSoftLimitThreshold = 0.0;
+        // wristFXConfig.reverseSoftLimitEnable = true;
 
         // Supply current limit is typically used to prevent breakers from tripping.
         // wristFXConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration(

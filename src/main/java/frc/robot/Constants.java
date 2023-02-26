@@ -182,7 +182,7 @@ public final class Constants {
 
       public static final class WristConstants {
         public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
-        public static final double kWristGearRatio = (12.0 / 1.0);       // TODO.  Gear reduction ratio between Falcon and gear driving the wrist (planetary and chain gears)
+        public static final double kWristGearRatio = (50.0 / 1.0);       // TODO.  From CAD, should be 50:1.  Gear reduction ratio between Falcon and gear driving the wrist (planetary and chain gears)
         public static final double kWristDegreesPerTick =  360.0 / kEncoderCPR / kWristGearRatio;
 
         public static final double maxUncalibratedPercentOutput = 0.10;     // TODO CALIBRATE
