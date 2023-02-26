@@ -277,6 +277,10 @@ public class Field {
         }
     }
 
+    /**
+     * gets the game's AprilTagFieldLayout for vision
+     * @return AprilTagFieldLayout for vision
+     */
     public AprilTagFieldLayout getAprilTagFieldLayout() {
         List<AprilTag> atList;
         
@@ -289,6 +293,14 @@ public class Field {
         }
 
         return new AprilTagFieldLayout(atList, FieldConstants.length, FieldConstants.width);
+    }
+
+    /**
+     * gets alliance
+     * @return Alliance current selected alliance color
+     */
+    public Alliance getAlliance() {
+        return alliance.getAlliance();
     }
 
     /**
