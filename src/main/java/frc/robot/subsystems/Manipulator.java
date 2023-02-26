@@ -65,7 +65,7 @@ public class Manipulator extends SubsystemBase implements Loggable {
    */
   //Check whether false represents the cone being in manipulator
   public boolean isConePresent(){
-    return coneSensor.get();
+    return !coneSensor.get();
   }
 
   /**
@@ -73,7 +73,7 @@ public class Manipulator extends SubsystemBase implements Loggable {
    * @return true if cube is in manipulator 
    */
   public boolean isCubePresent(){
-    return cubeSensor.get();
+    return !cubeSensor.get();
   }
 
   /**
