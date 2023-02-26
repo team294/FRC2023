@@ -185,9 +185,11 @@ public final class Constants {
         public static final double kWristGearRatio = (12.0 / 1.0);       // TODO.  Gear reduction ratio between Falcon and gear driving the wrist (planetary and chain gears)
         public static final double kWristDegreesPerTick =  360.0 / kEncoderCPR / kWristGearRatio;
 
-        public static final double maxUncalibratedPercentOutput = 0.10;     // TODO
+        public static final double maxUncalibratedPercentOutput = 0.10;     // TODO CALIBRATE
 
         public static double offsetAngleWrist = 0;
+
+        public static final double kG = 0.075;   // TODO CALIBRATE.  Feed foward percent-out to add to hold arm horizontal (0 deg)
 
         // Wrist regions
         public enum WristRegion {
@@ -196,12 +198,14 @@ public final class Constants {
             uncalibrated    // Unknown region, wrist is not calibrated
         } 
         // Wrist region boundaries
-        public static final double mainLowestAngle = 2.0;      // Boundary between back and main regions.  TODO CALIBRATE
+        public static final double mainLowestAngle = -80.0;      // Boundary between back and main regions.  TODO CALIBRATE
 
-        // Wrist pre-defined angles (in degrees).  0 degrees = horizontal [state reference]
+        // Wrist pre-defined angles (in degrees)
+        // 0 degrees = horizontal (in front of robot) relative to wrist center of gravity
+        // -90 degrees = vertical = wrist is hanging "down" naturally due to gravity
         public enum WristAngle {
-            lowerLimit(-90.0),      // TODO CALIBRATE 
-            loadConveyor(-80.0),    // TODO Define positions and calibrate
+            lowerLimit(-95.0),      // TODO CALIBRATE 
+            loadConveyor(-90.0),    // TODO Define positions and calibrate
             startConfig(-70.0),
             elevatorMoving(-45.0),
             loadHumanStation(0.0),
