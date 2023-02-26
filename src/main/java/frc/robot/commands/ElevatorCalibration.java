@@ -53,7 +53,7 @@ public class ElevatorCalibration extends CommandBase {
 
     switch (state) {
       case 0:   // ramp upwards until 10 inches from top
-        if (elevator.getElevatorPos() < ElevatorConstants.ElevatorPosition.upperLimit.value - 10.0) {
+        if (elevator.getElevatorPos() < ElevatorConstants.ElevatorPosition.upperLimit.value - 2.0) {
           percentOutput = MathUtil.clamp(currTime*rampRate, -1.0, 1.0);
           elevator.setElevatorMotorPercentOutput(percentOutput);      
         } else {
@@ -72,7 +72,7 @@ public class ElevatorCalibration extends CommandBase {
         }
         break;
       case 2:   // ramp downwards until 10 inches from bottom
-        if (elevator.getElevatorPos() > ElevatorConstants.ElevatorPosition.lowerLimit.value + 10.0) {
+        if (elevator.getElevatorPos() > ElevatorConstants.ElevatorPosition.lowerLimit.value + 2.0) {
           percentOutput = MathUtil.clamp(-currTime*rampRate, -1.0, 1.0);
           elevator.setElevatorMotorPercentOutput(percentOutput);      
         } else {

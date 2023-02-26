@@ -928,16 +928,16 @@
                   "Colors/Color when false": "#8B0000FF"
                 },
                 {
-                  "_type": "Text View",
-                  "_source0": "network_table:///SmartDashboard/Elev Target",
-                  "_title": "Elev Target",
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Elevator Cal Encoder",
+                  "_title": "Elevator Cal Encoder",
                   "_glyph": 148,
                   "_showGlyph": false
                 },
                 {
-                  "_type": "Command",
-                  "_source0": "network_table:///SmartDashboard/Elevator Calibrate",
-                  "_title": "Elevator Calibrate",
+                  "_type": "Text View",
+                  "_source0": "network_table:///SmartDashboard/Elev Target",
+                  "_title": "Elev Target",
                   "_glyph": 148,
                   "_showGlyph": false
                 },
@@ -973,6 +973,13 @@
                   "_type": "Command",
                   "_source0": "network_table:///SmartDashboard/Elevator Move To Bottom",
                   "_title": "Elevator Move To Bottom",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Elevator Calibration",
+                  "_title": "Elevator Calibration",
                   "_glyph": 148,
                   "_showGlyph": false
                 }

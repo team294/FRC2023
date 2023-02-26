@@ -148,13 +148,12 @@ public class RobotContainer {
     SmartDashboard.putData("Elevator Move To Bottom", new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
     
     //Wrist Commands
-    SmartDashboard.putData("Wrist Eject", new WristSetPercentOutput(0.5, wrist, log));
     SmartDashboard.putData("Wrist Stowed Position", new WristMoveToPosition(WristConstants.stowed, wrist, log));
     SmartDashboard.putData("Wrist Straight Position", new WristMoveToPosition(WristConstants.straight, wrist, log));
     SmartDashboard.putData("Wrist Scoring Position", new WristMoveToPosition(WristConstants.scoreCargo, wrist, log));//Need to find correct value
     SmartDashboard.putData("Wrist Vision Position", new WristMoveToPosition(WristConstants.vision, wrist, log));//Need to find correct value
-    SmartDashboard.putData("Wrist 90 Degrees", new WristSetAngle(90.0, wrist, log));
-    SmartDashboard.putData("Wrist -30 Degrees", new WristSetAngle(-30.0, wrist, log));
+    SmartDashboard.putData("Wrist Set Angle", new WristSetAngle(wrist, log));
+    SmartDashboard.putData("Wrist Set Output", new WristSetPercentOutput(wrist, log));
 
     //LED commands
     SmartDashboard.putData("LED Rainbow", new LEDSetPattern(LED.rainbowLibrary, 0, 0.5, led, log));
@@ -394,6 +393,8 @@ public class RobotContainer {
     driveTrain.setDriveModeCoast(true);     // When pushing a disabled robot by hand, it is a lot easier to push in Coast mode!!!!
     driveTrain.stopMotors();                // SAFETY:  Turn off any closed loop control that may be running, so the robot does not move when re-enabled.
 
+    elevator.setMotorModeCoast(true);
+
     patternTeamMoving.schedule();
   }
 
@@ -422,6 +423,7 @@ public class RobotContainer {
     log.writeLogEcho(true, "Auto", "Mode Init");
 
     driveTrain.setDriveModeCoast(false);
+    elevator.setMotorModeCoast(false);
 
     if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
     if (allianceSelection.getAlliance() == Alliance.Blue) {
@@ -447,6 +449,7 @@ public class RobotContainer {
     log.writeLogEcho(true, "Teleop", "Mode Init");
 
     driveTrain.setDriveModeCoast(false);
+    elevator.setMotorModeCoast(false);
 
     if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
     led.setStrip(Color.kOrange, 0);

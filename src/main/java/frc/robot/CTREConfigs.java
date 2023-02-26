@@ -74,7 +74,7 @@ public final class CTREConfigs {
         elevatorFXConfig.neutralDeadband = 0.0;
         elevatorFXConfig.peakOutputForward = 1.0;       // up max output
         elevatorFXConfig.peakOutputReverse = -1.0;      // down max output
-        elevatorFXConfig.openloopRamp = 0.3;        // 2019 elevator used 0.3   // TODO calibrate
+        elevatorFXConfig.openloopRamp = 0.3;        // 2019 elevator used 0.3
         elevatorFXConfig.closedloopRamp = 0.3;      // Calibrate if using Talon PID (currently not being used)
 
         elevatorFXConfig.slot0.kP = 0.0;     // Calibrate if using Talon PID (currently not being used)

@@ -268,7 +268,7 @@ public class Wrist extends SubsystemBase implements Loggable{
    */
   public void calibrateWristEnc(double angle /*boolean saveToPrefs,*/) {
     setWristCalibration(getWristEncoderTicksRaw() - degreesToEncoderTicks(angle) /*saveToPrefs,*/);
-    setDefaultCommand(null);
+    // setDefaultCommand(null);  // TODO Why is this here?
   }  
   
 	/**
