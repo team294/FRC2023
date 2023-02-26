@@ -44,7 +44,7 @@ public class Wrist extends SubsystemBase implements Loggable{
   
   private final DutyCycleEncoder revEncoder = new DutyCycleEncoder(Ports.DIOWristRevThroughBoreEncoder);
 
-  private double encoderZero = 0;          // Reference raw encoder reading for encoder.  Calibration sets this to the absolute position from RobotPreferences.
+  private double revEncoderZero = 0;          // Reference raw encoder reading for encoder.  Calibration sets this to the absolute position from RobotPreferences.
   private double wristEncoderZero = 0;         //Reference raw encoder reading for drive FalconFX encoder.  Calibration sets this to zero.
   
   // Don't think we need these
@@ -52,29 +52,10 @@ public class Wrist extends SubsystemBase implements Loggable{
 	// private int negMoveCount = 0; // increments every cycle the wrist moves down
 	// private double currEnc = 0.0; // current recorded encoder value
 	// private double encSnapShot = 0.0; // snapshot of encoder value used to make sure encoder is working
-  
-  private double encoderDegreesPerTicks = 360.0 / WristConstants.encoderTicksPerRevolution;
-  private double encoderTicksPerDegrees = WristConstants.encoderTicksPerRevolution / 360.0;
 
   private boolean usingPosition = false;
-  // kP = (desired-output-1.0max)*1024 / (error-in-encoder-ticks)
-  // kP = 2.5 -> output of 0.139 when error is 5 degrees
-  private double kP = 2.5;  // was 1.0 with original wrist, 2.5 is better with new wrist
-  // kI = (desired-output-1.0max)*1024 / [(time-ms) * (error-in-encoder-ticks)]
-  // kI = 0.036 -> output of 0.2 when error is 5 degrees for 100ms
-	private double kI = 0.0;      // Try 0.036?
-  // kD = (desired-output-1.0max)*1024 * (time-ms) / (error-in-encoder-ticks)
-  // kD = 200 -> output of 0.2 when error is changing by 90 degrees per second
 
-  // TODO Calibrate
-	private double kD = 0.0;  // was 5.0
-  private double kFF = 0.0;   // FF gain is multiplied by sensor value (probably in encoder ticks) and divided by 1024
   private double kFFconst = 0.075;   // Add about 1V (0.075* 12V) feed foward constant
-  private double kIz = 10;    // Izone in degrees
-  private double kIAccumMax = 0.3/kI;     // Max Iaccumulator value, in encoderTicks*milliseconds.  Max I power = kI * kIAccumMax.
-  private double kMaxOutput = 0.6; // up max output
-  private double kMinOutput = -0.6; // down max output
-  private double rampRate = 0.3;
 
   public double wristCalZero;   		// Wrist encoder position at O degrees, in encoder ticks (i.e. the calibration factor)
   public boolean wristCalibrated = false;     // Default to wrist being uncalibrated.  Calibrate from robot preferences or "Calibrate Wrist Zero" button on dashboard
@@ -101,20 +82,9 @@ public class Wrist extends SubsystemBase implements Loggable{
     wristMotor.configForwardLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
     wristMotor.configReverseLimitSwitchSource(LimitSwitchSource.FeedbackConnector, LimitSwitchNormal.NormallyOpen);
     wristMotor.setNeutralMode(NeutralMode.Brake);
-    wristMotor.configVoltageCompSaturation(12.0);
     wristMotor.enableVoltageCompensation(true);
     wristMotor.clearStickyFaults();
-
-    wristMotor.config_kP(0, kP);
-		wristMotor.config_kI(0, kI);
-		wristMotor.config_kD(0, kD);
-		wristMotor.config_kF(0, kFF);
-    wristMotor.config_IntegralZone(0, (int)degreesToEncoderTicks(kIz));
-    wristMotor.configMaxIntegralAccumulator(0, kIAccumMax);
-		wristMotor.configClosedloopRamp(rampRate);
-		wristMotor.configPeakOutputForward(kMaxOutput);
-    wristMotor.configPeakOutputReverse(kMinOutput);
-    
+   
     wristLimits = wristMotor.getSensorCollection();
     // TODO  find wrist gear ratio
     // Configures the encoder to consider itself stopped after .1 seconds
@@ -125,7 +95,12 @@ public class Wrist extends SubsystemBase implements Loggable{
     // Wait for through-bore encoder to connect, up to 0.25 sec
     long t = System.currentTimeMillis() + 250;
     while (System.currentTimeMillis() < t && !revEncoder.isConnected());    
-    if (!revEncoder.isConnected()) {
+    if (revEncoder.isConnected()) {
+      // Copy calibration to wrist encoder
+      // if it works:
+      wristCalibrated = true;
+    } else {
+      wristCalibrated = false;
       RobotPreferences.recordStickyFaults("Wrist-ThroughBoreEncoder", log);
     }
 
@@ -180,7 +155,7 @@ public class Wrist extends SubsystemBase implements Loggable{
    * @param percentPower between -1.0 (down full speed) and 1.0 (up full speed)
    */
   public void setWristMotorPercentOutput(double percentOutput) {
-    percentOutput = MathUtil.clamp(percentOutput, kMinOutput, kMaxOutput);
+    percentOutput = MathUtil.clamp(percentOutput, -1.0, 1.0);
 
     if (log.isMyLogRotation(logRotationKey)) {
       log.writeLog(false, subsystemName , "Percent Output", "Percent Output", percentOutput);
@@ -283,8 +258,8 @@ public class Wrist extends SubsystemBase implements Loggable{
   
 	/**
 	 * If the angle is reading >/< max/min angle, add/subtract 360 degrees to the wristCalZero accordingly
-	 * Note: when the motor is not inverted, upon booting up, an absolute encoder reads a value between 0 and 4096
-	 * 		 when the motor is inverted, upon booting up, an absolute encoder reads a value between 0 and -4096
+	 * Note: when the motor is not inverted, upon booting up, an absolute encoder reads a value between 0 and 2048
+	 * 		 when the motor is inverted, upon booting up, an absolute encoder reads a value between 0 and -2048????  (that was true for mag-encoder.  is it true for Falcon internal encoder?)
 	 * Note: absolute encoder values don't wrap during operation
 	 */
 	public void adjustWristCalZero() {
@@ -292,11 +267,11 @@ public class Wrist extends SubsystemBase implements Loggable{
       "raw ticks", getWristEncoderTicksRaw(), "wristCalZero", wristCalZero);
 		if(getWristAngle() < WristConstants.min - 15.0) {
       log.writeLogEcho(false, subsystemName, "Adjust wrist", "Below min angle");
-			wristCalZero -= WristConstants.encoderTicksPerRevolution;
+			wristCalZero -= WristConstants.kEncoderCPR;
 		}
 		else if(getWristAngle() > WristConstants.max + 10.0) {
       log.writeLogEcho(false, subsystemName, "Adjust wrist", "Above max angle");
-			wristCalZero += WristConstants.encoderTicksPerRevolution;
+			wristCalZero += WristConstants.kEncoderCPR;
 		}
     log.writeLogEcho(false, subsystemName, "Adjust wrist post", "wrist angle", getWristAngle(), 
       "raw ticks", getWristEncoderTicksRaw(), "wristCalZero", wristCalZero);
@@ -328,7 +303,7 @@ public class Wrist extends SubsystemBase implements Loggable{
    * @return parameter encoder ticks converted to equivalent degrees
    */
   public double encoderTicksToDegrees(double encoderTicks) {
-    return encoderTicks * encoderDegreesPerTicks;
+    return encoderTicks * WristConstants.kWristDegreesPerTick;
   }
 
   /**
@@ -337,7 +312,7 @@ public class Wrist extends SubsystemBase implements Loggable{
    * @return parameter degrees converted to equivalent encoder ticks
    */
   public double degreesToEncoderTicks(double degrees) {
-    return degrees * encoderTicksPerDegrees;
+    return degrees / WristConstants.kWristDegreesPerTick;
   }
 
   /**
@@ -439,8 +414,8 @@ public class Wrist extends SubsystemBase implements Loggable{
   public void calibrateEncoderDegrees(double offsetDegrees) {
     // System.out.println(swName + " " + turningOffsetDegrees);
     // turningCanCoder.configMagnetOffset(offsetDegrees, 100);
-    encoderZero = -offsetDegrees;
-    log.writeLogEcho(true, subsystemName, "calibrateThroughBoreEncoder", "encoderZero", encoderZero, "raw encoder", revEncoder.getRaw(), "encoder degrees", getEncoderDegrees());
+    revEncoderZero = -offsetDegrees;
+    log.writeLogEcho(true, subsystemName, "calibrateThroughBoreEncoder", "encoderZero", revEncoderZero, "raw encoder", revEncoder.getRaw(), "encoder degrees", getEncoderDegrees());
   }
 
   /**
@@ -449,7 +424,7 @@ public class Wrist extends SubsystemBase implements Loggable{
    * + = up, - = down?
    */
   public double getEncoderDegrees() {
-    return MathBCR.normalizeAngle(revEncoder.getRaw() - encoderZero);
+    return MathBCR.normalizeAngle(revEncoder.getRaw() - revEncoderZero);
   }
 
   /**

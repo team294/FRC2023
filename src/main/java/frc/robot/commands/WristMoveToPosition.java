@@ -16,8 +16,6 @@ import frc.robot.utilities.FileLog;
 public class WristMoveToPosition extends CommandBase {
 
   private double target;
-  private boolean targetAngle; // true if target is angle, false if target is position
-  private WristAngle pos;
   private final Wrist wrist;
   private final FileLog log;
 
@@ -27,7 +25,6 @@ public class WristMoveToPosition extends CommandBase {
    */
   public WristMoveToPosition(double angle, Wrist wrist, FileLog log) {
     target = angle;
-    targetAngle = true;
     this.wrist = wrist;
     this.log = log;
 
@@ -36,11 +33,10 @@ public class WristMoveToPosition extends CommandBase {
 
   /**
    * Moves wrist to target position
-   * @param pos target position based on WristAngle from RobotPrefs
+   * @param pos target position based on WristAngle from Constants
    */
   public WristMoveToPosition(WristAngle pos, Wrist wrist, FileLog log) {
-    this.pos = pos;
-    targetAngle = true;
+    target = pos.value;
     this.wrist = wrist;
     this.log = log;
 
@@ -50,26 +46,9 @@ public class WristMoveToPosition extends CommandBase {
   // Called just before this Command runs the first time
   @Override
   public void initialize() {
-    if (targetAngle) {
-      wrist.setWristAngle(target);
-    } else {
-      switch (pos) {
-        case stowed:
-          wrist.setWristAngle(WristConstants.stowed);
-          break;
-        case straight:
-          wrist.setWristAngle(WristConstants.straight);
-          break;
-        case scoreCargo:
-          wrist.setWristAngle(WristConstants.scoreCargo);
-          break;
-        case vision:
-          wrist.setWristAngle(WristConstants.vision);
-          break;
-      }
-    }
+    wrist.setWristAngle(target);
 
-    log.writeLog(false, "WristMoveToPosition", "Initialize", "Target", targetAngle);    // TODO fix this
+    log.writeLog(false, "WristMoveToPosition", "Initialize", "Target", target);
   }
 
   // Called repeatedly when this Command is scheduled to run
