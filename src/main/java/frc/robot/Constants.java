@@ -66,8 +66,8 @@ public final class Constants {
         public static final int CANManipulator = 45; //TODO CHANGE NUMBER TO REAL PORT 
 
         // Digital IO ports
-        public static final int DIOManipulatorCubeSensor = 5; //TODO PLACE HOLDER SET TO CORRET PORT
-        public static final int DIOManipulatorConeSensor = 6; //TODO PLACE HOLDER SET TO CORRECT PORT
+        public static final int DIOManipulatorCubeSensor = 1; //TODO PLACE HOLDER SET TO CORRET PORT
+        public static final int DIOManipulatorConeSensor = 2; //TODO PLACE HOLDER SET TO CORRECT PORT
 
         // PWM ports
         public static final int PWMLEDStripTop = 0;         // LED Strip on top of robot

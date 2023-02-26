@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Manipulator;
@@ -12,13 +13,13 @@ import frc.robot.utilities.FileLog;
 public class ManipulatorTogglePiston extends CommandBase {
   /** Creates a new ManipulatorStopMotor. */
   private final Manipulator manipulator;
-  private final LED led = new LED();
+  private final LED led;
   private final FileLog log;
 
-  public ManipulatorTogglePiston(Manipulator manipulator, FileLog log) {
+  public ManipulatorTogglePiston(Manipulator manipulator, LED led, FileLog log) {
     this.manipulator = manipulator;
     this.log = log;
-
+    this.led = led;
     addRequirements(manipulator);
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -28,9 +29,9 @@ public class ManipulatorTogglePiston extends CommandBase {
   public void initialize() {
     manipulator.togglePiston();
     if(manipulator.getPistonCone()){
-      new LEDSetStrip("Yellow", led, log);
+      new LEDSetStrip(Color.kYellow, led, log);
     } else {
-      new LEDSetStrip("Purple", led, log);
+      new LEDSetStrip(Color.kPurple, led, log);
     }
     log.writeLog(false, "ManipulatorTogglePiston", "Initialize");
   }

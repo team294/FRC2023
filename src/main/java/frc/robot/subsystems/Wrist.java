@@ -41,7 +41,7 @@ public class Wrist extends SubsystemBase implements Loggable{
   // private SparkMaxPIDController wristPIDController;
   private TalonFXSensorCollection wristLimits;
   
-  Encoder encoder = new Encoder(0, 1);
+  Encoder encoder = new Encoder(7, 8);
 
   private double encoderZero = 0;          // Reference raw encoder reading for encoder.  Calibration sets this to the absolute position from RobotPreferences.
   private double wristEncoderZero = 0;         //Reference raw encoder reading for drive FalconFX encoder.  Calibration sets this to zero.

@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.Manipulator;
@@ -36,9 +37,9 @@ public class ManipulatorSetPistonPosition extends CommandBase {
   public void initialize() {
     manipulator.setPistonCone(cone);
     if(cone){
-      new LEDSetStrip("Yellow", led, log);
+      new LEDSetStrip(Color.kYellow, led, log);
     } else {
-      new LEDSetStrip("Purple", led, log);
+      new LEDSetStrip(Color.kPurple, led, log);
     }
     log.writeLog(false, "ManipulatorSetPistonCone", "Initialize");
   }
