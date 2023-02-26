@@ -19,6 +19,7 @@ import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -28,6 +29,7 @@ import frc.robot.Constants.WristConstants.WristRegion;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.Loggable;
 import frc.robot.utilities.MathBCR;
+import frc.robot.utilities.RobotPreferences;
 import frc.robot.utilities.Wait;
 
 public class Wrist extends SubsystemBase implements Loggable{
@@ -37,11 +39,10 @@ public class Wrist extends SubsystemBase implements Loggable{
   private final String subsystemName;
   private Elevator elevator;        // Do not call this elevator object in the Wrist constructor!  The elevator constructor will set this variable (after the wrist constructor).
 
-  private TalonFX wristMotor = new TalonFX(Ports.CANWristMotor);
-  // private SparkMaxPIDController wristPIDController;
+  private final TalonFX wristMotor = new TalonFX(Ports.CANWristMotor);
   private TalonFXSensorCollection wristLimits;
   
-  Encoder encoder = new Encoder(0, 1);
+  private final DutyCycleEncoder revEncoder = new DutyCycleEncoder(Ports.DIOWristRevThroughBoreEncoder);
 
   private double encoderZero = 0;          // Reference raw encoder reading for encoder.  Calibration sets this to the absolute position from RobotPreferences.
   private double wristEncoderZero = 0;         //Reference raw encoder reading for drive FalconFX encoder.  Calibration sets this to zero.
@@ -116,11 +117,20 @@ public class Wrist extends SubsystemBase implements Loggable{
     
     wristLimits = wristMotor.getSensorCollection();
     // TODO  find wrist gear ratio
-    encoder.setDistancePerPulse(4/256);
     // Configures the encoder to consider itself stopped after .1 seconds
     // encoder.setMinRate(0.1);
     // encoder.setMinRate(10);
-    encoder.setReverseDirection(false);
+
+    // Rev Through-Bore Encoder settings
+    // Wait for through-bore encoder to connect, up to 0.25 sec
+    long t = System.currentTimeMillis() + 250;
+    while (System.currentTimeMillis() < t && !revEncoder.isConnected());    
+    if (!revEncoder.isConnected()) {
+      RobotPreferences.recordStickyFaults("Wrist-ThroughBoreEncoder", log);
+    }
+
+
+
     calibrateEncoderDegrees(WristConstants.offsetAngleWrist);
     // encoder.setSamplesToAverage(5);
     // wristLimits =  wristMotor.getSensorCollection();
@@ -293,26 +303,6 @@ public class Wrist extends SubsystemBase implements Loggable{
 	}
 
   /**
-   * Reads whether wrist is at lower limit
-   * @return true if wrist is at lower limit, false if not
-   */
-  public boolean getWristLowerLimit() {
-    return wristLimits.isRevLimitSwitchClosed() == 1;
-    // revLimitSwitch = wristMotor.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
-    // return revLimitSwitch.isPressed();
-  }
-
-  /**
-   * Reads whether wrist is at upper limit
-   * @return true if wrist is at upper limit, false if not
-   */
-  public boolean getWristUpperLimit() {
-    return wristLimits.isFwdLimitSwitchClosed() == 1;
-    // fwdLimitSwitch = wristMotor.getReverseLimitSwitch(SparkMaxLimitSwitch.Type.kNormallyClosed);
-    // return fwdLimitSwitch.isPressed();
-  }
-
-  /**
    * 
    * @return raw encoder ticks (based on encoder zero being at horizontal position)
    */
@@ -450,7 +440,7 @@ public class Wrist extends SubsystemBase implements Loggable{
     // System.out.println(swName + " " + turningOffsetDegrees);
     // turningCanCoder.configMagnetOffset(offsetDegrees, 100);
     encoderZero = -offsetDegrees;
-    log.writeLogEcho(true, subsystemName, "calibrateThroughBoreEncoder", "encoderZero", encoderZero, "raw encoder", encoder.getRaw(), "encoder degrees", getEncoderDegrees());
+    log.writeLogEcho(true, subsystemName, "calibrateThroughBoreEncoder", "encoderZero", encoderZero, "raw encoder", revEncoder.getRaw(), "encoder degrees", getEncoderDegrees());
   }
 
   /**
@@ -459,7 +449,7 @@ public class Wrist extends SubsystemBase implements Loggable{
    * + = up, - = down?
    */
   public double getEncoderDegrees() {
-    return MathBCR.normalizeAngle(encoder.getRaw() - encoderZero);
+    return MathBCR.normalizeAngle(revEncoder.getRaw() - encoderZero);
   }
 
   /**
@@ -467,7 +457,7 @@ public class Wrist extends SubsystemBase implements Loggable{
    * + = counterclockwise, - = clockwise
    */
   public double getEncoderVelocityDPS() {
-    return encoder.getRate();
+    return revEncoder.getRate();
   }
 
   /**
@@ -487,8 +477,7 @@ public class Wrist extends SubsystemBase implements Loggable{
     log.writeLog(logWhenDisabled, subsystemName, "Update Variables",
         "Volts", wristMotor.getBusVoltage(), "Amps", wristMotor.getStatorCurrent(),
         "WristCalZero", wristCalZero,
-        "Enc Raw", getWristEncoderTicksRaw(), "Wrist Angle", getWristAngle(), "Wrist Target", getCurrentWristTarget(),
-        "Upper Limit", getWristUpperLimit(), "Lower Limit", getWristLowerLimit()
+        "Enc Raw", getWristEncoderTicksRaw(), "Wrist Angle", getWristAngle(), "Wrist Target", getCurrentWristTarget()
         );
   }
 
@@ -508,24 +497,22 @@ public class Wrist extends SubsystemBase implements Loggable{
       SmartDashboard.putBoolean(buildString(subsystemName, " calibrated"), wristCalibrated);
       SmartDashboard.putNumber(buildString(subsystemName, " Angle"), getWristAngle());
       SmartDashboard.putNumber(buildString(subsystemName, " enc raw"), getWristEncoderTicksRaw());
-			SmartDashboard.putBoolean(buildString(subsystemName, " Lower Limit"), getWristLowerLimit());
-      SmartDashboard.putBoolean(buildString(subsystemName, " Upper Limit"), getWristUpperLimit());
       SmartDashboard.putNumber(buildString(subsystemName, " target angle"), getCurrentWristTarget());
       SmartDashboard.putNumber(buildString(subsystemName, " voltage"), wristMotor.getBusVoltage());
     }
     
     // Checks if the wrist is not calibrated and automatically calibrates it once the limit switch is pressed
     // If the wrist isn't calibrated at the start of the match, does that mean we can't control the wrist at all?
-    if (!wristCalibrated) {
-      if (getWristUpperLimit()) {
-        calibrateWristEnc(WristConstants.max);
-        updateWristLog(true);
-      }
-      if (getWristLowerLimit()) {
-        calibrateWristEnc(WristConstants.min);
-        updateWristLog(true);
-      }
-    }
+    // if (!wristCalibrated) {
+    //   if (getWristUpperLimit()) {
+    //     calibrateWristEnc(WristConstants.max);
+    //     updateWristLog(true);
+    //   }
+    //   if (getWristLowerLimit()) {
+    //     calibrateWristEnc(WristConstants.min);
+    //     updateWristLog(true);
+    //   }
+    // }
     
     // Un-calibrates the wrist if the angle is outside of bounds
     // TODO change low back to - 10.0
