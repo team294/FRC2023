@@ -36,7 +36,18 @@ public final class Constants {
         kBrake;
     }
 
+    // public enum ManipulatorBehavior {
+    //     end(0),
+    //     runforever(1),
+    //     waitforcone(2),
+    //     waitforcube(3),
+    //     waitforobj(4);
+        
+    //     @SuppressWarnings({"MemberName", "PMD.SingularField"})
+    //     public final int value;
+    //     ManipulatorBehavior(int value) { this.value = value; }
 
+    // }
     public static final class Ports{
         public static final int CANPneumaticHub = 1;
 
