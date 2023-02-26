@@ -1,6 +1,5 @@
 package frc.robot;
 
-import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFXConfiguration;
 import com.ctre.phoenix.sensors.AbsoluteSensorRange;
@@ -66,4 +65,31 @@ public final class CTREConfigs {
         swerveCanCoderConfig.sensorTimeBase = SensorTimeBase.PerSecond;
     }
 
+    // Configuration for elevator motors
+    public static final TalonFXConfiguration elevatorFXConfig;
+    static {
+        elevatorFXConfig = new TalonFXConfiguration();
+
+        elevatorFXConfig.voltageCompSaturation = 12.0;
+        elevatorFXConfig.neutralDeadband = 0.0;
+        elevatorFXConfig.peakOutputForward = 1.0;       // up max output
+        elevatorFXConfig.peakOutputReverse = -1.0;      // down max output
+        elevatorFXConfig.openloopRamp = 0.3;        // 2019 elevator used 0.3   // TODO calibrate
+        elevatorFXConfig.closedloopRamp = 0.3;      // Calibrate if using Talon PID (currently not being used)
+
+        elevatorFXConfig.slot0.kP = 0.0;     // Calibrate if using Talon PID (currently not being used)
+        elevatorFXConfig.slot0.kI = 0.0;
+        elevatorFXConfig.slot0.kD = 0.0;
+        elevatorFXConfig.slot0.kF = 0.0;     // Use arbitrary FF instead
+        elevatorFXConfig.slot0.integralZone = 0.0;
+        elevatorFXConfig.initializationStrategy = SensorInitializationStrategy.BootToZero;
+
+        // Supply current limit is typically used to prevent breakers from tripping.
+        // elevatorFXConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration(
+        //     true, 35, 60, 0.1);
+
+        // Stator current limit can be used to limit acceleration, torque, braking (when in brake mode), and motor heating.
+        // elevatorFXConfig.statorCurrLimit = new StatorCurrentLimitConfiguration(
+        //     enable, currentLimit, triggerThresholdCurrent, triggerThresholdTime);
+    }
 }
