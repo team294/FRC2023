@@ -34,7 +34,7 @@ public class PhotonCameraWrapper {
   }
 
   public void init() {
-    log.writeLogEcho(true, "PhotonCameraWrapper", "Init", "Starting");
+    log.writeLog(true, "PhotonCameraWrapper", "Init", "Starting");
 
     currAlliance = field.getAlliance();
 
@@ -43,22 +43,16 @@ public class PhotonCameraWrapper {
     }
 
 
-  //  aprilTagFieldLayout = field.getAprilTagFieldLayout();
+    //  aprilTagFieldLayout = field.getAprilTagFieldLayout();
 
-  try {
-    aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
-    updateAlliance();
-    log.writeLogEcho(true, "PhotonCameraWrapper", "Init", "Loaded april tags from file");
-  } catch (IOException e) {
-    log.writeLogEcho(true, "PhotonCameraWrapper", "Init", "Error loading april tags from file");
-    e.printStackTrace();
-  }
-
-  log.writeLogEcho(true, "PhotonCameraWrapper", "Init", "Loaded april tags from field");
-  log.writeLogEcho(true, "PhotonCameraWrapper", "Init", 
-    "AT8 x",aprilTagFieldLayout.getTagPose(8).get().getX(),
-    "AT8 y",aprilTagFieldLayout.getTagPose(8).get().getY(),
-    "AT8 rot",aprilTagFieldLayout.getTagPose(8).get().getRotation());
+    try {
+      aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
+      updateAlliance();
+      log.writeLog(true, "PhotonCameraWrapper", "Init", "Loaded april tags from file");
+    } catch (IOException e) {
+      log.writeLog(true, "PhotonCameraWrapper", "Init", "Error loading april tags from file");
+      e.printStackTrace();
+    }
 
     // Create pose estimator
     photonPoseEstimator = new PhotonPoseEstimator(
@@ -69,13 +63,15 @@ public class PhotonCameraWrapper {
 
     hasInit = true;
 
-    log.writeLogEcho(true, "PhotonCameraWrapper", "Init", "Done");
+    log.writeLog(true, "PhotonCameraWrapper", "Init", "Done");
   }
 
   public boolean hasInit() {
     return hasInit;
   }
-
+/**
+ * updates the current alliance and apriltag field layout
+ */
 public void updateAlliance() {
   if (field.getAlliance() != currAlliance) {
     currAlliance = field.getAlliance();
@@ -87,9 +83,10 @@ public void updateAlliance() {
         aprilTagFieldLayout.setOrigin(OriginPosition.kRedAllianceWallRightSide);
         break;
       default:
-        log.writeLog(true, "PhotonCameraWrapper", "UpdateAlliance", "Alliance Invalid");
+        log.writeLog(true, "PhotonCameraWrapper", "UpdateAlliance", "Alliance invalid");
         break;
     }
+    log.writeLog(true, "PhotonCameraWrapper", "UpdateAlliance", "Alliance changed", currAlliance);
     aprilTagFieldLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
   }
 }
@@ -109,9 +106,9 @@ public void periodic() {
     photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
     var newPoseOptional = photonPoseEstimator.update();
     if (newPoseOptional.isPresent()) {
-      log.writeLog(true, "PhotonCameraWrapper", "getEstimatedGlobalPose", "PreviousPose", "X",prevEstimatedRobotPose.getX(),"Y",prevEstimatedRobotPose.getY());
+      // log.writeLog(true, "PhotonCameraWrapper", "getEstimatedGlobalPose", "PreviousPose", "X",prevEstimatedRobotPose.getX(),"Y",prevEstimatedRobotPose.getY());
       EstimatedRobotPose newPose = newPoseOptional.get();
-      log.writeLog(true, "PhotonCameraWrapper", "getEstimatedGlobalPose", "NewPose", "X",newPose.estimatedPose.getX(),"Y",newPose.estimatedPose.getY());
+      // log.writeLog(true, "PhotonCameraWrapper", "getEstimatedGlobalPose", "NewPose", "X",newPose.estimatedPose.getX(),"Y",newPose.estimatedPose.getY());
     }
     return newPoseOptional;
   }
