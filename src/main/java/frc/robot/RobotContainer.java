@@ -386,6 +386,8 @@ public class RobotContainer {
     driveTrain.setDriveModeCoast(true);     // When pushing a disabled robot by hand, it is a lot easier to push in Coast mode!!!!
     driveTrain.stopMotors();                // SAFETY:  Turn off any closed loop control that may be running, so the robot does not move when re-enabled.
 
+    elevator.setMotorModeCoast(true);
+
     patternTeamMoving.schedule();
   }
 
@@ -414,6 +416,7 @@ public class RobotContainer {
     log.writeLogEcho(true, "Auto", "Mode Init");
 
     driveTrain.setDriveModeCoast(false);
+    elevator.setMotorModeCoast(false);
 
     if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
     if (allianceSelection.getAlliance() == Alliance.Blue) {
@@ -439,6 +442,7 @@ public class RobotContainer {
     log.writeLogEcho(true, "Teleop", "Mode Init");
 
     driveTrain.setDriveModeCoast(false);
+    elevator.setMotorModeCoast(false);
 
     if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
     led.setStrip(Color.kOrange, 0);
