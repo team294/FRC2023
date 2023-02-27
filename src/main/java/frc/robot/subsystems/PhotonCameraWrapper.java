@@ -5,6 +5,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.utilities.Field;
 import frc.robot.utilities.FileLog;
@@ -19,7 +20,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
-public class PhotonCameraWrapper {
+public class PhotonCameraWrapper extends SubsystemBase {
   public PhotonCamera photonCamera;
   public PhotonPoseEstimator photonPoseEstimator;
   private AprilTagFieldLayout aprilTagFieldLayout;
@@ -47,20 +48,31 @@ public class PhotonCameraWrapper {
 
     try {
       aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
-      updateAlliance();
+      currAlliance = field.getAlliance();
+      switch (currAlliance) {
+        case Blue:
+          aprilTagFieldLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
+          break;
+        case Red:
+          aprilTagFieldLayout.setOrigin(OriginPosition.kRedAllianceWallRightSide);
+          break;
+        default:
+          log.writeLog(true, "PhotonCameraWrapper", "UpdateAlliance", "Alliance invalid");
+          break;
+      }
       log.writeLog(true, "PhotonCameraWrapper", "Init", "Loaded april tags from file");
     } catch (IOException e) {
       log.writeLog(true, "PhotonCameraWrapper", "Init", "Error loading april tags from file");
       e.printStackTrace();
     }
-
+    
     // Create pose estimator
     photonPoseEstimator = new PhotonPoseEstimator(
-        aprilTagFieldLayout,
-        PoseStrategy.CLOSEST_TO_REFERENCE_POSE,
-        photonCamera,
-        VisionConstants.robotToCam);
-
+      aprilTagFieldLayout,
+      PoseStrategy.CLOSEST_TO_REFERENCE_POSE,
+      photonCamera,
+      VisionConstants.robotToCam);
+      
     hasInit = true;
 
     log.writeLog(true, "PhotonCameraWrapper", "Init", "Done");
@@ -69,30 +81,17 @@ public class PhotonCameraWrapper {
   public boolean hasInit() {
     return hasInit;
   }
-/**
- * updates the current alliance and apriltag field layout
- */
-public void updateAlliance() {
-  if (field.getAlliance() != currAlliance) {
-    currAlliance = field.getAlliance();
-    switch (currAlliance) {
-      case Blue:
-        aprilTagFieldLayout.setOrigin(OriginPosition.kBlueAllianceWallRightSide);
-        break;
-      case Red:
-        aprilTagFieldLayout.setOrigin(OriginPosition.kRedAllianceWallRightSide);
-        break;
-      default:
-        log.writeLog(true, "PhotonCameraWrapper", "UpdateAlliance", "Alliance invalid");
-        break;
-    }
-    log.writeLog(true, "PhotonCameraWrapper", "UpdateAlliance", "Alliance changed", currAlliance);
-  }
-}
 
-public void periodic() {
-  updateAlliance();
-}
+  public Alliance getAlliance() {
+    return field.getAlliance();
+  }
+
+  public void periodic() {
+    if (field.getAlliance() != currAlliance) {
+      init();
+      log.writeLogEcho(true, "PhotonCameraWrapper", "UpdateAlliance", "Alliance changed", currAlliance);
+    }
+  }
 
   /**
   * @param estimatedRobotPose The current best guess at robot pose
