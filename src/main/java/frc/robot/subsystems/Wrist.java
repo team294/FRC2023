@@ -45,7 +45,7 @@ public class Wrist extends SubsystemBase implements Loggable{
   private double wristCalZero = 0;   		      // Wrist encoder position at O degrees, in degrees (i.e. the calibration factor).  Calibration sets this to match the REV through bore encoder.
   private boolean wristCalibrated = false;    // Default to wrist being uncalibrated.  Calibrate from robot preferences or "Calibrate Wrist Zero" button on dashboard
 
-  private double safeAngle;
+  private double safeAngle;         // current wrist target on position control on the Falcon motor (if the Falcon is in position mode)
 
   public Wrist(FileLog log) {
     this.log = log;
@@ -94,7 +94,7 @@ public class Wrist extends SubsystemBase implements Loggable{
 
       // Configure soft limits on motor
       wristMotor.configForwardSoftLimitThreshold(wristDegreesToEncoderTickPosition(WristAngle.upperLimit.value), 100);
-      wristMotor.configReverseSoftLimitThreshold(wristDegreesToEncoderTickPosition(WristAngle.upperLimit.value), 100);
+      wristMotor.configReverseSoftLimitThreshold(wristDegreesToEncoderTickPosition(WristAngle.lowerLimit.value), 100);
       wristMotor.configForwardSoftLimitEnable(true, 100);
       wristMotor.configReverseSoftLimitEnable(true, 100);
     }
@@ -173,7 +173,7 @@ public class Wrist extends SubsystemBase implements Loggable{
       }
 
       wristMotor.set(ControlMode.Position, wristDegreesToEncoderTickPosition(safeAngle), 
-        DemandType.ArbitraryFeedForward, WristConstants.kG * Math.cos(angle*Math.PI/180.0));
+        DemandType.ArbitraryFeedForward, WristConstants.kG * Math.cos(safeAngle*Math.PI/180.0));
 
       log.writeLog(false, subsystemName, "Set angle", "Desired angle", angle, "Set angle", safeAngle,
        "Elevator Pos", elevator.getElevatorPos(), "Elevator Target", elevator.getCurrentElevatorTarget());  
@@ -310,12 +310,13 @@ public class Wrist extends SubsystemBase implements Loggable{
 	 */
 	public void setWristUncalibrated() {
 		stopWrist();
-		wristCalibrated = false;
 
     log.writeLog(false, "Wrist", "Uncalibrate wrist", 
       "Rev angle", getRevEncoderDegrees(), "Enc Raw", getWristEncoderTicksRaw(),
 			"Wrist Angle", getWristAngle(), "Wrist Target", getCurrentWristTarget());
-	}
+
+    wristCalibrated = false;
+  }
 
   /**
    * Calibrates the wrist encoder, assuming we know the wrist's current angle

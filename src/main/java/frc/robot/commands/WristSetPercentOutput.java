@@ -16,7 +16,12 @@ public class WristSetPercentOutput extends CommandBase {
   private final FileLog log;
   private final boolean fromShuffleboard;
 
-  /** Creates a new WristSetPercentOutput. */
+  /**
+   * Sets the speed of the wrist
+   * @param percent percent output, -1 (down) to +1 (up)
+   * @param wrist
+   * @param log
+   */
   public WristSetPercentOutput(double percent, Wrist wrist, FileLog log) {
     this.percent = percent;
     this.wrist = wrist;
@@ -24,9 +29,13 @@ public class WristSetPercentOutput extends CommandBase {
     fromShuffleboard = false;
 
     addRequirements(wrist);
-    // Use addRequirements() here to declare subsystem dependencies.
   }
 
+  /**
+   * Sets the speed of the wrist from Shuffleboard
+   * @param wrist
+   * @param log
+   */
   public WristSetPercentOutput(Wrist wrist, FileLog log){
     this.wrist = wrist;
     this.log = log;
@@ -59,6 +68,6 @@ public class WristSetPercentOutput extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return true;
+    return false;
   }
 }
