@@ -187,25 +187,33 @@ public final class Constants {
 
         public static final double maxUncalibratedPercentOutput = 0.10;     // TODO CALIBRATE
 
-        public static double offsetAngleWrist = 0;
+        // Update the REV through bore encoder offset angle in RobotPreferences (in Shuffleboard), not in this code!
+        // After updating in RobotPreferences, you will need to re-start the robot code for the changes to take effect.
+        // When calibrating offset, 0 deg should be with the CG of the wrist horizontal facing away from the robot,
+        // and -90 deg is with the CG of the wrist resting downward.
+        public static double revEncoderOffsetAngleWrist = 0;    // 69.0 deg (TODO VERIFY)
 
         public static final double kG = 0.075;   // TODO CALIBRATE.  Feed foward percent-out to add to hold arm horizontal (0 deg)
 
         // Wrist regions
         public enum WristRegion {
-            back,           // In the wrist back region, the elevator must be in the bottom region (not allowed to go to elevator main region).
+            backFar,        // In the wrist backFar region, the elevator must be in the bottom region (not allowed to go to elevator main or low regions).
+            backMid,        // In the wrist backMid region, the elevator may be in any elevator region.
+            down,           // Wrist pointed down, the elevator must be in the main region.
             main,           // In the wrist main region, the elevator may be in any elevator region.
             uncalibrated    // Unknown region, wrist is not calibrated
         } 
         // Wrist region boundaries
-        public static final double mainLowestAngle = -80.0;      // Boundary between back and main regions.  TODO CALIBRATE
+        public static final double boundBackFarMid = -110.0;      // Boundary between backFar and backMid regions.  TODO CALIBRATE
+        public static final double boundBackMidDown = -100.0;      // Boundary between backMid and down regions.  TODO CALIBRATE
+        public static final double boundDownMain = -80.0;      // Boundary between down and main regions.  TODO CALIBRATE
 
         // Wrist pre-defined angles (in degrees)
         // 0 degrees = horizontal (in front of robot) relative to wrist center of gravity
         // -90 degrees = vertical = wrist is hanging "down" naturally due to gravity
         public enum WristAngle {
-            lowerLimit(-95.0),      // TODO CALIBRATE 
-            loadConveyor(-90.0),    // TODO Define positions and calibrate
+            lowerLimit(-120.0),      // TODO CALIBRATE 
+            loadConveyor(-115.0),    // TODO Define positions and calibrate
             startConfig(-70.0),
             elevatorMoving(-45.0),
             loadHumanStation(0.0),
@@ -231,10 +239,12 @@ public final class Constants {
         // Elevator regions
         public enum ElevatorRegion {
             bottom,     // In the elevator bottom region, the wrist may be in any wrist region.
+            low,        // TODO implement this code!!!!!
             main,       // In the elevator main region, the wrist must be in the wrist main region (not allowed to go to wrist back region).
             uncalibrated;       // Unknown region, elevator is not calibrated.
         }
         // Elevator region boundaries
+        // TODO fix boundaries to add low region!!!!
         public static final double mainBottom = 2.0;      // Boundary between bottom and main regions.  TODO CALIBRATE
 
         // Elevator pre-defined positions (in inches from bottom of elevator)

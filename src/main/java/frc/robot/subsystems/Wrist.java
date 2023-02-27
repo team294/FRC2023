@@ -11,16 +11,18 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
-import com.ctre.phoenix.motorcontrol.TalonFXSensorCollection;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import frc.robot.CTREConfigs;
 import frc.robot.Constants.Ports;
 import frc.robot.Constants.WristConstants;
+import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
+import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.Constants.WristConstants.WristRegion;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.Loggable;
@@ -36,15 +38,12 @@ public class Wrist extends SubsystemBase implements Loggable{
   private Elevator elevator;        // Do not call this elevator object in the Wrist constructor!  The elevator constructor will set this variable (after the wrist constructor).
 
   private final TalonFX wristMotor = new TalonFX(Ports.CANWristMotor);
-  private TalonFXSensorCollection wristLimits;
   
   private final DutyCycleEncoder revEncoder = new DutyCycleEncoder(Ports.DIOWristRevThroughBoreEncoder);
 
   private double revEncoderZero = 0;          // Reference raw encoder reading for encoder.  Calibration sets this to the absolute position from RobotPreferences.
-  private double wristEncoderZero = 0;         //Reference raw encoder reading for drive FalconFX encoder.  Calibration sets this to zero.
-  
-  private double wristCalZero;   		// Wrist encoder position at O degrees, in encoder ticks (i.e. the calibration factor)
-  private boolean wristCalibrated = false;     // Default to wrist being uncalibrated.  Calibrate from robot preferences or "Calibrate Wrist Zero" button on dashboard
+  private double wristCalZero = 0;   		      // Wrist encoder position at O degrees, in degrees (i.e. the calibration factor).  Calibration sets this to match the REV through bore encoder.
+  private boolean wristCalibrated = false;    // Default to wrist being uncalibrated.  Calibrate from robot preferences or "Calibrate Wrist Zero" button on dashboard
 
   private double safeAngle;
 
@@ -67,7 +66,6 @@ public class Wrist extends SubsystemBase implements Loggable{
 		wristMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 100);
 		wristMotor.setSensorPhase(false);         // True = Flip direction of sensor reading
     wristMotor.configFeedbackNotContinuous(false, 100);
-    wristLimits = wristMotor.getSensorCollection();
 
     // Rev Through-Bore Encoder settings
     // Wait for through-bore encoder to connect, up to 0.25 sec
@@ -75,17 +73,12 @@ public class Wrist extends SubsystemBase implements Loggable{
     while (System.currentTimeMillis() < t && !isRevEncoderConnected());    
     if (isRevEncoderConnected()) {
       // Copy calibration to wrist encoder
-      // if it works:
+      calibrateRevEncoderDegrees(WristConstants.revEncoderOffsetAngleWrist);
       wristCalibrated = true;
     } else {
       wristCalibrated = false;
       RobotPreferences.recordStickyFaults("Wrist-ThroughBoreEncoder", log);
     }
-
-    // TODO Fix calibrations
-
-    calibrateRevEncoderDegrees(WristConstants.offsetAngleWrist);
-    // relativeEncoder = wristMotor.getEncoder();
 
     // Wait 0.25 seconds before adjusting the wrist calibration.  The reason is that .setInverted (above)
     // changes the sign of read encoder value, but that change can be delayed up to 50ms for a round trip
@@ -93,13 +86,18 @@ public class Wrist extends SubsystemBase implements Loggable{
     // we don't wait (random weird behavior).
     // DO NOT GET RID OF THIS WITHOUT TALKING TO DON OR ROB.
     Wait.waitTime(250);
-    adjustWristCalZero();
 
-    // Configure soft limits on motor  TODO
-    wristMotor.configForwardSoftLimitThreshold(10000, 100);   // TODO set value, in raw encoder units
-    wristMotor.configReverseSoftLimitThreshold(-10000, 100);    // TODO set value, in raw encoder units
-    wristMotor.configForwardSoftLimitEnable(true, 100);
-    wristMotor.configReverseSoftLimitEnable(true, 100);
+    if (wristCalibrated) {
+      calibrateWristEnc(getRevEncoderDegrees());
+
+      // adjustWristCalZero();
+
+      // Configure soft limits on motor
+      wristMotor.configForwardSoftLimitThreshold(wristDegreesToEncoderTickPosition(WristAngle.upperLimit.value), 100);
+      wristMotor.configReverseSoftLimitThreshold(wristDegreesToEncoderTickPosition(WristAngle.upperLimit.value), 100);
+      wristMotor.configForwardSoftLimitEnable(true, 100);
+      wristMotor.configReverseSoftLimitEnable(true, 100);
+    }
   }
 
   /**
@@ -129,6 +127,7 @@ public class Wrist extends SubsystemBase implements Loggable{
 
   /**
    * Sets percent power of wrist motor
+   * <p><b> There are no elevator interlocks on this method!!!! </b>
    * @param percentPower between -1.0 (down full speed) and 1.0 (up full speed)
    */
   public void setWristMotorPercentOutput(double percentOutput) {
@@ -139,170 +138,51 @@ public class Wrist extends SubsystemBase implements Loggable{
 
   /**
    * Only works when encoder is working and calibrated
-   * If setting to greater than wristKeepOut, elevator position must be at the bottom
-   * and target must be at the bottom.
+   * Interlocks with elevator position
    * @param angle target angle, in degrees (0 = horizontal in front of robot, + = up, - = down)
    */
   public void setWristAngle(double angle) {
     if (wristCalibrated) {
-      // Don't move wrist in or out of KeepOut if climber > climbWristMovingSafe or elevator > elevatorWristSafeStow.
-      if (
-            // Not needed because elevator doesn'it interfere with wrist
-            /*(elevator.getElevatorPos() > elevatorWristSafeStow ||         // Elevator is not safe
-            elevator.getCurrentElevatorTarget() > elevatorWristSafeStow) // Elevator is moving to not safe
-            &&*/ (angle > WristConstants.WristAngle.upperLimit.value || angle < WristConstants.WristAngle.lowerLimit.value /*|| getWristAngle() > WristConstants.wristKeepOut*/)) {  // We are moving in or out of KeepOut region
-        log.writeLog(false, subsystemName, "Set angle", "Angle", angle , "Set angle,N/A,Interlock,Forbidden",
-           ",Elevator Position", elevator.getElevatorPos() + 
-          ",Elevator Target," + elevator.getCurrentElevatorTarget() + ",Wrist Angle," + getWristAngle());
-        return;
+      // Keep wrist in usable range
+      safeAngle = MathUtil.clamp(angle, WristAngle.lowerLimit.value, WristAngle.upperLimit.value);
+
+      WristRegion curRegion = getRegion(getWristAngle());
+
+      // Check elevator interlocks
+      if (curRegion == WristRegion.backFar) {
+        safeAngle = MathUtil.clamp(safeAngle, WristAngle.lowerLimit.value, WristConstants.boundBackMidDown);
       }
-      // Angle should be safe as long as its between min and max limits
-      // Shouldn't be affected by elevator position
-      safeAngle = angle;
+      if (curRegion == WristRegion.backMid) {
+        if (elevator.getElevatorRegion() == ElevatorRegion.bottom) {
+          safeAngle = MathUtil.clamp(safeAngle, WristAngle.lowerLimit.value, WristConstants.boundBackMidDown);
+        } else if (elevator.getElevatorRegion() == ElevatorRegion.main) {
+          safeAngle = MathUtil.clamp(safeAngle, WristConstants.boundBackFarMid, WristAngle.upperLimit.value);
+        } else {
+          safeAngle = MathUtil.clamp(safeAngle, WristConstants.boundBackFarMid, WristConstants.boundBackMidDown);
+        }
+      }
+      if (curRegion == WristRegion.down) {
+        safeAngle = MathUtil.clamp(safeAngle, WristConstants.boundBackFarMid, WristAngle.upperLimit.value);
+      }
+      if (curRegion == WristRegion.main) {
+        if (elevator.getElevatorRegion() == ElevatorRegion.main) {
+          safeAngle = MathUtil.clamp(safeAngle, WristConstants.boundBackFarMid, WristAngle.upperLimit.value);
+        } else {
+          safeAngle = MathUtil.clamp(safeAngle, WristConstants.boundDownMain, WristAngle.upperLimit.value);
+        }
+      }
 
-      // Apply interlocks if elevator is low
-      // if (elevator.getElevatorPos() < ElevatorConstants.groundCargo - 2.0 || elevator.getCurrentElevatorTarget() < ElevatorConstants.groundCargo -2.0) {
-      //   // Elevator is very low or is going very low
-      //   // Wrist can not be below vision level
-      //   safeAngle = (safeAngle < WristConstants.wristVision) ? WristConstants.wristVision : safeAngle;
-      // } else {
-        // Wrist is safe to move as far down as wristDown
-        // safeAngle = (safeAngle < WristConstants.wristDown) ? WristConstants.wristDown : safeAngle;
-      // }
+      wristMotor.set(ControlMode.Position, wristDegreesToEncoderTickPosition(safeAngle), 
+        DemandType.ArbitraryFeedForward, WristConstants.kG * Math.cos(angle*Math.PI/180.0));
 
-      // wristMotor.set(ControlMode.Position, degreesToEncoderTicks(safeAngle) + Robot.robotPrefs.wristCalZero);
-      // wristMotor.set(ControlMode.Position, degreesToEncoderTicks(safeAngle) + wristCalZero, 
-      //                DemandType.ArbitraryFeedForward, kFFconst);
-      // Need usingPosition boolean because there is no way to get controltype from neo
-      // usingPosition = true; // Starting to set angle with position
-      //use arbitrary kFF value?
-      wristMotor.set(ControlMode.Position, safeAngle/WristConstants.kWristDegreesPerTick + wristCalZero, 
-                     DemandType.ArbitraryFeedForward, WristConstants.kG * Math.cos(angle*Math.PI/180.0));
-      // usingPosition = false; //Finished setting angle with position
-      log.writeLog(false, subsystemName, "Set angle", "Desired angle", angle, "Set angle", safeAngle, "Interlock,Allowed",
+      log.writeLog(false, subsystemName, "Set angle", "Desired angle", angle, "Set angle", safeAngle,
        "Elevator Pos", elevator.getElevatorPos(), "Elevator Target", elevator.getCurrentElevatorTarget());  
-    }
-  }
-
-	// ************ Calibration methods
-
-  /**
-	 * Sets wrist angle calibration factor and enables angle control modes for wrist
-	 * 
-	 * @param wristCalZero  Calibration factor for wrist
-	 * @param writeCalToPreferences  true = store calibration in Robot Preferences, false = don't change Robot Preferences
-	 */
-	public void setWristCalibration(double wristCalZero /*boolean writeCalToPreferences,*/) {
-		this.wristCalZero = wristCalZero;
-		wristCalibrated = true;
-		stopWrist();	// Stop motor, so it doesn't jump to new value
-		log.writeLog(false, "Preferences", "Calibrate wrist", "zero value", wristCalZero, 
-			"Enc Raw", getWristEncoderTicksRaw(),
-			"Wrist Angle", getWristAngle(), "Wrist Target", getCurrentWristTarget());
-		// if (writeCalToPreferences) {
-		// 	prefs.putDouble("wristCalZero", wristCalZero);
-		// }
-	}
-
-	/**
-	 * Stops wrist motor and sets wristCalibrated to false
-	 */
-	public void setWristUncalibrated() {
-		stopWrist();
-		log.writeLog(false, "Preferences", "Uncalibrate wrist", "Enc Raw", getWristEncoderTicksRaw(),
-			"Wrist Angle", getWristAngle() + ",Wrist Target," + getCurrentWristTarget());
-		wristCalibrated = false;
-	}
-
-  /**
-   * Calibrates the wrist encoder, assuming we know the wrist's current angle
-   * @param angle current angle that the wrist is physically at, in degrees (0 = horizontal in front of robot, + = up, - = down)
-   * @param saveToPrefs true = save the calibration to RobotPreferences
-   */
-  public void calibrateWristEnc(double angle /*boolean saveToPrefs,*/) {
-    setWristCalibration(getWristEncoderTicksRaw() - angle/ WristConstants.kWristDegreesPerTick /*saveToPrefs,*/);
-    // setDefaultCommand(null);  // TODO Why is this here?
-  }  
-  
-	/**
-	 * If the angle is reading >/< max/min angle, add/subtract 360 degrees to the wristCalZero accordingly
-	 * Note: when the motor is not inverted, upon booting up, an absolute encoder reads a value between 0 and 2048
-	 * 		 when the motor is inverted, upon booting up, an absolute encoder reads a value between 0 and -2048????  (that was true for mag-encoder.  is it true for Falcon internal encoder?)
-	 * Note: absolute encoder values don't wrap during operation
-	 */
-	public void adjustWristCalZero() {
-    log.writeLogEcho(false, subsystemName, "Adjust wrist pre", "wrist angle", getWristAngle(), 
-      "raw ticks", getWristEncoderTicksRaw(), "wristCalZero", wristCalZero);
-		if(getWristAngle() < WristConstants.WristAngle.lowerLimit.value - 15.0) {
-      log.writeLogEcho(false, subsystemName, "Adjust wrist", "Below min angle");
-			wristCalZero -= WristConstants.kEncoderCPR;
-		}
-		else if(getWristAngle() > WristConstants.WristAngle.upperLimit.value + 10.0) {
-      log.writeLogEcho(false, subsystemName, "Adjust wrist", "Above max angle");
-			wristCalZero += WristConstants.kEncoderCPR;
-		}
-    log.writeLogEcho(false, subsystemName, "Adjust wrist post", "wrist angle", getWristAngle(), 
-      "raw ticks", getWristEncoderTicksRaw(), "wristCalZero", wristCalZero);
-	}
-
-	// ************ Internal Falcon encoder methods
-
-  /**
-   * 
-   * @return raw encoder ticks (based on encoder zero being at horizontal position)
-   */
-  public double getWristEncoderTicks() {
-    return getWristEncoderTicksRaw() - wristCalZero;
-  }
-
-  /**
-   * 
-   * @return raw encoder ticks, adjusted direction (positive is towards stowed, negative is towards lower hard stop)
-   */
-  public double getWristEncoderTicksRaw() {
-    return wristMotor.getSelectedSensorPosition(0);
-    // return relativeEncoder.getPosition();
-  }
-
-  /**
-   * For use in the wrist subsystem only.  Use getWristAngle() when calling from outside this class.
-   * @return current encoder ticks (based on zero) converted to degrees
-   */
-  private double getWristEncoderDegrees() {
-    return getWristEncoderTicks()* WristConstants.kWristDegreesPerTick;
-  }
-
-  /**
-   * 
-   * @return current encoder ticks converted to degrees
-   */
-  public double getWristEncoderDegreesRaw() {
-    return getWristEncoderTicksRaw()* WristConstants.kWristDegreesPerTick;
-  }
-
-  /**
-	 * Returns the angle that wrist is currently positioned at in degrees.
-	 * If the wrist is not calibrated, then returns wristMax in keepout region to engage all interlocks,
-   * since we really don't know where the wrist is at.
-	 * @return current degree of wrist angle
-	 */
-  public double getWristAngle() {
-    if (wristCalibrated) {
-      double wristAngle = getWristEncoderDegrees();
-      wristAngle = wristAngle % 360; // If encoder wraps around 360 degrees
-      wristAngle = (wristAngle > 180) ? wristAngle - 360 : wristAngle; // Change range to -180 to +180
-      // wristAngle = (wristAngle <= -180) ? wristAngle + 360 : wristAngle; // Change range to -180 to +180  THIS LINE OF CODE DOESN'T WORK!!!!
-      return wristAngle;
-    } else {
-      // Wrist is not calibrated.  Assume we are at back angle in keepout region to engage all interlocks,
-      // since we really don't know where the wrist is at.
-      return WristConstants.WristAngle.lowerLimit.value;
     }
   }
 
   /**
 	 * Returns the angle that wrist is trying to move to in degrees.
-	 * If the wrist is not calibrated, then returns wristMax in keepout region to engage all interlocks,
+	 * If the wrist is not calibrated, then returns wrist lowerLimit in backFar region to engage all interlocks,
    * since we really don't know where the wrist is at.  If the wrist is in manual control mode, then
    * returns the actual wrist position.
 	 * @return desired degree of wrist angle
@@ -318,26 +198,104 @@ public class Wrist extends SubsystemBase implements Loggable{
         // angle may be undefined).  So, get the actual wrist angle instead.
         currentTarget = getWristAngle();
       }
-
-      currentTarget = currentTarget % 360; // If encoder wraps around 360 degrees
-      currentTarget = (currentTarget > 180) ? currentTarget - 360 : currentTarget; // Change range to -180 to +180
-
       return currentTarget;
     } else {
       // Wrist is not calibrated.  Assume we are at back angle in keepout region to engage all interlocks,
       // since we really don't know where the wrist is at.
-      return WristConstants.WristAngle.lowerLimit.value;
+      return WristAngle.lowerLimit.value;
     }
   }
 
+	// ************ Wrist region methods
+
+ 	/**
+   * For use in the wrist subsystem only.  Use getWristRegion() when calling from outside this class.
+	 * <p>Returns the wrist region for a given angle.
+   * @param degrees angle in degrees
+	 * @return corresponding wrist region
+	 */
+	private WristRegion getRegion(double degrees) {
+      if (degrees <= WristConstants.boundBackFarMid) return WristRegion.backFar;
+      else if (degrees < WristConstants.boundBackMidDown) return WristRegion.backMid;
+      else if (degrees <= WristConstants.boundDownMain) return WristRegion.down;
+      else return WristRegion.main;
+	}
 
 	/**
-	 * Returns the wrist region that the wrist is currently in.  If the wrist is moving between regions, value will return "back".
+	 * Returns the wrist region that the wrist is currently in.  If the wrist is moving between regions, the
+   * value will return the more restrictive of the two regions.
 	 * @return current wristRegion
 	 */
 	public WristRegion getWristRegion() {
-		return WristRegion.main;   //curWristRegion;    // TODO fix this!!!!!!
+    if (!wristCalibrated) {
+      return WristRegion.uncalibrated;
+    }
+
+    WristRegion curRegion = getRegion(getWristAngle());
+
+    if (wristMotor.getControlMode() == ControlMode.Position) {
+      WristRegion targetRegion = getRegion(safeAngle);
+
+      if (curRegion == WristRegion.backMid) {
+        if (targetRegion == WristRegion.backFar) curRegion = WristRegion.backFar;
+        if (targetRegion == WristRegion.down || targetRegion == WristRegion.main) curRegion = WristRegion.down;
+      }
+
+      if (curRegion == WristRegion.main) {
+        if (targetRegion != WristRegion.main) curRegion = WristRegion.down;
+      }
+    }
+      
+    return curRegion;
 	}
+
+	// ************ Internal Falcon encoder methods
+
+  /**
+   * 
+   * @return raw encoder ticks, adjusted direction (positive is towards stowed, negative is towards lower hard stop)
+   */
+  public double getWristEncoderTicksRaw() {
+    return wristMotor.getSelectedSensorPosition(0);
+  }
+
+  /**
+   * Converts the wrist position in degrees to raw encoder ticks.  Assumes that the encoder is calibrated.
+   * @param degrees wrist position in degrees
+   * @return wrist position in encoder ticks
+   */
+  private double wristDegreesToEncoderTickPosition(double degrees) {
+    return (degrees + wristCalZero) / WristConstants.kWristDegreesPerTick;
+  }
+
+  /**
+   * For use in the wrist subsystem only.  Use getWristAngle() when calling from outside this class.
+   * Assumes that the encoder is calibrated.
+   * <p>Gets the current wrist angle from the Falcon encoder.
+   * @return current encoder ticks (based on zero) converted to degrees
+   */
+  private double getWristEncoderDegrees() {
+    // DO NOT normalize this angle.  It should not wrap, since the wrist mechanically can not cross the -180/+180 deg point
+    return getWristEncoderTicksRaw()* WristConstants.kWristDegreesPerTick - wristCalZero;
+  }
+
+  /**
+	 * Returns the angle that wrist is currently positioned at in degrees.
+	 * If the wrist is not calibrated, then returns wrist lowerLimit in backFar region to engage all interlocks,
+   * since we really don't know where the wrist is at.
+	 * @return current degree of wrist angle
+	 */
+  public double getWristAngle() {
+    if (wristCalibrated) {
+      return getWristEncoderDegrees();
+    } else {
+      // Wrist is not calibrated.  Assume we are at back angle in keepout region to engage all interlocks,
+      // since we really don't know where the wrist is at.
+      return WristAngle.lowerLimit.value;
+    }
+  }
+
+  // ************ Internal Falcon encoder calibration methods
 
   /**
 	 * returns whether encoder is calibrated or not
@@ -347,13 +305,53 @@ public class Wrist extends SubsystemBase implements Loggable{
 		return wristCalibrated;
   }
 
-  /**
-	 * Set the wrist encoder position to zero in software.
+	/**
+	 * Stops wrist motor and sets wristCalibrated to false
 	 */
-  public void zeroWristEncoder() {
-    wristEncoderZero = wristMotor.getSelectedSensorPosition();
-    log.writeLogEcho(true, subsystemName, "ZeroDriveEncoder", "wristEncoderZero", wristEncoderZero, "raw encoder", getWristEncoderDegreesRaw(), "encoder degrees", getWristAngle());
-  }
+	public void setWristUncalibrated() {
+		stopWrist();
+		wristCalibrated = false;
+
+    log.writeLog(false, "Wrist", "Uncalibrate wrist", 
+      "Rev angle", getRevEncoderDegrees(), "Enc Raw", getWristEncoderTicksRaw(),
+			"Wrist Angle", getWristAngle(), "Wrist Target", getCurrentWristTarget());
+	}
+
+  /**
+   * Calibrates the wrist encoder, assuming we know the wrist's current angle
+   * @param angle current angle that the wrist is physically at, in degrees
+   */
+  public void calibrateWristEnc(double angle) {
+		stopWrist();	// Stop motor, so it doesn't jump to new value
+
+    wristCalZero = getWristEncoderTicksRaw()* WristConstants.kWristDegreesPerTick - angle;
+		wristCalibrated = true;
+
+    log.writeLog(false, "Wrist", "Calibrate wrist", "zero value", wristCalZero, 
+			"Rev angle", getRevEncoderDegrees(), "Enc Raw", getWristEncoderTicksRaw(),
+			"Wrist Angle", getWristAngle(), "Wrist Target", getCurrentWristTarget());
+  }  
+  
+	/**
+	 * If the angle is reading >/< max/min angle, add/subtract 360 degrees to the wristCalZero accordingly
+	 * Note: when the motor is not inverted, upon booting up, an absolute encoder reads a value between 0 and 2048
+	 * 		 when the motor is inverted, upon booting up, an absolute encoder reads a value between 0 and -2048????  (that was true for mag-encoder.  is it true for Falcon internal encoder?)
+	 * Note: absolute encoder values don't wrap during operation
+	 */
+	// public void adjustWristCalZero() {
+  //   log.writeLogEcho(false, subsystemName, "Adjust wrist pre", "wrist angle", getWristAngle(), 
+  //     "raw ticks", getWristEncoderTicksRaw(), "wristCalZero", wristCalZero);
+	// 	if(getWristAngle() < WristAngle.lowerLimit.value - 15.0) {
+  //     log.writeLogEcho(false, subsystemName, "Adjust wrist", "Below min angle");
+	// 		wristCalZero -= WristConstants.kEncoderCPR;
+	// 	}
+	// 	else if(getWristAngle() > WristAngle.upperLimit.value + 10.0) {
+  //     log.writeLogEcho(false, subsystemName, "Adjust wrist", "Above max angle");
+	// 		wristCalZero += WristConstants.kEncoderCPR;
+	// 	}
+  //   log.writeLogEcho(false, subsystemName, "Adjust wrist post", "wrist angle", getWristAngle(), 
+  //     "raw ticks", getWristEncoderTicksRaw(), "wristCalZero", wristCalZero);
+	// }
 
  	// ************ REV through-bore encoder methods
 
@@ -413,26 +411,25 @@ public class Wrist extends SubsystemBase implements Loggable{
   
   @Override
   public void periodic() {
-
-    if (fastLogging || log.isMyLogRotation(logRotationKey)) {
+    if (log.isMyLogRotation(logRotationKey)) {
       SmartDashboard.putBoolean("Wrist Rev connected", isRevEncoderConnected());
       SmartDashboard.putBoolean("Wrist calibrated", wristCalibrated);
       SmartDashboard.putNumber("Wrist Rev angle", getRevEncoderDegrees());
       SmartDashboard.putNumber("Wrist angle", getWristAngle());
       SmartDashboard.putNumber("Wrist enc raw", getWristEncoderTicksRaw());
       SmartDashboard.putNumber("Wrist target angle", getCurrentWristTarget());
-      SmartDashboard.putNumber("Wrist voltage", wristMotor.getBusVoltage());
+      SmartDashboard.putNumber("Wrist output", wristMotor.getMotorOutputPercent());
     }
         
-    // Un-calibrates the wrist if the angle is outside of bounds
-    // TODO CALIBRATE
-    if (getWristAngle() > WristConstants.WristAngle.upperLimit.value + 10.0 || getWristAngle() < WristConstants.WristAngle.lowerLimit.value - 10.0) {
-      setWristUncalibrated();
-      updateWristLog(true);
-    }
-
     if (fastLogging || log.isMyLogRotation(logRotationKey)) {
       updateWristLog(false);
+    }
+
+    // Un-calibrates the wrist if the angle is outside of bounds
+    // TODO CALIBRATE
+    if (getWristAngle() > WristAngle.upperLimit.value + 10.0 || getWristAngle() < WristAngle.lowerLimit.value - 10.0) {
+      setWristUncalibrated();
+      updateWristLog(true);
     }
   }
  
