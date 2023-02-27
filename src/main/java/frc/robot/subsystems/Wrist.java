@@ -56,7 +56,7 @@ public class Wrist extends SubsystemBase implements Loggable{
     wristMotor.configFactoryDefault(100);
     wristMotor.configAllSettings(CTREConfigs.wristFXConfig, 100);
     wristMotor.selectProfileSlot(0, 0);
-    wristMotor.setInverted(false);
+    wristMotor.setInverted(true);           // Motor needs to be inverted due to config on robot
     wristMotor.enableVoltageCompensation(true);
     wristMotor.setNeutralMode(NeutralMode.Brake);
 

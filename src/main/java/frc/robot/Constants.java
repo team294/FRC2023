@@ -60,10 +60,10 @@ public final class Constants {
 
         public static final int CANElevatorMotor = 21;      //TODO CHANGE NUMBER TO REAL PORT 
         // public static final int CANElevatorMotor2 = 22;
-        public static final int CANWristMotor = 23;         //TODO CHANGE NUMBER TO REAL PORT 
+        public static final int CANWristMotor = 45; 
 
         public static final int CANGrabber = 44;
-        public static final int CANManipulator = 45; //TODO CHANGE NUMBER TO REAL PORT 
+        public static final int CANManipulator = 43; 
 
         // Digital IO ports
         public static final int DIOWristRevThroughBoreEncoder = 0;
@@ -182,16 +182,16 @@ public final class Constants {
 
       public static final class WristConstants {
         public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
-        public static final double kWristGearRatio = (50.0 / 1.0);       // TODO.  From CAD, should be 50:1.  Gear reduction ratio between Falcon and gear driving the wrist (planetary and chain gears)
-        public static final double kWristDegreesPerTick =  360.0 / kEncoderCPR / kWristGearRatio;
+        public static final double kWristGearRatio = (50.0 / 1.0);       // From CAD, should be 50:1.  Gear reduction ratio between Falcon and gear driving the wrist (planetary and chain gears)
+        public static final double kWristDegreesPerTick =  360.0 / kEncoderCPR / kWristGearRatio * 0.9726;      // CALIBRATED (fudge factor 0.9726)
 
-        public static final double maxUncalibratedPercentOutput = 0.10;     // TODO CALIBRATE
+        public static final double maxUncalibratedPercentOutput = 0.05;     // CALIBRATED
 
         // Update the REV through bore encoder offset angle in RobotPreferences (in Shuffleboard), not in this code!
         // After updating in RobotPreferences, you will need to re-start the robot code for the changes to take effect.
         // When calibrating offset, 0 deg should be with the CG of the wrist horizontal facing away from the robot,
         // and -90 deg is with the CG of the wrist resting downward.
-        public static double revEncoderOffsetAngleWrist = 0;    // 69.0 deg (TODO VERIFY)
+        public static double revEncoderOffsetAngleWrist = 0;    // ~69.0 deg (TODO Read from RobotPreferences and record here)
 
         public static final double kG = 0.075;   // TODO CALIBRATE.  Feed foward percent-out to add to hold arm horizontal (0 deg)
 
@@ -212,14 +212,14 @@ public final class Constants {
         // 0 degrees = horizontal (in front of robot) relative to wrist center of gravity
         // -90 degrees = vertical = wrist is hanging "down" naturally due to gravity
         public enum WristAngle {
-            lowerLimit(-120.0),      // TODO CALIBRATE 
+            lowerLimit(-126.0),      // CALIBRATED
             loadConveyor(-115.0),    // TODO Define positions and calibrate
             startConfig(-70.0),
             elevatorMoving(-45.0),
             loadHumanStation(0.0),
             scoreLow(0.0),
             scoreMidHigh(10.0),
-            upperLimit(15.0);       // TODO CALIBRATE
+            upperLimit(32.0);       // CALIBRATED
             // score low 5 inches
             @SuppressWarnings({"MemberName", "PMD.SingularField"})
             public final double value;
