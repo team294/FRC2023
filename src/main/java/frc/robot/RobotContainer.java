@@ -26,8 +26,8 @@ import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.Constants.CoordType;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.StopType;
-import frc.robot.Constants.WristConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
+import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.commands.*;
 import frc.robot.commands.autos.*;
 import frc.robot.subsystems.*;
@@ -148,10 +148,9 @@ public class RobotContainer {
     SmartDashboard.putData("Elevator Move To Bottom", new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
     
     //Wrist Commands
-    SmartDashboard.putData("Wrist Stowed Position", new WristMoveToPosition(WristConstants.stowed, wrist, log));
-    SmartDashboard.putData("Wrist Straight Position", new WristMoveToPosition(WristConstants.straight, wrist, log));
-    SmartDashboard.putData("Wrist Scoring Position", new WristMoveToPosition(WristConstants.scoreCargo, wrist, log));//Need to find correct value
-    SmartDashboard.putData("Wrist Vision Position", new WristMoveToPosition(WristConstants.vision, wrist, log));//Need to find correct value
+    SmartDashboard.putData("Wrist Stowed Position", new WristSetAngle(WristAngle.startConfig, wrist, log));
+    SmartDashboard.putData("Wrist ElevMove Position", new WristSetAngle(WristAngle.elevatorMoving, wrist, log));
+    SmartDashboard.putData("Wrist Scoring Position", new WristSetAngle(WristAngle.scoreMidHigh, wrist, log));
     SmartDashboard.putData("Wrist Set Angle", new WristSetAngle(wrist, log));
     SmartDashboard.putData("Wrist Set Output", new WristSetPercentOutput(wrist, log));
 

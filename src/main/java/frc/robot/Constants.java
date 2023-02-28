@@ -70,12 +70,13 @@ public final class Constants {
 
         public static final int CANElevatorMotor = 21;      //TODO CHANGE NUMBER TO REAL PORT 
         // public static final int CANElevatorMotor2 = 22;
-        public static final int CANWristMotor = 23;         //TODO CHANGE NUMBER TO REAL PORT 
+        public static final int CANWristMotor = 45; 
 
         public static final int CANGrabber = 44;
-        public static final int CANManipulator = 45; //TODO CHANGE NUMBER TO REAL PORT 
+        public static final int CANManipulator = 43; 
 
         // Digital IO ports
+        public static final int DIOWristRevThroughBoreEncoder = 0;
         public static final int DIOManipulatorCubeSensor = 5; //TODO PLACE HOLDER SET TO CORRET PORT
         public static final int DIOManipulatorConeSensor = 6; //TODO PLACE HOLDER SET TO CORRECT PORT
 
@@ -212,36 +213,50 @@ public final class Constants {
         public static final double targetSideLength = Units.inchesToMeters(6);
     }
       public static final class WristConstants {
-        public static double offsetAngleWrist = 0;
-        // Wrist Angles (in degrees)
-        // TODO Find these values
-        public static final double max = 113.0;		// Location of upper limit switch for auto calibration
-        public static final double stowed = 0; // Starting angle
-        // public static final double wristKeepOut = 28.0; // Max angle to avoid interference with elevator(Maybe necessary)
-        public static final double scoreCargo = 100; // Angle to score cargo
-        public static final double loadCargoStation = -45; // Angle to pick up cargo from loading station
-        public static final double loadCargoGround = 0; // Angle to pick up cargo from ground intake
-        // public static final double wristMinWhenElevatorLow = -45.0;   // If the elevator is in the groundCargo position, don't move the wrist below this!
-        public static final double straight = 90;	//  needed to bias upward to account for sag and insure that hatch cover gripper engages first
-        // public static final double wristDown = -60.0;		// In this position, elevator must be able to go to groundCargo (Not sure we need this)
-        public static final double vision = 60;    // wrist angle for optimal vision tracking (Maybe to keep out of the way of camera? Might not be necessary)
-        public static final double min = -61.0;			// Location of lower limit switch for auto calibration
-        // public static final double wristMax = 113.0;		// Location of upper limit switch for auto calibration
-        // public static final double wristStowed = 110.0;
-        // public static final double wristKeepOut = 28.0; // Max angle to avoid interference with elevator or climber
-        // public static final double wristUp = 15.0;
-        // public static final double wristStraight = -1.0;	//  needed to bias upward to account for sag and insure that hatch cover gripper engages first
-        // public static final double wristVision = -5.0;    // wrist angle for optimal vision tracking
-        // public static final double wristCargoShot = -30.0;	// Angle for wrist for cargo ship ball shot
-        // public static final double wristLowerCrashWhenElevatorLow = -45.0;   // If the elevator is in the low position, don't move the wrist below this!
-        // public static final double wristDown = -60.0;		 // In this position, elevator must be able to go to groundCargo
-        // public static final double wristMin = -61.0;			// Location of lower limit switch for auto calibration
-        public enum WristAngle {stowed, loadCargoStation, loadCargoGround, scoreCargo, straight, vision}
-        // public enum WristAngle {stowed, up, straight, scoreCargo, vision, down}
-        public static final double encoderTicksPerRevolution = 4096.0; // Neo ticks per revolution?
-            
+        public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
+        public static final double kWristGearRatio = (50.0 / 1.0);       // From CAD, should be 50:1.  Gear reduction ratio between Falcon and gear driving the wrist (planetary and chain gears)
+        public static final double kWristDegreesPerTick =  360.0 / kEncoderCPR / kWristGearRatio * 0.9726;      // CALIBRATED (fudge factor 0.9726)
+
+        public static final double maxUncalibratedPercentOutput = 0.05;     // CALIBRATED
+
+        // Update the REV through bore encoder offset angle in RobotPreferences (in Shuffleboard), not in this code!
+        // After updating in RobotPreferences, you will need to re-start the robot code for the changes to take effect.
+        // When calibrating offset, 0 deg should be with the CG of the wrist horizontal facing away from the robot,
+        // and -90 deg is with the CG of the wrist resting downward.
+        public static double revEncoderOffsetAngleWrist = 0;    // ~69.0 deg (TODO Read from RobotPreferences and record here)
+
+        public static final double kG = 0.075;   // TODO CALIBRATE.  Feed foward percent-out to add to hold arm horizontal (0 deg)
+
         // Wrist regions
-        public enum WristRegion {back, main, uncalibrated}  
+        public enum WristRegion {
+            backFar,        // In the wrist backFar region, the elevator must be in the bottom region (not allowed to go to elevator main or low regions).
+            backMid,        // In the wrist backMid region, the elevator may be in any elevator region.
+            down,           // Wrist pointed down, the elevator must be in the main region.
+            main,           // In the wrist main region, the elevator may be in any elevator region.
+            uncalibrated    // Unknown region, wrist is not calibrated
+        } 
+        // Wrist region boundaries
+        public static final double boundBackFarMid = -110.0;      // Boundary between backFar and backMid regions.  TODO CALIBRATE
+        public static final double boundBackMidDown = -100.0;      // Boundary between backMid and down regions.  TODO CALIBRATE
+        public static final double boundDownMain = -80.0;      // Boundary between down and main regions.  TODO CALIBRATE
+
+        // Wrist pre-defined angles (in degrees)
+        // 0 degrees = horizontal (in front of robot) relative to wrist center of gravity
+        // -90 degrees = vertical = wrist is hanging "down" naturally due to gravity
+        public enum WristAngle {
+            lowerLimit(-126.0),      // CALIBRATED
+            loadConveyor(-115.0),    // TODO Define positions and calibrate
+            startConfig(-70.0),
+            elevatorMoving(-45.0),
+            loadHumanStation(0.0),
+            scoreLow(0.0),
+            scoreMidHigh(10.0),
+            upperLimit(32.0);       // CALIBRATED
+            // score low 5 inches
+            @SuppressWarnings({"MemberName", "PMD.SingularField"})
+            public final double value;
+            WristAngle(double value) { this.value = value; }
+        }
       }
 
       public static final class ElevatorConstants {
@@ -256,10 +271,12 @@ public final class Constants {
         // Elevator regions
         public enum ElevatorRegion {
             bottom,     // In the elevator bottom region, the wrist may be in any wrist region.
+            low,        // TODO implement this code!!!!!
             main,       // In the elevator main region, the wrist must be in the wrist main region (not allowed to go to wrist back region).
             uncalibrated;       // Unknown region, elevator is not calibrated.
-        }     
+        }
         // Elevator region boundaries
+        // TODO fix boundaries to add low region!!!!
         public static final double mainBottom = 2.0;      // Boundary between bottom and main regions.  TODO CALIBRATE
 
         // Elevator pre-defined positions (in inches from bottom of elevator)
@@ -268,8 +285,8 @@ public final class Constants {
             bottom(0.0),            // CALIBRATED
             loadingStation(20.0),   // CALIBRATED
             scoreLow(5.0),          // CALIBRATED
-            scoreMid(21.0),         // CALIBRATED
-            scoreHigh(41.0),        // CALIBRATED
+            scoreMidCone(21.0),     // CALIBRATED
+            scoreHighCone(41.0),    // CALIBRATED
             upperLimit(45.4);       // CALIBRATED
             // score low 5 inches
             @SuppressWarnings({"MemberName", "PMD.SingularField"})
