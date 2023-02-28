@@ -7,7 +7,6 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Constants;
 import frc.robot.subsystems.Conveyor;
 import frc.robot.utilities.FileLog;
 
@@ -22,19 +21,18 @@ public class ConveyorMove extends CommandBase {
   public ConveyorMove(double speed, Conveyor conveyor, FileLog log) {
     this.conveyor = conveyor;
     this.log = log;
-    
-    this.speed = speed > Constants.ConveyorConstants.maxSpeedPercent?Constants.ConveyorConstants.maxSpeedPercent:speed;
+    fromShuffleboard = false;
+    this.speed = speed;
     addRequirements(conveyor);
     // Use addRequirements() here to declare subsystem dependencies.
   }
-  public ConveyorMove(boolean fromShuffleboard, double speed, Conveyor conveyor, FileLog log) {
+  public ConveyorMove(Conveyor conveyor, FileLog log) {
     this.conveyor = conveyor;
     this.log = log;
-    this.speed = speed;
-    this.fromShuffleboard = fromShuffleboard;
+    fromShuffleboard = true;
     addRequirements(conveyor);
-    if(SmartDashboard.getNumber("Conveyor Custom Percent", -9999) == -9999) {
-        SmartDashboard.putNumber("Conveyor Custom Percent", 0);
+    if(SmartDashboard.getNumber("Conveyor Percent", -9999) == -9999) {
+        SmartDashboard.putNumber("Conveyor Percent", 0);
     }
     // Use addRequirements() here to declare subsystem dependencies.
   }
@@ -43,10 +41,9 @@ public class ConveyorMove extends CommandBase {
   @Override
   public void initialize() {
     if(fromShuffleboard){
-        conveyor.setMotorPercentOutput(SmartDashboard.getNumber("Conveyor Custom Percent",0));
-    } else {
-        conveyor.setMotorPercentOutput(speed);
+        speed = SmartDashboard.getNumber("Conveyor Percent",0);
     }
+    conveyor.setMotorPercentOutput(speed);
     log.writeLog(false, conveyor.getName(), "conveyor activated");
   }
 
