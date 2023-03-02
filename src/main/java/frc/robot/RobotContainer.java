@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj.util.Color;
-
 import frc.robot.Constants.CoordType;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.StopType;
@@ -57,6 +56,7 @@ public class RobotContainer {
   private final Grabber grabber = new Grabber("Grabber", log);
   private final Manipulator manipulator = new Manipulator(log);
   private final LED led = new LED();
+  private final Conveyor conveyor = new Conveyor(log);
 
   // Define other utilities
   private final TrajectoryCache trajectoryCache = new TrajectoryCache(log);
@@ -163,6 +163,12 @@ public class RobotContainer {
     SmartDashboard.putData("LED OFF", new LEDSetStrip(Color.kBlack, 0, led, log));
     SmartDashboard.putData("LED Yellow", new LEDSetStrip(Color.kYellow, 1, led, log));
     SmartDashboard.putData("LED Purple", new LEDSetStrip(Color.kPurple, 1, led, log));
+
+    //Conveyor Commands
+    SmartDashboard.putData("Start Conveyor Custom Percent", new ConveyorMove(conveyor, log));
+    SmartDashboard.putData("Start Conveyor", new ConveyorMove(0.3, conveyor, log));
+    SmartDashboard.putData("Stop Conveyor", new ConveyorMove(0, conveyor, log));
+
 
     //Manipulator Commands
     SmartDashboard.putData("Manipulator Stop", new ManipulatorStopMotor(manipulator, log));
