@@ -22,6 +22,7 @@ public class ManipulatorGrab extends CommandBase {
 
     private double motorPercent = 0.0;
     // private double ampSensitivity = 0.0;
+    // * @param ampSensitivity [Double] minimum value sensitivity must change by to detect that manipulator has picked up object
    
     private BehaviorType behaviorType;
 
@@ -34,10 +35,10 @@ public class ManipulatorGrab extends CommandBase {
     waitForCone = wait for cone, then stop motor
     waitForCube = wait for cube, then stop motor
     waitForConeOrCube = wait for cone or cube then stop motor
+   * @param MotorPercent [Double] percent motors will be run at when command is initialized.   -1 (eject) to +1 (grab)
+   * @param BehaviorType [BehaviorType] enum that defines behavior of manipulator
    * @param Manipulator [Manipulator] manipulator object
-   * @param MotorPercent [Double] percent motors will be run at when command is initialized
-   * @param BehaviorType [BehaviorType] enum that defines behavior of manipulator (0-4)
-   * @param ampSensitivity [Double] minimum value sensitivity must change by to detect that manipulator has picked up object
+   * @param log
    */
   public ManipulatorGrab(double motorPercent, BehaviorType behaviorType,  Manipulator manipulator, FileLog log) {
     this.manipulator = manipulator;
@@ -66,7 +67,7 @@ public class ManipulatorGrab extends CommandBase {
       manipulator.setPistonCone(false);
 
     }
-    log.writeLog(false, "ManipulatorGet", "Start");
+    log.writeLog(false, "ManipulatorGet", "Start", "Percent", motorPercent, "Behavior", behaviorType);
 
 
   }
