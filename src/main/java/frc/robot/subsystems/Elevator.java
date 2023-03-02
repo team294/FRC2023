@@ -157,9 +157,9 @@ public class Elevator extends SubsystemBase implements Loggable{
 			pos = MathUtil.clamp(pos, ElevatorPosition.lowerLimit.value, ElevatorPosition.upperLimit.value);
 
 			// Do not move the elevator out of the bottom region if the wrist is not in the main region (interlock to prevent crashing).
-			if (wrist.getWristRegion() != WristRegion.main && pos > ElevatorConstants.mainBottom) {
-				pos = ElevatorConstants.mainBottom;
-			}
+			// if (wrist.getWristRegion() != WristRegion.main && pos > ElevatorConstants.mainBottom) {
+			// 	pos = ElevatorConstants.mainBottom;
+			// }
 
 			elevatorProfile.setProfileTarget(pos);
 
