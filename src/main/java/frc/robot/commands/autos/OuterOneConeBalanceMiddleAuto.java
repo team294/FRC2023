@@ -24,7 +24,8 @@ public class OuterOneConeBalanceMiddleAuto extends SequentialCommandGroup {
                 // Start at the origin facing the +X direction
                 new Pose2d(0, 0, new Rotation2d(0)),
                 // 
-                List.of(new Translation2d(-4.11, 0)),
+                List.of(),
+                // List.of(new Translation2d(-4.11, 0)),  //TODO Fix this -- malformed spline
                 // Pass through these two interior waypoints, making an 's' curve path
 
                 new Pose2d(-2.4, 0, new Rotation2d(0)),

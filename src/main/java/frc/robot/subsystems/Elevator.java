@@ -56,13 +56,16 @@ public class Elevator extends SubsystemBase implements Loggable{
 		this.wrist = wrist;								// Save the wrist subsystem (so elevator can get wrist status)
 		wrist.saveElevatorObject(this);					// Pass elevator subsystem to wrist (so wrist can get elevator status)
 
+		// create elevator motion profile object (do this first, used in "checkAndZeroElevatorEnc")
+		elevatorProfile = new ElevatorProfileGenerator(this, log);	
+
 		// configure motor
 		elevatorMotor.configFactoryDefault(100);
 		elevatorMotor.configAllSettings(CTREConfigs.elevatorFXConfig, 100);
 		elevatorMotor.selectProfileSlot(0, 0);
 		elevatorMotor.setInverted(true);
 		elevatorMotor.enableVoltageCompensation(true);
-		elevatorMotor.setNeutralMode(NeutralMode.Brake);
+		setMotorModeCoast(true);
 
 		// configure encoder on motor
 		elevatorMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 100);
@@ -88,9 +91,6 @@ public class Elevator extends SubsystemBase implements Loggable{
 		// start the elevator in manual mode unless it is properly zeroed
 		elevCalibrated = (isElevatorAtLowerLimit() && getElevatorEncTicks() == 0);
 
-		// create elevator motion profile object
-		elevatorProfile = new ElevatorProfileGenerator(this, log);	
-
 		// ensure the elevator starts in manual mode
 		stopElevator();
 	}
@@ -102,6 +102,17 @@ public class Elevator extends SubsystemBase implements Loggable{
 		return subsystemName;
 	}
 
+	/**
+	 * @param setCoast true = coast mode, false = brake mode
+	 */
+	public void setMotorModeCoast(boolean setCoast) {
+		if (setCoast) {
+			elevatorMotor.setNeutralMode(NeutralMode.Coast);
+		} else {
+			elevatorMotor.setNeutralMode(NeutralMode.Brake);
+		}
+	}
+	
 	// ************ Elevator movement methods
 
 	/**
@@ -239,6 +250,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 * @return current elevatorRegion
 	 */
 	public ElevatorRegion getElevatorRegion() {
+		// TODO change description/function:  If elevator is moving between regions, then return the most restrictive region (=low)
 		if (elevCalibrated) {
 			if (elevatorMotor.getMotorOutputPercent() > 0.0) {
 				return ElevatorRegion.main;		// Elevator is moving up.  For safety, assume we are in the main region
@@ -253,7 +265,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	/**
 	 * @return Current elevator velocity in in/s, + equals up, - equals down
 	 */
-	public double getElevatorVelocity() {			// TODO verify speed is correct
+	public double getElevatorVelocity() {
 		return elevatorMotor.getSelectedSensorVelocity(0) * ElevatorConstants.kElevEncoderInchesPerTick * 10.0;
 	}
 
@@ -281,7 +293,8 @@ public class Elevator extends SubsystemBase implements Loggable{
     */
 	public void updateElevatorLog(boolean logWhenDisabled) {
 		log.writeLog(logWhenDisabled, subsystemName, "Update Variables",
-				"Volts", elevatorMotor.getMotorOutputVoltage(), "Amps", elevatorMotor.getStatorCurrent(),
+				"Temp", elevatorMotor.getTemperature(),
+				"PctOut", elevatorMotor.getMotorOutputPercent(), "Amps", elevatorMotor.getStatorCurrent(),
 				"Enc Ticks", getElevatorEncTicks(), "Enc Inches", getElevatorPos(), 
 				"Elev Target", getCurrentElevatorTarget(), "Elev Vel", getElevatorVelocity(),
 				"Upper Limit", isElevatorAtUpperLimit(), "Lower Limit", isElevatorAtLowerLimit(),

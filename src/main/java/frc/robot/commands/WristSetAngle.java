@@ -7,36 +7,67 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.Robot;
-import frc.robot.subsystems.Elevator;
+import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.subsystems.Wrist;
 import frc.robot.utilities.FileLog;
 
 public class WristSetAngle extends CommandBase {
 
-  private double target;
-  private final double angle;
+  private double angle;
   private final Wrist wrist;
   private final FileLog log;
+  private final boolean fromShuffleboard;
 
   /**
    * Moves wrist to target angle
-   * @param angle target angle in degrees
+   * @param angle target angle in degrees.  (0 = horizontal in front of robot, + = up, - = down)
    */
   public WristSetAngle(double angle, Wrist wrist, FileLog log) {
     this.angle = angle;
     this.wrist = wrist;
     this.log = log;
+    fromShuffleboard = false;
 
+    addRequirements(wrist);
+  }
+
+  /**
+   * Moves wrist to target position
+   * @param position WristAngle (see Constants)
+   */
+  public WristSetAngle(WristAngle pos, Wrist wrist, FileLog log) {
+    angle = pos.value;
+    this.wrist = wrist;
+    this.log = log;
+    fromShuffleboard = false;
+
+    addRequirements(wrist);
+  }
+
+  /**
+   * Moves wrist to target angle from Shuffleboard
+   */
+  public WristSetAngle(Wrist wrist, FileLog log) {
+    this.wrist = wrist;
+    this.log = log;
+    fromShuffleboard = true;
+
+    if(SmartDashboard.getNumber("Wrist Angle to set", -9999) == -9999) {
+      SmartDashboard.putNumber("Wrist Angle to set", 0);
+    }
     addRequirements(wrist);
   }
 
   // Called just before this Command runs the first time
   @Override
   public void initialize() {
-    wrist.setWristAngle(target + wrist.getCurrentWristTarget());
-    log.writeLog(false, "WristSetAngle", "Initialize", "Target", target + wrist.getCurrentWristTarget());
+    if(fromShuffleboard){
+      angle = SmartDashboard.getNumber("Wrist Angle to set", 0);
+    }
+    wrist.setWristAngle(angle);
+    log.writeLog(false, "WristSetAngle", "Initialize", "Target", angle);
   }
 
   // Called repeatedly when this Command is scheduled to run
