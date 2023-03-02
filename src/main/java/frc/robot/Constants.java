@@ -156,6 +156,12 @@ public final class Constants {
         public static double offsetAngleFrontRightMotor = 0; // -12.8
         public static double offsetAngleBackLeftMotor = 0; // -107.6
         public static double offsetAngleBackRightMotor = 0; // -170.2
+
+        // Driving constants to cap acceleration
+        public static final double maxXSpeedWithElevatorUp = 1.0;       // m/s
+        public static final double maxAccelerationRate = 5.0;           // m/s^2
+        public static final double maxAccelerationRateWithElevatorUp = 2.0;           // m/s^2
+        public static final double maxRotationRateWithElevatorUp = 0.8;     // rad/sec
       }
 
       public static final class TrajectoryConstants {
