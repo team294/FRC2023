@@ -29,6 +29,7 @@ import frc.robot.Constants.StopType;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.commands.*;
+import frc.robot.commands.ManipulatorGrab.BehaviorType;
 import frc.robot.commands.autos.*;
 import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
@@ -162,6 +163,14 @@ public class RobotContainer {
     SmartDashboard.putData("LED OFF", new LEDSetStrip(Color.kBlack, 0, led, log));
     SmartDashboard.putData("LED Yellow", new LEDSetStrip(Color.kYellow, 1, led, log));
     SmartDashboard.putData("LED Purple", new LEDSetStrip(Color.kPurple, 1, led, log));
+
+    //Manipulator Commands
+    SmartDashboard.putData("Manipulator Stop", new ManipulatorStopMotor(manipulator, log));
+    SmartDashboard.putData("Manipulator Pick Up",new ManipulatorGrab(0.8, BehaviorType.waitForConeOrCube, manipulator, log));
+    SmartDashboard.putData("Manipulator Eject",new ManipulatorSetPercent(-0.5, manipulator, log));
+    SmartDashboard.putData("Manipulator Cone", new ManipulatorSetPistonPosition(true, led, manipulator, log));
+    SmartDashboard.putData("Manipulator Cube", new ManipulatorSetPistonPosition(false, led, manipulator, log));
+    SmartDashboard.putData("Manipulator Toggle", new ManipulatorTogglePiston(manipulator, led, log));
   }
 
   /**
@@ -359,8 +368,8 @@ public class RobotContainer {
       RobotPreferences.recordStickyFaults("RobotPreferences", log);
     }
 
-    compressor.disable();
-    // compressor.enableDigital();
+    // compressor.disable();
+    compressor.enableDigital();
 
     // Set initial robot position on field
     // This takes place a while after the drivetrain is created, so after any CanBus delays.
@@ -450,6 +459,6 @@ public class RobotContainer {
    * Method called once every scheduler cycle when teleop mode is initialized/enabled.
    */
   public void teleopPeriodic() {
-    
+
   }
 }
