@@ -65,8 +65,10 @@ public final class Constants {
         // public static final int CANElevatorMotor2 = 22;
         public static final int CANWristMotor = 45; 
 
-        public static final int CANGrabber = 44;
-        public static final int CANManipulator = 45; //TODO CHANGE NUMBER TO REAL PORT 
+        public static final int CANIntake = 40;
+        public static final int CANGrabber = 44;        //TODO REMOVE THE GRABBER
+        public static final int CANManipulator = 43; 
+        public static final int CANConveyor = 47;
 
         // Digital IO ports
         public static final int DIOWristRevThroughBoreEncoder = 0;
