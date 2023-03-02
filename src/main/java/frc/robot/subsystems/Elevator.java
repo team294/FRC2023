@@ -252,7 +252,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	public ElevatorRegion getElevatorRegion() {
 		// TODO change description/function:  If elevator is moving between regions, then return the most restrictive region (=low)
 		if (elevCalibrated) {
-			if (elevatorMotor.getMotorOutputPercent() > 0.0) {
+			if (elevatorMotor.getMotorOutputPercent() > 0.05) {
 				return ElevatorRegion.main;		// Elevator is moving up.  For safety, assume we are in the main region
 			} else {
 				return calcElevatorRegion(getElevatorPos());

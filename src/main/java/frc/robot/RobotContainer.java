@@ -51,11 +51,11 @@ public class RobotContainer {
   private final Field field = new Field(allianceSelection, log);
 
   // Define robot subsystems  
-  private final DriveTrain driveTrain = new DriveTrain(field, log);
-  private final Grabber grabber = new Grabber("Grabber", log);
-  private final Manipulator manipulator = new Manipulator(log);
   private final Wrist wrist = new Wrist(log);
   private final Elevator elevator = new Elevator(wrist, log);
+  private final DriveTrain driveTrain = new DriveTrain(field, elevator, log);
+  private final Grabber grabber = new Grabber("Grabber", log);
+  private final Manipulator manipulator = new Manipulator(log);
   private final LED led = new LED();
 
   // Define other utilities

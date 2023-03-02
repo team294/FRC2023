@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -30,6 +31,7 @@ import static frc.robot.Constants.DriveConstants.*;
 
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
 import frc.robot.utilities.*;
 
 // Vision imports
@@ -66,21 +68,26 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   private PhotonCameraWrapper camera;
 
   // Odometry class for tracking robot pose
-  SwerveDrivePoseEstimator poseEstimator; 
-  Field2d field = new Field2d();    // Field to dispaly on Shuffleboard
+  private final SwerveDrivePoseEstimator poseEstimator; 
+  private final Field2d field = new Field2d();    // Field to dispaly on Shuffleboard
 
   //Slew rate limiter
-  SlewRateLimiter filterX = new SlewRateLimiter(5.0); //0.5 is a placeholder, need to calibrate 
-  SlewRateLimiter filterY = new SlewRateLimiter(5.0); //0.5 is a placeholder, need to calibrate 
+  private final Elevator elevator;
+  private final SlewRateLimiter filterX = new SlewRateLimiter(5.0);
+  private final SlewRateLimiter filterY = new SlewRateLimiter(5.0);
+  private final SlewRateLimiter filterXSlow = new SlewRateLimiter(2.0);   // limiter in X direction when elevator is out
+  private final double maxXSpeedElevator = 1.0;
+  private boolean elevatorUp = false;
 
   /**
    * Constructs the DriveTrain subsystem
    * @param log FileLog object for logging
    */
-  public DriveTrain(Field fieldUtil, FileLog log) {
+  public DriveTrain(Field fieldUtil, Elevator elevator, FileLog log) {
     this.log = log; // save reference to the fileLog
-    this.camera = new PhotonCameraWrapper(fieldUtil, log);
     logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
+    this.camera = new PhotonCameraWrapper(fieldUtil, log);
+    this.elevator = elevator;
 
     // create swerve modules
     swerveFrontLeft = new SwerveModule( "FL",
@@ -262,10 +269,29 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     // Convert states to chassisspeeds
     ChassisSpeeds chassisSpeeds = kDriveKinematics.toChassisSpeeds(desiredStates);
     
-    // x slew rate limit chassisspeed
-    double xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
     // y slew rate limit chassisspeed
     double ySlewed = filterY.calculate(chassisSpeeds.vyMetersPerSecond);
+
+    double xSlewed;
+    if (elevator.getElevatorRegion()==ElevatorRegion.bottom) {
+      // Elevator is down.  We can X-travel at full speed
+      if (elevatorUp) {
+        // Elevator was up but is now down.  Reset the fast slew rate limiter
+        filterX.reset(getChassisSpeeds().vxMetersPerSecond);
+      }
+      elevatorUp = false;
+      // x slew rate limit chassisspeed
+      xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
+    } else {
+      // Elevator is up.  X-travel slowly!
+      if (!elevatorUp) {
+        // Elevator was down but is now up.  Reset the slow slew rate limiter
+        filterXSlow.reset(getChassisSpeeds().vxMetersPerSecond);
+      }
+      elevatorUp = true;
+      // x slew rate limit chassisspeed
+      xSlewed = filterXSlow.calculate(MathUtil.clamp(chassisSpeeds.vxMetersPerSecond, -maxXSpeedElevator, maxXSpeedElevator));
+    }
 
     // convert back to swervem module states
     desiredStates = kDriveKinematics.toSwerveModuleStates(new ChassisSpeeds(xSlewed, ySlewed, chassisSpeeds.omegaRadiansPerSecond), new Translation2d());
