@@ -17,6 +17,7 @@ public class ManipulatorSetPistonPosition extends CommandBase {
   private final FileLog log;
 
   private final LED led;
+
   /**
    * Sets piston position to handle either cone or cube
    * @param cone true = cone, false = cube
@@ -42,7 +43,7 @@ public class ManipulatorSetPistonPosition extends CommandBase {
     } else {
       new LEDSetStrip(Color.kPurple, led, log);
     }
-    log.writeLog(false, "ManipulatorSetPistonCone", "Initialize");
+    log.writeLog(false, "ManipulatorSetPistonCone", "Initialize", "Set to cone", cone);
   }
 
   // Called every time the scheduler runs while the command is scheduled.

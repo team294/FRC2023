@@ -45,10 +45,10 @@ public class Manipulator extends SubsystemBase implements Loggable {
     logRotationKey = log.allocateLogRotation();
 
     motor.setNeutralMode(NeutralMode.Coast);
-    motor.setInverted(false);      
+    motor.setInverted(false);
+    motor.configVoltageCompSaturation(12.0, 100);
     motor.enableVoltageCompensation(true);
-    // motor.setOpenLoopRampRate(0.05);    //seconds from neutral to full
-    // motor.setClosedLoopRampRate(0.05);  //seconds from neutral to full
+    motor.configOpenloopRamp(0.3, 100);
   }
 
   /**
@@ -76,8 +76,8 @@ public class Manipulator extends SubsystemBase implements Loggable {
   }
 
   /**
-   * Sets the percent of the motor
-   * @param percent
+   * Sets the pecent power of the manipulator
+   * @param percent -1 (eject) to +1 (grab)
    */
   public void setMotorPercentOutput(double percent){
     motor.set(ControlMode.PercentOutput, percent);
@@ -141,16 +141,19 @@ public class Manipulator extends SubsystemBase implements Loggable {
     // This method will be called once per scheduler run
     if(fastLogging || log.isMyLogRotation(logRotationKey)) {
       updateManipulatorLog(false);
+    }
+
+    if(log.isMyLogRotation(logRotationKey)) {
       // Update data on SmartDashboard
       SmartDashboard.putNumber("Manipulator Amps", motor.getStatorCurrent());
-      SmartDashboard.putNumber("Manipulator Bus Volt", motor.getBusVoltage());
       SmartDashboard.putNumber("Manipulator Out Percent", motor.getMotorOutputPercent());
-      SmartDashboard.putNumber("Manipulator Temperature", motor.getTemperature());
+      SmartDashboard.putNumber("Manipulator Temp", motor.getTemperature());
       SmartDashboard.putBoolean("Manipulator Cone", pistonCone);
       SmartDashboard.putBoolean("Cone Sensor", isConePresent());
       SmartDashboard.putBoolean("Cube Sensor", isCubePresent());
     }
-    pistonCone = pneumaticDoubleSolenoid.get() == Value.kForward;
+
+    // pistonCone = pneumaticDoubleSolenoid.get() == Value.kForward;
   }
 
   /**
@@ -160,10 +163,12 @@ public class Manipulator extends SubsystemBase implements Loggable {
   public void updateManipulatorLog(boolean logWhenDisabled){
     log.writeLog(logWhenDisabled, subsystemName, "Update Variables",
     "Bus Volt", motor.getBusVoltage(),
+    "Temperature", motor.getTemperature(),
     "Out Percent", motor.getMotorOutputPercent(),
     "Amps", motor.getStatorCurrent(),
-    "Temperature", motor.getTemperature(),
-    "Piston cone", getPistonCone()
+    "Piston cone", getPistonCone(),
+    "Cone sensor", isConePresent(),
+    "Cube sensor", isCubePresent()
     );
   }
 

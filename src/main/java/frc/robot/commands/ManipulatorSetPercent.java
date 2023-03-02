@@ -14,6 +14,12 @@ public class ManipulatorSetPercent extends CommandBase {
   private final Manipulator manipulator;
   private final FileLog log;
 
+  /**
+   * Sets the speed of the manipulator
+   * @param percent -1 (eject) to +1 (grab)
+   * @param manipulator
+   * @param log
+   */
   public ManipulatorSetPercent(double percent, Manipulator manipulator, FileLog log) {
     this.percent = percent;
     this.manipulator = manipulator;
@@ -26,7 +32,7 @@ public class ManipulatorSetPercent extends CommandBase {
   @Override
   public void initialize() {
     manipulator.setMotorPercentOutput(percent);
-    log.writeLog(false, "ManipulatorEject", "Initialize");
+    log.writeLog(false, "ManipulatorSetPercent", "Initialize", "Percent", percent);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
