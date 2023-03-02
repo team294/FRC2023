@@ -48,9 +48,10 @@ public class RobotContainer {
   private final FileLog log = new FileLog("A1");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
   private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
+  private final Field field = new Field(allianceSelection, log);
 
   // Define robot subsystems  
-  private final DriveTrain driveTrain = new DriveTrain(log);
+  private final DriveTrain driveTrain = new DriveTrain(field, log);
   private final Grabber grabber = new Grabber("Grabber", log);
   private final Manipulator manipulator = new Manipulator(log);
   private final Wrist wrist = new Wrist(log);
@@ -60,7 +61,6 @@ public class RobotContainer {
   // Define other utilities
   private final TrajectoryCache trajectoryCache = new TrajectoryCache(log);
   private final AutoSelection autoSelection = new AutoSelection(trajectoryCache, allianceSelection, log);
-  private final Field field = new Field(driveTrain, manipulator, allianceSelection, log);
 
   // Define controllers
   // private final Joystick xboxController = new Joystick(OIConstants.usbXboxController); //assuming usbxboxcontroller is int
@@ -126,7 +126,7 @@ public class RobotContainer {
             )
           ),
           driveTrain, log));
-    SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal()), driveTrain, log));
+    SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
 
     // Testing for autos
     SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
@@ -423,6 +423,7 @@ public class RobotContainer {
     log.writeLogEcho(true, "Auto", "Mode Init");
 
     driveTrain.setDriveModeCoast(false);
+    driveTrain.cameraInit();
     elevator.setMotorModeCoast(false);
 
     if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
@@ -449,6 +450,7 @@ public class RobotContainer {
     log.writeLogEcho(true, "Teleop", "Mode Init");
 
     driveTrain.setDriveModeCoast(false);
+    driveTrain.cameraInit();
     elevator.setMotorModeCoast(false);
 
     if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();

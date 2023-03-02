@@ -3,11 +3,15 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
+
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-
+import edu.wpi.first.math.util.Units;
 import frc.robot.utilities.TrapezoidProfileBCR;
 
 /**
@@ -181,7 +185,30 @@ public final class Constants {
             SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare);
       }
 
-      public static final class WristConstants {
+    public static class FieldConstants {
+        public static final double length = Units.feetToMeters(54);
+        public static final double width = Units.feetToMeters(27);
+    }
+
+    public static class VisionConstants {
+
+        public static final Transform3d robotToCam =
+                new Transform3d(
+                        new Translation3d(Units.inchesToMeters(6.0), 0.0, Units.inchesToMeters(30.5)),
+                        new Rotation3d(
+                                0, 0,
+                                0)); // Cam mounted facing forward in center of robot
+                // new Transform3d(
+                //         new Translation3d(0.5, 0.0, 0.5),
+                //         new Rotation3d(
+                //                 0, 0,
+                //                 0)); // Cam mounted facing forward, half a meter forward of center, half a meter up
+        // from center.
+        public static final String cameraName = "CenterCamera";
+        public static final double targetSideLength = Units.inchesToMeters(6);
+    }
+
+    public static final class WristConstants {
         public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
         public static final double kWristGearRatio = (50.0 / 1.0);       // From CAD, should be 50:1.  Gear reduction ratio between Falcon and gear driving the wrist (planetary and chain gears)
         public static final double kWristDegreesPerTick =  360.0 / kEncoderCPR / kWristGearRatio * 0.9726;      // CALIBRATED (fudge factor 0.9726)
