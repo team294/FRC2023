@@ -68,7 +68,7 @@ public class TrajectoryCache {
             new Pose2d(1.821942, 2.748026, new Rotation2d(0)),
             List.of(),
             // Go straight onto platform
-            new Pose2d(4.25, 2.748026, Rotation2d.fromDegrees(0))
+            new Pose2d(5, 2.748026, Rotation2d.fromDegrees(0))
             // new Pose2d(3.821942, 2.748026, Rotation2d.fromDegrees(0))
             // new Pose2d(5.75895, 2.707, new Rotation2d(0))
         );    
@@ -78,7 +78,8 @@ public class TrajectoryCache {
             new Pose2d(1.75895, 5.307, new Rotation2d(0)), //CHECK Y VALUES
             List.of(),
             // Go straight onto platform
-            new Pose2d(5.75895, 5.307, new Rotation2d(0))//CHECK Y VALUES
+            // new Pose2d(5.75895, 5.307, new Rotation2d(0))//CHECK Y VALUES
+            new Pose2d(5, 5.307, new Rotation2d(0))//CHECK Y VALUES
         );    
 
         cache[TrajectoryType.LeaveCommunity.value] = calcTrajectory("LeaveCommunity", 0.4, 0.4, false, 

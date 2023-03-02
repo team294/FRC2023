@@ -29,7 +29,8 @@ public class AutoSelection {
 	public static final int LEAVE_COMMUNITY = 2;
 	public static final int RIGHT_ONE_CONE_BALANCE = 3;
 	public static final int LEFT_ONE_CONE_BALANCE = 4;
-	public static final int MIDDLE_ONE_CONE_BALANCE = 4;
+	public static final int MIDDLE_ONE_CONE_BALANCE = 5;
+	public static final int MIDDLE_BALANCE = 6;
 
 	private AllianceSelection allianceSelection;
 	private TrajectoryCache trajectoryCache;
@@ -50,6 +51,7 @@ public class AutoSelection {
 		autoChooser.addOption("Right One Cone Balance", RIGHT_ONE_CONE_BALANCE);
 		autoChooser.addOption("Left One Cone Balance", LEFT_ONE_CONE_BALANCE);
 		autoChooser.addOption("Middle One Cone Balance", MIDDLE_ONE_CONE_BALANCE);
+		autoChooser.addOption("Middle Balance", MIDDLE_BALANCE);
 	
 		// show auto selection widget on Shuffleboard
 		SmartDashboard.putData("Autonomous routine", autoChooser);
@@ -124,6 +126,16 @@ public class AutoSelection {
 			new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value], () -> rotationBack, driveTrain, log))
 			);
 	   }
+
+	   if(autoPlan == MIDDLE_BALANCE){
+		log.writeLogEcho(true, "AutoSelect", "run Left One Cone Balance");
+			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+			((allianceSelection.getAlliance() == Alliance.Red) ? 
+			new DriveTrajectory(CoordType.kAbsoluteResetPose, StopType.kBrake, trajectoryCache.cache[TrajectoryType.CenterBalanceRed.value], () -> rotationFront, driveTrain, log) : 
+			new DriveTrajectory(CoordType.kAbsoluteResetPose, StopType.kBrake, trajectoryCache.cache[TrajectoryType.CenterBalanceBlue.value], () -> rotationFront, driveTrain, log))
+			);
+	   }
+	   
 
    if (autonomousCommand == null) {
 			log.writeLogEcho(true, "AutoSelect", "No autocommand found");
