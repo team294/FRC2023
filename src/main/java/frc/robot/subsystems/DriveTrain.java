@@ -70,8 +70,8 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   Field2d field = new Field2d();    // Field to dispaly on Shuffleboard
 
   //Slew rate limiter
-  SlewRateLimiter filterX = new SlewRateLimiter(0.5); //0.5 is a placeholder, need to calibrate 
-  SlewRateLimiter filterY = new SlewRateLimiter(0.5); //0.5 is a placeholder, need to calibrate 
+  SlewRateLimiter filterX = new SlewRateLimiter(5.0); //0.5 is a placeholder, need to calibrate 
+  SlewRateLimiter filterY = new SlewRateLimiter(5.0); //0.5 is a placeholder, need to calibrate 
 
   /**
    * Constructs the DriveTrain subsystem
