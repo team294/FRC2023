@@ -182,64 +182,62 @@ public class RobotContainer {
    */
   private void configureXboxButtons(){
     //check povtrigger and axis trigger number bindings
-    // Trigger xbPOVUp = new POVTrigger(xboxController, 0);
-    // Trigger xbPOVRight = new POVTrigger(xboxController, 90);
-    //Trigger xbPOVDown = new POVTrigger(xboxController, 180);
-    // Trigger xbPOVLeft = new POVTrigger(xboxController, 270);
     
     // Triggers for all xbox buttons
     Trigger xbLT = xboxController.leftTrigger();
     Trigger xbRT = xboxController.rightTrigger();
     Trigger xbA = xboxController.a();
-    // Trigger xbB = xboxController.b();
-    // Trigger xbY = xboxController.y();
-    // Trigger xbX = xboxController.x();
-    // Trigger xbLB = xboxController.leftBumper();
-    // Trigger xbRB = xboxController.rightBumper();
-    // Trigger xbBack = xboxController.back();
-    // Trigger xbStart = xboxController.start();
-    // Trigger xbPOVUp = xboxController.povUp();
-    // Trigger xbPOVRight = xboxController.povRight();
-    // Trigger xbPOVLeft = xboxController.povLeft();
-    // Trigger xbPOVDown = xboxController.povDown();
-    
-    // right trigger 
-    xbRT.whileTrue(new GrabberPickUp(grabber, log));
-    // xbRT.whenActive(new ShootSequence(uptake, feeder, shooter, log),false);
-
-    // left trigger
-    xbLT.whileTrue(new GrabberEject(grabber, log));
-    // xbLT.whenActive(new TurretTurnAngleTwice(TargetType.kVisionOnScreen, false, turret, pivisionhub, log));
-    // xbLT.whenInactive(new TurretStop(turret, log));
-
-    
+    Trigger xbB = xboxController.b();
+    Trigger xbY = xboxController.y();
+    Trigger xbX = xboxController.x();
+    Trigger xbLB = xboxController.leftBumper();
+    Trigger xbRB = xboxController.rightBumper();
+    Trigger xbBack = xboxController.back();
+    Trigger xbStart = xboxController.start();
+    Trigger xbPOVUp = xboxController.povUp();
+    Trigger xbPOVRight = xboxController.povRight();
+    Trigger xbPOVLeft = xboxController.povLeft();
+    Trigger xbPOVDown = xboxController.povDown();
+   
     //a
-    xbA.whileTrue(new GrabberStopMotor(grabber, log));       
+    // Include wrist
+    xbA.whileTrue(new ElevatorSetPosition(ElevatorPosition.scoreLow, elevator, log)); 
     
     //b
-    // xbB.whileTrue(command));         
+    // Include wrist
+    xbB.whileTrue(new ElevatorSetPosition(ElevatorPosition.scoreMid, elevator, log));         
  
     //y
-    // xb[4].whenHeld(new ShootSetup(false, 4100, pivisionhub, shooter, log));        
+    // Include wrist
+    xbY.whileTrue(new ElevatorSetPosition(ElevatorPosition.scoreHigh, elevator, log));        
     
     //x
-    // xb[3].whileTrue(new ShootSetup(true, 3100, pivisionhub, shooter, log));        
+    // Include wrist
+    xbX.whileTrue(new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));        
     
-    // LB = 5, RB = 6
-    // xb[5].onTrue(new TurretSetPercentOutput(-0.1, turret, log));
-    // xb[5].whenReleased(new TurretStop(turret, log));
-    // xb[6].onTrue(new TurretSetPercentOutput(+0.1, turret, log));
-    // xb[6].whenReleased(new TurretStop(turret, log));
+    //lb
+    // xbLB.whileTrue(new ManipulatorSetPistonPosition(true, led, manipulator, log));     
+    
+    //rb
+    // xbRB.whileTrue(new ManipulatorSetPistonPosition(false, led, manipulator, log));     
 
-    // back = 7, start = 8 
-    // xb[7].whenHeld(new ShootSetup(false, 500, pivisionhub, shooter, log));   // micro shot for use in the pit
-    // xb[8].whenHeld(new ClimberSetExtended(false,climber, log)); 
 
-    // pov is the d-pad (up, down, left, right)
-    // xbPOVUp.whenActive(new TurretTurnAngle(TargetType.kAbsolute, 0, 2, turret, pivisionhub, log));
-    // xbPOVRight.whenActive(new TurretTurnAngle(TargetType.kAbsolute, 45, 2, turret, pivisionhub, log));
-    // xbPOVLeft.whenActive(new TurretTurnAngle(TargetType.kAbsolute, -45, 2, turret, pivisionhub, log));
-    //xbPOVDown.whenActive(new StopAllMotors(feeder, shooter, intakeFront, uptake, log));
+    // back 
+    // xbBack.whileTrue(Command command); 
+
+    // start 
+    // xbStart.whileTrue(Command command); 
+
+    // POV buttons
+    // Up
+    // xbPOVUp.whileTrue(Command command);
+    // Down
+    // xbPOVUp.whileTrue(Command command);
+    // Left
+    // xbPOVUp.whileTrue(Command command);
+    // Right
+    // xbPOVUp.whileTrue(Command command);
+    
   }
 
   /**
