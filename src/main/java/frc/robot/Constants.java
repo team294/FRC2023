@@ -36,18 +36,6 @@ public final class Constants {
         kBrake;
     }
 
-    // public enum ManipulatorBehavior {
-    //     end(0),
-    //     runforever(1),
-    //     waitforcone(2),
-    //     waitforcube(3),
-    //     waitforobj(4);
-        
-    //     @SuppressWarnings({"MemberName", "PMD.SingularField"})
-    //     public final int value;
-    //     ManipulatorBehavior(int value) { this.value = value; }
-
-    // }
     public static final class Ports{
         public static final int CANPneumaticHub = 1;
 
@@ -73,8 +61,10 @@ public final class Constants {
         // public static final int CANElevatorMotor2 = 22;
         public static final int CANWristMotor = 45; 
 
-        public static final int CANGrabber = 44;
+        public static final int CANIntake = 40;
+        public static final int CANGrabber = 44;        //TODO REMOVE THE GRABBER
         public static final int CANManipulator = 43; 
+        public static final int CANConveyor = 47;
 
         // Digital IO ports
         public static final int DIOWristRevThroughBoreEncoder = 0;
