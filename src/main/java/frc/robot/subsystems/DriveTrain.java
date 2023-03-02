@@ -6,17 +6,17 @@ package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -31,10 +31,10 @@ import static frc.robot.Constants.DriveConstants.*;
 
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
 import frc.robot.utilities.*;
 
 // Vision imports
-import frc.robot.subsystems.PhotonCameraWrapper;
 import org.photonvision.EstimatedRobotPose;
 import java.util.Optional;
 
@@ -68,17 +68,25 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   private PhotonCameraWrapper camera;
 
   // Odometry class for tracking robot pose
-  SwerveDrivePoseEstimator poseEstimator; 
-  Field2d field = new Field2d();    // Field to dispaly on Shuffleboard
+  private final SwerveDrivePoseEstimator poseEstimator; 
+  private final Field2d field = new Field2d();    // Field to dispaly on Shuffleboard
+
+  //Slew rate limiter
+  private final Elevator elevator;
+  private boolean elevatorUpPriorIteration = false;       // Tracking for elevator position from prior iteration
+  private final SlewRateLimiter filterX = new SlewRateLimiter(maxAccelerationRate);
+  private final SlewRateLimiter filterY = new SlewRateLimiter(maxAccelerationRate);
+  private final SlewRateLimiter filterXSlow = new SlewRateLimiter(maxAccelerationRateWithElevatorUp);   // limiter in X direction when elevator is out
 
   /**
    * Constructs the DriveTrain subsystem
    * @param log FileLog object for logging
    */
-  public DriveTrain(Field fieldUtil, FileLog log) {
+  public DriveTrain(Field fieldUtil, Elevator elevator, FileLog log) {
     this.log = log; // save reference to the fileLog
-    this.camera = new PhotonCameraWrapper(fieldUtil, log);
     logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
+    this.camera = new PhotonCameraWrapper(fieldUtil, log);
+    this.elevator = elevator;
 
     // create swerve modules
     swerveFrontLeft = new SwerveModule( "FL",
@@ -222,6 +230,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     swerveBackLeft.setDriveMotorPercentOutput(percentOutput);
     swerveBackRight.setDriveMotorPercentOutput(percentOutput);
   }
+  
 
   /**
    * 
@@ -255,6 +264,39 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   public void setModuleStates(SwerveModuleState[] desiredStates, boolean isOpenLoop) {
     SwerveDriveKinematics.desaturateWheelSpeeds(
         desiredStates, SwerveConstants.kMaxSpeedMetersPerSecond);
+
+    // Convert states to chassisspeeds
+    ChassisSpeeds chassisSpeeds = kDriveKinematics.toChassisSpeeds(desiredStates);
+    
+    // y slew rate limit chassisspeed
+    double ySlewed = filterY.calculate(chassisSpeeds.vyMetersPerSecond);
+
+    double xSlewed, omegaLimited;
+    if (elevator.getElevatorRegion()==ElevatorRegion.bottom) {
+      // Elevator is down.  We can X-travel at full speed
+      if (elevatorUpPriorIteration) {
+        // Elevator was up but is now down.  Reset the fast slew rate limiter
+        filterX.reset(getChassisSpeeds().vxMetersPerSecond);
+      }
+      elevatorUpPriorIteration = false;
+      // x slew rate limit chassisspeed
+      xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
+      omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
+    } else {
+      // Elevator is up.  X-travel slowly!
+      if (!elevatorUpPriorIteration) {
+        // Elevator was down but is now up.  Reset the slow slew rate limiter
+        filterXSlow.reset(getChassisSpeeds().vxMetersPerSecond);
+      }
+      elevatorUpPriorIteration = true;
+      // x slew rate limit chassisspeed
+      xSlewed = filterXSlow.calculate(MathUtil.clamp(chassisSpeeds.vxMetersPerSecond, -maxXSpeedWithElevatorUp, maxXSpeedWithElevatorUp));
+      omegaLimited = MathUtil.clamp(chassisSpeeds.omegaRadiansPerSecond, -maxRotationRateWithElevatorUp, maxRotationRateWithElevatorUp);
+    }
+
+    // convert back to swervem module states
+    desiredStates = kDriveKinematics.toSwerveModuleStates(new ChassisSpeeds(xSlewed, ySlewed, omegaLimited), new Translation2d());
+    
     swerveFrontLeft.setDesiredState(desiredStates[0], isOpenLoop);
     swerveFrontRight.setDesiredState(desiredStates[1], isOpenLoop);
     swerveBackLeft.setDesiredState(desiredStates[2], isOpenLoop);
@@ -326,18 +368,15 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * False = the provided x and y speeds are relative to the current facing of the robot. 
    */
    public void drive(double xSpeed, double ySpeed, double rot, Translation2d centerOfRotationMeters, boolean fieldRelative, boolean isOpenLoop) {
+    
     SwerveModuleState[] swerveModuleStates =
         kDriveKinematics.toSwerveModuleStates(
             fieldRelative
                 ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, Rotation2d.fromDegrees(getGyroRotation()))
                 : new ChassisSpeeds(xSpeed, ySpeed, rot),
             centerOfRotationMeters);
-    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, SwerveConstants.kMaxSpeedMetersPerSecond);
 
-    swerveFrontLeft.setDesiredState(swerveModuleStates[0], isOpenLoop);
-    swerveFrontRight.setDesiredState(swerveModuleStates[1], isOpenLoop);
-    swerveBackLeft.setDesiredState(swerveModuleStates[2], isOpenLoop);
-    swerveBackRight.setDesiredState(swerveModuleStates[3], isOpenLoop);
+    setModuleStates(swerveModuleStates, isOpenLoop);
   }
 
   // TODO Add version of setModuleStates with acceleration
