@@ -31,7 +31,7 @@ public class Conveyor extends SubsystemBase implements Loggable{
    * @param logFileLog object for logging
    */
   public Conveyor(FileLog log) {
-    motor = new WPI_TalonFX(Ports.CANConveyorMotor);
+    motor = new WPI_TalonFX(Ports.CANConveyor);
     this.log = log;
     logRotationKey = log.allocateLogRotation();
 
