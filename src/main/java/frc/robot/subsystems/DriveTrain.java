@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.kauailabs.navx.frc.AHRS;
 
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -15,18 +16,27 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.utilities.FileLog;
 import static frc.robot.Constants.Ports.*;
+
 import static frc.robot.Constants.DriveConstants.*;
 
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.utilities.*;
+
+// Vision imports
+import frc.robot.subsystems.PhotonCameraWrapper;
+import org.photonvision.EstimatedRobotPose;
+import java.util.Optional;
 
 
 public class DriveTrain extends SubsystemBase implements Loggable {
@@ -54,16 +64,20 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   private double angularVelocity;  // Robot angular velocity in degrees per second
   private LinearFilter lfRunningAvg = LinearFilter.movingAverage(4); //calculate running average to smooth quantization error in angular velocity calc
 
+  // variable to store vision camera
+  private PhotonCameraWrapper camera;
+
   // Odometry class for tracking robot pose
-  SwerveDriveOdometry odometry;
+  SwerveDrivePoseEstimator poseEstimator; 
   Field2d field = new Field2d();    // Field to dispaly on Shuffleboard
 
   /**
    * Constructs the DriveTrain subsystem
    * @param log FileLog object for logging
    */
-  public DriveTrain(FileLog log) {
+  public DriveTrain(Field fieldUtil, FileLog log) {
     this.log = log; // save reference to the fileLog
+    this.camera = new PhotonCameraWrapper(fieldUtil, log);
     logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
 
     // create swerve modules
@@ -100,8 +114,8 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
     // create and initialize odometery
     // Set initial location to 0,0.
-    odometry = new SwerveDriveOdometry(kDriveKinematics, Rotation2d.fromDegrees(getGyroRotation()), 
-        getModulePotisions(), new Pose2d(0, 0, Rotation2d.fromDegrees(0)) );
+    poseEstimator = new SwerveDrivePoseEstimator(kDriveKinematics, Rotation2d.fromDegrees(getGyroRotation()), 
+       getModulePositions(), new Pose2d(0, 0, Rotation2d.fromDegrees(0)) );
     SmartDashboard.putData("Field", field);
   }
   
@@ -277,7 +291,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * @return The current module positions, as measured by the encoders.  
    * 0 = FrontLeft, 1 = FrontRight, 2 = BackLeft, 3 = BackRight
    */
-  public SwerveModulePosition[] getModulePotisions() {
+  public SwerveModulePosition[] getModulePositions() {
     return new SwerveModulePosition[] {
       swerveFrontLeft.getPosition(), swerveFrontRight.getPosition(),
       swerveBackLeft.getPosition(), swerveBackRight.getPosition()
@@ -336,24 +350,24 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * @return The robot's pose
    */
   public Pose2d getPose() {
-    return odometry.getPoseMeters();
+    return poseEstimator.getEstimatedPosition();
   }
 
   /**
-   * Resets the odometry to the specified pose.  I.e. defines the robot's
+   * Resets the pose estimator to the specified pose.  I.e. defines the robot's
    * position and orientation on the field.
    * This method also resets the gyro, which is required for the pose
    * to properly reset.
    *
-   * @param pose The pose to which to set the odometry.  Pose components include
+   * @param pose The pose to which to set the pose estimator.  Pose components include
    *    <p> Robot X location in the field, in meters (0 = field edge in front of driver station, + = away from our drivestation)
    *    <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, + = left when looking from our drivestation)
    *    <p> Robot angle on the field (0 = facing away from our drivestation, + to the left, - to the right)
    */
   public void resetPose(Pose2d pose) {
     zeroGyroRotation(pose.getRotation().getDegrees());
-    odometry.resetPosition( Rotation2d.fromDegrees(getGyroRotation()),
-        getModulePotisions(), pose );
+    poseEstimator.resetPosition( Rotation2d.fromDegrees(getGyroRotation()),
+    getModulePositions(), pose );
   }
   
   /**
@@ -403,10 +417,9 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     // calculate angVel in degrees per second
     angularVelocity =  lfRunningAvg.calculate( (currAng - prevAng) / (currTime - prevTime) * 1000 );
 
-    // Update robot odometry
-    double degrees = getGyroRotation();
-    odometry.update(Rotation2d.fromDegrees(degrees), getModulePotisions());
-        
+    // update 
+    updateOdometry();
+    
     if(fastLogging || log.isMyLogRotation(logRotationKey)) {
       updateDriveLog(false);
 
@@ -415,19 +428,19 @@ public class DriveTrain extends SubsystemBase implements Loggable {
       }
 
       // Update data on SmartDashboard
-      field.setRobotPose(odometry.getPoseMeters());
+      field.setRobotPose(poseEstimator.getEstimatedPosition());
       ChassisSpeeds robotSpeeds = getRobotSpeeds();
       // SmartDashboard.putNumber("Drive Average Dist in Meters", Units.inchesToMeters(getAverageDistance()));
       SmartDashboard.putNumber("Drive X Velocity", robotSpeeds.vxMetersPerSecond);
       SmartDashboard.putNumber("Drive Y Velocity", robotSpeeds.vyMetersPerSecond);
       SmartDashboard.putBoolean("Drive isGyroReading", isGyroReading());
       SmartDashboard.putNumber("Drive Raw Gyro", getGyroRaw());
-      SmartDashboard.putNumber("Drive Gyro Rotation", degrees);
+      SmartDashboard.putNumber("Drive Gyro Rotation", getGyroRotation());
       SmartDashboard.putNumber("Drive AngVel", angularVelocity);
       SmartDashboard.putNumber("Drive Pitch", ahrs.getRoll());
       
-      // position from odometry (helpful for autos)
-      Pose2d pose = odometry.getPoseMeters();
+      // position from poseEstimator (helpful for autos)
+      Pose2d pose = poseEstimator.getEstimatedPosition();
       SmartDashboard.putNumber("Drive Odometry X", pose.getTranslation().getX());
       SmartDashboard.putNumber("Drive Odometry Y", pose.getTranslation().getY());
       SmartDashboard.putNumber("Drive Odometry Theta", pose.getRotation().getDegrees());
@@ -452,7 +465,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * @param logWhenDisabled true will log when disabled, false will discard the string
    */
   public void updateDriveLog(boolean logWhenDisabled) {
-    Pose2d pose = odometry.getPoseMeters();
+    Pose2d pose = poseEstimator.getEstimatedPosition();
     ChassisSpeeds robotSpeeds = getRobotSpeeds();
     log.writeLog(logWhenDisabled, "Drive", "Update Variables", 
       "Gyro Angle", getGyroRotation(), "RawGyro", getGyroRaw(), 
@@ -467,4 +480,45 @@ public class DriveTrain extends SubsystemBase implements Loggable {
       swerveBackRight.getLogString()
       );
   }
+
+  public void updateOdometry() {
+    poseEstimator.update(Rotation2d.fromDegrees(getGyroRotation()), getModulePositions());
+
+    if (camera.hasInit()) {
+      Optional<EstimatedRobotPose> result = camera.getEstimatedGlobalPose(poseEstimator.getEstimatedPosition());
+
+      if (result.isPresent()) {
+        EstimatedRobotPose camPose = result.get();
+        // only updates odometry if close enough
+        // TODO change how it decides if it's too far
+        //if (camPose.estimatedPose.getX() < 3.3) {
+          poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
+
+          //field.getObject("Vision").setPose(camPose.estimatedPose.toPose2d());
+          SmartDashboard.putNumber("Vision X", camPose.estimatedPose.toPose2d().getX());
+          SmartDashboard.putNumber("Vision Y", camPose.estimatedPose.toPose2d().getY());
+          SmartDashboard.putNumber("Vision rot", camPose.estimatedPose.toPose2d().getRotation().getDegrees());
+          
+          SmartDashboard.putNumber("Odo X", poseEstimator.getEstimatedPosition().getX());
+          SmartDashboard.putNumber("Odo Y", poseEstimator.getEstimatedPosition().getY());
+          SmartDashboard.putNumber("Odo rot", poseEstimator.getEstimatedPosition().getRotation().getDegrees());
+       // }
+      }
+
+    }
+
+    if (camera.getAlliance() == Alliance.Red) {
+      Pose2d currPose = poseEstimator.getEstimatedPosition();
+      double x = FieldConstants.length - currPose.getX();
+      double y = FieldConstants.width - currPose.getY();
+      Rotation2d rot = currPose.getRotation().rotateBy(Rotation2d.fromDegrees(180));
+
+      field.setRobotPose(new Pose2d(x, y, rot));
+    } else field.setRobotPose(poseEstimator.getEstimatedPosition());
+  }  
+
+  public void cameraInit() {
+    camera.init();
+  }
+
 }

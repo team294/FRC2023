@@ -3,11 +3,15 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
+
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-
+import edu.wpi.first.math.util.Units;
 import frc.robot.utilities.TrapezoidProfileBCR;
 
 /**
@@ -21,28 +25,20 @@ import frc.robot.utilities.TrapezoidProfileBCR;
 public final class Constants {
 
     public enum CoordType {
-        kRelative(0),
-        kAbsolute(1),
-        kAbsoluteResetPose(2);
-    
-        @SuppressWarnings({"MemberName", "PMD.SingularField"})
-        public final int value;
-        CoordType(int value) { this.value = value; }
+        kRelative,              // Relative to current robot location/facing
+        kAbsolute,              // Absolute field coordinates, don't reset robot pose
+        kAbsoluteResetPose,     // Absolute field coordinates, reset robot pose always
+        kAbsoluteResetPoseTol;  // Absolute field coordinates, reset robot pose if robot is not close to specified position
     }
 
     /**
      * Options to select driving stopping types.
      */
     public enum StopType {
-        kNoStop(0),
-        kCoast(1),
-        kBrake(2);
-    
-        @SuppressWarnings({"MemberName", "PMD.SingularField"})
-        public final int value;
-        StopType(int value) { this.value = value; }
+        kNoStop,
+        kCoast,
+        kBrake;
     }
-
 
     public static final class Ports{
         public static final int CANPneumaticHub = 1;
@@ -65,11 +61,19 @@ public final class Constants {
         public static final int CANTurnEncoderBackLeft = 11;
         public static final int CANTurnEncoderBackRight = 12;
 
-        public static final int CANGrabber = 44;
-        public static final int CANManipulator = 45; //TODO CHANGE NUMBER TO REAL PORT 
+        public static final int CANElevatorMotor = 21;      //TODO CHANGE NUMBER TO REAL PORT 
+        // public static final int CANElevatorMotor2 = 22;
+        public static final int CANWristMotor = 45; 
+
+        public static final int CANIntake = 40;
+        public static final int CANGrabber = 44;        //TODO REMOVE THE GRABBER
+        public static final int CANManipulator = 43; 
+        public static final int CANConveyor = 47;
 
         // Digital IO ports
-        // public static final int DIOTurretCalSwitch = 1;
+        public static final int DIOWristRevThroughBoreEncoder = 0;
+        public static final int DIOManipulatorCubeSensor = 1; //TODO PLACE HOLDER SET TO CORRET PORT
+        public static final int DIOManipulatorConeSensor = 2; //TODO PLACE HOLDER SET TO CORRECT PORT
 
         // PWM ports
         public static final int PWMLEDStripTop = 0;         // LED Strip on top of robot
@@ -181,4 +185,109 @@ public final class Constants {
             SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare);
       }
 
+    public static class FieldConstants {
+        public static final double length = Units.feetToMeters(54);
+        public static final double width = Units.feetToMeters(27);
+    }
+
+    public static class VisionConstants {
+
+        public static final Transform3d robotToCam =
+                new Transform3d(
+                        new Translation3d(Units.inchesToMeters(6.0), 0.0, Units.inchesToMeters(30.5)),
+                        new Rotation3d(
+                                0, 0,
+                                0)); // Cam mounted facing forward in center of robot
+                // new Transform3d(
+                //         new Translation3d(0.5, 0.0, 0.5),
+                //         new Rotation3d(
+                //                 0, 0,
+                //                 0)); // Cam mounted facing forward, half a meter forward of center, half a meter up
+        // from center.
+        public static final String cameraName = "CenterCamera";
+        public static final double targetSideLength = Units.inchesToMeters(6);
+    }
+
+    public static final class WristConstants {
+        public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
+        public static final double kWristGearRatio = (50.0 / 1.0);       // From CAD, should be 50:1.  Gear reduction ratio between Falcon and gear driving the wrist (planetary and chain gears)
+        public static final double kWristDegreesPerTick =  360.0 / kEncoderCPR / kWristGearRatio * 0.9726;      // CALIBRATED (fudge factor 0.9726)
+
+        public static final double maxUncalibratedPercentOutput = 0.05;     // CALIBRATED
+
+        // Update the REV through bore encoder offset angle in RobotPreferences (in Shuffleboard), not in this code!
+        // After updating in RobotPreferences, you will need to re-start the robot code for the changes to take effect.
+        // When calibrating offset, 0 deg should be with the CG of the wrist horizontal facing away from the robot,
+        // and -90 deg is with the CG of the wrist resting downward.
+        public static double revEncoderOffsetAngleWrist = 0;    // ~69.0 deg (TODO Read from RobotPreferences and record here)
+
+        public static final double kG = 0.075;   // TODO CALIBRATE.  Feed foward percent-out to add to hold arm horizontal (0 deg)
+
+        // Wrist regions
+        public enum WristRegion {
+            backFar,        // In the wrist backFar region, the elevator must be in the bottom region (not allowed to go to elevator main or low regions).
+            backMid,        // In the wrist backMid region, the elevator may be in any elevator region.
+            down,           // Wrist pointed down, the elevator must be in the main region.
+            main,           // In the wrist main region, the elevator may be in any elevator region.
+            uncalibrated    // Unknown region, wrist is not calibrated
+        } 
+        // Wrist region boundaries
+        public static final double boundBackFarMid = -110.0;      // Boundary between backFar and backMid regions.  TODO CALIBRATE
+        public static final double boundBackMidDown = -100.0;      // Boundary between backMid and down regions.  TODO CALIBRATE
+        public static final double boundDownMain = -80.0;      // Boundary between down and main regions.  TODO CALIBRATE
+
+        // Wrist pre-defined angles (in degrees)
+        // 0 degrees = horizontal (in front of robot) relative to wrist center of gravity
+        // -90 degrees = vertical = wrist is hanging "down" naturally due to gravity
+        public enum WristAngle {
+            lowerLimit(-126.0),      // CALIBRATED
+            loadConveyor(-115.0),    // TODO Define positions and calibrate
+            startConfig(-70.0),
+            elevatorMoving(-45.0),
+            loadHumanStation(0.0),
+            scoreLow(0.0),
+            scoreMidHigh(10.0),
+            upperLimit(32.0);       // CALIBRATED
+            // score low 5 inches
+            @SuppressWarnings({"MemberName", "PMD.SingularField"})
+            public final double value;
+            WristAngle(double value) { this.value = value; }
+        }
+      }
+
+      public static final class ElevatorConstants {
+        public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
+        public static final double kElevGearRatio = (12.0 / 1.0);        // CALIBRATED.  Gear reduction ratio between Falcon and gear driving the elevator
+        public static final double kElevStages = 2.0;                   // Upper stage moves 2x compared to lower stage
+        public static final double kElevGearDiameterInches = 1.273;       // CALIBRATED.  Diameter of the gear driving the elevator in inches.  Per CAD = 1.273.  Calibrated = 1.276.
+        public static final double kElevEncoderInchesPerTick = (kElevGearDiameterInches * Math.PI) / kEncoderCPR / kElevGearRatio * kElevStages;
+
+        public static final double maxUncalibratedPercentOutput = 0.10;     // CALIBRATED
+
+        // Elevator regions
+        public enum ElevatorRegion {
+            bottom,     // In the elevator bottom region, the wrist may be in any wrist region.
+            low,        // TODO implement this code!!!!!
+            main,       // In the elevator main region, the wrist must be in the wrist main region (not allowed to go to wrist back region).
+            uncalibrated;       // Unknown region, elevator is not calibrated.
+        }
+        // Elevator region boundaries
+        // TODO fix boundaries to add low region!!!!
+        public static final double mainBottom = 2.0;      // Boundary between bottom and main regions.  TODO CALIBRATE
+
+        // Elevator pre-defined positions (in inches from bottom of elevator)
+        public enum ElevatorPosition {
+            lowerLimit(0.0), 
+            bottom(0.0),            // CALIBRATED
+            loadingStation(20.0),   // CALIBRATED
+            scoreLow(5.0),          // CALIBRATED
+            scoreMidCone(21.0),     // CALIBRATED
+            scoreHighCone(41.0),    // CALIBRATED
+            upperLimit(45.4);       // CALIBRATED
+            // score low 5 inches
+            @SuppressWarnings({"MemberName", "PMD.SingularField"})
+            public final double value;
+            ElevatorPosition(double value) { this.value = value; }
+        }
+      }
 }
