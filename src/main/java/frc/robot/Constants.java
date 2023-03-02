@@ -161,7 +161,7 @@ public final class Constants {
         public static final double maxXSpeedWithElevatorUp = 1.0;       // m/s
         public static final double maxAccelerationRate = 5.0;           // m/s^2
         public static final double maxAccelerationRateWithElevatorUp = 2.0;           // m/s^2
-        public static final double maxRotationRateWithElevatorUp = 1.5;     // rad/sec
+        public static final double maxRotationRateWithElevatorUp = 0.8;     // rad/sec
       }
 
       public static final class TrajectoryConstants {

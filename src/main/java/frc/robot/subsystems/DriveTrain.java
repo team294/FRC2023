@@ -295,7 +295,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     }
 
     // convert back to swervem module states
-    desiredStates = kDriveKinematics.toSwerveModuleStates(new ChassisSpeeds(xSlewed, ySlewed, chassisSpeeds.omegaRadiansPerSecond), new Translation2d());
+    desiredStates = kDriveKinematics.toSwerveModuleStates(new ChassisSpeeds(xSlewed, ySlewed, omegaLimited), new Translation2d());
     
     swerveFrontLeft.setDesiredState(desiredStates[0], isOpenLoop);
     swerveFrontRight.setDesiredState(desiredStates[1], isOpenLoop);
