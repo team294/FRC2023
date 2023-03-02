@@ -8,6 +8,7 @@ import com.kauailabs.navx.frc.AHRS;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.LinearFilter;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -70,6 +71,10 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   // Odometry class for tracking robot pose
   SwerveDrivePoseEstimator poseEstimator; 
   Field2d field = new Field2d();    // Field to dispaly on Shuffleboard
+
+  //Slew rate limiter
+  SlewRateLimiter filterX = new SlewRateLimiter(0.5); //0.5 is a placeholder, need to calibrate 
+  SlewRateLimiter filterY = new SlewRateLimiter(0.5); //0.5 is a placeholder, need to calibrate 
 
   /**
    * Constructs the DriveTrain subsystem
@@ -222,6 +227,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     swerveBackLeft.setDriveMotorPercentOutput(percentOutput);
     swerveBackRight.setDriveMotorPercentOutput(percentOutput);
   }
+  
 
   /**
    * 
@@ -255,6 +261,20 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   public void setModuleStates(SwerveModuleState[] desiredStates, boolean isOpenLoop) {
     SwerveDriveKinematics.desaturateWheelSpeeds(
         desiredStates, SwerveConstants.kMaxSpeedMetersPerSecond);
+
+    // Convert states to chassisspeeds
+    ChassisSpeeds chassisSpeeds = kDriveKinematics.toChassisSpeeds(desiredStates);
+    
+    // x slew rate limit chassisspeed
+    double xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
+    // y slew rate limit chassisspeed
+    double ySlewed = filterY.calculate(chassisSpeeds.vyMetersPerSecond);
+
+    // convert back to swervem module states
+    desiredStates = kDriveKinematics.toSwerveModuleStates(new ChassisSpeeds(xSlewed, ySlewed, chassisSpeeds.omegaRadiansPerSecond), new Translation2d());
+    
+    
+    
     swerveFrontLeft.setDesiredState(desiredStates[0], isOpenLoop);
     swerveFrontRight.setDesiredState(desiredStates[1], isOpenLoop);
     swerveBackLeft.setDesiredState(desiredStates[2], isOpenLoop);
@@ -326,18 +346,15 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * False = the provided x and y speeds are relative to the current facing of the robot. 
    */
    public void drive(double xSpeed, double ySpeed, double rot, Translation2d centerOfRotationMeters, boolean fieldRelative, boolean isOpenLoop) {
+    
     SwerveModuleState[] swerveModuleStates =
         kDriveKinematics.toSwerveModuleStates(
             fieldRelative
                 ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, Rotation2d.fromDegrees(getGyroRotation()))
                 : new ChassisSpeeds(xSpeed, ySpeed, rot),
             centerOfRotationMeters);
-    SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, SwerveConstants.kMaxSpeedMetersPerSecond);
 
-    swerveFrontLeft.setDesiredState(swerveModuleStates[0], isOpenLoop);
-    swerveFrontRight.setDesiredState(swerveModuleStates[1], isOpenLoop);
-    swerveBackLeft.setDesiredState(swerveModuleStates[2], isOpenLoop);
-    swerveBackRight.setDesiredState(swerveModuleStates[3], isOpenLoop);
+    setModuleStates(swerveModuleStates, isOpenLoop);
   }
 
   // TODO Add version of setModuleStates with acceleration
