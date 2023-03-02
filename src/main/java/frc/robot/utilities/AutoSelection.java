@@ -4,9 +4,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -62,7 +59,8 @@ public class AutoSelection {
 	}
 
 	/**
-	 * Gets the auto command based upon input from the shuffleboard
+	 * Gets the auto command based upon input from the shuffleboard.
+	 * This method is designed to be called at AutonomousInit by Robot.java.
 	 * 
 	 * @param driveTrain The driveTrain that will be passed to the auto command
 	 * @param log        The filelog to write the logs to
@@ -70,8 +68,6 @@ public class AutoSelection {
 	 */
 	public Command getAutoCommand(DriveTrain driveTrain, FileLog log) {
 		Command autonomousCommand = null;
-		Rotation2d rotationFront = new Rotation2d();
-		Rotation2d rotationBack = Rotation2d.fromDegrees(180);
 
 		// Get parameters from Shuffleboard
 		int autoPlan = autoChooser.getSelected();
@@ -87,53 +83,61 @@ public class AutoSelection {
 		if (autoPlan == STRAIGHT) {
 			log.writeLogEcho(true, "AutoSelect", "run Straight");
 		   autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime), 
-		   			new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], () -> rotationFront, driveTrain, log)
+		   		new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
+						trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log)
 		   );
 	   }
 
 	   if (autoPlan == LEAVE_COMMUNITY) {
 			log.writeLogEcho(true, "AutoSelect", "run Leave Community");
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			new DriveResetPose(new Pose2d(new Translation2d(0, 0), rotationBack), false, driveTrain, log),
-			new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.LeaveCommunity.value], () -> rotationBack, driveTrain, log)
+				new DriveTrajectory(CoordType.kAbsoluteResetPose, StopType.kBrake, 
+						trajectoryCache.cache[TrajectoryType.LeaveCommunity.value], driveTrain, log)
 	   		);
    	   }
 
 	   if(autoPlan == RIGHT_ONE_CONE_BALANCE){
 			log.writeLogEcho(true, "AutoSelect", "run Right One Cone Balance");
 			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			((allianceSelection.getAlliance() == Alliance.Red) ? 
-			new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceRed.value], () -> rotationBack, driveTrain, log) : 
-			new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceBlue.value], () -> rotationBack, driveTrain, log))
+				new DriveTrajectory(CoordType.kAbsoluteResetPoseTol, StopType.kBrake, 
+					((allianceSelection.getAlliance() == Alliance.Red) ? 
+						trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceRed.value]:
+						trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceBlue.value] ), 
+					driveTrain, log)
 			);
-
 	   }
 
 	   if(autoPlan == LEFT_ONE_CONE_BALANCE){
-		log.writeLogEcho(true, "AutoSelect", "run Left One Cone Balance");
+			log.writeLogEcho(true, "AutoSelect", "run Left One Cone Balance");
 			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			((allianceSelection.getAlliance() == Alliance.Red) ? 
-			new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceRed.value], () -> rotationBack, driveTrain, log) : 
-			new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceBlue.value], () -> rotationBack, driveTrain, log))
+				new DriveTrajectory(CoordType.kAbsoluteResetPoseTol, StopType.kBrake, 
+					((allianceSelection.getAlliance() == Alliance.Red) ? 
+						trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceRed.value]:
+						trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceBlue.value] ), 
+					driveTrain, log)
 			);
 	   }
 
 	   if(autoPlan == MIDDLE_ONE_CONE_BALANCE){
-		log.writeLogEcho(true, "AutoSelect", "run Left One Cone Balance");
+			log.writeLogEcho(true, "AutoSelect", "run Middle One Cone Balance");
 			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			((allianceSelection.getAlliance() == Alliance.Red) ? 
-			new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceRed.value], () -> rotationBack, driveTrain, log) : 
-			new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value], () -> rotationBack, driveTrain, log))
+				new DriveTrajectory(CoordType.kAbsoluteResetPoseTol, StopType.kBrake, 
+					((allianceSelection.getAlliance() == Alliance.Red) ? 
+						trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceRed.value]:
+						trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value] ), 
+					driveTrain, log)
 			);
 	   }
 
 	   if(autoPlan == MIDDLE_BALANCE){
-		log.writeLogEcho(true, "AutoSelect", "run Left One Cone Balance");
-			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			((allianceSelection.getAlliance() == Alliance.Red) ? 
-			new DriveTrajectory(CoordType.kAbsoluteResetPose, StopType.kBrake, trajectoryCache.cache[TrajectoryType.CenterBalanceRed.value], () -> rotationFront, driveTrain, log) : 
-			new DriveTrajectory(CoordType.kAbsoluteResetPose, StopType.kBrake, trajectoryCache.cache[TrajectoryType.CenterBalanceBlue.value], () -> rotationFront, driveTrain, log))
-			);
+		log.writeLogEcho(true, "AutoSelect", "run Middle Balance");
+		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+			new DriveTrajectory(CoordType.kAbsoluteResetPoseTol, StopType.kBrake, 
+				((allianceSelection.getAlliance() == Alliance.Red) ? 
+					trajectoryCache.cache[TrajectoryType.CenterBalanceRed.value]:
+					trajectoryCache.cache[TrajectoryType.CenterBalanceBlue.value] ), 
+				driveTrain, log)
+		);
 	   }
 	   
 

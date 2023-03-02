@@ -1,15 +1,13 @@
 package frc.robot.utilities;
 
 import frc.robot.subsystems.Elevator;
-
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class ElevatorProfileGenerator {
 
 	Elevator elevator;
 	FileLog log;
-	private int logRotationKey;         // key for the logging cycle for this subsystem
-	private boolean fastLogging = false; // true is enabled to run every cycle; false follows normal logging cycles
 
 	private boolean profileEnabled = false;
 
@@ -19,11 +17,11 @@ public class ElevatorProfileGenerator {
 	private double initialPosition; // Initial position in inches from the floor
 	private double finalPosition; // Final position in inches from the floor
 
-	private double maxVelocity = 50;
+	private double maxVelocity = 63.0;			// in inches per second.  CALIBRATED
 	private double currentMPVelocity;
 
-	private double maxAcceleration = 100;
-	private double stoppingAcceleration = .5 * maxAcceleration;
+	private double maxAcceleration = 100;		// in inches per second^2.  CALIBRATED
+	private double stoppingAcceleration = .75 * maxAcceleration;
 	private double currentMPAcceleration;
 	private boolean approachingTarget = false;		// true = decelerating towards target;  false = not close enough to start decelerating
 
@@ -38,15 +36,17 @@ public class ElevatorProfileGenerator {
 	double percentPowerFF = 0;
 	double percentPowerFB = 0;
 
-	private double kFF = 0.14;  // calibrated to 0.1, 0.12
-	private double kVu = 0.0139;  // Should be around 0.015, calibrated to 0.0139
-	private double kAu = 0.002;   // Should be around 0.002
-	private double kPu = 0.15;  // was 0.15
+	private double kFF = 0.01945;    // CALIBRATED
+	private double kSu = 0.01425;	 // CALIBRATED
+	private double kVu = 0.0149;  // CALIBRATED
+	private double kAu = 0.001;   // CALIBRATED
+	private double kPu = 0.10;    // CALIBRATED
 	private double kIu = 0;
 	private double kDu = 0;
-	private double kVd = 0.0125;   // Should be around 0.012, calibrated to 0.0125
-	private double kAd = 0.002;   // Should be around 0.002
-	private double kPd = 0.15;	// was 0.05
+	private double kSd = 0.01425;	// CALIBRATED
+	private double kVd = 0.0135;  // CALIBRATED
+	private double kAd = 0.001;   // CALIBRATED
+	private double kPd = 0.05;	  // CALIBRATED
 	private double kId = 0;
 	private double kDd = 0;
 	
@@ -56,7 +56,6 @@ public class ElevatorProfileGenerator {
 	public ElevatorProfileGenerator(Elevator elevator, FileLog log) {
 		disableProfileControl();
 		this.log = log;
-		logRotationKey = log.allocateLogRotation();
 		this.elevator = elevator;
 	}
 
@@ -73,7 +72,7 @@ public class ElevatorProfileGenerator {
 	 * encoder is working, the elevator is calibrated, and there are no physical obstructions
 	 * (check interlocks before calling).
 	 * Enables motion profile's control of motors
-	 * @param pos in inches from the floor.
+	 * @param pos in inches, per ElevatorConstants.ElevatorPosition
 	*/
 	public void setProfileTarget(double pos) {
 		profileEnabled = true;
@@ -94,13 +93,6 @@ public class ElevatorProfileGenerator {
 		targetMPDistance = Math.abs(finalPosition - initialPosition);
 
 		directionSign = Math.signum(finalPosition - initialPosition);
-
-		/* TODO uncomment if we decide to have different velocities/accelerations for up vs down
-		if(directionSign == 1) {
-
-		} else {
-
-		} */
 
 		// Seed the profile with the current velocity, in case the elevator is already moving
 		currentMPVelocity = elevator.getElevatorVelocity() * directionSign;
@@ -162,27 +154,25 @@ public class ElevatorProfileGenerator {
 	 */
 	public double trackProfilePeriodic() {
 		if(profileEnabled) {
+			if (currentMPVelocity>0 || Math.abs(percentPowerFB)>0.08) {
+				updateElevatorProfileLog(false);
+			}
+
 			updateProfileCalcs();
 			error = getCurrentPosition() - elevator.getElevatorPos();
 			intError = intError + error * dt;
 
 			if (directionSign == 1) {
-				percentPowerFF = kFF + kVu*currentMPVelocity*directionSign + kAu*currentMPAcceleration*directionSign;
+				percentPowerFF = kFF + kSu*Math.signum(currentMPVelocity*directionSign) + kVu*currentMPVelocity*directionSign + kAu*currentMPAcceleration*directionSign;
 				percentPowerFB = kPu * error + ((error - prevError) * kDu) + (kIu * intError);
 			} else if(directionSign == -1) {
-				percentPowerFF = kFF + kVd*currentMPVelocity*directionSign + kAd*currentMPAcceleration*directionSign;
+				percentPowerFF = kFF + kSd*Math.signum(currentMPVelocity*directionSign) + kVd*currentMPVelocity*directionSign + kAd*currentMPAcceleration*directionSign;
 				percentPowerFB = kPd * error + ((error - prevError) * kDd) + (kId * intError);
 			} 
 			prevError = error;
 
 			// Cap feedback power to prevent jerking the elevator
-			percentPowerFB = (percentPowerFB>0.2) ? 0.2 : percentPowerFB;
-			percentPowerFB = (percentPowerFB<-0.2) ? -0.2 : percentPowerFB;
-
-			// Do we want a log rotation for this or just log it with elevator subsystem?
-			if (fastLogging || log.isMyLogRotation(logRotationKey) || currentMPVelocity>0 || Math.abs(percentPowerFB)>0.1) {
-				updateElevatorProfileLog(false);
-			}
+			percentPowerFB = MathUtil.clamp(percentPowerFB, -0.2, 0.2);
 
 			return percentPowerFF + percentPowerFB;
 		} else {
@@ -198,11 +188,10 @@ public class ElevatorProfileGenerator {
     */
 	public void updateElevatorProfileLog(boolean logWhenDisabled) {
 		log.writeLog(logWhenDisabled, "ElevatorProfile", "updateCalc",
-		        "MP Pos", getCurrentPosition(), "ActualPos",
-				elevator.getElevatorPos(), "TargetPos",
-				finalPosition, "Time since start", getTimeSinceProfileStart(), "dt", dt,
+		        "MP Pos", getCurrentPosition(), "ActualPos", elevator.getElevatorPos(), 
+				"TargetPos", finalPosition, "Time since start", getTimeSinceProfileStart(), "dt", dt,
 				"ActualVel", elevator.getElevatorVelocity(),
-				"MP Vel,", (currentMPVelocity * directionSign),
+				"MP Vel", (currentMPVelocity * directionSign),
 				"MP Accel", (currentMPAcceleration * directionSign),
 				"PowerFF", percentPowerFF, "PowerFB", percentPowerFB );
 	}
