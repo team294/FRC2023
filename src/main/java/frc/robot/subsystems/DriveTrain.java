@@ -115,7 +115,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     // create and initialize odometery
     // Set initial location to 0,0.
     poseEstimator = new SwerveDrivePoseEstimator(kDriveKinematics, Rotation2d.fromDegrees(getGyroRotation()), 
-       getModulePotisions(), new Pose2d(0, 0, Rotation2d.fromDegrees(0)) );
+       getModulePositions(), new Pose2d(0, 0, Rotation2d.fromDegrees(0)) );
     SmartDashboard.putData("Field", field);
   }
   
@@ -291,7 +291,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * @return The current module positions, as measured by the encoders.  
    * 0 = FrontLeft, 1 = FrontRight, 2 = BackLeft, 3 = BackRight
    */
-  public SwerveModulePosition[] getModulePotisions() {
+  public SwerveModulePosition[] getModulePositions() {
     return new SwerveModulePosition[] {
       swerveFrontLeft.getPosition(), swerveFrontRight.getPosition(),
       swerveBackLeft.getPosition(), swerveBackRight.getPosition()
@@ -367,7 +367,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   public void resetPose(Pose2d pose) {
     zeroGyroRotation(pose.getRotation().getDegrees());
     poseEstimator.resetPosition( Rotation2d.fromDegrees(getGyroRotation()),
-    getModulePotisions(), pose );
+    getModulePositions(), pose );
   }
   
   /**
@@ -482,7 +482,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   }
 
   public void updateOdometry() {
-    poseEstimator.update(Rotation2d.fromDegrees(getGyroRotation()), getModulePotisions());
+    poseEstimator.update(Rotation2d.fromDegrees(getGyroRotation()), getModulePositions());
 
     if (camera.hasInit()) {
       Optional<EstimatedRobotPose> result = camera.getEstimatedGlobalPose(poseEstimator.getEstimatedPosition());

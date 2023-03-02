@@ -3,13 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
-import java.util.ArrayList;
 
-import edu.wpi.first.apriltag.AprilTag;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -212,7 +206,8 @@ public final class Constants {
         public static final String cameraName = "CenterCamera";
         public static final double targetSideLength = Units.inchesToMeters(6);
     }
-      public static final class WristConstants {
+
+    public static final class WristConstants {
         public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
         public static final double kWristGearRatio = (50.0 / 1.0);       // From CAD, should be 50:1.  Gear reduction ratio between Falcon and gear driving the wrist (planetary and chain gears)
         public static final double kWristDegreesPerTick =  360.0 / kEncoderCPR / kWristGearRatio * 0.9726;      // CALIBRATED (fudge factor 0.9726)
