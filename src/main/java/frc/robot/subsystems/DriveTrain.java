@@ -14,10 +14,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.SerialPort;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -35,7 +33,6 @@ import frc.robot.Constants.SwerveConstants;
 import frc.robot.utilities.*;
 
 // Vision imports
-import frc.robot.subsystems.PhotonCameraWrapper;
 import org.photonvision.EstimatedRobotPose;
 import java.util.Optional;
 
@@ -272,8 +269,6 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
     // convert back to swervem module states
     desiredStates = kDriveKinematics.toSwerveModuleStates(new ChassisSpeeds(xSlewed, ySlewed, chassisSpeeds.omegaRadiansPerSecond), new Translation2d());
-    
-    
     
     swerveFrontLeft.setDesiredState(desiredStates[0], isOpenLoop);
     swerveFrontRight.setDesiredState(desiredStates[1], isOpenLoop);
