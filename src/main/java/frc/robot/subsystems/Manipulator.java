@@ -148,9 +148,9 @@ public class Manipulator extends SubsystemBase implements Loggable {
       SmartDashboard.putNumber("Manipulator Amps", motor.getStatorCurrent());
       SmartDashboard.putNumber("Manipulator Out Percent", motor.getMotorOutputPercent());
       SmartDashboard.putNumber("Manipulator Temp", motor.getTemperature());
-      SmartDashboard.putBoolean("Manipulator Cone", pistonCone);
-      SmartDashboard.putBoolean("Cone Sensor", isConePresent());
-      SmartDashboard.putBoolean("Cube Sensor", isCubePresent());
+      SmartDashboard.putBoolean("Manipulator Cone Position", pistonCone);
+      SmartDashboard.putBoolean("Manipulator Cone Sensor", isConePresent());
+      SmartDashboard.putBoolean("Manipulator Cube Sensor", isCubePresent());
     }
 
     // pistonCone = pneumaticDoubleSolenoid.get() == Value.kForward;

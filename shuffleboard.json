@@ -1039,6 +1039,13 @@
                 },
                 {
                   "_type": "Text View",
+                  "_source0": "network_table:///SmartDashboard/Wrist output",
+                  "_title": "Wrist output",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Text View",
                   "_source0": "network_table:///SmartDashboard/Wrist target angle",
                   "_title": "Wrist target angle",
                   "_glyph": 148,
@@ -1090,6 +1097,104 @@
                   "_type": "Command",
                   "_source0": "network_table:///SmartDashboard/Wrist Scoring Position",
                   "_title": "Wrist Scoring Position",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                }
+              ]
+            }
+          },
+          "8,0": {
+            "size": [
+              2,
+              6
+            ],
+            "content": {
+              "_type": "List Layout",
+              "_title": "Manipulator",
+              "_glyph": 149,
+              "_showGlyph": false,
+              "Layout/Label position": "LEFT",
+              "_children": [
+                {
+                  "_type": "Boolean Box",
+                  "_source0": "network_table:///SmartDashboard/Manipulator Cone Position",
+                  "_title": "Cone Position",
+                  "_glyph": 148,
+                  "_showGlyph": false,
+                  "Colors/Color when true": "#7CFC00FF",
+                  "Colors/Color when false": "#8B0000FF"
+                },
+                {
+                  "_type": "Boolean Box",
+                  "_source0": "network_table:///SmartDashboard/Manipulator Cone Sensor",
+                  "_title": "Cone Sensor",
+                  "_glyph": 148,
+                  "_showGlyph": false,
+                  "Colors/Color when true": "#7CFC00FF",
+                  "Colors/Color when false": "#8B0000FF"
+                },
+                {
+                  "_type": "Boolean Box",
+                  "_source0": "network_table:///SmartDashboard/Manipulator Cube Sensor",
+                  "_title": "Cube Sensor",
+                  "_glyph": 148,
+                  "_showGlyph": false,
+                  "Colors/Color when true": "#7CFC00FF",
+                  "Colors/Color when false": "#8B0000FF"
+                },
+                {
+                  "_type": "Text View",
+                  "_source0": "network_table:///SmartDashboard/Manipulator Temp",
+                  "_title": "Temp",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Text View",
+                  "_source0": "network_table:///SmartDashboard/Manipulator Out Percent",
+                  "_title": "Out Percent",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Manipulator Cone",
+                  "_title": "Manipulator Cone",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Manipulator Cube",
+                  "_title": "Manipulator Cube",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Manipulator Stop",
+                  "_title": "Manipulator Stop",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Manipulator Pick Up",
+                  "_title": "Manipulator Pick Up",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Manipulator Eject",
+                  "_title": "Manipulator Eject",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Manipulator Toggle",
+                  "_title": "Manipulator Toggle",
                   "_glyph": 148,
                   "_showGlyph": false
                 }

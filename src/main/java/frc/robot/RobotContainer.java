@@ -44,7 +44,7 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryType;
  */
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
-  private final FileLog log = new FileLog("A1");
+  private final FileLog log = new FileLog("B1");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
   private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
   private final Field field = new Field(allianceSelection, log);
@@ -230,7 +230,7 @@ public class RobotContainer {
     xbX.onTrue(new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));        
     
     //lb
-    // xbLB.whileTrue(new ManipulatorSetPistonPosition(true, led, manipulator, log));     
+    xbLB.whileTrue(new ElevatorWristXboxControl(xboxController, elevator, wrist, log));     
     
     //rb
     // xbRB.whileTrue(new ManipulatorSetPistonPosition(false, led, manipulator, log));     
