@@ -220,6 +220,7 @@ public final class Constants {
         public static final double kWristDegreesPerTick =  360.0 / kEncoderCPR / kWristGearRatio * 0.9726;      // CALIBRATED (fudge factor 0.9726)
 
         public static final double maxUncalibratedPercentOutput = 0.05;     // CALIBRATED
+        public static final double maxPercentOutput = 0.2;          // TODO Calibate
 
         // Update the REV through bore encoder offset angle in RobotPreferences (in Shuffleboard), not in this code!
         // After updating in RobotPreferences, you will need to re-start the robot code for the changes to take effect.

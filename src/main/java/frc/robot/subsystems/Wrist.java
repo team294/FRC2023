@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.CTREConfigs;
 import frc.robot.Constants.Ports;
-import frc.robot.Constants.WristConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
 import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.Constants.WristConstants.WristRegion;
@@ -29,6 +28,8 @@ import frc.robot.utilities.Loggable;
 import frc.robot.utilities.MathBCR;
 import frc.robot.utilities.RobotPreferences;
 import frc.robot.utilities.Wait;
+
+import static frc.robot.Constants.WristConstants.*;
 
 public class Wrist extends SubsystemBase implements Loggable{
   private final FileLog log;
@@ -73,7 +74,7 @@ public class Wrist extends SubsystemBase implements Loggable{
     while (System.currentTimeMillis() < t && !isRevEncoderConnected());    
     if (isRevEncoderConnected()) {
       // Copy calibration to wrist encoder
-      calibrateRevEncoderDegrees(WristConstants.revEncoderOffsetAngleWrist);
+      calibrateRevEncoderDegrees(revEncoderOffsetAngleWrist);
       wristCalibrated = true;
     } else {
       wristCalibrated = false;
@@ -131,7 +132,11 @@ public class Wrist extends SubsystemBase implements Loggable{
    * @param percentPower between -1.0 (down full speed) and 1.0 (up full speed)
    */
   public void setWristMotorPercentOutput(double percentOutput) {
-    percentOutput = MathUtil.clamp(percentOutput, -1.0, 1.0);
+    if (wristCalibrated) {
+      percentOutput = MathUtil.clamp(percentOutput, -maxPercentOutput, maxPercentOutput);
+    } else {
+      percentOutput = MathUtil.clamp(percentOutput, -maxUncalibratedPercentOutput, maxUncalibratedPercentOutput);
+    }
 
     wristMotor.set(ControlMode.PercentOutput, percentOutput);
   }
@@ -150,30 +155,30 @@ public class Wrist extends SubsystemBase implements Loggable{
 
       // Check elevator interlocks
       if (curRegion == WristRegion.backFar) {
-        safeAngle = MathUtil.clamp(safeAngle, WristAngle.lowerLimit.value, WristConstants.boundBackMidDown);
+        safeAngle = MathUtil.clamp(safeAngle, WristAngle.lowerLimit.value, boundBackMidDown);
       }
       if (curRegion == WristRegion.backMid) {
         if (elevator.getElevatorRegion() == ElevatorRegion.bottom) {
-          safeAngle = MathUtil.clamp(safeAngle, WristAngle.lowerLimit.value, WristConstants.boundBackMidDown);
+          safeAngle = MathUtil.clamp(safeAngle, WristAngle.lowerLimit.value, boundBackMidDown);
         } else if (elevator.getElevatorRegion() == ElevatorRegion.main) {
-          safeAngle = MathUtil.clamp(safeAngle, WristConstants.boundBackFarMid, WristAngle.upperLimit.value);
+          safeAngle = MathUtil.clamp(safeAngle, boundBackFarMid, WristAngle.upperLimit.value);
         } else {
-          safeAngle = MathUtil.clamp(safeAngle, WristConstants.boundBackFarMid, WristConstants.boundBackMidDown);
+          safeAngle = MathUtil.clamp(safeAngle, boundBackFarMid, boundBackMidDown);
         }
       }
       if (curRegion == WristRegion.down) {
-        safeAngle = MathUtil.clamp(safeAngle, WristConstants.boundBackFarMid, WristAngle.upperLimit.value);
+        safeAngle = MathUtil.clamp(safeAngle, boundBackFarMid, WristAngle.upperLimit.value);
       }
       if (curRegion == WristRegion.main) {
         if (elevator.getElevatorRegion() == ElevatorRegion.main) {
-          safeAngle = MathUtil.clamp(safeAngle, WristConstants.boundBackFarMid, WristAngle.upperLimit.value);
+          safeAngle = MathUtil.clamp(safeAngle, boundBackFarMid, WristAngle.upperLimit.value);
         } else {
-          safeAngle = MathUtil.clamp(safeAngle, WristConstants.boundDownMain, WristAngle.upperLimit.value);
+          safeAngle = MathUtil.clamp(safeAngle, boundDownMain, WristAngle.upperLimit.value);
         }
       }
 
       wristMotor.set(ControlMode.Position, wristDegreesToEncoderTickPosition(safeAngle), 
-        DemandType.ArbitraryFeedForward, WristConstants.kG * Math.cos(safeAngle*Math.PI/180.0));
+        DemandType.ArbitraryFeedForward, kG * Math.cos(safeAngle*Math.PI/180.0));
 
       log.writeLog(false, subsystemName, "Set angle", "Desired angle", angle, "Set angle", safeAngle,
        "Elevator Pos", elevator.getElevatorPos(), "Elevator Target", elevator.getCurrentElevatorTarget());  
@@ -215,10 +220,12 @@ public class Wrist extends SubsystemBase implements Loggable{
 	 * @return corresponding wrist region
 	 */
 	private WristRegion getRegion(double degrees) {
-      if (degrees <= WristConstants.boundBackFarMid) return WristRegion.backFar;
-      else if (degrees < WristConstants.boundBackMidDown) return WristRegion.backMid;
-      else if (degrees <= WristConstants.boundDownMain) return WristRegion.down;
-      else return WristRegion.main;
+      if (degrees <= boundBackFarMid) return WristRegion.backFar;
+      else if (degrees < boundBackMidDown) return WristRegion.backMid;
+      else if (degrees <= boundDownMain) return WristRegion.down;
+      else return WristRegion.main; 
+    }
+
 	}
 
 	/**
@@ -265,7 +272,7 @@ public class Wrist extends SubsystemBase implements Loggable{
    * @return wrist position in encoder ticks
    */
   private double wristDegreesToEncoderTickPosition(double degrees) {
-    return (degrees + wristCalZero) / WristConstants.kWristDegreesPerTick;
+    return (degrees + wristCalZero) / kWristDegreesPerTick;
   }
 
   /**
@@ -276,7 +283,7 @@ public class Wrist extends SubsystemBase implements Loggable{
    */
   private double getWristEncoderDegrees() {
     // DO NOT normalize this angle.  It should not wrap, since the wrist mechanically can not cross the -180/+180 deg point
-    return getWristEncoderTicksRaw()* WristConstants.kWristDegreesPerTick - wristCalZero;
+    return getWristEncoderTicksRaw()* kWristDegreesPerTick - wristCalZero;
   }
 
   /**
@@ -325,7 +332,7 @@ public class Wrist extends SubsystemBase implements Loggable{
   public void calibrateWristEnc(double angle) {
 		stopWrist();	// Stop motor, so it doesn't jump to new value
 
-    wristCalZero = getWristEncoderTicksRaw()* WristConstants.kWristDegreesPerTick - angle;
+    wristCalZero = getWristEncoderTicksRaw()* kWristDegreesPerTick - angle;
 		wristCalibrated = true;
 
     log.writeLog(false, "Wrist", "Calibrate wrist", "zero value", wristCalZero, 
@@ -431,6 +438,12 @@ public class Wrist extends SubsystemBase implements Loggable{
     if (getWristAngle() > WristAngle.upperLimit.value + 10.0 || getWristAngle() < WristAngle.lowerLimit.value - 10.0) {
       setWristUncalibrated();
       updateWristLog(true);
+    }
+
+    // If in manual drive mode and if elevator object exists, 
+    // then enforce interlocks (stop wrist if at edge of allowed region based on elevator)
+    if (wristMotor.getControlMode() == ControlMode.PercentOutput && elevator != null) {
+      // TODO stop motor if at interlock regions
     }
   }
  
