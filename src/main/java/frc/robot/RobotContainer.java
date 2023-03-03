@@ -214,43 +214,52 @@ public class RobotContainer {
     Trigger xbPOVDown = xboxController.povDown();
    
     //a
-    // Include wrist
-    xbA.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreLow, elevator, log)); 
-    
+    // xbA.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreLow, elevator, log)); 
+    // Move elevator/wrist to score low position
+    xbA.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.scoreLow.value, elevator, wrist, log));
+     
     //b
-    // Include wrist
-    xbB.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreMidCone, elevator, log));         
+    // xbB.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreMidCone, elevator, log));         
+    // Move elevator/wrist to score mid position
+    xbB.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreMidCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, log));
  
     //y
-    // Include wrist
-    xbY.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreHighCone, elevator, log));        
+    // xbY.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreHighCone, elevator, log));
+    // Move elevator/wrist to score high position
+    xbY.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, log));
     
     //x
-    // Include wrist
-    xbX.onTrue(new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));        
+    // xbX.onTrue(new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
+    // Store elevator and wrist for traveling or pickup from conveyor
+    xbX.onTrue(new ElevatorWristStow(elevator, wrist, log));        
     
     //lb
     xbLB.whileTrue(new ElevatorWristXboxControl(xboxController, elevator, wrist, log));     
     
     //rb
-    // xbRB.whileTrue(new ManipulatorSetPistonPosition(false, led, manipulator, log));     
+    // xbRB.onTrue(new ManipulatorSetPistonPosition(false, led, manipulator, log));     
 
+    // Left Trigger
+    // xbLT.onTrue(Command command);
+
+    // Right Trigger
+    // xbRT.onTrue(Command command);
 
     // back 
-    // xbBack.whileTrue(Command command); 
+    // xbBack.onTrue(Command command); 
 
     // start 
-    // xbStart.whileTrue(Command command); 
+    // xbStart.onTrue(Command command); 
 
     // POV buttons
     // Up
-    // xbPOVUp.whileTrue(Command command);
+    // xbPOVUp.onTrue(Command command);
     // Down
-    // xbPOVUp.whileTrue(Command command);
+    // xbPOVUp.onTrue(Command command);
     // Left
-    // xbPOVUp.whileTrue(Command command);
+    // xbPOVUp.onTrue(Command command);
     // Right
-    // xbPOVUp.whileTrue(Command command);
+    // xbPOVUp.onTrue(Command command);
     
   }
 

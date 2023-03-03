@@ -19,6 +19,13 @@ public class ElevatorWristXboxControl extends CommandBase {
   private final Wrist wrist;
   private final FileLog log;
 
+  /**
+   * Controls the elevator and wrist using the left and right XBox Controller joysticks
+   * @param xboxController
+   * @param elevator
+   * @param wrist
+   * @param log
+   */
   public ElevatorWristXboxControl(CommandXboxController xboxController, Elevator elevator, Wrist wrist, FileLog log) {
     this.elevator = elevator;
     this.wrist = wrist;
