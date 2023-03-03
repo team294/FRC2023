@@ -82,8 +82,8 @@ public final class Constants {
         // public static final int I2CcolorSensor = 0x52;       // According to REV docs, color sensor is at 0x52 = 82.  Rob had 39?
 
         // Pneumatic solenoid ports
-        public static final int SolManipulatorFwd = 0;      // TODO set correct channel
-        public static final int SolManipulatorRev = 1;      // TODO set correct channel
+        public static final int SolManipulatorFwd = 1;      // TODO set correct channel
+        public static final int SolManipulatorRev = 0;      // TODO set correct channel
 
     }
 
