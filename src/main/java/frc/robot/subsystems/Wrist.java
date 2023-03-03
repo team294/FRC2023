@@ -224,8 +224,6 @@ public class Wrist extends SubsystemBase implements Loggable{
       else if (degrees < boundBackMidDown) return WristRegion.backMid;
       else if (degrees <= boundDownMain) return WristRegion.down;
       else return WristRegion.main; 
-    }
-
 	}
 
 	/**
@@ -442,8 +440,30 @@ public class Wrist extends SubsystemBase implements Loggable{
 
     // If in manual drive mode and if elevator object exists, 
     // then enforce interlocks (stop wrist if at edge of allowed region based on elevator)
-    if (wristMotor.getControlMode() == ControlMode.PercentOutput && elevator != null) {
-      // TODO stop motor if at interlock regions
+    if (wristMotor.getControlMode() == ControlMode.PercentOutput && elevator != null && wristCalibrated) {
+      double angle = getWristEncoderDegrees();
+      double pct = wristMotor.getMotorOutputPercent();
+      double tol = 1.0;     // degrees tolerance for safeties
+
+      // TODO finish code
+      // switch (elevator.getElevatorRegion()) {
+      //   case uncalibrated:
+      //     // No interlock.  Danger zone!!!!!!!
+      //     break;
+      //   case bottom:
+      //     if ( (angle <= (WristAngle.lowerLimit.value+tol) && pct < 0.0) ||
+      //          (angle >= (boundBackMidDown-tol) && angle <= (boundDownMidpoint) && pct > 0.0) ||
+      //          (angle >= (boundDownMidpoint) && angle <= (boundDownMain+tol) && pct < 0.0) ||
+      //          (angle >= (WristAngle.upperLimit.value-tol) && pct > 0.0)
+      //        ) {
+      //       stopWrist();
+      //     }
+      //     break;
+      //   case low:
+      //     break;
+      //   case main:
+      //     break;
+      // }
     }
   }
  

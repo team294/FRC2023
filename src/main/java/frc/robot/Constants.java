@@ -242,12 +242,13 @@ public final class Constants {
         public static final double boundBackFarMid = -110.0;      // Boundary between backFar and backMid regions.  TODO CALIBRATE
         public static final double boundBackMidDown = -100.0;      // Boundary between backMid and down regions.  TODO CALIBRATE
         public static final double boundDownMain = -80.0;      // Boundary between down and main regions.  TODO CALIBRATE
+        public static final double boundDownMidpoint = (boundBackMidDown+boundDownMain)/2.0;      // Midpoint in down region
 
         // Wrist pre-defined angles (in degrees)
         // 0 degrees = horizontal (in front of robot) relative to wrist center of gravity
         // -90 degrees = vertical = wrist is hanging "down" naturally due to gravity
         public enum WristAngle {
-            lowerLimit(-126.0),      // CALIBRATED
+            lowerLimit(-126.0),      // CALIBRATED          // TODO test soft limits
             loadConveyor(-115.0),    // TODO Define positions and calibrate
             startConfig(-70.0),
             elevatorMoving(-45.0),
