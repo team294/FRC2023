@@ -457,8 +457,14 @@ public class RobotContainer {
     driveTrain.cameraInit();
     elevator.setMotorModeCoast(false);
 
-    if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
-    led.setStrip(Color.kOrange, 0);
+    if (patternTeamMoving.isScheduled()) {
+      patternTeamMoving.cancel();
+      if (allianceSelection.getAlliance() == Alliance.Blue) {
+        led.setStrip(Color.kBlue, 0);
+      } else {
+        led.setStrip(Color.kRed, 0);
+      }
+    }
   }
 
   /**

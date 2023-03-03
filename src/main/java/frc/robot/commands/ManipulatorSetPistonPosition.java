@@ -39,9 +39,9 @@ public class ManipulatorSetPistonPosition extends CommandBase {
   public void initialize() {
     manipulator.setPistonCone(cone);
     if(cone){
-      new LEDSetStrip(Color.kYellow, led, log);
+      led.setStrip(Color.kYellow, 0);
     } else {
-      new LEDSetStrip(Color.kPurple, led, log);
+      led.setStrip(Color.kPurple, 0);
     }
     log.writeLog(false, "ManipulatorSetPistonCone", "Initialize", "Set to cone", cone);
   }

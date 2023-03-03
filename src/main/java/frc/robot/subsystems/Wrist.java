@@ -15,7 +15,6 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -447,25 +446,37 @@ public class Wrist extends SubsystemBase implements Loggable{
       double pct = wristMotor.getMotorOutputPercent();
       double tol = 1.0;     // degrees tolerance for safeties
 
-      // TODO finish code
-      // switch (elevator.getElevatorRegion()) {
-      //   case uncalibrated:
-      //     // No interlock.  Danger zone!!!!!!!
-      //     break;
-      //   case bottom:
-      //     if ( (angle <= (WristAngle.lowerLimit.value+tol) && pct < 0.0) ||
-      //          (angle >= (boundBackMidDown-tol) && angle <= (boundDownMidpoint) && pct > 0.0) ||
-      //          (angle >= (boundDownMidpoint) && angle <= (boundDownMain+tol) && pct < 0.0) ||
-      //          (angle >= (WristAngle.upperLimit.value-tol) && pct > 0.0)
-      //        ) {
-      //       stopWrist();
-      //     }
-      //     break;
-      //   case low:
-      //     break;
-      //   case main:
-      //     break;
-      // }
+      // TODO test code
+      switch (elevator.getElevatorRegion()) {
+        case uncalibrated:
+          // No interlock.  Danger zone!!!!!!!
+          break;
+        case bottom:
+          if ( (angle <= (WristAngle.lowerLimit.value+tol) && pct < 0.0) ||
+               (angle >= (boundBackMidDown-tol) && angle <= (boundDownMidpoint) && pct > 0.0) ||
+               (angle >= (boundDownMidpoint) && angle <= (boundDownMain+tol) && pct < 0.0) ||
+               (angle >= (WristAngle.upperLimit.value-tol) && pct > 0.0)
+             ) {
+            stopWrist();
+          }
+          break;
+        case low:
+          if ( (angle <= (boundBackFarMid+tol) && pct < 0.0) ||
+              (angle >= (boundBackMidDown-tol) && angle <= (boundDownMidpoint) && pct > 0.0) ||
+              (angle >= (boundDownMidpoint) && angle <= (boundDownMain+tol) && pct < 0.0) ||
+              (angle >= (WristAngle.upperLimit.value-tol) && pct > 0.0)
+              ) {
+            stopWrist();
+          }
+         break;
+        case main:
+          if ( (angle <= (boundBackFarMid+tol) && pct < 0.0) ||
+              (angle >= (WristAngle.upperLimit.value-tol) && pct > 0.0)
+              ) {
+            stopWrist();
+          }
+          break;
+      }
     }
   }
  
