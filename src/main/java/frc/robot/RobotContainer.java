@@ -215,19 +215,19 @@ public class RobotContainer {
    
     //a
     // Include wrist
-    xbA.whileTrue(new ElevatorSetPosition(ElevatorPosition.scoreLow, elevator, log)); 
+    xbA.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreLow, elevator, log)); 
     
     //b
     // Include wrist
-    xbB.whileTrue(new ElevatorSetPosition(ElevatorPosition.scoreMid, elevator, log));         
+    xbB.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreMidCone, elevator, log));         
  
     //y
     // Include wrist
-    xbY.whileTrue(new ElevatorSetPosition(ElevatorPosition.scoreHigh, elevator, log));        
+    xbY.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreHighCone, elevator, log));        
     
     //x
     // Include wrist
-    xbX.whileTrue(new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));        
+    xbX.onTrue(new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));        
     
     //lb
     // xbLB.whileTrue(new ManipulatorSetPistonPosition(true, led, manipulator, log));     
