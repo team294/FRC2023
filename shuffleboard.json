@@ -1039,6 +1039,13 @@
                 },
                 {
                   "_type": "Text View",
+                  "_source0": "network_table:///SmartDashboard/Wrist output",
+                  "_title": "Wrist output",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Text View",
                   "_source0": "network_table:///SmartDashboard/Wrist target angle",
                   "_title": "Wrist target angle",
                   "_glyph": 148,

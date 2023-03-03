@@ -6,6 +6,9 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.Constants.ElevatorConstants;
+import frc.robot.Constants.OIConstants;
+import frc.robot.Constants.WristConstants;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.Wrist;
 import frc.robot.utilities.FileLog;
@@ -36,6 +39,10 @@ public class ElevatorWristXboxControl extends CommandBase {
   public void execute() {
     double elevatorPct = xboxController.getLeftX();
     double wristPct = xboxController.getRightX();
+    if (Math.abs(elevatorPct)<OIConstants.manualElevatorDeadband) elevatorPct=0;
+    if (Math.abs(wristPct)<OIConstants.manualWristDeadband) wristPct=0;
+    wristPct *= WristConstants.maxPercentOutput;
+    elevatorPct *= ElevatorConstants.maxManualPercentOutput;
 
     log.writeLog(false, "ElevatorWristXboxControl", "Execute", "Left Xbox", elevatorPct, "Right Xbox", wristPct);
 

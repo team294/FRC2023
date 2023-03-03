@@ -94,6 +94,8 @@ public final class Constants {
         public static final int usbCoPanel = 3;
 
         public static final double joystickDeadband = 0.01;
+        public static final double manualElevatorDeadband = 0.1;
+        public static final double manualWristDeadband = 0.1;
     }
 
     public static final class RobotDimensions {
@@ -220,15 +222,15 @@ public final class Constants {
         public static final double kWristDegreesPerTick =  360.0 / kEncoderCPR / kWristGearRatio * 0.9726;      // CALIBRATED (fudge factor 0.9726)
 
         public static final double maxUncalibratedPercentOutput = 0.05;     // CALIBRATED
-        public static final double maxPercentOutput = 0.2;          // TODO Calibate
+        public static final double maxPercentOutput = 0.1;          // CALIBRATED
 
         // Update the REV through bore encoder offset angle in RobotPreferences (in Shuffleboard), not in this code!
         // After updating in RobotPreferences, you will need to re-start the robot code for the changes to take effect.
         // When calibrating offset, 0 deg should be with the CG of the wrist horizontal facing away from the robot,
         // and -90 deg is with the CG of the wrist resting downward.
-        public static double revEncoderOffsetAngleWrist = 0;    // ~69.0 deg (TODO Read from RobotPreferences and record here)
+        public static double revEncoderOffsetAngleWrist = 0;    // 69.0 deg
 
-        public static final double kG = 0.075;   // TODO CALIBRATE.  Feed foward percent-out to add to hold arm horizontal (0 deg)
+        public static final double kG = 0.02;   // CALIBRATED.  Feed foward percent-out to add to hold arm horizontal (0 deg)
 
         // Wrist regions
         public enum WristRegion {
@@ -239,22 +241,22 @@ public final class Constants {
             uncalibrated    // Unknown region, wrist is not calibrated
         } 
         // Wrist region boundaries
-        public static final double boundBackFarMid = -110.0;      // Boundary between backFar and backMid regions.  TODO CALIBRATE
-        public static final double boundBackMidDown = -100.0;      // Boundary between backMid and down regions.  TODO CALIBRATE
-        public static final double boundDownMain = -80.0;      // Boundary between down and main regions.  TODO CALIBRATE
+        public static final double boundBackFarMid = -119.0;      // Boundary between backFar and backMid regions.  CALIBRATED
+        public static final double boundBackMidDown = -116.0;      // Boundary between backMid and down regions.  CALIBRATED
+        public static final double boundDownMain = -91.0;      // Boundary between down and main regions.  CALIBRATED
         public static final double boundDownMidpoint = (boundBackMidDown+boundDownMain)/2.0;      // Midpoint in down region
 
         // Wrist pre-defined angles (in degrees)
         // 0 degrees = horizontal (in front of robot) relative to wrist center of gravity
         // -90 degrees = vertical = wrist is hanging "down" naturally due to gravity
         public enum WristAngle {
-            lowerLimit(-126.0),      // CALIBRATED          // TODO test soft limits
-            loadConveyor(-115.0),    // TODO Define positions and calibrate
-            startConfig(-70.0),
-            elevatorMoving(-45.0),
-            loadHumanStation(0.0),
+            lowerLimit(-119.0),      // CALIBRATED
+            startConfig(-119.0),     // CALIBRATED
+            loadConveyor(-117.5),    // CALIBRATED
+            loadHumanStation(0.0),      // TODO calibrate
             scoreLow(0.0),
             scoreMidHigh(10.0),
+            elevatorMoving(32.0),    // CALIBRATED
             upperLimit(32.0);       // CALIBRATED
             // score low 5 inches
             @SuppressWarnings({"MemberName", "PMD.SingularField"})
@@ -271,6 +273,7 @@ public final class Constants {
         public static final double kElevEncoderInchesPerTick = (kElevGearDiameterInches * Math.PI) / kEncoderCPR / kElevGearRatio * kElevStages;
 
         public static final double maxUncalibratedPercentOutput = 0.10;     // CALIBRATED
+        public static final double maxManualPercentOutput = 0.50;  // CALIBRATED
 
         // Elevator regions
         public enum ElevatorRegion {
