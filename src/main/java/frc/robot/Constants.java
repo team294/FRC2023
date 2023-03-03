@@ -284,7 +284,8 @@ public final class Constants {
         }
         // Elevator region boundaries
         // TODO fix boundaries to add low region!!!!
-        public static final double mainBottom = 2.0;      // Boundary between bottom and main regions.  TODO CALIBRATE
+        public static final double boundBottomLow = 2.0;        // Boundary between bottom and low regions
+        public static final double boundMainLow = 3.0;      // Boundary between low and main regions.  TODO CALIBRATE
 
         // Elevator pre-defined positions (in inches from bottom of elevator)
         public enum ElevatorPosition {

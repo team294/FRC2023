@@ -229,7 +229,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 		if (elevCalibrated) {
 			return getElevatorEncTicks()*ElevatorConstants.kElevEncoderInchesPerTick;
 		} else {
-			return ElevatorConstants.mainBottom + 10.0;
+			return ElevatorConstants.boundMainLow + 10.0;
 		}
 	}
 
@@ -241,7 +241,13 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 */
 	private ElevatorRegion calcElevatorRegion(double pos) {
 		if (elevCalibrated) {
-			return (pos >= ElevatorConstants.mainBottom) ? ElevatorRegion.main : ElevatorRegion.bottom;
+			if (pos >= ElevatorConstants.boundMainLow) {
+				return ElevatorRegion.main;
+			 } else if (pos > ElevatorConstants.boundBottomLow) {
+				return ElevatorRegion.low;
+			 }else {
+				return ElevatorRegion.bottom;
+			 }
 		} else {
 			return ElevatorRegion.uncalibrated;
 		}
