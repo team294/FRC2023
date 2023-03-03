@@ -22,13 +22,13 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj.util.Color;
-
 import frc.robot.Constants.CoordType;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.StopType;
-import frc.robot.Constants.WristConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
+import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.commands.*;
+import frc.robot.commands.ManipulatorGrab.BehaviorType;
 import frc.robot.commands.autos.*;
 import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
@@ -47,19 +47,20 @@ public class RobotContainer {
   private final FileLog log = new FileLog("A1");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
   private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
+  private final Field field = new Field(allianceSelection, log);
 
   // Define robot subsystems  
-  private final DriveTrain driveTrain = new DriveTrain(log);
-  private final Grabber grabber = new Grabber("Grabber", log);
-  private final Manipulator manipulator = new Manipulator(log);
   private final Wrist wrist = new Wrist(log);
   private final Elevator elevator = new Elevator(wrist, log);
+  private final DriveTrain driveTrain = new DriveTrain(field, elevator, log);
+  private final Grabber grabber = new Grabber("Grabber", log);
+  private final Manipulator manipulator = new Manipulator(log);
   private final LED led = new LED();
+  private final Conveyor conveyor = new Conveyor(log);
 
   // Define other utilities
   private final TrajectoryCache trajectoryCache = new TrajectoryCache(log);
   private final AutoSelection autoSelection = new AutoSelection(trajectoryCache, allianceSelection, log);
-  private final Field field = new Field(driveTrain, manipulator, allianceSelection, log);
 
   // Define controllers
   // private final Joystick xboxController = new Joystick(OIConstants.usbXboxController); //assuming usbxboxcontroller is int
@@ -125,7 +126,7 @@ public class RobotContainer {
             )
           ),
           driveTrain, log));
-    SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal()), driveTrain, log));
+    SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
 
     // Testing for autos
     SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
@@ -148,10 +149,9 @@ public class RobotContainer {
     SmartDashboard.putData("Elevator Move To Bottom", new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
     
     //Wrist Commands
-    SmartDashboard.putData("Wrist Stowed Position", new WristMoveToPosition(WristConstants.stowed, wrist, log));
-    SmartDashboard.putData("Wrist Straight Position", new WristMoveToPosition(WristConstants.straight, wrist, log));
-    SmartDashboard.putData("Wrist Scoring Position", new WristMoveToPosition(WristConstants.scoreCargo, wrist, log));//Need to find correct value
-    SmartDashboard.putData("Wrist Vision Position", new WristMoveToPosition(WristConstants.vision, wrist, log));//Need to find correct value
+    SmartDashboard.putData("Wrist Stowed Position", new WristSetAngle(WristAngle.startConfig, wrist, log));
+    SmartDashboard.putData("Wrist ElevMove Position", new WristSetAngle(WristAngle.elevatorMoving, wrist, log));
+    SmartDashboard.putData("Wrist Scoring Position", new WristSetAngle(WristAngle.scoreMidHigh, wrist, log));
     SmartDashboard.putData("Wrist Set Angle", new WristSetAngle(wrist, log));
     SmartDashboard.putData("Wrist Set Output", new WristSetPercentOutput(wrist, log));
 
@@ -163,6 +163,20 @@ public class RobotContainer {
     SmartDashboard.putData("LED OFF", new LEDSetStrip(Color.kBlack, 0, led, log));
     SmartDashboard.putData("LED Yellow", new LEDSetStrip(Color.kYellow, 1, led, log));
     SmartDashboard.putData("LED Purple", new LEDSetStrip(Color.kPurple, 1, led, log));
+
+    //Conveyor Commands
+    SmartDashboard.putData("Start Conveyor Custom Percent", new ConveyorMove(conveyor, log));
+    SmartDashboard.putData("Start Conveyor", new ConveyorMove(0.3, conveyor, log));
+    SmartDashboard.putData("Stop Conveyor", new ConveyorMove(0, conveyor, log));
+
+
+    //Manipulator Commands
+    SmartDashboard.putData("Manipulator Stop", new ManipulatorStopMotor(manipulator, log));
+    SmartDashboard.putData("Manipulator Pick Up",new ManipulatorGrab(0.8, BehaviorType.waitForConeOrCube, manipulator, log));
+    SmartDashboard.putData("Manipulator Eject",new ManipulatorSetPercent(-0.5, manipulator, log));
+    SmartDashboard.putData("Manipulator Cone", new ManipulatorSetPistonPosition(true, led, manipulator, log));
+    SmartDashboard.putData("Manipulator Cube", new ManipulatorSetPistonPosition(false, led, manipulator, log));
+    SmartDashboard.putData("Manipulator Toggle", new ManipulatorTogglePiston(manipulator, led, log));
   }
 
   /**
@@ -358,8 +372,8 @@ public class RobotContainer {
       RobotPreferences.recordStickyFaults("RobotPreferences", log);
     }
 
-    compressor.disable();
-    // compressor.enableDigital();
+    // compressor.disable();
+    compressor.enableDigital();
 
     // Set initial robot position on field
     // This takes place a while after the drivetrain is created, so after any CanBus delays.
@@ -413,6 +427,7 @@ public class RobotContainer {
     log.writeLogEcho(true, "Auto", "Mode Init");
 
     driveTrain.setDriveModeCoast(false);
+    driveTrain.cameraInit();
     elevator.setMotorModeCoast(false);
 
     if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
@@ -439,6 +454,7 @@ public class RobotContainer {
     log.writeLogEcho(true, "Teleop", "Mode Init");
 
     driveTrain.setDriveModeCoast(false);
+    driveTrain.cameraInit();
     elevator.setMotorModeCoast(false);
 
     if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
@@ -449,6 +465,6 @@ public class RobotContainer {
    * Method called once every scheduler cycle when teleop mode is initialized/enabled.
    */
   public void teleopPeriodic() {
-    
+
   }
 }

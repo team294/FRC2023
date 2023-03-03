@@ -70,9 +70,8 @@ public class ElevatorSetPosition extends CommandBase {
     if(fromShuffleboard){
       target = SmartDashboard.getNumber("Elevator Position", 0);
     }
-    elevator.setProfileTarget(target);
     log.writeLog(false, "ElevatorSetPosition", "Target Position", target);
-
+    elevator.setProfileTarget(target);
   }
   // Called repeatedly when this Command is scheduled to run
   @Override
