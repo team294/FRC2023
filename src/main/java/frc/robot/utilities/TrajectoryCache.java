@@ -125,7 +125,8 @@ public class TrajectoryCache {
                 new Pose2d(1.75895, 5.307, new Rotation2d(0)), //CHECK Y VALUES
                 List.of(),
                 // Go straight onto platform
-                new Pose2d(5.75895, 5.307, new Rotation2d(0))  //CHECK Y VALUES
+                new Pose2d(4.25, 5.307, Rotation2d.fromDegrees(0))
+                // new Pose2d(5.75895, 5.307, new Rotation2d(0))  //CHECK Y VALUES
             )
         );    
 
