@@ -26,6 +26,7 @@ public class ConveyorMove extends CommandBase {
     addRequirements(conveyor);
     // Use addRequirements() here to declare subsystem dependencies.
   }
+
   public ConveyorMove(Conveyor conveyor, FileLog log) {
     this.conveyor = conveyor;
     this.log = log;
@@ -60,7 +61,6 @@ public class ConveyorMove extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-
-    return false;
+    return true;
   }
 }

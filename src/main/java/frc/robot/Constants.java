@@ -289,12 +289,13 @@ public final class Constants {
 
         // Elevator pre-defined positions (in inches from bottom of elevator)
         public enum ElevatorPosition {
-            lowerLimit(0.0), 
+            lowerLimit(0.0),        // CALIBRATED
             bottom(0.0),            // CALIBRATED
-            loadingStation(20.0),   // CALIBRATED
-            scoreLow(5.0),          // CALIBRATED
-            scoreMidCone(21.0),     // CALIBRATED
-            scoreHighCone(41.0),    // CALIBRATED
+            loadingStationCube(20.0),   // TODO CALIBRATE
+            loadingStationCone(25.0),   // TODO CALIBRATE
+            scoreLow(5.0),          // TODO CALIBRATE
+            scoreMidCone(21.0),     // TODO CALIBRATE
+            scoreHighCone(41.0),    // TODO CALIBRATE
             upperLimit(45.4);       // CALIBRATED
             // score low 5 inches
             @SuppressWarnings({"MemberName", "PMD.SingularField"})

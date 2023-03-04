@@ -18,6 +18,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -30,6 +32,7 @@ import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.commands.*;
 import frc.robot.commands.ManipulatorGrab.BehaviorType;
 import frc.robot.commands.autos.*;
+import frc.robot.commands.sequences.*;
 import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
 import frc.robot.utilities.*;
@@ -243,24 +246,37 @@ public class RobotContainer {
     // xbLT.onTrue(Command command);
 
     // Right Trigger
-    // xbRT.onTrue(Command command);
+    // Score piece
+    xbRT.onTrue(new EjectPiece(manipulator, log));
 
-    // back 
-    // xbBack.onTrue(Command command); 
+    // back
+    // Turn off all motors
+    xbBack.onTrue(Commands.parallel(
+      new ManipulatorStopMotor(manipulator, log),
+      new ConveyorMove(0, conveyor, log)
+      // TODO stop intake
+    )); 
 
     // start 
     // xbStart.onTrue(Command command); 
 
     // POV buttons
+
     // Up
-    // xbPOVUp.onTrue(Command command);
+    // Prepare to get cone
+    xbPOVUp.onTrue(new ManipulatorSetPistonPosition(true, led, manipulator, log));
+
     // Down
-    // xbPOVUp.onTrue(Command command);
+    // Prepare to get cube
+    xbPOVDown.onTrue(new ManipulatorSetPistonPosition(false, led, manipulator, log));
+
     // Left
-    // xbPOVUp.onTrue(Command command);
+    // Sets elevator/wrist to stowed, turn on conveyor, turn on manipulator to load piece
+    xbPOVLeft.onTrue(new LoadPieceConveyor(elevator, wrist, manipulator, conveyor, log));
+
     // Right
-    // xbPOVUp.onTrue(Command command);
-    
+    // Move elevator to loading station config and turn on manipulator to grab piece
+    xbPOVRight.onTrue( new LoadPieceLoadingStation(elevator, wrist, manipulator, log) );
   }
 
   /**

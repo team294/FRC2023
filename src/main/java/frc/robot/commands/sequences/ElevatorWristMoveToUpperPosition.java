@@ -2,18 +2,17 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands;
+package frc.robot.commands.sequences;
 
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.WristConstants;
-import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
 import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.Constants.WristConstants.WristRegion;
+import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.FileLog;
 
@@ -25,8 +24,8 @@ public class ElevatorWristMoveToUpperPosition extends SequentialCommandGroup {
   // }
 
   /**
-   * Stows the elevator and wrist in the scoring position.  Appropriately moves the
-   * wrist and elevator regardless of starting configuration
+   * Moves the elevator and wrist to an upper position.  Appropriately moves the
+   * wrist and elevator regardless of starting configuration to get to the requested configuration.
    * @param elevatorPosition target height in inches, per ElevatorConstants.ElevatorPosition
    * @param wristAngle target angle in degrees.  (0 = horizontal in front of robot, + = up, - = down)
    * @param elevator
