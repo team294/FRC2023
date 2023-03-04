@@ -24,7 +24,6 @@ import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.Ports;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
-import frc.robot.Constants.WristConstants.WristRegion;
 import frc.robot.utilities.ElevatorProfileGenerator;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.Loggable;

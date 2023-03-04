@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -47,7 +46,7 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryType;
  */
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
-  private final FileLog log = new FileLog("B1");
+  private final FileLog log = new FileLog("B2");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
   private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
   private final Field field = new Field(allianceSelection, log);
@@ -56,7 +55,6 @@ public class RobotContainer {
   private final Wrist wrist = new Wrist(log);
   private final Elevator elevator = new Elevator(wrist, log);
   private final DriveTrain driveTrain = new DriveTrain(field, elevator, log);
-  private final Grabber grabber = new Grabber("Grabber", log);
   private final Manipulator manipulator = new Manipulator(log);
   private final LED led = new LED();
   private final Conveyor conveyor = new Conveyor(log);
@@ -139,11 +137,6 @@ public class RobotContainer {
         trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value], driveTrain, log));
     SmartDashboard.putData("Auto OneConeBalance", new OuterOneConeBalanceMiddleAuto(driveTrain));     // TODO put on auto selector and remove this button
   
-    //Grabber commands
-    SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
-    SmartDashboard.putData("Grabber Pick Up",new GrabberPickUp(grabber, log));
-    SmartDashboard.putData("Grabber Eject", new GrabberEject(grabber, log));
-
     //Elevator Commands
     SmartDashboard.putData("Elevator Cal Encoder", new ElevatorCalibrateEncoderIfAtLowerLimit(elevator, log));
     SmartDashboard.putData("Elevator Calibration", new ElevatorCalibration(0.05, elevator, log));
