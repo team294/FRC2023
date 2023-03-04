@@ -433,11 +433,11 @@ public class Wrist extends SubsystemBase implements Loggable{
     }
 
     // Un-calibrates the wrist if the angle is outside of bounds
-    // TODO CALIBRATE
-    if (getWristAngle() > WristAngle.upperLimit.value + 10.0 || getWristAngle() < WristAngle.lowerLimit.value - 10.0) {
-      setWristUncalibrated();
-      updateWristLog(true);
-    }
+    // // TODO CALIBRATE
+    // if (getWristAngle() > WristAngle.upperLimit.value + 20.0 || getWristAngle() < WristAngle.lowerLimit.value - 20.0) {
+    //   setWristUncalibrated();
+    //   updateWristLog(true);
+    // }
 
     // If in manual drive mode and if elevator object exists, 
     // then enforce interlocks (stop wrist if at edge of allowed region based on elevator)

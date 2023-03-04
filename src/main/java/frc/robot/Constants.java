@@ -230,7 +230,7 @@ public final class Constants {
         // and -90 deg is with the CG of the wrist resting downward.
         public static double revEncoderOffsetAngleWrist = 0;    // 69.0 deg
 
-        public static final double kG = 0.02;   // CALIBRATED.  Feed foward percent-out to add to hold arm horizontal (0 deg)
+        public static final double kG = 0.03;   // CALIBRATED 0.02.  Feed foward percent-out to add to hold arm horizontal (0 deg)
 
         // Wrist regions
         public enum WristRegion {
@@ -253,9 +253,9 @@ public final class Constants {
             lowerLimit(-119.0),      // CALIBRATED
             startConfig(-119.0),     // CALIBRATED
             loadConveyor(-117.5),    // CALIBRATED
-            loadHumanStation(0.0),      // TODO calibrate
+            loadHumanStation(10.0),      // TODO calibrate
             scoreLow(0.0),
-            scoreMidHigh(10.0),
+            scoreMidHigh(20.0),         // Was 10.0
             elevatorMoving(32.0),    // CALIBRATED
             upperLimit(32.0);       // CALIBRATED
             // score low 5 inches
@@ -291,8 +291,8 @@ public final class Constants {
         public enum ElevatorPosition {
             lowerLimit(0.0),        // CALIBRATED
             bottom(0.0),            // CALIBRATED
-            loadingStationCube(20.0),   // TODO CALIBRATE
-            loadingStationCone(25.0),   // TODO CALIBRATE
+            loadingStationCube(35.0),   // TODO CALIBRATE
+            loadingStationCone(45.0),   // TODO CALIBRATE
             scoreLow(5.0),          // TODO CALIBRATE
             scoreMidCone(21.0),     // TODO CALIBRATE
             scoreHighCone(41.0),    // TODO CALIBRATE
