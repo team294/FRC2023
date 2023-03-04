@@ -1,6 +1,7 @@
 package frc.robot.utilities;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.math.MathUtil;
@@ -13,6 +14,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import frc.robot.Constants.CoordType;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.Constants.StopType;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
@@ -39,6 +41,7 @@ public class AutoSelection {
 	public static final int CONE_LEAVE_NEAR_WALL = 7;
 	public static final int SCORE_CONE = 8;
 	public static final int SCORE_CONE_BALANCE_4TOWALL = 9;
+	public static final int BALANCE_4TOWALL = 10;
 
 	private final AllianceSelection allianceSelection;
 	private final TrajectoryCache trajectoryCache;
@@ -57,8 +60,9 @@ public class AutoSelection {
 		// auto selections
 		autoChooser.setDefaultOption("None", NONE);
 		autoChooser.addOption("Score Cone", SCORE_CONE);
-		// autoChooser.addOption("Score Cone Balance 4ToWall", SCORE_CONE_BALANCE_4TOWALL);
-		// autoChooser.addOption("Cone Leave NearWall", CONE_LEAVE_NEAR_WALL);
+		autoChooser.addOption("Cone Leave NearWall", CONE_LEAVE_NEAR_WALL);
+		autoChooser.addOption("Cone Balance 4ToWall", SCORE_CONE_BALANCE_4TOWALL);
+		autoChooser.addOption("Balance 4ToWall", BALANCE_4TOWALL);
 
 		// autoChooser.addOption("Straight", STRAIGHT);
 		// autoChooser.addOption("Leave Community", LEAVE_COMMUNITY);
@@ -107,43 +111,81 @@ public class AutoSelection {
 	   		);
    	   	}
 
-		// TODO not done!!!!!
-		if (autoPlan == SCORE_CONE_BALANCE_4TOWALL) {
-			// Starting position = facing drivers, 4th scoring position from wall
-			log.writeLogEcho(true, "AutoSelect", "run Score Cone Balance 4ToWall");
-			Pose2d posCommunityInitial, posCommunityFinal;
-			if (allianceSelection.getAlliance() == Alliance.Red) {
-				// posCommunityInitial = field.getStationInitial(autoPlan)
-			}
-
-	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-				new AutoScoreConeHigh(elevator, wrist, manipulator, led, log)
-				// new DriveResetPose
-			// TODO drive onto balance and reset pose
-	   		);
-   	   	}
-
-		// TODO not done!!!
 		if (autoPlan == CONE_LEAVE_NEAR_WALL) {
 			// Starting position = facing drivers, against scoring position closest to wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
-			Pose2d posCommunityInitial, posCommunityFinal;
+			Pose2d posScoreInitial, posLeaveFinal;
 			if (allianceSelection.getAlliance() == Alliance.Red) {
-				posCommunityInitial = field.getFinalColumn(9);
+				posScoreInitial = field.getFinalColumn(9);
 			} else {
-				posCommunityInitial = field.getFinalColumn(1);
+				posScoreInitial = field.getFinalColumn(1);
 			}
-			posCommunityFinal = posCommunityInitial.transformBy(new Transform2d(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0.0)));
+			// Travel  4.4 m in +X from starting position
+			posLeaveFinal = posScoreInitial.transformBy(new Transform2d(new Translation2d(4.4, 0.0), Rotation2d.fromDegrees(0.0)));
 
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			   new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
-
-				new DriveTrajectory(CoordType.kAbsoluteResetPose, StopType.kBrake, 
-						trajectoryCache.cache[TrajectoryType.LeaveCommunity.value], driveTrain, log)
+			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
+			    new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
+				new DriveToPose(posLeaveFinal, driveTrain, log)
 	   		);
    	   	}
 
-	// 	if (autoPlan == STRAIGHT) {
+		if (autoPlan == SCORE_CONE_BALANCE_4TOWALL) {
+			// Starting position = facing drivers, 4th scoring position from wall
+			log.writeLogEcho(true, "AutoSelect", "run Score Cone Balance 4ToWall");
+			Pose2d posCommunityInitial = field.getStationInitial(2);
+			Pose2d posCommunityFinal = field.getStationCenter(2);
+			Pose2d posScoreInitial;
+			if (allianceSelection.getAlliance() == Alliance.Red) {
+				posScoreInitial = field.getFinalColumn(6);
+			} else {
+				posScoreInitial = field.getFinalColumn(4);
+			}
+
+	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
+				new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
+				new DriveToPose(posCommunityInitial, driveTrain, log),
+				new DriveToPose(posCommunityFinal, driveTrain, log)
+
+				// TODO balance robot
+				// ,
+				// new ConditionalCommand(
+				// 	null, // drive forward slowly
+				// 	new WaitCommand(0.01), 
+				// 	() -> driveTrain.getGyroPitch() > DriveConstants.maxPitchBalancedDegrees
+				// )
+	   		);
+   	   	}
+
+		if (autoPlan == BALANCE_4TOWALL) {
+			// Starting position = facing drivers, 4th scoring position from wall
+			log.writeLogEcho(true, "AutoSelect", "run Balance 4ToWall");
+			Pose2d posCommunityInitial = field.getStationInitial(2);
+			Pose2d posCommunityFinal = field.getStationCenter(2);
+			Pose2d posScoreInitial;
+			if (allianceSelection.getAlliance() == Alliance.Red) {
+				posScoreInitial = field.getFinalColumn(6);
+			} else {
+				posScoreInitial = field.getFinalColumn(4);
+			}
+
+	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
+				new DriveToPose(posCommunityInitial, driveTrain, log),
+				new DriveToPose(posCommunityFinal, driveTrain, log)
+
+				// TODO balance robot
+				// ,
+				// new ConditionalCommand(
+				// 	null, // drive forward slowly
+				// 	new WaitCommand(0.01), 
+				// 	() -> driveTrain.getGyroPitch() > DriveConstants.maxPitchBalancedDegrees
+				// )
+	   		);
+   	   	}
+
+		// 	if (autoPlan == STRAIGHT) {
 	// 		log.writeLogEcho(true, "AutoSelect", "run Straight");
 	// 	   autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime), 
 	// 	   		new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
