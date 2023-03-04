@@ -202,7 +202,8 @@ public final class Constants {
 
         public static final Transform3d robotToCam =
                 new Transform3d(
-                        new Translation3d(Units.inchesToMeters(6.0), 0.0, Units.inchesToMeters(30.5)),
+                    // new Translation3d(Units.inchesToMeters(6.0), 0.0, Units.inchesToMeters(30.5)),       Changed in B3
+                    new Translation3d(Units.inchesToMeters(6.0)+0.02, -0.005, Units.inchesToMeters(30.5)),
                         new Rotation3d(
                                 0, 0,
                                 0)); // Cam mounted facing forward in center of robot

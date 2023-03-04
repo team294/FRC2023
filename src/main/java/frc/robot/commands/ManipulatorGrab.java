@@ -136,7 +136,7 @@ public class ManipulatorGrab extends CommandBase {
   public void end(boolean interrupted) {
     if (behaviorType == BehaviorType.waitForCone || behaviorType == BehaviorType.waitForCube ||
         behaviorType == BehaviorType.waitForConeOrCube) {
-      manipulator.setMotorPercentOutput(0.1);
+      manipulator.setMotorPercentOutput(0.2);
     } else {
       manipulator.stopMotor();
     }

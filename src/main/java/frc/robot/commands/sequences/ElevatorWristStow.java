@@ -30,24 +30,31 @@ public class ElevatorWristStow extends SequentialCommandGroup {
    */
   public ElevatorWristStow(Elevator elevator, Wrist wrist, FileLog log) {
     addCommands(
-      // If wrist is in main or down region, then raise elevator (if needed) and move wrist into BackMid region
+      // If elevator is not in main and wrist is in main or down region, then raise elevator
       new ConditionalCommand(
-        Commands.sequence(
-          new ConditionalCommand(
-            new ElevatorSetPosition(ElevatorConstants.boundMainLow+1.0, elevator, log), 
-            new WaitCommand(0.01), 
-            () -> (elevator.getElevatorRegion() != ElevatorRegion.main)
-          ),
-          new WristSetAngle(WristConstants.boundBackMidDown-1.0, wrist, log)
-        ), 
+        new ElevatorSetPosition(ElevatorConstants.boundMainLow+3.0, elevator, log),
         new WaitCommand(0.01), 
-        () -> (wrist.getWristRegion() == WristRegion.main || wrist.getWristRegion() == WristRegion.down)
+        () -> (elevator.getElevatorRegion() != ElevatorRegion.main && 
+               (wrist.getWristRegion() == WristRegion.main || wrist.getWristRegion() == WristRegion.down)
+              )
       ),
-      // move elevator and wrist to final position
-      Commands.parallel(
-        new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log),
-        new WristSetAngle(WristAngle.loadConveyor, wrist, log)
-      )
+
+      // If elevator is higher than a little into main, then put wrist back before lowering
+      new ConditionalCommand(
+        new WristSetAngle(WristAngle.elevatorMoving, wrist, log),
+        new WaitCommand(0.01), 
+        () -> (elevator.getElevatorPos() >= ElevatorConstants.boundMainLow+8.0)
+      ),
+
+      // lower elevator to lower edge of main region
+      new ElevatorSetPosition(ElevatorConstants.boundMainLow+3.0, elevator, log)
+        .until( () -> elevator.getElevatorPos() <= ElevatorConstants.boundMainLow+10.0),
+
+      // move wrist to stow position
+      new WristSetAngle(WristAngle.loadConveyor, wrist, log),
+
+      // move elevator to stow position
+      new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log)
     );
   }
 }
