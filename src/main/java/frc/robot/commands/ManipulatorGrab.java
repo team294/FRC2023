@@ -6,7 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-
+import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.FileLog;
 
@@ -136,7 +136,7 @@ public class ManipulatorGrab extends CommandBase {
   public void end(boolean interrupted) {
     if (behaviorType == BehaviorType.waitForCone || behaviorType == BehaviorType.waitForCube ||
         behaviorType == BehaviorType.waitForConeOrCube) {
-      manipulator.setMotorPercentOutput(0.2);
+      manipulator.setMotorPercentOutput(ManipulatorConstants.pieceHoldPct);
     } else {
       manipulator.stopMotor();
     }

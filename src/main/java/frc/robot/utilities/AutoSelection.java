@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import frc.robot.Constants.CoordType;
+import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.Constants.StopType;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.WristConstants.WristAngle;
@@ -32,6 +33,8 @@ public class AutoSelection {
 	public static final int MIDDLE_ONE_CONE_BALANCE = 5;
 	public static final int MIDDLE_BALANCE = 6;
 	public static final int CONE_LEAVE_NEAR_WALL = 7;
+	public static final int SCORE_CONE = 8;
+	public static final int SCORE_CONE_BALANCE_RIGHT = 9;
 
 	private AllianceSelection allianceSelection;
 	private TrajectoryCache trajectoryCache;
@@ -47,14 +50,16 @@ public class AutoSelection {
 
 		// auto selections
 		autoChooser.setDefaultOption("None", NONE);
-		autoChooser.addOption("Cone Leave NearWall", CONE_LEAVE_NEAR_WALL);
+		autoChooser.addOption("Score Cone", SCORE_CONE);
+		autoChooser.addOption("Score Cone Balance Right", SCORE_CONE_BALANCE_RIGHT);
+		// autoChooser.addOption("Cone Leave NearWall", CONE_LEAVE_NEAR_WALL);
 
-		autoChooser.addOption("Straight", STRAIGHT);
-		autoChooser.addOption("Leave Community", LEAVE_COMMUNITY);
-		autoChooser.addOption("Right One Cone Balance", RIGHT_ONE_CONE_BALANCE);
-		autoChooser.addOption("Left One Cone Balance", LEFT_ONE_CONE_BALANCE);
-		autoChooser.addOption("Middle One Cone Balance", MIDDLE_ONE_CONE_BALANCE);
-		autoChooser.addOption("Middle Balance", MIDDLE_BALANCE);
+		// autoChooser.addOption("Straight", STRAIGHT);
+		// autoChooser.addOption("Leave Community", LEAVE_COMMUNITY);
+		// autoChooser.addOption("Right One Cone Balance", RIGHT_ONE_CONE_BALANCE);
+		// autoChooser.addOption("Left One Cone Balance", LEFT_ONE_CONE_BALANCE);
+		// autoChooser.addOption("Middle One Cone Balance", MIDDLE_ONE_CONE_BALANCE);
+		// autoChooser.addOption("Middle Balance", MIDDLE_BALANCE);
 	
 		// show auto selection widget on Shuffleboard
 		SmartDashboard.putData("Autonomous routine", autoChooser);
@@ -83,22 +88,34 @@ public class AutoSelection {
 
 		if (autoPlan == NONE) {
 		 	log.writeLogEcho(true, "AutoSelect", "run None");
-			autonomousCommand = null;
+			autonomousCommand = new DriveResetPose(180, false, driveTrain, log);
 		}
 
-	   if (autoPlan == CONE_LEAVE_NEAR_WALL) {
+		if (autoPlan == SCORE_CONE) {
+			log.writeLogEcho(true, "AutoSelect", "run Score Cone");
+	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+			   	new DriveResetPose(180, false, driveTrain, log),
+				new AutoScoreConeHigh(elevator, wrist, manipulator, led, log)
+	   		);
+   	   	}
+
+		if (autoPlan == SCORE_CONE) {
+			log.writeLogEcho(true, "AutoSelect", "run Score Cone Balance Right");
+	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+			   	new DriveResetPose(180, false, driveTrain, log),
+				new AutoScoreConeHigh(elevator, wrist, manipulator, led, log)
+	   		);
+   	   	}
+
+		if (autoPlan == CONE_LEAVE_NEAR_WALL) {
 			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			   new ManipulatorSetPistonPosition(true, led, manipulator, log),
-			   new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, log),
-			   new EjectPiece(manipulator, log),
-			   new WaitCommand(1.0),
-			   
+			   new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
 
 				new DriveTrajectory(CoordType.kAbsoluteResetPose, StopType.kBrake, 
 						trajectoryCache.cache[TrajectoryType.LeaveCommunity.value], driveTrain, log)
 	   		);
-   	   }
+   	   	}
 
 		if (autoPlan == STRAIGHT) {
 			log.writeLogEcho(true, "AutoSelect", "run Straight");

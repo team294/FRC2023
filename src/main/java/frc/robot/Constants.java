@@ -304,4 +304,10 @@ public final class Constants {
             ElevatorPosition(double value) { this.value = value; }
         }
       }
+
+      public static final class ManipulatorConstants {
+        public static final double pieceGrabPct = 0.8;
+        public static final double pieceHoldPct = 0.2;
+      }
+
 }

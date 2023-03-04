@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.Constants.CoordType;
+import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.StopType;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
@@ -46,7 +47,7 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryType;
  */
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
-  private final FileLog log = new FileLog("B4");
+  private final FileLog log = new FileLog("B5");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
   private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
   private final Field field = new Field(allianceSelection, log);
@@ -168,7 +169,7 @@ public class RobotContainer {
 
     //Manipulator Commands
     SmartDashboard.putData("Manipulator Stop", new ManipulatorStopMotor(manipulator, log));
-    SmartDashboard.putData("Manipulator Pick Up",new ManipulatorGrab(0.8, BehaviorType.waitForConeOrCube, manipulator, log));
+    SmartDashboard.putData("Manipulator Pick Up",new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log));
     SmartDashboard.putData("Manipulator Eject",new ManipulatorSetPercent(-0.5, manipulator, log));
     SmartDashboard.putData("Manipulator Cone", new ManipulatorSetPistonPosition(true, led, manipulator, log));
     SmartDashboard.putData("Manipulator Cube", new ManipulatorSetPistonPosition(false, led, manipulator, log));
@@ -236,7 +237,9 @@ public class RobotContainer {
     // xbRB.onTrue(new ManipulatorSetPistonPosition(false, led, manipulator, log));     
 
     // Left Trigger
-    // xbLT.onTrue(Command command);
+    // When held, manipulator choke up on game piece.  When released, manipulator go to holding power
+    xbLT.onTrue(new ManipulatorSetPercent(ManipulatorConstants.pieceGrabPct, manipulator, log));
+    xbLT.onFalse(new ManipulatorSetPercent(ManipulatorConstants.pieceHoldPct, manipulator, log));
 
     // Right Trigger
     // Score piece
