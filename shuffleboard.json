@@ -1144,13 +1144,6 @@
                 },
                 {
                   "_type": "Text View",
-                  "_source0": "network_table:///SmartDashboard/Manipulator Temp",
-                  "_title": "Temp",
-                  "_glyph": 148,
-                  "_showGlyph": false
-                },
-                {
-                  "_type": "Text View",
                   "_source0": "network_table:///SmartDashboard/Manipulator Out Percent",
                   "_title": "Out Percent",
                   "_glyph": 148,
@@ -1195,6 +1188,56 @@
                   "_type": "Command",
                   "_source0": "network_table:///SmartDashboard/Manipulator Toggle",
                   "_title": "Manipulator Toggle",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                }
+              ]
+            }
+          },
+          "10,0": {
+            "size": [
+              2,
+              3
+            ],
+            "content": {
+              "_type": "List Layout",
+              "_title": "Conveyor",
+              "_glyph": 149,
+              "_showGlyph": false,
+              "Layout/Label position": "LEFT",
+              "_children": [
+                {
+                  "_type": "Text View",
+                  "_source0": "network_table:///SmartDashboard/ConveyorOut Percent",
+                  "_title": "ConveyorOut Percent",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Conveyor Stop",
+                  "_title": "Conveyor Stop",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Conveyor Run",
+                  "_title": "Conveyor Run",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Command",
+                  "_source0": "network_table:///SmartDashboard/Conveyor Custom Percent",
+                  "_title": "Conveyor Custom Percent",
+                  "_glyph": 148,
+                  "_showGlyph": false
+                },
+                {
+                  "_type": "Text View",
+                  "_source0": "network_table:///SmartDashboard/Conveyor Percent",
+                  "_title": "Conveyor Set Percent",
                   "_glyph": 148,
                   "_showGlyph": false
                 }

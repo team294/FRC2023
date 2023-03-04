@@ -278,14 +278,14 @@ public final class Constants {
         // Elevator regions
         public enum ElevatorRegion {
             bottom,     // In the elevator bottom region, the wrist may be in any wrist region.
-            low,        // TODO implement this code!!!!!
+            low,        // Slightly up, wrist can not go far-back or main
             main,       // In the elevator main region, the wrist must be in the wrist main region (not allowed to go to wrist back region).
             uncalibrated;       // Unknown region, elevator is not calibrated.
         }
         // Elevator region boundaries
         // TODO fix boundaries to add low region!!!!
         public static final double boundBottomLow = 2.0;        // Boundary between bottom and low regions
-        public static final double boundMainLow = 3.0;      // Boundary between low and main regions.  TODO CALIBRATE
+        public static final double boundMainLow = 2.0;      // Boundary between low and main regions.  CALIBRATED
 
         // Elevator pre-defined positions (in inches from bottom of elevator)
         public enum ElevatorPosition {

@@ -168,9 +168,9 @@ public class RobotContainer {
     SmartDashboard.putData("LED Purple", new LEDSetStrip(Color.kPurple, 1, led, log));
 
     //Conveyor Commands
-    SmartDashboard.putData("Start Conveyor Custom Percent", new ConveyorMove(conveyor, log));
-    SmartDashboard.putData("Start Conveyor", new ConveyorMove(0.3, conveyor, log));
-    SmartDashboard.putData("Stop Conveyor", new ConveyorMove(0, conveyor, log));
+    SmartDashboard.putData("Conveyor Custom Percent", new ConveyorMove(conveyor, log));
+    SmartDashboard.putData("Conveyor Run", new ConveyorMove(0.3, conveyor, log));
+    SmartDashboard.putData("Conveyor Stop", new ConveyorMove(0, conveyor, log));
 
 
     //Manipulator Commands
