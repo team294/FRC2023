@@ -82,8 +82,8 @@ public final class Constants {
         // public static final int I2CcolorSensor = 0x52;       // According to REV docs, color sensor is at 0x52 = 82.  Rob had 39?
 
         // Pneumatic solenoid ports
-        public static final int SolManipulatorFwd = 1;      // TODO set correct channel
-        public static final int SolManipulatorRev = 0;      // TODO set correct channel
+        public static final int SolManipulatorFwd = 1;
+        public static final int SolManipulatorRev = 0;
 
     }
 
@@ -230,7 +230,7 @@ public final class Constants {
         // and -90 deg is with the CG of the wrist resting downward.
         public static double revEncoderOffsetAngleWrist = 0;    // 69.0 deg
 
-        public static final double kG = 0.02;   // CALIBRATED.  Feed foward percent-out to add to hold arm horizontal (0 deg)
+        public static final double kG = 0.03;   // CALIBRATED 0.02.  Feed foward percent-out to add to hold arm horizontal (0 deg)
 
         // Wrist regions
         public enum WristRegion {
@@ -253,9 +253,9 @@ public final class Constants {
             lowerLimit(-119.0),      // CALIBRATED
             startConfig(-119.0),     // CALIBRATED
             loadConveyor(-117.5),    // CALIBRATED
-            loadHumanStation(0.0),      // TODO calibrate
+            loadHumanStation(10.0),      // TODO calibrate
             scoreLow(0.0),
-            scoreMidHigh(10.0),
+            scoreMidHigh(20.0),         // Was 10.0
             elevatorMoving(32.0),    // CALIBRATED
             upperLimit(32.0);       // CALIBRATED
             // score low 5 inches
@@ -278,22 +278,24 @@ public final class Constants {
         // Elevator regions
         public enum ElevatorRegion {
             bottom,     // In the elevator bottom region, the wrist may be in any wrist region.
-            low,        // TODO implement this code!!!!!
+            low,        // Slightly up, wrist can not go far-back or main
             main,       // In the elevator main region, the wrist must be in the wrist main region (not allowed to go to wrist back region).
             uncalibrated;       // Unknown region, elevator is not calibrated.
         }
         // Elevator region boundaries
         // TODO fix boundaries to add low region!!!!
-        public static final double mainBottom = 2.0;      // Boundary between bottom and main regions.  TODO CALIBRATE
+        public static final double boundBottomLow = 2.0;        // Boundary between bottom and low regions
+        public static final double boundMainLow = 2.0;      // Boundary between low and main regions.  CALIBRATED
 
         // Elevator pre-defined positions (in inches from bottom of elevator)
         public enum ElevatorPosition {
-            lowerLimit(0.0), 
+            lowerLimit(0.0),        // CALIBRATED
             bottom(0.0),            // CALIBRATED
-            loadingStation(20.0),   // CALIBRATED
-            scoreLow(5.0),          // CALIBRATED
-            scoreMidCone(21.0),     // CALIBRATED
-            scoreHighCone(41.0),    // CALIBRATED
+            loadingStationCube(35.0),   // TODO CALIBRATE
+            loadingStationCone(45.0),   // TODO CALIBRATE
+            scoreLow(5.0),          // TODO CALIBRATE
+            scoreMidCone(21.0),     // TODO CALIBRATE
+            scoreHighCone(41.0),    // TODO CALIBRATE
             upperLimit(45.4);       // CALIBRATED
             // score low 5 inches
             @SuppressWarnings({"MemberName", "PMD.SingularField"})

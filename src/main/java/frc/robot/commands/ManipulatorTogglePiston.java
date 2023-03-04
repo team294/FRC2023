@@ -28,9 +28,9 @@ public class ManipulatorTogglePiston extends CommandBase {
   public void initialize() {
     manipulator.togglePiston();
     if(manipulator.getPistonCone()){
-      new LEDSetStrip(Color.kYellow, led, log);
+      led.setStrip(Color.kYellow, 0);
     } else {
-      new LEDSetStrip(Color.kPurple, led, log);
+      led.setStrip(Color.kPurple, 0);
     }
     log.writeLog(false, "ManipulatorTogglePiston", "Initialize", "isConeAfterToggle", manipulator.getPistonCone());
   }

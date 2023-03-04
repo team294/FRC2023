@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -30,6 +31,7 @@ import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.commands.*;
 import frc.robot.commands.ManipulatorGrab.BehaviorType;
 import frc.robot.commands.autos.*;
+import frc.robot.commands.sequences.*;
 import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
 import frc.robot.utilities.*;
@@ -44,7 +46,7 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryType;
  */
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
-  private final FileLog log = new FileLog("B1");
+  private final FileLog log = new FileLog("B2");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
   private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
   private final Field field = new Field(allianceSelection, log);
@@ -53,7 +55,6 @@ public class RobotContainer {
   private final Wrist wrist = new Wrist(log);
   private final Elevator elevator = new Elevator(wrist, log);
   private final DriveTrain driveTrain = new DriveTrain(field, elevator, log);
-  private final Grabber grabber = new Grabber("Grabber", log);
   private final Manipulator manipulator = new Manipulator(log);
   private final LED led = new LED();
   private final Conveyor conveyor = new Conveyor(log);
@@ -136,11 +137,6 @@ public class RobotContainer {
         trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value], driveTrain, log));
     SmartDashboard.putData("Auto OneConeBalance", new OuterOneConeBalanceMiddleAuto(driveTrain));     // TODO put on auto selector and remove this button
   
-    //Grabber commands
-    SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
-    SmartDashboard.putData("Grabber Pick Up",new GrabberPickUp(grabber, log));
-    SmartDashboard.putData("Grabber Eject", new GrabberEject(grabber, log));
-
     //Elevator Commands
     SmartDashboard.putData("Elevator Cal Encoder", new ElevatorCalibrateEncoderIfAtLowerLimit(elevator, log));
     SmartDashboard.putData("Elevator Calibration", new ElevatorCalibration(0.05, elevator, log));
@@ -165,9 +161,9 @@ public class RobotContainer {
     SmartDashboard.putData("LED Purple", new LEDSetStrip(Color.kPurple, 1, led, log));
 
     //Conveyor Commands
-    SmartDashboard.putData("Start Conveyor Custom Percent", new ConveyorMove(conveyor, log));
-    SmartDashboard.putData("Start Conveyor", new ConveyorMove(0.3, conveyor, log));
-    SmartDashboard.putData("Stop Conveyor", new ConveyorMove(0, conveyor, log));
+    SmartDashboard.putData("Conveyor Custom Percent", new ConveyorMove(conveyor, log));
+    SmartDashboard.putData("Conveyor Run", new ConveyorMove(0.3, conveyor, log));
+    SmartDashboard.putData("Conveyor Stop", new ConveyorMove(0, conveyor, log));
 
 
     //Manipulator Commands
@@ -214,44 +210,66 @@ public class RobotContainer {
     Trigger xbPOVDown = xboxController.povDown();
    
     //a
-    // Include wrist
-    xbA.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreLow, elevator, log)); 
-    
+    // xbA.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreLow, elevator, log)); 
+    // Move elevator/wrist to score low position
+    xbA.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.scoreLow.value, elevator, wrist, log));
+     
     //b
-    // Include wrist
-    xbB.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreMidCone, elevator, log));         
+    // xbB.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreMidCone, elevator, log));         
+    // Move elevator/wrist to score mid position
+    xbB.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreMidCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, log));
  
     //y
-    // Include wrist
-    xbY.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreHighCone, elevator, log));        
+    // xbY.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreHighCone, elevator, log));
+    // Move elevator/wrist to score high position
+    xbY.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, log));
     
     //x
-    // Include wrist
-    xbX.onTrue(new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));        
+    // xbX.onTrue(new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
+    // Store elevator and wrist for traveling or pickup from conveyor
+    xbX.onTrue(new ElevatorWristStow(elevator, wrist, log));        
     
     //lb
     xbLB.whileTrue(new ElevatorWristXboxControl(xboxController, elevator, wrist, log));     
     
     //rb
-    // xbRB.whileTrue(new ManipulatorSetPistonPosition(false, led, manipulator, log));     
+    // xbRB.onTrue(new ManipulatorSetPistonPosition(false, led, manipulator, log));     
 
+    // Left Trigger
+    // xbLT.onTrue(Command command);
 
-    // back 
-    // xbBack.whileTrue(Command command); 
+    // Right Trigger
+    // Score piece
+    xbRT.onTrue(new EjectPiece(manipulator, log));
+
+    // back
+    // Turn off all motors
+    xbBack.onTrue(Commands.parallel(
+      new ManipulatorStopMotor(manipulator, log),
+      new ConveyorMove(0, conveyor, log)
+      // TODO stop intake
+    )); 
 
     // start 
-    // xbStart.whileTrue(Command command); 
+    // xbStart.onTrue(Command command); 
 
     // POV buttons
+
     // Up
-    // xbPOVUp.whileTrue(Command command);
+    // Prepare to get cone
+    xbPOVUp.onTrue(new ManipulatorSetPistonPosition(true, led, manipulator, log));
+
     // Down
-    // xbPOVUp.whileTrue(Command command);
+    // Prepare to get cube
+    xbPOVDown.onTrue(new ManipulatorSetPistonPosition(false, led, manipulator, log));
+
     // Left
-    // xbPOVUp.whileTrue(Command command);
+    // Sets elevator/wrist to stowed, turn on conveyor, turn on manipulator to load piece
+    xbPOVLeft.onTrue(new LoadPieceConveyor(elevator, wrist, manipulator, conveyor, log));
+
     // Right
-    // xbPOVUp.whileTrue(Command command);
-    
+    // Move elevator to loading station config and turn on manipulator to grab piece
+    xbPOVRight.onTrue( new LoadPieceLoadingStation(elevator, wrist, manipulator, log) );
   }
 
   /**
@@ -275,6 +293,8 @@ public class RobotContainer {
     //left[1].onTrue(new IntakeRetractAndFlush(intakeFront, uptake, feeder, log));
     // resets current angle to 0, keeps current X and Y
     left[1].onTrue(new DriveResetPose(0, false, driveTrain, log));
+    // drive to closest goal
+    left[2].onTrue(new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
    
     // left joystick right button
     right[1].onTrue(new DriveToPose(CoordType.kAbsolute, 0, driveTrain, log));
@@ -457,8 +477,14 @@ public class RobotContainer {
     driveTrain.cameraInit();
     elevator.setMotorModeCoast(false);
 
-    if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
-    led.setStrip(Color.kOrange, 0);
+    if (patternTeamMoving.isScheduled()) {
+      patternTeamMoving.cancel();
+      if (allianceSelection.getAlliance() == Alliance.Blue) {
+        led.setStrip(Color.kBlue, 0);
+      } else {
+        led.setStrip(Color.kRed, 0);
+      }
+    }
   }
 
   /**

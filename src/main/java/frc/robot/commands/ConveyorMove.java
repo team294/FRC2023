@@ -4,7 +4,6 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Conveyor;
@@ -26,6 +25,7 @@ public class ConveyorMove extends CommandBase {
     addRequirements(conveyor);
     // Use addRequirements() here to declare subsystem dependencies.
   }
+
   public ConveyorMove(Conveyor conveyor, FileLog log) {
     this.conveyor = conveyor;
     this.log = log;
@@ -54,13 +54,12 @@ public class ConveyorMove extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    conveyor.stopMotor();
+    // conveyor.stopMotor();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-
-    return false;
+    return true;
   }
 }

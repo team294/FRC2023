@@ -24,7 +24,6 @@ import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.Ports;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
-import frc.robot.Constants.WristConstants.WristRegion;
 import frc.robot.utilities.ElevatorProfileGenerator;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.Loggable;
@@ -137,10 +136,11 @@ public class Elevator extends SubsystemBase implements Loggable{
 			-ElevatorConstants.maxUncalibratedPercentOutput, ElevatorConstants.maxUncalibratedPercentOutput);
 		}
 
+		// TODO fix interlock
 		// Do not move the elevator up if the wrist is not in the main region (interlock to prevent crashing).
-		if (wrist.getWristRegion() != WristRegion.main && percentOutput > 0.0) {
-			percentOutput = 0.0;
-		}
+		// if (wrist.getWristRegion() != WristRegion.main && percentOutput > 0.0) {
+		// 	percentOutput = 0.0;
+		// }
 
 		elevatorMotor.set(ControlMode.PercentOutput, percentOutput);
 	}
@@ -156,6 +156,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 
 			pos = MathUtil.clamp(pos, ElevatorPosition.lowerLimit.value, ElevatorPosition.upperLimit.value);
 
+			// TODO fix interlock
 			// Do not move the elevator out of the bottom region if the wrist is not in the main region (interlock to prevent crashing).
 			// if (wrist.getWristRegion() != WristRegion.main && pos > ElevatorConstants.mainBottom) {
 			// 	pos = ElevatorConstants.mainBottom;
@@ -227,7 +228,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 		if (elevCalibrated) {
 			return getElevatorEncTicks()*ElevatorConstants.kElevEncoderInchesPerTick;
 		} else {
-			return ElevatorConstants.mainBottom + 10.0;
+			return ElevatorConstants.boundMainLow + 10.0;
 		}
 	}
 
@@ -239,7 +240,13 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 */
 	private ElevatorRegion calcElevatorRegion(double pos) {
 		if (elevCalibrated) {
-			return (pos >= ElevatorConstants.mainBottom) ? ElevatorRegion.main : ElevatorRegion.bottom;
+			if (pos >= ElevatorConstants.boundMainLow) {
+				return ElevatorRegion.main;
+			 } else if (pos > ElevatorConstants.boundBottomLow) {
+				return ElevatorRegion.low;
+			 }else {
+				return ElevatorRegion.bottom;
+			 }
 		} else {
 			return ElevatorRegion.uncalibrated;
 		}

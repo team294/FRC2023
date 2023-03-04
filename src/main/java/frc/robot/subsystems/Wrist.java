@@ -15,7 +15,6 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -434,11 +433,11 @@ public class Wrist extends SubsystemBase implements Loggable{
     }
 
     // Un-calibrates the wrist if the angle is outside of bounds
-    // TODO CALIBRATE
-    if (getWristAngle() > WristAngle.upperLimit.value + 10.0 || getWristAngle() < WristAngle.lowerLimit.value - 10.0) {
-      setWristUncalibrated();
-      updateWristLog(true);
-    }
+    // // TODO CALIBRATE
+    // if (getWristAngle() > WristAngle.upperLimit.value + 20.0 || getWristAngle() < WristAngle.lowerLimit.value - 20.0) {
+    //   setWristUncalibrated();
+    //   updateWristLog(true);
+    // }
 
     // If in manual drive mode and if elevator object exists, 
     // then enforce interlocks (stop wrist if at edge of allowed region based on elevator)
@@ -447,25 +446,37 @@ public class Wrist extends SubsystemBase implements Loggable{
       double pct = wristMotor.getMotorOutputPercent();
       double tol = 1.0;     // degrees tolerance for safeties
 
-      // TODO finish code
-      // switch (elevator.getElevatorRegion()) {
-      //   case uncalibrated:
-      //     // No interlock.  Danger zone!!!!!!!
-      //     break;
-      //   case bottom:
-      //     if ( (angle <= (WristAngle.lowerLimit.value+tol) && pct < 0.0) ||
-      //          (angle >= (boundBackMidDown-tol) && angle <= (boundDownMidpoint) && pct > 0.0) ||
-      //          (angle >= (boundDownMidpoint) && angle <= (boundDownMain+tol) && pct < 0.0) ||
-      //          (angle >= (WristAngle.upperLimit.value-tol) && pct > 0.0)
-      //        ) {
-      //       stopWrist();
-      //     }
-      //     break;
-      //   case low:
-      //     break;
-      //   case main:
-      //     break;
-      // }
+      // TODO test code
+      switch (elevator.getElevatorRegion()) {
+        case uncalibrated:
+          // No interlock.  Danger zone!!!!!!!
+          break;
+        case bottom:
+          if ( (angle <= (WristAngle.lowerLimit.value+tol) && pct < 0.0) ||
+               (angle >= (boundBackMidDown-tol) && angle <= (boundDownMidpoint) && pct > 0.0) ||
+               (angle >= (boundDownMidpoint) && angle <= (boundDownMain+tol) && pct < 0.0) ||
+               (angle >= (WristAngle.upperLimit.value-tol) && pct > 0.0)
+             ) {
+            stopWrist();
+          }
+          break;
+        case low:
+          if ( (angle <= (boundBackFarMid+tol) && pct < 0.0) ||
+              (angle >= (boundBackMidDown-tol) && angle <= (boundDownMidpoint) && pct > 0.0) ||
+              (angle >= (boundDownMidpoint) && angle <= (boundDownMain+tol) && pct < 0.0) ||
+              (angle >= (WristAngle.upperLimit.value-tol) && pct > 0.0)
+              ) {
+            stopWrist();
+          }
+         break;
+        case main:
+          if ( (angle <= (boundBackFarMid+tol) && pct < 0.0) ||
+              (angle >= (WristAngle.upperLimit.value-tol) && pct > 0.0)
+              ) {
+            stopWrist();
+          }
+          break;
+      }
     }
   }
  
