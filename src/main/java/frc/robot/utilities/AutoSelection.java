@@ -4,6 +4,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -34,24 +38,26 @@ public class AutoSelection {
 	public static final int MIDDLE_BALANCE = 6;
 	public static final int CONE_LEAVE_NEAR_WALL = 7;
 	public static final int SCORE_CONE = 8;
-	public static final int SCORE_CONE_BALANCE_RIGHT = 9;
+	public static final int SCORE_CONE_BALANCE_4TOWALL = 9;
 
-	private AllianceSelection allianceSelection;
-	private TrajectoryCache trajectoryCache;
+	private final AllianceSelection allianceSelection;
+	private final TrajectoryCache trajectoryCache;
+	private final Field field;
 	private SendableChooser<Integer> autoChooser = new SendableChooser<>();
 	
 	/**
 	 * AutoSelection constructor for command group
 	 * Sets up autoPlan widget 
 	 */  	
-	public AutoSelection(TrajectoryCache trajectoryCache, AllianceSelection allianceSelection, FileLog log) {
+	public AutoSelection(TrajectoryCache trajectoryCache, AllianceSelection allianceSelection, Field field, FileLog log) {
 		this.trajectoryCache = trajectoryCache;
 		this.allianceSelection = allianceSelection;
+		this.field = field;
 
 		// auto selections
 		autoChooser.setDefaultOption("None", NONE);
 		autoChooser.addOption("Score Cone", SCORE_CONE);
-		autoChooser.addOption("Score Cone Balance Right", SCORE_CONE_BALANCE_RIGHT);
+		// autoChooser.addOption("Score Cone Balance 4ToWall", SCORE_CONE_BALANCE_4TOWALL);
 		// autoChooser.addOption("Cone Leave NearWall", CONE_LEAVE_NEAR_WALL);
 
 		// autoChooser.addOption("Straight", STRAIGHT);
@@ -87,11 +93,13 @@ public class AutoSelection {
 		waitTime = MathUtil.clamp(waitTime, 0, 15);		// make sure autoDelay isn't negative and is only active during auto
 
 		if (autoPlan == NONE) {
-		 	log.writeLogEcho(true, "AutoSelect", "run None");
+			// Starting position = facing drivers
+			log.writeLogEcho(true, "AutoSelect", "run None");
 			autonomousCommand = new DriveResetPose(180, false, driveTrain, log);
 		}
 
 		if (autoPlan == SCORE_CONE) {
+			// Starting position = facing drivers, against a cone scoring location
 			log.writeLogEcho(true, "AutoSelect", "run Score Cone");
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			   	new DriveResetPose(180, false, driveTrain, log),
@@ -99,16 +107,34 @@ public class AutoSelection {
 	   		);
    	   	}
 
-		if (autoPlan == SCORE_CONE) {
-			log.writeLogEcho(true, "AutoSelect", "run Score Cone Balance Right");
+		// TODO not done!!!!!
+		if (autoPlan == SCORE_CONE_BALANCE_4TOWALL) {
+			// Starting position = facing drivers, 4th scoring position from wall
+			log.writeLogEcho(true, "AutoSelect", "run Score Cone Balance 4ToWall");
+			Pose2d posCommunityInitial, posCommunityFinal;
+			if (allianceSelection.getAlliance() == Alliance.Red) {
+				// posCommunityInitial = field.getStationInitial(autoPlan)
+			}
+
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			   	new DriveResetPose(180, false, driveTrain, log),
 				new AutoScoreConeHigh(elevator, wrist, manipulator, led, log)
+				// new DriveResetPose
+			// TODO drive onto balance and reset pose
 	   		);
    	   	}
 
+		// TODO not done!!!
 		if (autoPlan == CONE_LEAVE_NEAR_WALL) {
+			// Starting position = facing drivers, against scoring position closest to wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
+			Pose2d posCommunityInitial, posCommunityFinal;
+			if (allianceSelection.getAlliance() == Alliance.Red) {
+				posCommunityInitial = field.getFinalColumn(9);
+			} else {
+				posCommunityInitial = field.getFinalColumn(1);
+			}
+			posCommunityFinal = posCommunityInitial.transformBy(new Transform2d(new Translation2d(0.0, 0.0), Rotation2d.fromDegrees(0.0)));
+
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			   new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
 
@@ -117,65 +143,65 @@ public class AutoSelection {
 	   		);
    	   	}
 
-		if (autoPlan == STRAIGHT) {
-			log.writeLogEcho(true, "AutoSelect", "run Straight");
-		   autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime), 
-		   		new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
-						trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log)
-		   );
-	   }
+	// 	if (autoPlan == STRAIGHT) {
+	// 		log.writeLogEcho(true, "AutoSelect", "run Straight");
+	// 	   autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime), 
+	// 	   		new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
+	// 					trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log)
+	// 	   );
+	//    }
 
-	   if (autoPlan == LEAVE_COMMUNITY) {
-			log.writeLogEcho(true, "AutoSelect", "run Leave Community");
-	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-				new DriveTrajectory(CoordType.kAbsoluteResetPose, StopType.kBrake, 
-						trajectoryCache.cache[TrajectoryType.LeaveCommunity.value], driveTrain, log)
-	   		);
-   	   }
+	//    if (autoPlan == LEAVE_COMMUNITY) {
+	// 		log.writeLogEcho(true, "AutoSelect", "run Leave Community");
+	//    		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+	// 			new DriveTrajectory(CoordType.kAbsoluteResetPose, StopType.kBrake, 
+	// 					trajectoryCache.cache[TrajectoryType.LeaveCommunity.value], driveTrain, log)
+	//    		);
+   	//    }
 
-	   if(autoPlan == RIGHT_ONE_CONE_BALANCE){
-			log.writeLogEcho(true, "AutoSelect", "run Right One Cone Balance");
-			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-				new DriveTrajectory(CoordType.kAbsoluteResetPoseTol, StopType.kBrake, 
-					((allianceSelection.getAlliance() == Alliance.Red) ? 
-						trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceRed.value]:
-						trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceBlue.value] ), 
-					driveTrain, log)
-			);
-	   }
+	//    if(autoPlan == RIGHT_ONE_CONE_BALANCE){
+	// 		log.writeLogEcho(true, "AutoSelect", "run Right One Cone Balance");
+	// 		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+	// 			new DriveTrajectory(CoordType.kAbsoluteResetPoseTol, StopType.kBrake, 
+	// 				((allianceSelection.getAlliance() == Alliance.Red) ? 
+	// 					trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceRed.value]:
+	// 					trajectoryCache.cache[TrajectoryType.RightOuterOneConeBalanceBlue.value] ), 
+	// 				driveTrain, log)
+	// 		);
+	//    }
 
-	   if(autoPlan == LEFT_ONE_CONE_BALANCE){
-			log.writeLogEcho(true, "AutoSelect", "run Left One Cone Balance");
-			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-				new DriveTrajectory(CoordType.kAbsoluteResetPoseTol, StopType.kBrake, 
-					((allianceSelection.getAlliance() == Alliance.Red) ? 
-						trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceRed.value]:
-						trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceBlue.value] ), 
-					driveTrain, log)
-			);
-	   }
+	//    if(autoPlan == LEFT_ONE_CONE_BALANCE){
+	// 		log.writeLogEcho(true, "AutoSelect", "run Left One Cone Balance");
+	// 		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+	// 			new DriveTrajectory(CoordType.kAbsoluteResetPoseTol, StopType.kBrake, 
+	// 				((allianceSelection.getAlliance() == Alliance.Red) ? 
+	// 					trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceRed.value]:
+	// 					trajectoryCache.cache[TrajectoryType.LeftOuterOneConeBalanceBlue.value] ), 
+	// 				driveTrain, log)
+	// 		);
+	//    }
 
-	   if(autoPlan == MIDDLE_ONE_CONE_BALANCE){
-			log.writeLogEcho(true, "AutoSelect", "run Middle One Cone Balance");
-			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-				new DriveTrajectory(CoordType.kAbsoluteResetPoseTol, StopType.kBrake, 
-					((allianceSelection.getAlliance() == Alliance.Red) ? 
-						trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceRed.value]:
-						trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value] ), 
-					driveTrain, log)
-			);
-	   }
+	//    if(autoPlan == MIDDLE_ONE_CONE_BALANCE){
+	// 		log.writeLogEcho(true, "AutoSelect", "run Middle One Cone Balance");
+	// 		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+	// 			new DriveTrajectory(CoordType.kAbsoluteResetPoseTol, StopType.kBrake, 
+	// 				((allianceSelection.getAlliance() == Alliance.Red) ? 
+	// 					trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceRed.value]:
+	// 					trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value] ), 
+	// 				driveTrain, log)
+	// 		);
+	//    }
 
-	   if(autoPlan == MIDDLE_BALANCE){
-		log.writeLogEcho(true, "AutoSelect", "run Middle Balance");
-		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			new DriveTrajectory(CoordType.kAbsoluteResetPoseTol, StopType.kBrake, 
-				((allianceSelection.getAlliance() == Alliance.Red) ? 
-					trajectoryCache.cache[TrajectoryType.CenterBalanceRed.value]:
-					trajectoryCache.cache[TrajectoryType.CenterBalanceBlue.value] ), 
-				driveTrain, log)
-		);
-	   }
+	//    if(autoPlan == MIDDLE_BALANCE){
+	// 	log.writeLogEcho(true, "AutoSelect", "run Middle Balance");
+	// 	autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+	// 		new DriveTrajectory(CoordType.kAbsoluteResetPoseTol, StopType.kBrake, 
+	// 			((allianceSelection.getAlliance() == Alliance.Red) ? 
+	// 				trajectoryCache.cache[TrajectoryType.CenterBalanceRed.value]:
+	// 				trajectoryCache.cache[TrajectoryType.CenterBalanceBlue.value] ), 
+	// 			driveTrain, log)
+	// 	);
+	//    }
 	   
 
    if (autonomousCommand == null) {

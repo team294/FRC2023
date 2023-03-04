@@ -47,7 +47,7 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryType;
  */
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
-  private final FileLog log = new FileLog("B5");
+  private final FileLog log = new FileLog("B6");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
   private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
   private final Field field = new Field(allianceSelection, log);
@@ -62,7 +62,7 @@ public class RobotContainer {
 
   // Define other utilities
   private final TrajectoryCache trajectoryCache = new TrajectoryCache(log);
-  private final AutoSelection autoSelection = new AutoSelection(trajectoryCache, allianceSelection, log);
+  private final AutoSelection autoSelection = new AutoSelection(trajectoryCache, allianceSelection, field, log);
 
   // Define controllers
   // private final Joystick xboxController = new Joystick(OIConstants.usbXboxController); //assuming usbxboxcontroller is int

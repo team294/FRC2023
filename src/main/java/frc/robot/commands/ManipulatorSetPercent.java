@@ -15,7 +15,7 @@ public class ManipulatorSetPercent extends CommandBase {
   private final FileLog log;
 
   /**
-   * Sets the speed of the manipulator
+   * Sets the speed of the manipulator and finishes command with manipulator running
    * @param percent -1 (eject) to +1 (grab)
    * @param manipulator
    * @param log
@@ -43,12 +43,12 @@ public class ManipulatorSetPercent extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    manipulator.stopMotor();
+    // manipulator.stopMotor();
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return true;
   }
 }

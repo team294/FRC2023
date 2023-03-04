@@ -23,12 +23,14 @@ public class AutoScoreConeHigh extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
+      new FileLogWrite(true, false, "AutoScoreConeHigh", "Start", log),
       new ManipulatorSetPistonPosition(true, led, manipulator, log),		// set to cone position
-      new ManipulatorSetPercent(ManipulatorConstants.pieceHoldPct, manipulator, log),				// Low power to hold piece
+      new ManipulatorSetPercent(ManipulatorConstants.pieceGrabPct, manipulator, log),				// Low power to hold piece
       new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, log),
       new WaitCommand(0.25),
       new EjectPiece(manipulator, log), 		// Runs for 1 second
-      new ElevatorWristStow(elevator, wrist, log)
+      new ElevatorWristStow(elevator, wrist, log),
+      new FileLogWrite(true, false, "AutoScoreConeHigh", "Finish", log)
     );
   }
 }

@@ -5,7 +5,7 @@
 package frc.robot.commands.sequences;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.FileLog;
@@ -20,7 +20,9 @@ public class EjectPiece extends SequentialCommandGroup {
    */
   public EjectPiece(Manipulator manipulator, FileLog log) {
     addCommands(
-      new ManipulatorSetPercent(-0.5, manipulator, log).withTimeout(1)
+      new ManipulatorSetPercent(-0.5, manipulator, log),
+      new WaitCommand(1.0),
+      new ManipulatorStopMotor(manipulator, log)
     );
   }
 }
