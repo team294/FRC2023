@@ -174,6 +174,13 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   }
 
   /**
+	 * @return double, gyro pitch from 180 to -180, in degrees (postitive is nose up, negative is nose down)
+	 */
+	public double getGyroPitch() {
+		return ahrs.getPitch();
+  }
+
+  /**
    * @return gyro angular velocity (with some averaging to reduce noise), in degrees per second.
    * Positive is turning left, negative is turning right.
    */
@@ -476,7 +483,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
       SmartDashboard.putNumber("Drive Raw Gyro", getGyroRaw());
       SmartDashboard.putNumber("Drive Gyro Rotation", getGyroRotation());
       SmartDashboard.putNumber("Drive AngVel", angularVelocity);
-      SmartDashboard.putNumber("Drive Pitch", ahrs.getRoll());
+      SmartDashboard.putNumber("Drive Pitch", getGyroPitch());
       
       // position from poseEstimator (helpful for autos)
       Pose2d pose = poseEstimator.getEstimatedPosition();

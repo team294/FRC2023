@@ -10,8 +10,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import frc.robot.Constants.CoordType;
 import frc.robot.Constants.StopType;
+import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
+import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.commands.*;
 import frc.robot.commands.autos.*;
+import frc.robot.commands.sequences.*;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.TrajectoryCache.TrajectoryType;
 
@@ -21,13 +24,14 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryType;
  */
 public class AutoSelection {
 
-	public static final int EXAMPLE = 0;
+	public static final int NONE = 0;
 	public static final int STRAIGHT = 1;
 	public static final int LEAVE_COMMUNITY = 2;
 	public static final int RIGHT_ONE_CONE_BALANCE = 3;
 	public static final int LEFT_ONE_CONE_BALANCE = 4;
 	public static final int MIDDLE_ONE_CONE_BALANCE = 5;
 	public static final int MIDDLE_BALANCE = 6;
+	public static final int CONE_LEAVE_NEAR_WALL = 7;
 
 	private AllianceSelection allianceSelection;
 	private TrajectoryCache trajectoryCache;
@@ -42,7 +46,9 @@ public class AutoSelection {
 		this.allianceSelection = allianceSelection;
 
 		// auto selections
-		autoChooser.setDefaultOption("Example Auto", EXAMPLE);
+		autoChooser.setDefaultOption("None", NONE);
+		autoChooser.addOption("Cone Leave NearWall", CONE_LEAVE_NEAR_WALL);
+
 		autoChooser.addOption("Straight", STRAIGHT);
 		autoChooser.addOption("Leave Community", LEAVE_COMMUNITY);
 		autoChooser.addOption("Right One Cone Balance", RIGHT_ONE_CONE_BALANCE);
@@ -66,7 +72,7 @@ public class AutoSelection {
 	 * @param log        The filelog to write the logs to
 	 * @return the command to run
 	 */
-	public Command getAutoCommand(DriveTrain driveTrain, FileLog log) {
+	public Command getAutoCommand(Elevator elevator, Wrist wrist, Manipulator manipulator, DriveTrain driveTrain, LED led, FileLog log) {
 		Command autonomousCommand = null;
 
 		// Get parameters from Shuffleboard
@@ -75,10 +81,24 @@ public class AutoSelection {
 		double waitTime = SmartDashboard.getNumber("Autonomous delay", 0);
 		waitTime = MathUtil.clamp(waitTime, 0, 15);		// make sure autoDelay isn't negative and is only active during auto
 
-		if (autoPlan == EXAMPLE) {
-		 	log.writeLogEcho(true, "AutoSelect", "run Example Auto");
-			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime), new ExampleAuto(driveTrain));
+		if (autoPlan == NONE) {
+		 	log.writeLogEcho(true, "AutoSelect", "run None");
+			autonomousCommand = null;
 		}
+
+	   if (autoPlan == CONE_LEAVE_NEAR_WALL) {
+			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
+	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+			   new ManipulatorSetPistonPosition(true, led, manipulator, log),
+			   new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, log),
+			   new EjectPiece(manipulator, log),
+			   new WaitCommand(1.0),
+			   
+
+				new DriveTrajectory(CoordType.kAbsoluteResetPose, StopType.kBrake, 
+						trajectoryCache.cache[TrajectoryType.LeaveCommunity.value], driveTrain, log)
+	   		);
+   	   }
 
 		if (autoPlan == STRAIGHT) {
 			log.writeLogEcho(true, "AutoSelect", "run Straight");
