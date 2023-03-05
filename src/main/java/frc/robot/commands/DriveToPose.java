@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -20,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 
 import frc.robot.Constants;
 import frc.robot.Constants.CoordType;
+import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
@@ -41,6 +43,7 @@ public class DriveToPose extends CommandBase {
   }
 
   private final GoalMode goalMode;
+  private final TrapezoidProfileBCR.Constraints trapProfileConstraints;
   private Supplier<Pose2d> goalSupplier;    // Supplier for goalPose
   private Rotation2d rotation;              // Rotation for goalPose
   private Pose2d initialPose, goalPose;     // Starting and destination robot pose (location and rotation) on the field
@@ -64,6 +67,31 @@ public class DriveToPose extends CommandBase {
     this.log = log;
     this.goalPose = goalPose;
     goalMode = GoalMode.pose;
+    trapProfileConstraints = TrajectoryConstants.kDriveProfileConstraints;
+
+    constructorCommonCode();
+  }
+
+  /**
+   * Drives the robot to the desired pose in field coordinates.
+   * @param goalPose target pose in field coordinates.  Pose components include
+   *    <p> Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
+   *    <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
+   *    <p> Robot angle on the field (0 = facing away from our drivestation, + to the left, - to the right)
+   * @param maxVelMetersPerSecond max velocity to drive, in meters per second
+   * @param maxAccelMetersPerSecondSquare max acceleration/deceleration, in meters per second squared
+   * @param driveTrain DriveTrain subsystem
+   * @param log file for logging
+   */
+  public DriveToPose(Pose2d goalPose, double maxVelMetersPerSecond, double maxAccelMetersPerSecondSquare, DriveTrain driveTrain, FileLog log) {
+    this.driveTrain = driveTrain;
+    this.log = log;
+    this.goalPose = goalPose;
+    goalMode = GoalMode.pose;
+    trapProfileConstraints = new TrapezoidProfileBCR.Constraints(
+      MathUtil.clamp(maxVelMetersPerSecond, -SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxSpeedMetersPerSecond), 
+      MathUtil.clamp(maxAccelMetersPerSecondSquare, -SwerveConstants.kMaxAccelerationMetersPerSecondSquare, SwerveConstants.kMaxAccelerationMetersPerSecondSquare)
+    );
 
     constructorCommonCode();
   }
@@ -82,6 +110,7 @@ public class DriveToPose extends CommandBase {
     this.log = log;
     goalSupplier = goalPoseSupplier;
     goalMode = GoalMode.poseSupplier;
+    trapProfileConstraints = TrajectoryConstants.kDriveProfileConstraints;
 
     constructorCommonCode();
   }
@@ -104,6 +133,7 @@ public class DriveToPose extends CommandBase {
     } else {
       goalMode = GoalMode.angleAbsolute;
     }
+    trapProfileConstraints = TrajectoryConstants.kDriveProfileConstraints;
 
     constructorCommonCode();
   }
@@ -117,6 +147,7 @@ public class DriveToPose extends CommandBase {
     this.driveTrain = driveTrain;
     this.log = log;
     goalMode = GoalMode.shuffleboard;
+    trapProfileConstraints = TrajectoryConstants.kDriveProfileConstraints;
 
     constructorCommonCode();
 
@@ -198,7 +229,7 @@ public class DriveToPose extends CommandBase {
     // Create the profile.  The profile is linear distance (along goalDirection) relative to the initial pose
     TrapezoidProfileBCR.State initialState = new TrapezoidProfileBCR.State(0, initialVelocity);
     TrapezoidProfileBCR.State goalState = new TrapezoidProfileBCR.State(goalDistance, 0);
-    profile = new TrapezoidProfileBCR(TrajectoryConstants.kDriveProfileConstraints, goalState, initialState);
+    profile = new TrapezoidProfileBCR(trapProfileConstraints, goalState, initialState);
 
     log.writeLog(false, "DriveToPose", "Initialize", 
       "Time", timer.get(), 
