@@ -13,15 +13,14 @@ public class IntakeSetPercentOutput extends CommandBase {
   private Intake intake;
   private double intakePercentOutput;
   private FileLog log;
+
   /**
    * Sets the percent output of the intake motor.
    * @param intake intake subsystem
    * @param intakePercentOutput percent output of the intake motor
    * @param log log file
    */
-
   public IntakeSetPercentOutput(Intake intake, double intakePercentOutput, FileLog log) {
-    // Use addRequirements() here to declare subsystem dependencies.
     this.intake = intake;
     this.intakePercentOutput = intakePercentOutput;
     this.log = log;
@@ -31,7 +30,7 @@ public class IntakeSetPercentOutput extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    log.writeLog(false, intake.getName(), "SetPercentOutput", "Intake Percent", intakePercentOutput);
+    log.writeLog(false, "IntakeSetPercentOutput", "Initialize" ,"Intake Percent", intakePercentOutput);
 
     intake.setMotorPercentOutput(intakePercentOutput);
   }

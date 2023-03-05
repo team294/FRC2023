@@ -20,17 +20,15 @@ public class IntakeToggle extends CommandBase {
    * @param log
    */
   public IntakeToggle(Intake intake, FileLog log) {
-    // Use addRequirements() here to declare subsystem dependencies.
     this.intake = intake;
     this.log = log;
     addRequirements(intake);
-
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    log.writeLog(false, intake.getName(), "Toggle", "Extended at start", intake.isDeployed());
+    log.writeLog(false, "IntakeToggle", "Initialize", "Extended at start", intake.isDeployed());
 
     // turn off/on intake before closing/opening intake
     if (intake.isDeployed()) {

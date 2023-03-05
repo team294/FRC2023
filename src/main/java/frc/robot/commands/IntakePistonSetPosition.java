@@ -12,6 +12,7 @@ public class IntakePistonSetPosition extends CommandBase {
   Intake intake;
   FileLog log;
   boolean deploy;
+
   /**
    * Sets intake pistion position
    * @param intake intake subsystem
@@ -23,14 +24,13 @@ public class IntakePistonSetPosition extends CommandBase {
     this.deploy = deploy;
     this.log = log;
     addRequirements(intake);
-    // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
     intake.setDeployed(deploy);
-    log.writeLog(false, intake.getName(), "IntakeSetPiston", "IntakePiston", (deploy) ? "Deploy" : "Retract");
+    log.writeLog(false, "IntakePistonSetPosition", "Initialize", "IntakePiston", (deploy) ? "Deploy" : "Retract");
   }
 
   // Called every time the scheduler runs while the command is scheduled.

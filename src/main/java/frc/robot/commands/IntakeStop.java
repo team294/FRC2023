@@ -13,23 +13,22 @@ public class IntakeStop extends CommandBase {
   /** Creates a new IntakeStop. */
   Intake intake;
   FileLog log;
+
   /**
    * Stops the intake motor
    * @param intake Intake subsystem
    * @param log log file
    */
-
   public IntakeStop(Intake intake, FileLog log) {
     this.intake = intake;
     this.log = log;
     addRequirements(intake);
-    // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    log.writeLog(false, intake.getName(), "Stop");
+    log.writeLog(false, "IntakeStop", "Initialize");
     intake.stopMotor();
   }
 
