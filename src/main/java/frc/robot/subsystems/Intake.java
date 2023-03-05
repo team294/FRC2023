@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -22,15 +24,15 @@ import frc.robot.utilities.Loggable;
 public class Intake extends SubsystemBase implements Loggable {
   /** Creates a new Intake. */
   private final FileLog log;
-  private int logRotationKey;         // key for the logging cycle for this subsystem
+  private final int logRotationKey;         // key for the logging cycle for this subsystem
   private boolean fastLogging = false; 
 
   private String subsystemName;
 
-  private final CANSparkMax motor;
+  private final WPI_TalonSRX motor;
   private final DoubleSolenoid pneumaticDoubleSolenoid;
 
-  private boolean pistonExtended = false;
+  private boolean pistonExtended = false;     // Default state = retracted
 
   /**
    * Constructs the Intake subsystem, including rollers and a solenoid to change between deploy and stowed.
@@ -40,23 +42,19 @@ public class Intake extends SubsystemBase implements Loggable {
    * @param solenoidReverseChannel
    * @param log object for logging
    */
-  public Intake(String subsystemName, boolean inverted, int solenoidForwardChannel, int solenoidReverseChannel, FileLog log) {
-    motor = new CANSparkMax(Ports.CANIntake, MotorType.kBrushless);
-    pneumaticDoubleSolenoid = new DoubleSolenoid(Ports.CANPneumaticHub, PneumaticsModuleType.REVPH, solenoidForwardChannel, solenoidReverseChannel);
-    this.subsystemName = subsystemName;
+  public Intake(FileLog log) {
+    motor = new WPI_TalonSRX(Ports.CANIntake);
+    pneumaticDoubleSolenoid = new DoubleSolenoid(Ports.CANPneumaticHub, PneumaticsModuleType.REVPH, Ports.SolIntakeFwd, Ports.SolIntakeRev);
+    subsystemName = "Intake";
     this.log = log;
     
     logRotationKey = log.allocateLogRotation();
 
-    motor.restoreFactoryDefaults();
-    motor.setIdleMode(IdleMode.kCoast);
-    motor.setInverted(inverted);
-    motor.enableVoltageCompensation(12);
-    motor.setOpenLoopRampRate(0.05);    //seconds from neutral to full
-    motor.setClosedLoopRampRate(0.05);  //seconds from neutral to full
-
-  
-
+    motor.setNeutralMode(NeutralMode.Coast);
+    motor.setInverted(false);
+    motor.configVoltageCompSaturation(12.0, 100);
+    motor.enableVoltageCompensation(true);
+    motor.configOpenloopRamp(0.3, 100);     //seconds from neutral to full
   }
 
     /**
@@ -67,16 +65,8 @@ public class Intake extends SubsystemBase implements Loggable {
   }
 
   /**
-   * Sets the voltage of the motor
-   * @param voltage voltage
-   */
-  public void setVoltage(double voltage){
-    motor.setVoltage(voltage);
-  }
-
-  /**
    * Sets the percent of the motor, + is intake, - is outtake
-   * @param percent
+   * @param percent -1.0 to +1.0
    */
   public void setMotorPercentOutput(double percent){
     motor.set(percent);
@@ -93,7 +83,7 @@ public class Intake extends SubsystemBase implements Loggable {
    * @return stator current of the motor in amps
    */
   public double getAmps(){
-    return motor.getOutputCurrent();
+    return motor.getStatorCurrent();
   }
 
   /**
@@ -121,7 +111,6 @@ public class Intake extends SubsystemBase implements Loggable {
     log.writeLog(false, subsystemName, "togglePiston", "from extended", isDeployed());
     setDeployed(!isDeployed());
   }
-
   
 
   // ************ Information methods
@@ -141,11 +130,9 @@ public class Intake extends SubsystemBase implements Loggable {
     if(fastLogging || log.isMyLogRotation(logRotationKey)) {
       updateIntakeLog(false);
       // Update data on SmartDashboard
-      SmartDashboard.putNumber(buildString(subsystemName, "Amps"), motor.getOutputCurrent());
+      SmartDashboard.putNumber(buildString(subsystemName, "Amps"), getAmps());
       SmartDashboard.putNumber(buildString(subsystemName, "Bus Volt"), motor.getBusVoltage());
-      // SmartDashboard.putNumber(buildString(subsystemName, "Volt"), motor.()); 
-      SmartDashboard.putNumber(buildString(subsystemName, "Out Percent"), motor.get());
-      SmartDashboard.putNumber(buildString(subsystemName, "Out Temperature"), motor.getMotorTemperature());
+      SmartDashboard.putNumber(buildString(subsystemName, "Out Percent"), motor.getMotorOutputPercent());
       SmartDashboard.putBoolean(buildString(subsystemName, "Piston extend"), pistonExtended);
     }
   }
@@ -157,10 +144,8 @@ public class Intake extends SubsystemBase implements Loggable {
   public void updateIntakeLog(boolean logWhenDisabled){
     log.writeLog(logWhenDisabled, subsystemName, "Update Variables",
     "Bus Volt", motor.getBusVoltage(),
-    "Out Percent", motor.get(),
-    // "Volt", motor.(),
-    "Amps", motor.getOutputCurrent(),
-    "Temperature", motor.getMotorTemperature(),
+    "Out Percent", motor.getMotorOutputPercent(),
+    "Amps", getAmps(),
     "Piston extended", isDeployed()
     );
   }
