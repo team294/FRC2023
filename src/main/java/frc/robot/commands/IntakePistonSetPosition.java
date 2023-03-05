@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Intake;
 import frc.robot.utilities.FileLog;
 
-public class IntakePistonSetPosition2 extends CommandBase {
+public class IntakePistonSetPosition extends CommandBase {
   Intake intake;
   FileLog log;
   boolean deploy;
@@ -18,7 +18,7 @@ public class IntakePistonSetPosition2 extends CommandBase {
    * @param boolean true = deploy, false = undeploy
    * @param log log file
    */
-  public IntakePistonSetPosition2(Intake intake, boolean deploy, FileLog log) {
+  public IntakePistonSetPosition(Intake intake, boolean deploy, FileLog log) {
     this.intake  = intake;
     this.deploy = deploy;
     this.log = log;
