@@ -174,6 +174,13 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   }
 
   /**
+	 * @return double, gyro pitch from 180 to -180, in degrees (postitive is nose up, negative is nose down)
+	 */
+	public double getGyroPitch() {
+		return ahrs.getPitch();
+  }
+
+  /**
    * @return gyro angular velocity (with some averaging to reduce noise), in degrees per second.
    * Positive is turning left, negative is turning right.
    */
@@ -286,7 +293,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
       // Elevator is up.  X-travel slowly!
       if (!elevatorUpPriorIteration) {
         // Elevator was down but is now up.  Reset the slow slew rate limiter
-        filterXSlow.reset(getChassisSpeeds().vxMetersPerSecond);
+        filterXSlow.reset(MathUtil.clamp(getChassisSpeeds().vxMetersPerSecond, -maxXSpeedWithElevatorUp, maxXSpeedWithElevatorUp));     // Rev B8:  Added clamp on current velocity (may cause sudden deceleration) 
       }
       elevatorUpPriorIteration = true;
       // x slew rate limit chassisspeed
@@ -476,7 +483,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
       SmartDashboard.putNumber("Drive Raw Gyro", getGyroRaw());
       SmartDashboard.putNumber("Drive Gyro Rotation", getGyroRotation());
       SmartDashboard.putNumber("Drive AngVel", angularVelocity);
-      SmartDashboard.putNumber("Drive Pitch", ahrs.getRoll());
+      SmartDashboard.putNumber("Drive Pitch", getGyroPitch());
       
       // position from poseEstimator (helpful for autos)
       Pose2d pose = poseEstimator.getEstimatedPosition();
