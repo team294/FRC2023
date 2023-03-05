@@ -47,7 +47,7 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryType;
  */
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
-  private final FileLog log = new FileLog("B8");
+  private final FileLog log = new FileLog("B9");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
   private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
   private final Field field = new Field(allianceSelection, log);
@@ -106,6 +106,7 @@ public class RobotContainer {
     SmartDashboard.putData("Drive Wheels +95 deg", new DriveSetState(0, 95, false, driveTrain, log));
     SmartDashboard.putData("Drive 1.5 mps 0 deg", new DriveSetState(1.5, 0, false, driveTrain, log));
     SmartDashboard.putData("Drive Straight", new DriveStraight(false, false, false, driveTrain, log));
+    SmartDashboard.putData("Drive Lock Wheels", new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log));
 
     // Testing for trajectories
     Rotation2d rotationFront = new Rotation2d();          // Facing away from drivers
