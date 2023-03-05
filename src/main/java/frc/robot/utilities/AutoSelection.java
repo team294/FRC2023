@@ -40,7 +40,7 @@ public class AutoSelection {
 	public static final int MIDDLE_BALANCE = 6;
 	public static final int CONE_LEAVE_NEAR_WALL = 7;
 	public static final int SCORE_CONE = 8;
-	public static final int SCORE_CONE_BALANCE_4TOWALL = 9;
+	public static final int CONE_BALANCE_4TOWALL = 9;
 	public static final int BALANCE_4TOWALL = 10;
 
 	private final AllianceSelection allianceSelection;
@@ -61,7 +61,7 @@ public class AutoSelection {
 		autoChooser.setDefaultOption("None", NONE);
 		autoChooser.addOption("Score Cone", SCORE_CONE);
 		autoChooser.addOption("Cone Leave NearWall", CONE_LEAVE_NEAR_WALL);
-		autoChooser.addOption("Cone Balance 4ToWall", SCORE_CONE_BALANCE_4TOWALL);
+		autoChooser.addOption("Cone Balance 4ToWall", CONE_BALANCE_4TOWALL);
 		autoChooser.addOption("Balance 4ToWall", BALANCE_4TOWALL);
 
 		// autoChooser.addOption("Straight", STRAIGHT);
@@ -130,9 +130,9 @@ public class AutoSelection {
 	   		);
    	   	}
 
-		if (autoPlan == SCORE_CONE_BALANCE_4TOWALL) {
+		if (autoPlan == CONE_BALANCE_4TOWALL) {
 			// Starting position = facing drivers, 4th scoring position from wall
-			log.writeLogEcho(true, "AutoSelect", "run Score Cone Balance 4ToWall");
+			log.writeLogEcho(true, "AutoSelect", "run Cone Balance 4ToWall");
 			Pose2d posCommunityInitial = field.getStationInitial(2);
 			Pose2d posCommunityFinal = field.getStationCenter(2);
 			Pose2d posScoreInitial;

@@ -293,7 +293,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
       // Elevator is up.  X-travel slowly!
       if (!elevatorUpPriorIteration) {
         // Elevator was down but is now up.  Reset the slow slew rate limiter
-        filterXSlow.reset(getChassisSpeeds().vxMetersPerSecond);
+        filterXSlow.reset(MathUtil.clamp(getChassisSpeeds().vxMetersPerSecond, -maxXSpeedWithElevatorUp, maxXSpeedWithElevatorUp));     // Rev B8:  Added clamp on current velocity (may cause sudden deceleration) 
       }
       elevatorUpPriorIteration = true;
       // x slew rate limit chassisspeed
