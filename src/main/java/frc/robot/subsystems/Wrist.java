@@ -432,8 +432,8 @@ public class Wrist extends SubsystemBase implements Loggable{
       updateWristLog(false);
     }
 
-    // Un-calibrates the wrist if the angle is outside of bounds
-    // // TODO CALIBRATE
+    // Un-calibrates the wrist if the angle is outside of bounds.
+    // Turned off for right now.  It still occasionally false-triggers, even with 20degree tolerances.
     // if (getWristAngle() > WristAngle.upperLimit.value + 20.0 || getWristAngle() < WristAngle.lowerLimit.value - 20.0) {
     //   setWristUncalibrated();
     //   updateWristLog(true);

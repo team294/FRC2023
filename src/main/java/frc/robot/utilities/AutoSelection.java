@@ -6,8 +6,6 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -15,16 +13,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import frc.robot.Constants.CoordType;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.ManipulatorConstants;
-import frc.robot.Constants.StopType;
 import frc.robot.Constants.SwerveConstants;
-import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
-import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.commands.*;
 import frc.robot.commands.autos.*;
 import frc.robot.commands.sequences.*;
 import frc.robot.subsystems.*;
-import frc.robot.utilities.TrajectoryCache.TrajectoryType;
 
 
 /**
