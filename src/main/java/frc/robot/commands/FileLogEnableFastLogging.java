@@ -8,28 +8,32 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
+
+import frc.robot.utilities.Loggable;
 import frc.robot.utilities.FileLog;
-import frc.robot.utilities.RobotPreferences;
 
-public class StickyFaultsClear extends CommandBase {
-
+public class FileLogEnableFastLogging extends CommandBase {
+  private boolean enabled;
+  private Loggable subsystem;
   private FileLog log;
 
   /**
-   * Clears the sticky faults in RobotPreferences.
-   * <p> Note:  This command can run while the robot is disabled.
-   * @param log
+   * Changes logging cycle for a subsystem
+   * @param enabled true is enabled for every cycle; false follows normal logging cycles
+   * @param subsystem subsystem which logging cycle is changed
    */
-  public StickyFaultsClear(FileLog log) {
+  public FileLogEnableFastLogging(boolean enabled, Loggable subsystem, FileLog log) {
     // Use addRequirements() here to declare subsystem dependencies.
+    this.enabled  = enabled;
+    this.subsystem = subsystem;
     this.log = log;
   }
-
+  
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    RobotPreferences.clearStickyFaults(log);
-    log.writeLog(false, "ClearStickyFaults", "Init");
+    subsystem.enableFastLogging(enabled);
+    log.writeLog(false, "LogEnableFastLogging", "initialize", "Fast Logging", enabled);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -45,16 +49,6 @@ public class StickyFaultsClear extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return true;
-  }
-
-  /**
-   * Whether the given command should run when the robot is disabled. Override to return true if the
-   * command should run when disabled.
-   * @return whether the command should run when the robot is disabled
-   */
-  @Override
-  public boolean runsWhenDisabled() {
     return true;
   }
 }

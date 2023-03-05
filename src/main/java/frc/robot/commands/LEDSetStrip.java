@@ -7,59 +7,56 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.LED;
 import frc.robot.utilities.FileLog;
 
-public class DriveZeroGyro extends CommandBase {
-  /**
-   * Zeros gyro on the drive train
-   */
-
-  private DriveTrain driveTrain;
+public class LEDSetStrip extends CommandBase {
+  private LED led;
   private FileLog log;
-  private double zeroAngle;
-
+  private Color color;
+  private double intensity;
+ 
   /**
-	 * Zero the gyro position in software.
+   * Send a solid color to the LED strip, at 0.5 intensity.
+   * This command immediately finishes.
    * <p> Note:  This command can run while the robot is disabled.
-   * @param driveTrain DriveTrain subsytem
-   * @param log FileLog
-	 */
-  public DriveZeroGyro(DriveTrain driveTrain, FileLog log) {
-    // Use addRequirements() here to declare subsystem dependencies.
-    this.driveTrain = driveTrain;
-    this.log = log;
-    zeroAngle = 0;
-    addRequirements(driveTrain);
+   * @param color string of color name, case sensitive (ex: "Blue")
+   * @param led led strip (subsystem)
+   **/
+	public LEDSetStrip(Color color, LED led, FileLog log) {
+    this(color, 0.5, led, log);
   }
-
+  
   /**
-	 * Zero the gyro position in software against a specified angle.
+   * Send a solid color to the LED strip, at parameter intensity.
+   * This command immediately finishes.
    * <p> Note:  This command can run while the robot is disabled.
-	 * @param zeroAngle current robot angle compared to the zero angle
-   * @param driveTrain DriveTrain subsytem
-   * @param log2 FileLog
-	 */
-  public DriveZeroGyro(double zeroAngle, DriveTrain driveTrain, FileLog log) {
-    // Use addRequirements() here to declare subsystem dependencies.
-    this.driveTrain = driveTrain;
+   * @param color string of color name (first letter capital, ex: "Blue")
+   * @param intensity percent intensity (0 to 1)
+   * @param led led strip (subsystem)
+   **/
+	public LEDSetStrip(Color color, double intensity, LED led, FileLog log) {
+    this.led = led;
     this.log = log;
-    this.zeroAngle = zeroAngle;
-    addRequirements(driveTrain);
+    this.color = color;
+    this.intensity = intensity;
+	  addRequirements(led);
   }
 
-  // Called when the command is initially scheduled.
-  @Override
-  public void initialize() {
-    driveTrain.zeroGyroRotation(zeroAngle);
-    log.writeLog(false, "DriveZeroGyro", "Init", "CurrAng", zeroAngle);
+	// Called when the command is initially scheduled.
+	@Override
+	public void initialize() {
+    if (intensity >= 0) led.setStrip(color, intensity, 0);
+    else led.setStrip(color, 0);
+    log.writeLog(false, "LEDSetStrip", "Init", "SetColor", color);
   }
-
+    
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-  }
+	public void execute() {  
+	}
 
   // Called once the command ends or is interrupted.
   @Override
@@ -68,10 +65,10 @@ public class DriveZeroGyro extends CommandBase {
 
   // Returns true when the command should end.
   @Override
-  public boolean isFinished() {
-    return true;
-  }
-  
+	public boolean isFinished() {
+		return true;
+	}
+
   /**
    * Whether the given command should run when the robot is disabled. Override to return true if the
    * command should run when disabled.
@@ -81,5 +78,4 @@ public class DriveZeroGyro extends CommandBase {
   public boolean runsWhenDisabled() {
     return true;
   }
-
 }

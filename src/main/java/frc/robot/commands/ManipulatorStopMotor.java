@@ -5,27 +5,27 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Grabber;
+import frc.robot.subsystems.Manipulator;
 import frc.robot.utilities.FileLog;
 
-public class GrabberStopMotor extends CommandBase {
-  /** Creates a new GrabberStopMotor. */
-  private final Grabber grabber;
+public class ManipulatorStopMotor extends CommandBase {
+  /** Creates a new ManipulatorStopMotor. */
+  private final Manipulator manipulator;
   private final FileLog log;
-  
-  public GrabberStopMotor(Grabber grabber, FileLog log) {
-    this.grabber = grabber;
+
+  public ManipulatorStopMotor(Manipulator manipulator, FileLog log) {
+    this.manipulator = manipulator;
     this.log = log;
 
-    addRequirements(grabber);
+    addRequirements(manipulator);
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    grabber.stopMotor();
-    log.writeLog(false, "GrabberStopMotor", "Initialize");
+    manipulator.stopMotor();
+    log.writeLog(false, "ManipulatorStopMotor", "Initialize");
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -39,6 +39,6 @@ public class GrabberStopMotor extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return true;
   }
 }

@@ -9,23 +9,34 @@ import java.util.List;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
+import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.Constants.CoordType;
+import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.StopType;
+import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
+import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.commands.*;
+import frc.robot.commands.ManipulatorGrab.BehaviorType;
+import frc.robot.commands.autos.*;
+import frc.robot.commands.sequences.*;
 import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
 import frc.robot.utilities.*;
+import frc.robot.utilities.TrajectoryCache.TrajectoryFacing;
 import frc.robot.utilities.TrajectoryCache.TrajectoryType;
 
 /**
@@ -36,14 +47,22 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryType;
  */
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
-  private final FileLog log = new FileLog("A1");
+  private final FileLog log = new FileLog("C1");
+  private final AllianceSelection allianceSelection = new AllianceSelection(log);
+  private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
+  private final Field field = new Field(allianceSelection, log);
 
   // Define robot subsystems  
-  private final DriveTrain driveTrain = new DriveTrain(log);
+  private final Wrist wrist = new Wrist(log);
+  private final Elevator elevator = new Elevator(wrist, log);
+  private final DriveTrain driveTrain = new DriveTrain(field, elevator, log);
+  private final Manipulator manipulator = new Manipulator(log);
+  private final LED led = new LED();
+  private final Conveyor conveyor = new Conveyor(log);
 
   // Define other utilities
   private final TrajectoryCache trajectoryCache = new TrajectoryCache(log);
-  private final AutoSelection autoSelection = new AutoSelection(trajectoryCache, log);
+  private final AutoSelection autoSelection = new AutoSelection(trajectoryCache, allianceSelection, field, log);
 
   // Define controllers
   // private final Joystick xboxController = new Joystick(OIConstants.usbXboxController); //assuming usbxboxcontroller is int
@@ -53,8 +72,10 @@ public class RobotContainer {
 
   private final CommandXboxController xboxController = new CommandXboxController(OIConstants.usbXboxController);
   private boolean rumbling = false;
-  Grabber grabber = new Grabber("Grabber", log);
 
+  // Set to this pattern when the robot is disabled
+  private final Command patternTeamMoving = new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 0.5, led, log);
+  
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     configureButtonBindings(); // configure button bindings
@@ -70,17 +91,14 @@ public class RobotContainer {
 
     // display sticky faults
     RobotPreferences.showStickyFaultsOnShuffleboard();
-    SmartDashboard.putData("Clear Sticky Faults", new StickyFaultsClear(log).ignoringDisable(true));
-
-    // DriveTrain subsystem
-    // SmartDashboard.putData("DriveForward", new DriveSetPercentOutput(0.4, 0.4, driveTrain, log));
-
-    // DriveTrain calibration
-    // SmartDashboard.putData("Drive Cal Slow", new DriveCalibrate(0.3, 35, 0.01, CalibrateMode.kStraight, driveTrain, log));
+    SmartDashboard.putData("Clear Sticky Faults", new StickyFaultsClear(log));
 
     // Testing for drivetrain autos and trajectories
+    SmartDashboard.putData("Drive Reset SwerveModules", new DriveResetSwerveModules(driveTrain, log));
     SmartDashboard.putData("Zero Gyro", new DriveZeroGyro(driveTrain, log));
-    SmartDashboard.putData("Zero Odometry", new DriveResetPose(0, 0, 0, driveTrain, log));
+    SmartDashboard.putData("Zero Odometry", new DriveResetPose(0, 0, 0, false, driveTrain, log));
+    // SmartDashboard.putData("Set Odometry if out of tol", new DriveResetPose(2, 2, 180, true, driveTrain, log));      // For testing only
+    SmartDashboard.putData("Drive Reset Pose", new DriveResetPose(driveTrain, log));
     SmartDashboard.putData("Calibrate Drive Motors", new DriveCalibration(0.5, 12, 0.05, driveTrain, log));
     SmartDashboard.putData("Calibrate Turn Motors", new DriveTurnCalibration(1.0, 10, 0.2, driveTrain, log));
     SmartDashboard.putData("Drive Wheels 0 deg", new DriveSetState(0, 0, false, driveTrain, log));
@@ -88,25 +106,75 @@ public class RobotContainer {
     SmartDashboard.putData("Drive Wheels +95 deg", new DriveSetState(0, 95, false, driveTrain, log));
     SmartDashboard.putData("Drive 1.5 mps 0 deg", new DriveSetState(1.5, 0, false, driveTrain, log));
     SmartDashboard.putData("Drive Straight", new DriveStraight(false, false, false, driveTrain, log));
+    SmartDashboard.putData("Drive Lock Wheels", new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log));
 
-    // Testing for autos and trajectories
-    SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
-    SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
-    SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
-    SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
+    // Testing for trajectories
+    Rotation2d rotationFront = new Rotation2d();          // Facing away from drivers
+    SmartDashboard.putData("Drive To Pose", new DriveToPose(driveTrain, log));
+    SmartDashboard.putData("Drive To Pose Test", new DriveToPose(new Pose2d(1, 1, Rotation2d.fromDegrees(0)), driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
+        trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
+        trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
+        trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
     SmartDashboard.putData("Drive Trajectory Straight", new DriveTrajectory(
           CoordType.kRelative, StopType.kBrake,
-          TrajectoryGenerator.generateTrajectory(
-            new Pose2d(0,0,new Rotation2d(0)), 
-            List.of(), 
-            new Pose2d(3,0,new Rotation2d(0)), 
-            Constants.TrajectoryConstants.swerveTrajectoryConfig),
+          new TrajectoryFacing(rotationFront, rotationFront, 
+            TrajectoryGenerator.generateTrajectory(
+              new Pose2d(0,0,new Rotation2d(0)), 
+              List.of(), 
+              new Pose2d(1.0,0,new Rotation2d(0)), 
+              Constants.TrajectoryConstants.swerveTrajectoryConfig
+            )
+          ),
           driveTrain, log));
+    SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
+
+    // Testing for autos
+    // SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
+    // SmartDashboard.putData("Center Balance Blue", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
+    //     trajectoryCache.cache[TrajectoryType.CenterBalanceBlue.value], driveTrain, log));
+    // SmartDashboard.putData("Center Balance Community Blue", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
+    //     trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value], driveTrain, log));
+    // SmartDashboard.putData("Auto OneConeBalance", new OuterOneConeBalanceMiddleAuto(driveTrain));
   
-    //Grabber commands
-    SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
-    SmartDashboard.putData("Grabber Pick Up",new GrabberPickUp(grabber, log));
-    SmartDashboard.putData("Grabber Eject", new GrabberEject(grabber, log));
+    //Elevator Commands
+    SmartDashboard.putData("Elevator Cal Encoder", new ElevatorCalibrateEncoderIfAtLowerLimit(elevator, log));
+    SmartDashboard.putData("Elevator Calibration", new ElevatorCalibration(0.05, elevator, log));
+    SmartDashboard.putData("Elevator Set Percent", new ElevatorSetPercentOutput(elevator, log));
+    SmartDashboard.putData("Elevator Set Position", new ElevatorSetPosition(elevator, log));
+    SmartDashboard.putData("Elevator Move To Bottom", new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
+    
+    //Wrist Commands
+    SmartDashboard.putData("Wrist Stowed Position", new WristSetAngle(WristAngle.startConfig, wrist, log));
+    SmartDashboard.putData("Wrist ElevMove Position", new WristSetAngle(WristAngle.elevatorMoving, wrist, log));
+    SmartDashboard.putData("Wrist Scoring Position", new WristSetAngle(WristAngle.scoreMidHigh, wrist, log));
+    SmartDashboard.putData("Wrist Set Angle", new WristSetAngle(wrist, log));
+    SmartDashboard.putData("Wrist Set Output", new WristSetPercentOutput(wrist, log));
+
+    //LED commands
+    SmartDashboard.putData("LED Rainbow", new LEDSetPattern(LED.rainbowLibrary, 0, 0.5, led, log));
+    SmartDashboard.putData("LED Flash Team Color", new LEDSetPattern(LED.teamFlashingColorsLibrary, 0, 0.5, led, log));
+    SmartDashboard.putData("LED Full Team Color", new LEDSetPattern(LED.teamFullColorsLibrary, 0, 0.5, led, log));
+    SmartDashboard.putData("LED moving Team Color", new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 0.5, led, log));
+    SmartDashboard.putData("LED OFF", new LEDSetStrip(Color.kBlack, 0, led, log));
+    SmartDashboard.putData("LED Yellow", new LEDSetStrip(Color.kYellow, 1, led, log));
+    SmartDashboard.putData("LED Purple", new LEDSetStrip(Color.kPurple, 1, led, log));
+
+    //Conveyor Commands
+    SmartDashboard.putData("Conveyor Custom Percent", new ConveyorMove(conveyor, log));
+    SmartDashboard.putData("Conveyor Run", new ConveyorMove(0.3, conveyor, log));
+    SmartDashboard.putData("Conveyor Stop", new ConveyorMove(0, conveyor, log));
+
+
+    //Manipulator Commands
+    SmartDashboard.putData("Manipulator Stop", new ManipulatorStopMotor(manipulator, log));
+    SmartDashboard.putData("Manipulator Pick Up",new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log));
+    SmartDashboard.putData("Manipulator Eject",new ManipulatorSetPercent(-0.5, manipulator, log));
+    SmartDashboard.putData("Manipulator Cone", new ManipulatorSetPistonPosition(true, led, manipulator, log));
+    SmartDashboard.putData("Manipulator Cube", new ManipulatorSetPistonPosition(false, led, manipulator, log));
+    SmartDashboard.putData("Manipulator Toggle", new ManipulatorTogglePiston(manipulator, led, log));
   }
 
   /**
@@ -126,64 +194,86 @@ public class RobotContainer {
    */
   private void configureXboxButtons(){
     //check povtrigger and axis trigger number bindings
-    // Trigger xbPOVUp = new POVTrigger(xboxController, 0);
-    // Trigger xbPOVRight = new POVTrigger(xboxController, 90);
-    //Trigger xbPOVDown = new POVTrigger(xboxController, 180);
-    // Trigger xbPOVLeft = new POVTrigger(xboxController, 270);
     
     // Triggers for all xbox buttons
     Trigger xbLT = xboxController.leftTrigger();
     Trigger xbRT = xboxController.rightTrigger();
     Trigger xbA = xboxController.a();
-    // Trigger xbB = xboxController.b();
-    // Trigger xbY = xboxController.y();
-    // Trigger xbX = xboxController.x();
-    // Trigger xbLB = xboxController.leftBumper();
-    // Trigger xbRB = xboxController.rightBumper();
-    // Trigger xbBack = xboxController.back();
-    // Trigger xbStart = xboxController.start();
-    // Trigger xbPOVUp = xboxController.povUp();
-    // Trigger xbPOVRight = xboxController.povRight();
-    // Trigger xbPOVLeft = xboxController.povLeft();
-    // Trigger xbPOVDown = xboxController.povDown();
-    
-    // right trigger 
-    xbRT.whileTrue(new GrabberPickUp(grabber, log));
-    // xbRT.whenActive(new ShootSequence(uptake, feeder, shooter, log),false);
-
-    // left trigger
-    xbLT.whileTrue(new GrabberEject(grabber, log));
-    // xbLT.whenActive(new TurretTurnAngleTwice(TargetType.kVisionOnScreen, false, turret, pivisionhub, log));
-    // xbLT.whenInactive(new TurretStop(turret, log));
-
-    
+    Trigger xbB = xboxController.b();
+    Trigger xbY = xboxController.y();
+    Trigger xbX = xboxController.x();
+    Trigger xbLB = xboxController.leftBumper();
+    Trigger xbRB = xboxController.rightBumper();
+    Trigger xbBack = xboxController.back();
+    Trigger xbStart = xboxController.start();
+    Trigger xbPOVUp = xboxController.povUp();
+    Trigger xbPOVRight = xboxController.povRight();
+    Trigger xbPOVLeft = xboxController.povLeft();
+    Trigger xbPOVDown = xboxController.povDown();
+   
     //a
-    xbA.whileTrue(new GrabberStopMotor(grabber, log));       
-    
+    // xbA.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreLow, elevator, log)); 
+    // Move elevator/wrist to score low position
+    xbA.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.scoreLow.value, elevator, wrist, log));
+     
     //b
-    // xbB.whileTrue(command));         
+    // xbB.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreMidCone, elevator, log));         
+    // Move elevator/wrist to score mid position
+    xbB.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreMidCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, log));
  
     //y
-    // xb[4].whenHeld(new ShootSetup(false, 4100, pivisionhub, shooter, log));        
+    // xbY.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreHighCone, elevator, log));
+    // Move elevator/wrist to score high position
+    xbY.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, log));
     
     //x
-    // xb[3].whileTrue(new ShootSetup(true, 3100, pivisionhub, shooter, log));        
+    // xbX.onTrue(new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
+    // Store elevator and wrist for traveling or pickup from conveyor
+    xbX.onTrue(new ElevatorWristStow(elevator, wrist, log));        
     
-    // LB = 5, RB = 6
-    // xb[5].onTrue(new TurretSetPercentOutput(-0.1, turret, log));
-    // xb[5].whenReleased(new TurretStop(turret, log));
-    // xb[6].onTrue(new TurretSetPercentOutput(+0.1, turret, log));
-    // xb[6].whenReleased(new TurretStop(turret, log));
+    //lb
+    xbLB.whileTrue(new ElevatorWristXboxControl(xboxController, elevator, wrist, log));     
+    
+    //rb
+    // xbRB.onTrue(new ManipulatorSetPistonPosition(false, led, manipulator, log));     
 
-    // back = 7, start = 8 
-    // xb[7].whenHeld(new ShootSetup(false, 500, pivisionhub, shooter, log));   // micro shot for use in the pit
-    // xb[8].whenHeld(new ClimberSetExtended(false,climber, log)); 
+    // Left Trigger
+    // When held, manipulator choke up on game piece.  When released, manipulator go to holding power
+    xbLT.onTrue(new ManipulatorSetPercent(ManipulatorConstants.pieceGrabPct, manipulator, log));
+    xbLT.onFalse(new ManipulatorSetPercent(ManipulatorConstants.pieceHoldPct, manipulator, log));
 
-    // pov is the d-pad (up, down, left, right)
-    // xbPOVUp.whenActive(new TurretTurnAngle(TargetType.kAbsolute, 0, 2, turret, pivisionhub, log));
-    // xbPOVRight.whenActive(new TurretTurnAngle(TargetType.kAbsolute, 45, 2, turret, pivisionhub, log));
-    // xbPOVLeft.whenActive(new TurretTurnAngle(TargetType.kAbsolute, -45, 2, turret, pivisionhub, log));
-    //xbPOVDown.whenActive(new StopAllMotors(feeder, shooter, intakeFront, uptake, log));
+    // Right Trigger
+    // Score piece
+    xbRT.onTrue(new EjectPiece(manipulator, log));
+
+    // back
+    // Turn off all motors
+    xbBack.onTrue(Commands.parallel(
+      new ManipulatorStopMotor(manipulator, log),
+      new ConveyorMove(0, conveyor, log)
+      // TODO stop intake (if we and an intake subsystem)
+    )); 
+
+    // start 
+    // xbStart.onTrue(Command command); 
+
+    // POV buttons
+
+    // Up
+    // Prepare to get cone
+    xbPOVUp.onTrue(new ManipulatorSetPistonPosition(true, led, manipulator, log));
+
+    // Down
+    // Prepare to get cube
+    xbPOVDown.onTrue(new ManipulatorSetPistonPosition(false, led, manipulator, log));
+
+    // Left
+    // Sets elevator/wrist to stowed, turn on conveyor, turn on manipulator to load piece
+    xbPOVLeft.onTrue(new LoadPieceConveyor(elevator, wrist, manipulator, conveyor, log));
+
+    // Right
+    // Move elevator to loading station config and turn on manipulator to grab piece
+    xbPOVRight.onTrue( new LoadPieceLoadingStation(elevator, wrist, manipulator, log) );
   }
 
   /**
@@ -198,7 +288,6 @@ public class RobotContainer {
       right[i] = new JoystickButton(rightJoystick, i);
     }
 
-    // TODO Add a button binding to zero the Pose angle (after adding that feature to DriveResetPose).
     // If the robot angle drifts (or is turned on with the wrong facing), then this button can be used to 
     // reset the robot facing for field-oriented control.  Turn the robot so that it is facing away
     // from the driver, then press this button.
@@ -206,11 +295,16 @@ public class RobotContainer {
     // left joystick left button
     //left[1].onTrue(new IntakeRetractAndFlush(intakeFront, uptake, feeder, log));
     // resets current angle to 0, keeps current X and Y
-    left[1].onTrue(new DriveResetPose(0,driveTrain,log));
+    left[1].onTrue(new DriveResetPose(0, false, driveTrain, log));
+    // drive to closest goal
+    left[2].onTrue(new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
    
     // left joystick right button
-    //left[2].onTrue(new IntakeRetractAndFlush(intakeFront, uptake, feeder, log));
+    right[1].onTrue(new DriveToPose(CoordType.kAbsolute, 0, driveTrain, log));
+    right[2].onTrue(new DriveToPose(CoordType.kRelative, 180, driveTrain, log));
 
+    //left[2].onTrue(new IntakeRetractAndFlush(intakeFront, uptake, feeder, log));
+      
     // right joystick left button
     // right[1].onTrue(new IntakeExtendAndTurnOnMotors(intakeFront, uptake, log)); 
 
@@ -288,7 +382,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoSelection.getAutoCommand(driveTrain, log);
+    return autoSelection.getAutoCommand(elevator, wrist, manipulator, driveTrain, led, log);
   }
 
 
@@ -301,8 +395,12 @@ public class RobotContainer {
       RobotPreferences.recordStickyFaults("RobotPreferences", log);
     }
 
+    // compressor.disable();
+    compressor.enableDigital();
+
     // Set initial robot position on field
-    driveTrain.resetPose(new Pose2d(2.0, 2.0, Rotation2d.fromDegrees(0)));
+    // This takes place a while after the drivetrain is created, so after any CanBus delays.
+    driveTrain.resetPose(new Pose2d(0.0, 0.0, Rotation2d.fromDegrees(0)));  
   }
 
   /**
@@ -310,6 +408,7 @@ public class RobotContainer {
    */
   public void robotPeriodic(){
     log.advanceLogRotation();
+    allianceSelection.periodic();
   }
 
   /**
@@ -320,6 +419,10 @@ public class RobotContainer {
 
     driveTrain.setDriveModeCoast(true);     // When pushing a disabled robot by hand, it is a lot easier to push in Coast mode!!!!
     driveTrain.stopMotors();                // SAFETY:  Turn off any closed loop control that may be running, so the robot does not move when re-enabled.
+
+    elevator.setMotorModeCoast(true);
+
+    patternTeamMoving.schedule();
   }
 
   /**
@@ -330,6 +433,14 @@ public class RobotContainer {
     if (driveTrain.canBusError()) {
       RobotPreferences.recordStickyFaults("CAN Bus", log);
     }  //    TODO May want to flash this to the driver with some obvious signal!
+    // boolean error = true;  
+    // if (error == false) {
+    //   if(!patternTeamMoving.isScheduled()) patternTeamMoving.schedule();
+    // }
+    // else {
+    //   patternTeamMoving.cancel();
+    //   led.setStrip("Red", 0.5, 0);
+    // }
   }
   
   /**
@@ -339,7 +450,15 @@ public class RobotContainer {
     log.writeLogEcho(true, "Auto", "Mode Init");
 
     driveTrain.setDriveModeCoast(false);
+    driveTrain.cameraInit();
+    elevator.setMotorModeCoast(false);
 
+    if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
+    if (allianceSelection.getAlliance() == Alliance.Blue) {
+      led.setStrip(Color.kBlue, 0);
+    } else {
+      led.setStrip(Color.kRed, 0);
+    }
     // NOTE:  Do NOT reset the gyro or encoder here!!!!!
     // The first command in auto mode initializes before this code is run, and
     // it will read the gyro/encoder before the reset goes into effect.
@@ -358,6 +477,17 @@ public class RobotContainer {
     log.writeLogEcho(true, "Teleop", "Mode Init");
 
     driveTrain.setDriveModeCoast(false);
+    driveTrain.cameraInit();
+    elevator.setMotorModeCoast(false);
+
+    if (patternTeamMoving.isScheduled()) {
+      patternTeamMoving.cancel();
+      if (allianceSelection.getAlliance() == Alliance.Blue) {
+        led.setStrip(Color.kBlue, 0);
+      } else {
+        led.setStrip(Color.kRed, 0);
+      }
+    }
   }
 
   /**

@@ -86,10 +86,11 @@ public class HolonomicDriveControllerBCR {
    * Returns the next output of the holonomic drive controller.
    *
    * @param currentPose The current pose, as measured by odometry or pose estimator.
-   * @param trajectoryPose The desired trajectory pose, as sampled for the current timestep.
+   * @param trajectoryPose The desired trajectory pose, as sampled for the current timestep.  Note that the
+   * rotation component of trajectoryPose is the desired velocity direction (not the desired robot facing).
    * @param desiredLinearVelocityMetersPerSecond The desired linear velocity.
-   * @param desiredHeading The desired heading.
-   * @return The next output of the holonomic drive controller.
+   * @param desiredHeading The desired heading (the desired robot facing).
+   * @return The next output of the holonomic drive controller (chassis-relative speeds).
    */
   public ChassisSpeeds calculate(
       Pose2d currentPose,
@@ -133,9 +134,10 @@ public class HolonomicDriveControllerBCR {
    * Returns the next output of the holonomic drive controller.
    *
    * @param currentPose The current pose, as measured by odometry or pose estimator.
-   * @param desiredState The desired trajectory pose, as sampled for the current timestep.
-   * @param desiredHeading The desired heading.
-   * @return The next output of the holonomic drive controller.
+   * @param desiredState The desired trajectory pose, as sampled for the current timestep.  Note that the
+   * rotation component of desiredState is the desired velocity direction (not the desired robot facing).
+   * @param desiredHeading The desired heading (the desired robot facing).
+   * @return The next output of the holonomic drive controller (chassis-relative speeds).
    */
   public ChassisSpeeds calculate(
       Pose2d currentPose, Trajectory.State desiredState, Rotation2d desiredHeading) {

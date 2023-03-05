@@ -3,10 +3,16 @@
 // the WPILib BSD license file in the root directory of this project.
 package frc.robot;
 
+
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
+import frc.robot.utilities.TrapezoidProfileBCR;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -19,30 +25,23 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 public final class Constants {
 
     public enum CoordType {
-        kRelative(0),
-        kAbsolute(1),
-        kAbsoluteResetPose(2);
-    
-        @SuppressWarnings({"MemberName", "PMD.SingularField"})
-        public final int value;
-        CoordType(int value) { this.value = value; }
+        kRelative,              // Relative to current robot location/facing
+        kAbsolute,              // Absolute field coordinates, don't reset robot pose
+        kAbsoluteResetPose,     // Absolute field coordinates, reset robot pose always
+        kAbsoluteResetPoseTol;  // Absolute field coordinates, reset robot pose if robot is not close to specified position
     }
 
     /**
      * Options to select driving stopping types.
      */
     public enum StopType {
-        kNoStop(0),
-        kCoast(1),
-        kBrake(2);
-    
-        @SuppressWarnings({"MemberName", "PMD.SingularField"})
-        public final int value;
-        StopType(int value) { this.value = value; }
+        kNoStop,
+        kCoast,
+        kBrake;
     }
 
-
     public static final class Ports{
+        public static final int CANPneumaticHub = 1;
 
         public static final int CANDriveFrontLeftMotor = 1;
         public static final int CANDriveFrontRightMotor = 2;
@@ -62,10 +61,29 @@ public final class Constants {
         public static final int CANTurnEncoderBackLeft = 11;
         public static final int CANTurnEncoderBackRight = 12;
 
-        public static final int CANGrabber = 44;
-        public static final int CANManipulator = 0; //CHANGE NUMBER TO REAL PORT 
-        public static final int CANIntake = 0; //CHANGE NUMBER TO REAL PORT
-        public static final int CANPneumaticHub = 0; //CHANGE NUMBER TO REAL PORT
+        public static final int CANElevatorMotor = 21;
+        // public static final int CANElevatorMotor2 = 22;
+        public static final int CANWristMotor = 45; 
+
+        public static final int CANIntake = 40;
+        public static final int CANManipulator = 43; 
+        public static final int CANConveyor = 47;
+
+        // Digital IO ports
+        public static final int DIOWristRevThroughBoreEncoder = 0;
+        public static final int DIOManipulatorCubeSensor = 1;
+        public static final int DIOManipulatorConeSensor = 2;
+
+        // PWM ports
+        public static final int PWMLEDStripTop = 0;         // LED Strip on top of robot
+
+        // I2C ports
+        // public static final int I2CcolorSensor = 0x52;       // According to REV docs, color sensor is at 0x52 = 82.  Rob had 39?
+
+        // Pneumatic solenoid ports
+        public static final int SolManipulatorFwd = 1;
+        public static final int SolManipulatorRev = 0;
+
     }
 
     public static final class OIConstants {
@@ -75,22 +93,24 @@ public final class Constants {
         public static final int usbCoPanel = 3;
 
         public static final double joystickDeadband = 0.01;
+        public static final double manualElevatorDeadband = 0.1;
+        public static final double manualWristDeadband = 0.1;
     }
 
     public static final class RobotDimensions {
         //left to right distance between the drivetrain wheels; should be measured from center to center
-        public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.59127;      // CALIBRATED-2 = 0.59127 (based on robot rotating in place).  CAD geometry = 0.57785.
+        public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.58721;      // CALIBRATED-3 = 0.58721 (based on robot rotating in place).  CAD geometry = 0.57785.
         //front-back distance between the drivetrain wheels; should be measured from center to center
-        public static final double DRIVETRAIN_WHEELBASE_METERS = 0.59127;       // CALIBRATED-2 = 0.59127 (based on robot rotating in place).  CAD geometry = 0.57785.
+        public static final double DRIVETRAIN_WHEELBASE_METERS = 0.58721;       // CALIBRATED-3 = 0.58721 (based on robot rotating in place).  CAD geometry = 0.57785.
 
     }
 
     public static final class SwerveConstants {
         // Encoder calibration to meters travelled or wheel facing degrees
-        public static final double kEncoderCPR = 2048.0;                // CALIBRATED-2 = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
-        public static final double kDriveGearRatio = (8.14 / 1.0);      // CALIBRATED-2 = 8.14/1.0.  Team364 (MK3i?) = 6.86:1.  Mk4i = 8.14 : 1
-        public static final double kTurningGearRatio = (150.0/7.0 / 1.0); // CALIBRATED-2 = 150.0/7.0.  Team364 (MK3i?) = 12.8:1.  Mk4i = 150/7 : 1
-        public static final double kWheelDiameterMeters = 0.09953;        // CALIBRATED-2 = 0.102.  Depends a little on the tread wear!
+        public static final double kEncoderCPR = 2048.0;                // CALIBRATED-3 = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
+        public static final double kDriveGearRatio = (6.75 / 1.0);      // CALIBRATED-3 = 6.75/1.0.  Team364 (MK3i?) = 6.86:1.  Mk4i = 8.14:1 (L1-std gears).  Mk4i = 6.75:1 (L2-fast gears)
+        public static final double kTurningGearRatio = (150.0/7.0 / 1.0); // CALIBRATED-3 = 150.0/7.0.  Team364 (MK3i?) = 12.8:1.  Mk4i = 150/7 : 1
+        public static final double kWheelDiameterMeters = 0.09712;        // CALIBRATED-3 = 0.09712.  Depends a little on the tread wear!
         public static final double kDriveEncoderMetersPerTick = (kWheelDiameterMeters * Math.PI) / kEncoderCPR / kDriveGearRatio;
         public static final double kTurningEncoderDegreesPerTick = 360.0/kEncoderCPR / kTurningGearRatio;
         
@@ -98,21 +118,21 @@ public final class Constants {
         // Max speed is used to keep each motor from maxing out, which preserves ratio between motors 
         // and ensures that the robot travels in the requested direction.  So, use min value of all 4 motors,
         // and further derate (initial test by 5%) to account for some battery droop under heavy loads.
-        // Max speed measured values 1/25/2023:  FL = 3.98, FR  = 3.97, BL = 3.98, BR = 3.95
-        public static final double kMaxSpeedMetersPerSecond = 3.8;          // CALIBRATED-2
+        // Max speed measured values 2/12/2023:  All 4 motors are between 4.6 an 4.7 meters/sec.  So use 4.5 as a conservative value
+        public static final double kMaxSpeedMetersPerSecond = 4.5;          // CALIBRATED-3
         public static final double kNominalSpeedMetersPerSecond = 0.5*kMaxSpeedMetersPerSecond;
         // Max acceleration measured values 1/13/2023: FL = 28.073, FR = 26.343, BL = 18.482, BR = 19.289
         // Max acceleration measured 1/25/2023 (with ~80lbs on robot):  Average of 4 wheels = 10.0 m/sec^2
-        public static final double kMaxAccelerationMetersPerSecondSquare = 10; // CALIBRATED-2
+        // Max acceleration measured 2/12/2023 (with new drive gears):  Average ~11 m/sec^2.  Keep value at 10.0 for now.
+        public static final double kMaxAccelerationMetersPerSecondSquare = 10; // CALIBRATED-3
         public static final double kNominalAccelerationMetersPerSecondSquare = 0.7*kMaxAccelerationMetersPerSecondSquare;
-        // Max turn velocity degrees per second measured values 1/13/2023: FL = 1744.629, FR = 1762.207, BL = 1736.719, BR = 2085.645
-        public static final double kMaxTurningRadiansPerSecond = 9.1;   // CALIBRATED-2 took 528 degreesPerSecond and converted to radians
-        public static final double kNominalTurningRadiansPerSecond = 6.0;
-        public static final double kMaxAngularAccelerationRadiansPerSecondSquared = 30.0;            // CALIBRATED-2 31.7 rad/sec^2
-        public static final double kNominalAngularAccelerationRadiansPerSecondSquared = 10.0;
-        public static final double kVDrive = 0.248; // CALIBRATED-2 = 0.248.  in % output per meters per second
-        public static final double kADrive = 0.0;                   // TODO -- Calibrate
-        public static final double kSDrive = 0.017; // CALIBRATED-2 = 0.017.  in % output
+        public static final double kMaxTurningRadiansPerSecond = 11.0;   // CALIBRATED-3 took 633 degreesPerSecond and converted to radians and rounded down
+        public static final double kNominalTurningRadiansPerSecond = Math.PI;
+        public static final double kMaxAngularAccelerationRadiansPerSecondSquared = 35.0;            // CALIBRATED-3 37.4 rad/sec^2
+        public static final double kNominalAngularAccelerationRadiansPerSecondSquared = Math.PI;
+        public static final double kVDrive = 0.2034; // CALIBRATED-3 = 0.2511.  in % output per meters per second.  Calibration says 0.2511, but better match on a trapezoid is 
+        public static final double kADrive = 0.0;
+        public static final double kSDrive = 0.016; // CALIBRATED-3 = 0.016.  in % output
 
     }
 
@@ -133,18 +153,30 @@ public final class Constants {
         // Update the offset angles in RobotPreferences (in Shuffleboard), not in this code!
         // After updating in RobotPreferences, you will need to re-start the robot code for the changes to take effect.
         // When calibrating offset, set the wheels to zero degrees with the bevel gear facing to the right
-        public static double offsetAngleFrontLeftMotor = 0; // 92.2
-        public static double offsetAngleFrontRightMotor = 0; // -12.5
-        public static double offsetAngleBackLeftMotor = 0; // -106.6
-        public static double offsetAngleBackRightMotor = 0; // 157.5
+        public static double offsetAngleFrontLeftMotor = 0; // 92.3
+        public static double offsetAngleFrontRightMotor = 0; // -12.8
+        public static double offsetAngleBackLeftMotor = 0; // -107.6
+        public static double offsetAngleBackRightMotor = 0; // -170.2
+
+        // Driving constants to cap acceleration
+        public static final double maxXSpeedWithElevatorUp = 1.0;       // m/s
+        public static final double maxAccelerationRate = 5.0;           // m/s^2
+        public static final double maxAccelerationRateWithElevatorUp = 2.0;           // m/s^2
+        public static final double maxRotationRateWithElevatorUp = 0.8;     // rad/sec
+
+        // Auto balance constants
+        public static final double maxPitchBalancedDegrees = 6.0;       // If abs(Pitch) is under this value, then assume we are balanced
       }
 
       public static final class TrajectoryConstants {
+        // Max error for robot rotation
+        public static final double maxThetaErrorDegrees = 1.0;
+        public static final double maxPositionErrorMeters = 0.02;
 
         // Feedback terms for holonomic drive controllers
         public static final double kPXController = 1;       // X-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)
         public static final double kPYController = 1;       // Y-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)
-        public static final double kPThetaController = 1;   // Theta-velocity controller:  kp.  Units = (rad/sec of velocity) / (radians of angle error)
+        public static final double kPThetaController = 3;   // Theta-velocity controller:  kp.  Units = (rad/sec of velocity) / (radians of angle error)
 
         public static final TrajectoryConfig swerveTrajectoryConfig =
             new TrajectoryConfig(
@@ -156,5 +188,127 @@ public final class Constants {
         public static final TrapezoidProfile.Constraints kThetaControllerConstraints =
         new TrapezoidProfile.Constraints(
             SwerveConstants.kNominalTurningRadiansPerSecond, SwerveConstants.kNominalAngularAccelerationRadiansPerSecondSquared);
+
+        /* Constraint for the DriveToPose motion profile for distance being travelled */
+        public static final TrapezoidProfileBCR.Constraints kDriveProfileConstraints =
+        new TrapezoidProfileBCR.Constraints(
+            SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare);
       }
+
+    public static class FieldConstants {
+        public static final double length = Units.feetToMeters(54);
+        public static final double width = Units.feetToMeters(27);
+    }
+
+    public static class VisionConstants {
+
+        public static final Transform3d robotToCam =
+                new Transform3d(
+                    // new Translation3d(Units.inchesToMeters(6.0), 0.0, Units.inchesToMeters(30.5)),       Changed in B3
+                    new Translation3d(Units.inchesToMeters(6.0)+0.02, -0.005, Units.inchesToMeters(30.5)),
+                        new Rotation3d(
+                                0, 0,
+                                0)); // Cam mounted facing forward in center of robot
+                // new Transform3d(
+                //         new Translation3d(0.5, 0.0, 0.5),
+                //         new Rotation3d(
+                //                 0, 0,
+                //                 0)); // Cam mounted facing forward, half a meter forward of center, half a meter up
+        // from center.
+        public static final String cameraName = "CenterCamera";
+        public static final double targetSideLength = Units.inchesToMeters(6);
+    }
+
+    public static final class WristConstants {
+        public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
+        public static final double kWristGearRatio = (50.0 / 1.0);       // From CAD, should be 50:1.  Gear reduction ratio between Falcon and gear driving the wrist (planetary and chain gears)
+        public static final double kWristDegreesPerTick =  360.0 / kEncoderCPR / kWristGearRatio * 0.9726;      // CALIBRATED (fudge factor 0.9726)
+
+        public static final double maxUncalibratedPercentOutput = 0.05;     // CALIBRATED
+        public static final double maxPercentOutput = 0.1;          // CALIBRATED
+
+        // Update the REV through bore encoder offset angle in RobotPreferences (in Shuffleboard), not in this code!
+        // After updating in RobotPreferences, you will need to re-start the robot code for the changes to take effect.
+        // When calibrating offset, 0 deg should be with the CG of the wrist horizontal facing away from the robot,
+        // and -90 deg is with the CG of the wrist resting downward.
+        public static double revEncoderOffsetAngleWrist = 0;    // 69.0 deg
+
+        public static final double kG = 0.03;   // CALIBRATED 0.02.  Feed foward percent-out to add to hold arm horizontal (0 deg)
+
+        // Wrist regions
+        public enum WristRegion {
+            backFar,        // In the wrist backFar region, the elevator must be in the bottom region (not allowed to go to elevator main or low regions).
+            backMid,        // In the wrist backMid region, the elevator may be in any elevator region.
+            down,           // Wrist pointed down, the elevator must be in the main region.
+            main,           // In the wrist main region, the elevator may be in any elevator region.
+            uncalibrated    // Unknown region, wrist is not calibrated
+        } 
+        // Wrist region boundaries
+        public static final double boundBackFarMid = -119.0;      // Boundary between backFar and backMid regions.  CALIBRATED
+        public static final double boundBackMidDown = -116.0;      // Boundary between backMid and down regions.  CALIBRATED
+        public static final double boundDownMain = -91.0;      // Boundary between down and main regions.  CALIBRATED
+        public static final double boundDownMidpoint = (boundBackMidDown+boundDownMain)/2.0;      // Midpoint in down region
+
+        // Wrist pre-defined angles (in degrees)
+        // 0 degrees = horizontal (in front of robot) relative to wrist center of gravity
+        // -90 degrees = vertical = wrist is hanging "down" naturally due to gravity
+        public enum WristAngle {
+            lowerLimit(-119.0),      // CALIBRATED
+            startConfig(-119.0),     // CALIBRATED
+            loadConveyor(-117.5),    // CALIBRATED
+            loadHumanStation(10.0),      // CALIBRATED
+            scoreLow(0.0),
+            scoreMidHigh(20.0),         // Was 10.0
+            elevatorMoving(32.0),    // CALIBRATED
+            upperLimit(32.0);       // CALIBRATED
+            // score low 5 inches
+            @SuppressWarnings({"MemberName", "PMD.SingularField"})
+            public final double value;
+            WristAngle(double value) { this.value = value; }
+        }
+      }
+
+      public static final class ElevatorConstants {
+        public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
+        public static final double kElevGearRatio = (12.0 / 1.0);        // CALIBRATED.  Gear reduction ratio between Falcon and gear driving the elevator
+        public static final double kElevStages = 2.0;                   // Upper stage moves 2x compared to lower stage
+        public static final double kElevGearDiameterInches = 1.273;       // CALIBRATED.  Diameter of the gear driving the elevator in inches.  Per CAD = 1.273.  Calibrated = 1.276.
+        public static final double kElevEncoderInchesPerTick = (kElevGearDiameterInches * Math.PI) / kEncoderCPR / kElevGearRatio * kElevStages;
+
+        public static final double maxUncalibratedPercentOutput = 0.10;     // CALIBRATED
+        public static final double maxManualPercentOutput = 0.50;  // CALIBRATED
+
+        // Elevator regions
+        public enum ElevatorRegion {
+            bottom,     // In the elevator bottom region, the wrist may be in any wrist region.
+            low,        // Slightly up, wrist can not go far-back or main
+            main,       // In the elevator main region, the wrist must be in the wrist main region (not allowed to go to wrist back region).
+            uncalibrated;       // Unknown region, elevator is not calibrated.
+        }
+        // Elevator region boundaries
+        public static final double boundBottomLow = 2.0;        // Boundary between bottom and low regions
+        public static final double boundMainLow = 2.0;      // Boundary between low and main regions.  CALIBRATED
+
+        // Elevator pre-defined positions (in inches from bottom of elevator)
+        public enum ElevatorPosition {
+            lowerLimit(0.0),        // CALIBRATED
+            bottom(0.0),            // CALIBRATED
+            loadingStationCube(35.0),   // CALIBRATED
+            loadingStationCone(45.0),   // CALIBRATED
+            scoreLow(5.0),          // CALIBRATED
+            scoreMidCone(21.0),     // CALIBRATED
+            scoreHighCone(41.0),    // CALIBRATED
+            upperLimit(45.4);       // CALIBRATED
+            // score low 5 inches
+            @SuppressWarnings({"MemberName", "PMD.SingularField"})
+            public final double value;
+            ElevatorPosition(double value) { this.value = value; }
+        }
+      }
+
+      public static final class ManipulatorConstants {
+        public static final double pieceGrabPct = 0.8;
+        public static final double pieceHoldPct = 0.2;
+      }
+
 }

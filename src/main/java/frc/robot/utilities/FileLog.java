@@ -33,7 +33,7 @@ public class FileLog {
     // File logging rotation cycles, to spread out logging times between subsystems	
 	private final int NUM_ROTATIONS = 10;
 	private int rotationLastAllocated = NUM_ROTATIONS-1;
-	public int rotationCurrent = 0;			// Values = 0 .. NUM_ROTATIONS-1
+	private int rotationCurrent = 0;			// Values = 0 .. NUM_ROTATIONS-1
     
 	/**
 	 * Creates a new log file called "/home/lvuser/logfile.ver.date.time.csv"

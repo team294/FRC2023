@@ -22,6 +22,7 @@ import frc.robot.Constants.SwerveConstants;
 import frc.robot.utilities.CTRESwerveModuleState;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.MathBCR;
+import frc.robot.utilities.Wait;
 
 import static frc.robot.utilities.StringUtil.*;
 
@@ -29,6 +30,10 @@ public class SwerveModule {
       
   private final String swName;    // Name for this swerve module
   private final FileLog log;
+  private final boolean cancoderReversed;
+  private final boolean driveEncoderReversed;
+  private final boolean turningEncoderReversed;
+  private final double turningOffsetDegrees;
 
   private final WPI_TalonFX driveMotor;
   private final WPI_TalonFX turningMotor;
@@ -55,19 +60,41 @@ public class SwerveModule {
    * front of the robot.  Value is the desired encoder zero point, in absolute magnet position reading.
    */
   public SwerveModule(String swName, int driveMotorAddress, int turningMotorAddress, int cancoderAddress,
-      boolean driveEncoderReversed, boolean turningEncoderReversed, boolean cancoderReveresed,
+      boolean driveEncoderReversed, boolean turningEncoderReversed, boolean cancoderReversed,
       double turningOffsetDegrees, FileLog log) {
 
     // Save the module name and logfile
     this.swName = swName;
     this.log = log;
+    this.cancoderReversed = cancoderReversed;
+    this.driveEncoderReversed = driveEncoderReversed;
+    this.turningEncoderReversed = turningEncoderReversed;
+    this.turningOffsetDegrees = turningOffsetDegrees;
 
     // Create motor and encoder objects
     driveMotor = new WPI_TalonFX(driveMotorAddress);
     turningMotor = new WPI_TalonFX(turningMotorAddress);
     turningCanCoder = new WPI_CANCoder(cancoderAddress);
 
-    // configure drive motor
+    // Configure the swerve module motors and encoders
+    configSwerveModule();
+
+    // other configs for drive and turning motors
+    setMotorModeCoast(true);        // true on boot up, so robot is easy to push.  Change to false in autoinit or teleopinit
+
+  }
+
+  // ********** Swerve module configuration methods
+
+  /**
+   * Configures the motors and encoders, uses default values from the constructor.
+   * In general, this should only be called from the constructor when the robot code is starting.
+   * However, if the robot browns-out or otherwise partially resets, then this can be used to 
+   * force the encoders to have the right calibration and settings, especially the
+   * calibration angle for each swerve module.
+   */
+  public void configSwerveModule() {
+    //configure drive motors
     driveMotor.configFactoryDefault(100);
     driveMotor.configAllSettings(CTREConfigs.swerveDriveFXConfig, 100);
     driveMotor.selectProfileSlot(0, 0);
@@ -81,13 +108,10 @@ public class SwerveModule {
     turningMotor.setInverted(true);
     turningMotor.enableVoltageCompensation(true);
 
-    // other configs for drive and turning motors
-    setMotorModeCoast(true);        // true on boot up, so robot is easy to push.  Change to false in autoinit or teleopinit
-
     // configure turning CanCoder
     turningCanCoder.configFactoryDefault(100);
     turningCanCoder.configAllSettings(CTREConfigs.swerveCanCoderConfig, 100);
-    turningCanCoder.configSensorDirection(cancoderReveresed, 100);
+    turningCanCoder.configSensorDirection(cancoderReversed, 100);
 
     // configure drive encoder
     driveMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 100);
@@ -104,8 +128,7 @@ public class SwerveModule {
     // may take longer than this code.
     // The timeouts in the configuration code above (100ms) should take care of this, but it does not always wait long enough.
     // So, add a wait time here:
-    double finishTime = System.currentTimeMillis() + 200;
-    while (System.currentTimeMillis() < finishTime) {}
+    Wait.waitTime(200);
 
     // System.out.println(swName + " CanCoder " + getCanCoderDegrees() + " FX " + getTurningEncoderDegrees() + " pre-CAN");
     zeroDriveEncoder();
@@ -114,10 +137,7 @@ public class SwerveModule {
     // log.writeLogEcho(true, "SwerveModule", swName+" post-CAN", "Cancoder", getCanCoderDegrees(), "FX", getTurningEncoderDegrees());
     calibrateTurningEncoderDegrees(getCanCoderDegrees());
     // log.writeLogEcho(true, "SwerveModule", swName+" post-FX", "Cancoder", getCanCoderDegrees(), "FX", getTurningEncoderDegrees());
-
   }
-
-  // ********** Swerve module configuration methods
 
   /**
    * @param setCoast true = coast mode, false = brake mode
