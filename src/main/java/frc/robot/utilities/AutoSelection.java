@@ -127,18 +127,20 @@ public class AutoSelection {
 			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
 			Pose2d posScoreInitial, posLeave, posCross, posFinal;
 			if (allianceSelection.getAlliance() == Alliance.Red) {
-				posScoreInitial = field.getFinalColumn(9);
+				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 7.490968, 180
 				// Travel  4.4 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 4.4, 0);
-				// TODO FIX
-				posCross = posLeave;
-				posFinal = posCross;
+				posLeave = MathBCR.translate(posScoreInitial, 4.4, 0);  // 6.17165, 7.490968, 180
+				// Travel in Y to cross the field to the pickup side
+				posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
+				// Spin 180
+				posFinal = new Pose2d(7.0, 2.2, Rotation2d.fromDegrees(0.0));
 			} else {
 				posScoreInitial = field.getFinalColumn(1);			// 1.77165, 0.512826, 180
 				// Travel  4.4 m in +X from starting position
 				posLeave = MathBCR.translate(posScoreInitial, 4.4, 0);		// 6.17165, 0.512826, 180
 				// Travel in Y to cross the field to the pickup side
 				posCross = new Pose2d(6.3, 6.0, Rotation2d.fromDegrees(180.0));
+				// Spin 180
 				posFinal = new Pose2d(7.0, 6.0, Rotation2d.fromDegrees(0.0));
 			}
 
