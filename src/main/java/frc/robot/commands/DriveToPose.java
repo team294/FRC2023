@@ -275,7 +275,8 @@ public class DriveToPose extends CommandBase {
         "Robot Y", curRobotTranslation.getY(),
         "Robot Vel", Math.hypot(robotSpeeds.vyMetersPerSecond, robotSpeeds.vxMetersPerSecond),
         "Robot VelAng", Math.toDegrees(Math.atan2(robotSpeeds.vyMetersPerSecond, robotSpeeds.vxMetersPerSecond)),
-        "Robot rot", robotPose.getRotation().getDegrees()
+        "Robot rot", robotPose.getRotation().getDegrees(),
+        "Pitch", driveTrain.getGyroPitch()
     );
   }
 

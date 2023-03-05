@@ -141,12 +141,14 @@ public class AutoSelection {
 			log.writeLogEcho(true, "AutoSelect", "run Cone Balance 4ToWall");
 			Pose2d posCommunityInitial = field.getStationInitial(2);
 			Pose2d posCommunityFinal = field.getStationCenter(2);
-			Pose2d posScoreInitial;
+			Pose2d posScoreInitial, posCommunityFarther, posCommunityCloser;
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(6);
 			} else {
 				posScoreInitial = field.getFinalColumn(4);
 			}
+			posCommunityFarther = translate(posCommunityFinal, 2.0, 0.0);
+			posCommunityCloser = translate(posCommunityFinal, -2.0, 0.0);
 
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
@@ -154,12 +156,19 @@ public class AutoSelection {
 				new DriveToPose(posCommunityInitial, driveTrain, log),
 				new DriveToPose(posCommunityFinal, driveTrain, log),
 
-				// TODO balance robot
-				// new ConditionalCommand(
-				// 	null, // drive forward slowly
-				// 	new WaitCommand(0.01), 
-				// 	() -> driveTrain.getGyroPitch() > DriveConstants.maxPitchBalancedDegrees
-				// ),
+				// TODO test balance robot
+				new ConditionalCommand(
+					new DriveToPose(posCommunityFarther, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, driveTrain, log)
+							.until(() -> driveTrain.getGyroPitch() < DriveConstants.maxPitchBalancedDegrees), // drive forward slowly
+					new WaitCommand(0.01), 
+					() -> driveTrain.getGyroPitch() > DriveConstants.maxPitchBalancedDegrees
+				),
+				new ConditionalCommand(
+					new DriveToPose(posCommunityCloser, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, driveTrain, log)
+							.until(() -> driveTrain.getGyroPitch() > -DriveConstants.maxPitchBalancedDegrees), // drive forward slowly
+					new WaitCommand(0.01), 
+					() -> driveTrain.getGyroPitch() < -DriveConstants.maxPitchBalancedDegrees
+				),
 
 				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
 	   		);
@@ -184,12 +193,18 @@ public class AutoSelection {
 				new DriveToPose(posCommunityInitial, driveTrain, log),
 				new DriveToPose(posCommunityFinal, driveTrain, log),
 
-				// TODO balance robot
+				// TODO test balance robot
 				new ConditionalCommand(
 					new DriveToPose(posCommunityFarther, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, driveTrain, log)
 							.until(() -> driveTrain.getGyroPitch() < DriveConstants.maxPitchBalancedDegrees), // drive forward slowly
 					new WaitCommand(0.01), 
 					() -> driveTrain.getGyroPitch() > DriveConstants.maxPitchBalancedDegrees
+				),
+				new ConditionalCommand(
+					new DriveToPose(posCommunityCloser, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, driveTrain, log)
+							.until(() -> driveTrain.getGyroPitch() > -DriveConstants.maxPitchBalancedDegrees), // drive forward slowly
+					new WaitCommand(0.01), 
+					() -> driveTrain.getGyroPitch() < -DriveConstants.maxPitchBalancedDegrees
 				),
 
 				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
