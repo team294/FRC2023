@@ -52,7 +52,7 @@ public class ElevatorWristMoveToUpperPosition extends SequentialCommandGroup {
       // If elevator is not in the main region (and wrist is not in main region), 
       // then move elevator to main region so that the wrist is free to move forward
       new ConditionalCommand(
-        new ElevatorSetPosition(ElevatorConstants.boundMainLow+1.0, elevator, log), 
+        new ElevatorSetPosition(ElevatorConstants.boundMainLow+2.0, elevator, log), 
         new WaitCommand(0.01), 
         () -> (elevator.getElevatorRegion() != ElevatorRegion.main && wrist.getWristRegion() != WristRegion.main)
       ),

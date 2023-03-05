@@ -81,6 +81,18 @@ public class AutoSelection {
 	}
 
 	/**
+	 * Translates a pose by a given X and Y offset.
+	 * [Xnew Ynew ThetaNew] = [Xinit Yinit ThetaInit] + [xOffset yOffset 0]
+	 * @param initialPose
+	 * @param xOffset
+	 * @param yOffset
+	 * @return
+	 */
+	public Pose2d translate(Pose2d initialPose, double xOffset, double yOffset) {
+		return new Pose2d(initialPose.getTranslation().plus(new Translation2d(xOffset, yOffset)), initialPose.getRotation());
+	}
+
+	/**
 	 * Gets the auto command based upon input from the shuffleboard.
 	 * This method is designed to be called at AutonomousInit by Robot.java.
 	 * 
@@ -122,7 +134,7 @@ public class AutoSelection {
 				posScoreInitial = field.getFinalColumn(1);
 			}
 			// Travel  4.4 m in +X from starting position
-			posLeaveFinal = posScoreInitial.transformBy(new Transform2d(new Translation2d(4.4, 0.0), Rotation2d.fromDegrees(0.0)));
+			posLeaveFinal = translate(posScoreInitial, 4.4, 0);
 
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
@@ -171,8 +183,8 @@ public class AutoSelection {
 			} else {
 				posScoreInitial = field.getFinalColumn(4);
 			}
-			posCommunityFarther = posCommunityFinal.transformBy(new Transform2d(new Translation2d(2.0, 0.0), Rotation2d.fromDegrees(0.0)));
-			posCommunityCloser = posCommunityFinal.transformBy(new Transform2d(new Translation2d(-2.0, 0.0), Rotation2d.fromDegrees(0.0)));
+			posCommunityFarther = translate(posCommunityFinal, 2.0, 0.0);
+			posCommunityCloser = translate(posCommunityFinal, -2.0, 0.0);
 
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
