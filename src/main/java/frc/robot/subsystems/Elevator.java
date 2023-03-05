@@ -137,6 +137,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 		}
 
 		// TODO fix interlock
+		// TODO also add code to periodic() for interlock updates (see wrist for an example)
 		// Do not move the elevator up if the wrist is not in the main region (interlock to prevent crashing).
 		// if (wrist.getWristRegion() != WristRegion.main && percentOutput > 0.0) {
 		// 	percentOutput = 0.0;

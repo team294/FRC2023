@@ -47,7 +47,7 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryType;
  */
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
-  private final FileLog log = new FileLog("B9");
+  private final FileLog log = new FileLog("C1");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
   private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
   private final Field field = new Field(allianceSelection, log);
@@ -132,12 +132,12 @@ public class RobotContainer {
     SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
 
     // Testing for autos
-    SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
-    SmartDashboard.putData("Center Balance Blue", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-        trajectoryCache.cache[TrajectoryType.CenterBalanceBlue.value], driveTrain, log));
-    SmartDashboard.putData("Center Balance Community Blue", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-        trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value], driveTrain, log));
-    SmartDashboard.putData("Auto OneConeBalance", new OuterOneConeBalanceMiddleAuto(driveTrain));     // TODO put on auto selector and remove this button
+    // SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
+    // SmartDashboard.putData("Center Balance Blue", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
+    //     trajectoryCache.cache[TrajectoryType.CenterBalanceBlue.value], driveTrain, log));
+    // SmartDashboard.putData("Center Balance Community Blue", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
+    //     trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value], driveTrain, log));
+    // SmartDashboard.putData("Auto OneConeBalance", new OuterOneConeBalanceMiddleAuto(driveTrain));
   
     //Elevator Commands
     SmartDashboard.putData("Elevator Cal Encoder", new ElevatorCalibrateEncoderIfAtLowerLimit(elevator, log));
@@ -251,7 +251,7 @@ public class RobotContainer {
     xbBack.onTrue(Commands.parallel(
       new ManipulatorStopMotor(manipulator, log),
       new ConveyorMove(0, conveyor, log)
-      // TODO stop intake
+      // TODO stop intake (if we and an intake subsystem)
     )); 
 
     // start 
@@ -288,7 +288,6 @@ public class RobotContainer {
       right[i] = new JoystickButton(rightJoystick, i);
     }
 
-    // TODO Add a button binding to zero the Pose angle (after adding that feature to DriveResetPose).
     // If the robot angle drifts (or is turned on with the wrong facing), then this button can be used to 
     // reset the robot facing for field-oriented control.  Turn the robot so that it is facing away
     // from the driver, then press this button.

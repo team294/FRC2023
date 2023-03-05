@@ -71,8 +71,11 @@ public class ElevatorSetPosition extends CommandBase {
       target = SmartDashboard.getNumber("Elevator Position", 0);
     }
     log.writeLog(false, "ElevatorSetPosition", "Target Position", target);
+
+    toleranceCounter = 0;
     elevator.setProfileTarget(target);
   }
+
   // Called repeatedly when this Command is scheduled to run
   @Override
   public void execute() {

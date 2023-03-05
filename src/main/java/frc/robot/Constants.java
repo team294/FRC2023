@@ -61,19 +61,18 @@ public final class Constants {
         public static final int CANTurnEncoderBackLeft = 11;
         public static final int CANTurnEncoderBackRight = 12;
 
-        public static final int CANElevatorMotor = 21;      //TODO CHANGE NUMBER TO REAL PORT 
+        public static final int CANElevatorMotor = 21;
         // public static final int CANElevatorMotor2 = 22;
         public static final int CANWristMotor = 45; 
 
         public static final int CANIntake = 40;
-        public static final int CANGrabber = 44;        //TODO REMOVE THE GRABBER
         public static final int CANManipulator = 43; 
         public static final int CANConveyor = 47;
 
         // Digital IO ports
         public static final int DIOWristRevThroughBoreEncoder = 0;
-        public static final int DIOManipulatorCubeSensor = 1; //TODO PLACE HOLDER SET TO CORRET PORT
-        public static final int DIOManipulatorConeSensor = 2; //TODO PLACE HOLDER SET TO CORRECT PORT
+        public static final int DIOManipulatorCubeSensor = 1;
+        public static final int DIOManipulatorConeSensor = 2;
 
         // PWM ports
         public static final int PWMLEDStripTop = 0;         // LED Strip on top of robot
@@ -132,7 +131,7 @@ public final class Constants {
         public static final double kMaxAngularAccelerationRadiansPerSecondSquared = 35.0;            // CALIBRATED-3 37.4 rad/sec^2
         public static final double kNominalAngularAccelerationRadiansPerSecondSquared = Math.PI;
         public static final double kVDrive = 0.2034; // CALIBRATED-3 = 0.2511.  in % output per meters per second.  Calibration says 0.2511, but better match on a trapezoid is 
-        public static final double kADrive = 0.0;                   // TODO -- Calibrate
+        public static final double kADrive = 0.0;
         public static final double kSDrive = 0.016; // CALIBRATED-3 = 0.016.  in % output
 
     }
@@ -257,7 +256,7 @@ public final class Constants {
             lowerLimit(-119.0),      // CALIBRATED
             startConfig(-119.0),     // CALIBRATED
             loadConveyor(-117.5),    // CALIBRATED
-            loadHumanStation(10.0),      // TODO calibrate
+            loadHumanStation(10.0),      // CALIBRATED
             scoreLow(0.0),
             scoreMidHigh(20.0),         // Was 10.0
             elevatorMoving(32.0),    // CALIBRATED
@@ -287,7 +286,6 @@ public final class Constants {
             uncalibrated;       // Unknown region, elevator is not calibrated.
         }
         // Elevator region boundaries
-        // TODO fix boundaries to add low region!!!!
         public static final double boundBottomLow = 2.0;        // Boundary between bottom and low regions
         public static final double boundMainLow = 2.0;      // Boundary between low and main regions.  CALIBRATED
 
@@ -295,11 +293,11 @@ public final class Constants {
         public enum ElevatorPosition {
             lowerLimit(0.0),        // CALIBRATED
             bottom(0.0),            // CALIBRATED
-            loadingStationCube(35.0),   // TODO CALIBRATE
-            loadingStationCone(45.0),   // TODO CALIBRATE
-            scoreLow(5.0),          // TODO CALIBRATE
-            scoreMidCone(21.0),     // TODO CALIBRATE
-            scoreHighCone(41.0),    // TODO CALIBRATE
+            loadingStationCube(35.0),   // CALIBRATED
+            loadingStationCone(45.0),   // CALIBRATED
+            scoreLow(5.0),          // CALIBRATED
+            scoreMidCone(21.0),     // CALIBRATED
+            scoreHighCone(41.0),    // CALIBRATED
             upperLimit(45.4);       // CALIBRATED
             // score low 5 inches
             @SuppressWarnings({"MemberName", "PMD.SingularField"})

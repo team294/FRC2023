@@ -6,8 +6,6 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -15,16 +13,11 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import frc.robot.Constants.CoordType;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.ManipulatorConstants;
-import frc.robot.Constants.StopType;
 import frc.robot.Constants.SwerveConstants;
-import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
-import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.commands.*;
 import frc.robot.commands.autos.*;
 import frc.robot.commands.sequences.*;
 import frc.robot.subsystems.*;
-import frc.robot.utilities.TrajectoryCache.TrajectoryType;
 
 
 /**
@@ -81,6 +74,18 @@ public class AutoSelection {
 	}
 
 	/**
+	 * Translates a pose by a given X and Y offset.
+	 * [Xnew Ynew ThetaNew] = [Xinit Yinit ThetaInit] + [xOffset yOffset 0]
+	 * @param initialPose
+	 * @param xOffset
+	 * @param yOffset
+	 * @return
+	 */
+	public Pose2d translate(Pose2d initialPose, double xOffset, double yOffset) {
+		return new Pose2d(initialPose.getTranslation().plus(new Translation2d(xOffset, yOffset)), initialPose.getRotation());
+	}
+
+	/**
 	 * Gets the auto command based upon input from the shuffleboard.
 	 * This method is designed to be called at AutonomousInit by Robot.java.
 	 * 
@@ -122,7 +127,7 @@ public class AutoSelection {
 				posScoreInitial = field.getFinalColumn(1);
 			}
 			// Travel  4.4 m in +X from starting position
-			posLeaveFinal = posScoreInitial.transformBy(new Transform2d(new Translation2d(4.4, 0.0), Rotation2d.fromDegrees(0.0)));
+			posLeaveFinal = translate(posScoreInitial, 4.4, 0);
 
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
@@ -136,12 +141,14 @@ public class AutoSelection {
 			log.writeLogEcho(true, "AutoSelect", "run Cone Balance 4ToWall");
 			Pose2d posCommunityInitial = field.getStationInitial(2);
 			Pose2d posCommunityFinal = field.getStationCenter(2);
-			Pose2d posScoreInitial;
+			Pose2d posScoreInitial, posCommunityFarther, posCommunityCloser;
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(6);
 			} else {
 				posScoreInitial = field.getFinalColumn(4);
 			}
+			posCommunityFarther = translate(posCommunityFinal, 2.0, 0.0);
+			posCommunityCloser = translate(posCommunityFinal, -2.0, 0.0);
 
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
@@ -149,12 +156,19 @@ public class AutoSelection {
 				new DriveToPose(posCommunityInitial, driveTrain, log),
 				new DriveToPose(posCommunityFinal, driveTrain, log),
 
-				// TODO balance robot
-				// new ConditionalCommand(
-				// 	null, // drive forward slowly
-				// 	new WaitCommand(0.01), 
-				// 	() -> driveTrain.getGyroPitch() > DriveConstants.maxPitchBalancedDegrees
-				// ),
+				// TODO test balance robot
+				new ConditionalCommand(
+					new DriveToPose(posCommunityFarther, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, driveTrain, log)
+							.until(() -> driveTrain.getGyroPitch() < DriveConstants.maxPitchBalancedDegrees), // drive forward slowly
+					new WaitCommand(0.01), 
+					() -> driveTrain.getGyroPitch() > DriveConstants.maxPitchBalancedDegrees
+				),
+				new ConditionalCommand(
+					new DriveToPose(posCommunityCloser, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, driveTrain, log)
+							.until(() -> driveTrain.getGyroPitch() > -DriveConstants.maxPitchBalancedDegrees), // drive forward slowly
+					new WaitCommand(0.01), 
+					() -> driveTrain.getGyroPitch() < -DriveConstants.maxPitchBalancedDegrees
+				),
 
 				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
 	   		);
@@ -171,20 +185,26 @@ public class AutoSelection {
 			} else {
 				posScoreInitial = field.getFinalColumn(4);
 			}
-			posCommunityFarther = posCommunityFinal.transformBy(new Transform2d(new Translation2d(2.0, 0.0), Rotation2d.fromDegrees(0.0)));
-			posCommunityCloser = posCommunityFinal.transformBy(new Transform2d(new Translation2d(-2.0, 0.0), Rotation2d.fromDegrees(0.0)));
+			posCommunityFarther = translate(posCommunityFinal, 2.0, 0.0);
+			posCommunityCloser = translate(posCommunityFinal, -2.0, 0.0);
 
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
 				new DriveToPose(posCommunityInitial, driveTrain, log),
 				new DriveToPose(posCommunityFinal, driveTrain, log),
 
-				// TODO balance robot
+				// TODO test balance robot
 				new ConditionalCommand(
 					new DriveToPose(posCommunityFarther, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, driveTrain, log)
 							.until(() -> driveTrain.getGyroPitch() < DriveConstants.maxPitchBalancedDegrees), // drive forward slowly
 					new WaitCommand(0.01), 
 					() -> driveTrain.getGyroPitch() > DriveConstants.maxPitchBalancedDegrees
+				),
+				new ConditionalCommand(
+					new DriveToPose(posCommunityCloser, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, driveTrain, log)
+							.until(() -> driveTrain.getGyroPitch() > -DriveConstants.maxPitchBalancedDegrees), // drive forward slowly
+					new WaitCommand(0.01), 
+					() -> driveTrain.getGyroPitch() < -DriveConstants.maxPitchBalancedDegrees
 				),
 
 				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg

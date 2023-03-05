@@ -193,7 +193,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * Positive is turning left, negative is turning right.
    */
   // public double getAngularVelocityFromWheels () {
-    //TODO In the 2022 code, this was more accurate than the angular velocity from
+    // In the 2022 code, this was more accurate than the angular velocity from
     // the gyro.  This was used in the DriveTurnGyro code.  However, angular velocity
     // was easy to calculate from a west coast driveTrain.  How do we calculate this
     // from a swerve drive train?  Do we need this method?
@@ -385,8 +385,6 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
     setModuleStates(swerveModuleStates, isOpenLoop);
   }
-
-  // TODO Add version of setModuleStates with acceleration
 
   // ************ Odometry methods
 
