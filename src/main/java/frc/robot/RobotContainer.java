@@ -57,6 +57,7 @@ public class RobotContainer {
   private final Elevator elevator = new Elevator(wrist, log);
   private final DriveTrain driveTrain = new DriveTrain(field, elevator, log);
   private final Manipulator manipulator = new Manipulator(log);
+  private final Intake intake = new Intake(log);
   private final LED led = new LED();
   private final Conveyor conveyor = new Conveyor(log);
 
@@ -167,6 +168,12 @@ public class RobotContainer {
     SmartDashboard.putData("Conveyor Run", new ConveyorMove(0.3, conveyor, log));
     SmartDashboard.putData("Conveyor Stop", new ConveyorMove(0, conveyor, log));
 
+    // Intake Commands
+    SmartDashboard.putData("Intake Stop", new IntakeStop(intake, log));
+    SmartDashboard.putData("Intake Pick Up",new IntakeSetPercentOutput(0.5, intake, log));
+    SmartDashboard.putData("Intake Eject",new IntakeSetPercentOutput(0.5, intake, log));
+    SmartDashboard.putData("Intake Deploy", new IntakePistonSetPosition(true, intake, log));
+    SmartDashboard.putData("Intake Stow", new IntakePistonSetPosition(false, intake, log));
 
     //Manipulator Commands
     SmartDashboard.putData("Manipulator Stop", new ManipulatorStopMotor(manipulator, log));

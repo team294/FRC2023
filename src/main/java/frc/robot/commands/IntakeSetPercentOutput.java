@@ -15,12 +15,12 @@ public class IntakeSetPercentOutput extends CommandBase {
   private FileLog log;
 
   /**
-   * Sets the percent output of the intake motor.
+   * Sets the percent output of the intake motor, + is intake, - is outtake
+   * @param intakePercentOutput -1.0 to +1.0
    * @param intake intake subsystem
-   * @param intakePercentOutput percent output of the intake motor
    * @param log log file
    */
-  public IntakeSetPercentOutput(Intake intake, double intakePercentOutput, FileLog log) {
+  public IntakeSetPercentOutput(double intakePercentOutput, Intake intake, FileLog log) {
     this.intake = intake;
     this.intakePercentOutput = intakePercentOutput;
     this.log = log;

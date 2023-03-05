@@ -15,11 +15,11 @@ public class IntakePistonSetPosition extends CommandBase {
 
   /**
    * Sets intake pistion position
+   * @param boolean true = deploy, false = stow
    * @param intake intake subsystem
-   * @param boolean true = deploy, false = undeploy
    * @param log log file
    */
-  public IntakePistonSetPosition(Intake intake, boolean deploy, FileLog log) {
+  public IntakePistonSetPosition(boolean deploy, Intake intake, FileLog log) {
     this.intake  = intake;
     this.deploy = deploy;
     this.log = log;
