@@ -29,8 +29,10 @@ import static frc.robot.Constants.Ports.*;
 
 import static frc.robot.Constants.DriveConstants.*;
 
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
 import frc.robot.utilities.*;
 
@@ -75,9 +77,15 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   //Slew rate limiter
   private final Elevator elevator;
   private boolean elevatorUpPriorIteration = false;       // Tracking for elevator position from prior iteration
-  private final SlewRateLimiter filterX = new SlewRateLimiter(maxAccelerationRate);
+
+
+  private final BCRSlewRateLimiter filterX = new BCRSlewRateLimiter(maxAccelerationRate);
   private final SlewRateLimiter filterY = new SlewRateLimiter(maxAccelerationRate);
-  private final SlewRateLimiter filterXSlow = new SlewRateLimiter(maxAccelerationRateWithElevatorUp);   // limiter in X direction when elevator is out
+  
+  // tier 4 = slowest acceleration, tier 1 = fastest acceleration
+  // private final SlewRateLimiter filterXTier1 = new SlewRateLimiter(maxAccelerationRate);   // limiter in X direction when elevator is out
+  // private final SlewRateLimiter filterXTier2 = new SlewRateLimiter(maxAccelerationRateAtScoreMid);   // limiter in X direction when elevator is out
+  // private final SlewRateLimiter filterXTier3 = new SlewRateLimiter(maxAccelerationRateWithElevatorUp);   // limiter in X direction when elevator is out
 
   /**
    * Constructs the DriveTrain subsystem
@@ -120,6 +128,8 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     prevTime = System.currentTimeMillis();
     currTime = System.currentTimeMillis();
     lfRunningAvg.reset();
+
+    
 
     // create and initialize odometery
     // Set initial location to 0,0.
@@ -288,27 +298,46 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     double ySlewed = filterY.calculate(chassisSpeeds.vyMetersPerSecond);
 
     double xSlewed, omegaLimited;
-    if (elevator.getElevatorRegion()==ElevatorRegion.bottom) {
-      // Elevator is down.  We can X-travel at full speed
-      if (elevatorUpPriorIteration) {
-        // Elevator was up but is now down.  Reset the fast slew rate limiter
-        filterX.reset(getChassisSpeeds().vxMetersPerSecond);
-      }
-      elevatorUpPriorIteration = false;
-      // x slew rate limit chassisspeed
-      xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
-      omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
-    } else {
-      // Elevator is up.  X-travel slowly!
-      if (!elevatorUpPriorIteration) {
-        // Elevator was down but is now up.  Reset the slow slew rate limiter
-        filterXSlow.reset(MathUtil.clamp(getChassisSpeeds().vxMetersPerSecond, -maxXSpeedWithElevatorUp, maxXSpeedWithElevatorUp));     // Rev B8:  Added clamp on current velocity (may cause sudden deceleration) 
-      }
-      elevatorUpPriorIteration = true;
-      // x slew rate limit chassisspeed
-      xSlewed = filterXSlow.calculate(MathUtil.clamp(chassisSpeeds.vxMetersPerSecond, -maxXSpeedWithElevatorUp, maxXSpeedWithElevatorUp));
-      omegaLimited = MathUtil.clamp(chassisSpeeds.omegaRadiansPerSecond, -maxRotationRateWithElevatorUp, maxRotationRateWithElevatorUp);
-    }
+
+    // if (elevator.getElevatorPos() <= ElevatorPosition.scoreLow.value) {
+    //   xSlewed = filterXTier1.calculate(chassisSpeeds.vxMetersPerSecond);
+    //   omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
+    // } else if (elevator.getElevatorPos() <= ElevatorPosition.scoreMidCone.value) {
+    //   xSlewed = filterXTier2.calculate(chassisSpeeds.vxMetersPerSecond);
+    //   omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
+    // } else {
+    //   xSlewed = filterXTier3.calculate(chassisSpeeds.vxMetersPerSecond);
+    //   omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
+    // }
+
+
+    double rateLimit = MathUtil.clamp(elevator.getElevatorPos() * (maxAccelerationRate-maxAccelerationRateWithElevatorUp)/ElevatorPosition.upperLimit.value , maxAccelerationRateWithElevatorUp, maxAccelerationRate); 
+    filterX.setRateLimit(rateLimit);
+
+    xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
+    omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
+
+    // if (elevator.getElevatorRegion()==ElevatorRegion.bottom) {
+    //   // Elevator is down.  We can X-travel at full speed
+    //   if (elevatorUpPriorIteration) {
+    //     // Elevator was up but is now down.  Reset the fast slew rate limiter
+    //     filterX.reset(getChassisSpeeds().vxMetersPerSecond);
+    //   }
+    //   elevatorUpPriorIteration = false;
+    //   // x slew rate limit chassisspeed
+    //   xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
+    //   omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
+    // } else {
+    //   // Elevator is up.  X-travel slowly!
+    //   if (!elevatorUpPriorIteration) {
+    //     // Elevator was down but is now up.  Reset the slow slew rate limiter
+    //     filterXSlow.reset(MathUtil.clamp(getChassisSpeeds().vxMetersPerSecond, -maxXSpeedWithElevatorUp, maxXSpeedWithElevatorUp));     // Rev B8:  Added clamp on current velocity (may cause sudden deceleration) 
+    //   }
+    //   elevatorUpPriorIteration = true;
+    //   // x slew rate limit chassisspeed
+    //   xSlewed = filterXSlow.calculate(MathUtil.clamp(chassisSpeeds.vxMetersPerSecond, -maxXSpeedWithElevatorUp, maxXSpeedWithElevatorUp));
+    //   omegaLimited = MathUtil.clamp(chassisSpeeds.omegaRadiansPerSecond, -maxRotationRateWithElevatorUp, maxRotationRateWithElevatorUp);
+    // }
 
     // convert back to swervem module states
     desiredStates = kDriveKinematics.toSwerveModuleStates(new ChassisSpeeds(xSlewed, ySlewed, omegaLimited), new Translation2d());
