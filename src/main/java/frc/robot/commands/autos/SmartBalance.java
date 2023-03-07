@@ -10,6 +10,7 @@ public class SmartBalance extends CommandBase {
   private final double speed;
   private double initPitch = 0;
   private double pitch;
+  private double tolerance;
   private boolean ascend;
 
   private int toleranceCounter = 0;
@@ -20,28 +21,36 @@ public class SmartBalance extends CommandBase {
    * @param speed The speed at which the robot will drive
    * @param drive The DriveTrain subsystem on which this command will run
   */
-  public SmartBalance(double speed, DriveTrain drive) {
+  public SmartBalance(double speed, double tolerance, DriveTrain drivetrain) {
     this.speed = speed;
-    drivetrain = drive;
+    this.tolerance = tolerance;
+    this.drivetrain = drivetrain;
 
-    addRequirements(drive);
+    addRequirements(drivetrain);
   }
 
     // Called when the command is initially scheduled.
   @Override
   public void initialize() {
     initPitch = drivetrain.getGyroPitch();
-    ascend = initPitch > 0;
+    ascend = Math.abs(initPitch) > 5;
     toleranceCounter = 0;
     SmartDashboard.putNumber("Initial Pitch", initPitch);
+  }
+
+  private double getError() {
+    if (!ascend) {
+
+    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   // It is using the encoders to keep itself straight
   @Override
-  public void execute() {
-    drivetrain.drive(kPDriveBalance * speed, 0.0, 0.0, true, false);
+  public void execute() {    
+    drivetrain.drive(speed - kPDriveBalance * getError(), 0.0, 0.0, true, false);
   }
+
 
   // Called once the command ends or is interrupted.
   @Override
