@@ -15,7 +15,7 @@ public class Motor<T> {
         }
     }
 
-    public static Motor<WPI_TalonFX> createWPITalonFX(int id) {
+    public static Motor<WPI_TalonFX> createWPI_TalonFX(int id) {
         return new WPI_TalonFXMotor(id);
     }
 }
