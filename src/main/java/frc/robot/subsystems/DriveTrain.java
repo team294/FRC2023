@@ -311,7 +311,11 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     // }
 
 
-    double rateLimit = MathUtil.clamp(elevator.getElevatorPos() * (maxAccelerationRate-maxAccelerationRateWithElevatorUp)/ElevatorPosition.upperLimit.value , maxAccelerationRateWithElevatorUp, maxAccelerationRate); 
+    // interpolates the 
+    double rateLimit = MathUtil.clamp(
+      elevator.getElevatorPos() * (maxAccelerationRate-maxAccelerationRateWithElevatorUp)/ElevatorPosition.upperLimit.value, 
+      maxAccelerationRateWithElevatorUp, 
+      maxAccelerationRate); 
     filterX.setRateLimit(rateLimit);
 
     xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
