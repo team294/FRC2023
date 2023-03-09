@@ -170,7 +170,7 @@ public class RobotContainer {
 
     // Intake Commands
     SmartDashboard.putData("Intake Stop", new IntakeStop(intake, log));
-    SmartDashboard.putData("Intake Pick Up",new IntakeSetPercentOutput(-0.5, intake, log));
+    SmartDashboard.putData("Intake Pick Up",new IntakeSetPercentOutput(-1.0, intake, log));
     SmartDashboard.putData("Intake Eject",new IntakeSetPercentOutput(0.5, intake, log));
     SmartDashboard.putData("Intake Deploy", new IntakePistonSetPosition(true, intake, log));
     SmartDashboard.putData("Intake Stow", new IntakePistonSetPosition(false, intake, log));
