@@ -177,9 +177,7 @@ public class AutoSelection {
 		if (autoPlan == BALANCE_4TOWALL) {
 			// Starting position = facing drivers, 4th scoring position from wall
 			log.writeLogEcho(true, "AutoSelect", "run Balance 4ToWall");
-			Pose2d posCommunityInitial = field.getStationInitial(2);
-			Pose2d posCommunityFinal = field.getStationCenter(2);
-			// Pose2d posCommunityFinal = translate(field.getStationCenter(2), 1.5, 0.0);		// overdrive due to wheel slip when climbing on charging station
+			
 			Pose2d posScoreInitial;
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(6);
@@ -189,10 +187,8 @@ public class AutoSelection {
 
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
-
-				new SmartBalance(0.5, driveTrain, log),
+				new DriveUpChargingStation(0.5, driveTrain, log),
 				new ActiveBalance(driveTrain)
-				// new AutoBalance(posCommunityInitial, posCommunityFinal, driveTrain, log)
 	   		);
    	   	}
 
