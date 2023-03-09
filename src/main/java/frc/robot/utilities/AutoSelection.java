@@ -91,14 +91,14 @@ public class AutoSelection {
 		if (autoPlan == NONE) {
 			// Starting position = facing drivers
 			log.writeLogEcho(true, "AutoSelect", "run None");
-			autonomousCommand = new DriveResetPose(180, false, driveTrain, log);
+			autonomousCommand = new DriveResetPose(180.0, driveTrain, log);
 		}
 
 		if (autoPlan == SCORE_CONE) {
 			// Starting position = facing drivers, against a cone scoring location
 			log.writeLogEcho(true, "AutoSelect", "run Score Cone");
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			   	new DriveResetPose(180, false, driveTrain, log),
+			   	new DriveResetPose(180.0, driveTrain, log),
 				new AutoScoreConeHigh(elevator, wrist, manipulator, led, log)
 	   		);
    	   	}
@@ -116,7 +116,7 @@ public class AutoSelection {
 			posLeaveFinal = MathBCR.translate(posScoreInitial, 4.4, 0);
 
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
+			    new DriveResetPose(posScoreInitial, 0.5, 15.0, driveTrain, log),
 			    new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
 				new DriveToPose(posLeaveFinal, driveTrain, log)
 	   		);
@@ -145,7 +145,7 @@ public class AutoSelection {
 			}
 
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
+			    new DriveResetPose(posScoreInitial, 0.5, 15.0, driveTrain, log),
 			    new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
 				new DriveToPose(posLeave, driveTrain, log),
 				new DriveToPose(posCross, driveTrain, log),
@@ -167,7 +167,7 @@ public class AutoSelection {
 			}
 
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
+			    new DriveResetPose(posScoreInitial, 0.5, 15.0, driveTrain, log),
 				new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
 
 				new AutoBalance(posCommunityInitial, posCommunityFinal, driveTrain, log)
@@ -188,7 +188,7 @@ public class AutoSelection {
 			}
 
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
+			    new DriveResetPose(posScoreInitial, 0.5, 15.0, driveTrain, log),
 
 				new AutoBalance(posCommunityInitial, posCommunityFinal, driveTrain, log)
 	   		);

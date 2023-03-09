@@ -96,7 +96,7 @@ public class RobotContainer {
     // Testing for drivetrain autos and trajectories
     SmartDashboard.putData("Drive Reset SwerveModules", new DriveResetSwerveModules(driveTrain, log));
     SmartDashboard.putData("Zero Gyro", new DriveZeroGyro(driveTrain, log));
-    SmartDashboard.putData("Zero Odometry", new DriveResetPose(0, 0, 0, false, driveTrain, log));
+    SmartDashboard.putData("Zero Odometry", new DriveResetPose(0, 0, 0, driveTrain, log));
     // SmartDashboard.putData("Set Odometry if out of tol", new DriveResetPose(2, 2, 180, true, driveTrain, log));      // For testing only
     SmartDashboard.putData("Drive Reset Pose", new DriveResetPose(driveTrain, log));
     SmartDashboard.putData("Calibrate Drive Motors", new DriveCalibration(0.5, 12, 0.05, driveTrain, log));
@@ -295,7 +295,7 @@ public class RobotContainer {
     // left joystick left button
     //left[1].onTrue(new IntakeRetractAndFlush(intakeFront, uptake, feeder, log));
     // resets current angle to 0, keeps current X and Y
-    left[1].onTrue(new DriveResetPose(0, false, driveTrain, log));
+    left[1].onTrue(new DriveResetPose(0, driveTrain, log));
     // drive to closest goal
     left[2].onTrue(new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
    

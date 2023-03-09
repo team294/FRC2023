@@ -7,6 +7,8 @@
 
 package frc.robot.commands;
 
+import java.sql.DriverAction;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -24,20 +26,22 @@ public class DriveResetPose extends CommandBase {
   private final FileLog log;
   private final boolean fromShuffleboard;
   private final boolean onlyAngle;      // true = resent angle but not X-Y position
-  private final boolean tolerance;      // true = Don't reset if within 0.5m or 15 degrees of location, false = always reset
+  private final double toleranceMeters;
+  private final double toleranceDegrees;
   private double curX, curY, curAngle;    // in meters and degrees
   
   /**
-	 * Resets the pose, gyro, and encoders on the drive train
+   * Resets the pose, gyro, and encoders on the drive train
    * <p> Note:  This command can run while the robot is disabled.
    * @param curXinMeters Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
    * @param curYinMeters Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
    * @param curAngleinDegrees Robot angle on the field, in degrees (0 = facing away from our drivestation, + to the left, - to the right)
-   * @param tolerance true = Don't reset if within 0.5m or 15 degrees of location, false = always reset
+   * @param toleranceMeters Don't reset if within given meters of new position
+   * @param toleranceDegrees Don't reset if within given degrees of new position
    * @param driveTrain DriveTrain subsytem
    * @param log FileLog
-	 */
-  public DriveResetPose(double curXinMeters, double curYinMeters, double curAngleinDegrees, boolean tolerance, DriveTrain driveTrain, FileLog log) {
+   */
+  public DriveResetPose(double curXinMeters, double curYinMeters, double curAngleinDegrees, double toleranceMeters, double toleranceDegrees, DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
     curX = curXinMeters;
@@ -45,10 +49,23 @@ public class DriveResetPose extends CommandBase {
     curAngle = curAngleinDegrees;
     fromShuffleboard = false;
     onlyAngle = false;
-    this.tolerance = tolerance;
+    this.toleranceMeters = toleranceMeters;
+    this.toleranceDegrees = toleranceDegrees;
 
-    // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(driveTrain);
+  }
+
+  /**
+	 * Resets the pose, gyro, and encoders on the drive train
+   * <p> Note:  This command can run while the robot is disabled.
+   * @param curXinMeters Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
+   * @param curYinMeters Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
+   * @param curAngleinDegrees Robot angle on the field, in degrees (0 = facing away from our drivestation, + to the left, - to the right)
+   * @param driveTrain DriveTrain subsytem
+   * @param log FileLog
+	 */
+  public DriveResetPose(double curXinMeters, double curYinMeters, double curAngleinDegrees, DriveTrain driveTrain, FileLog log) {
+    this(curXinMeters, curYinMeters, curAngleinDegrees, 0, 0, driveTrain, log);
   }
 
   /**
@@ -58,12 +75,28 @@ public class DriveResetPose extends CommandBase {
    *    <p> Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
    *    <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
    *    <p> Robot angle on the field (0 = facing away from our drivestation, + to the left, - to the right)
-   * @param tolerance true = Don't reset if within 0.5m or 15 degrees of location, false = always reset
+   * @param toleranceMeters Don't reset if within given meters of new position
+   * @param toleranceDegrees Don't reset if within given degrees of new position
    * @param driveTrain DriveTrain subsytem
    * @param log FileLog
 	 */
-  public DriveResetPose(Pose2d curPose, boolean tolerance, DriveTrain driveTrain, FileLog log) {
-    this(curPose.getX(), curPose.getY(), curPose.getRotation().getDegrees(), tolerance,
+  public DriveResetPose(Pose2d curPose, double toleranceMeters, double toleranceDegrees, DriveTrain driveTrain, FileLog log) {
+    this(curPose.getX(), curPose.getY(), curPose.getRotation().getDegrees(), toleranceMeters, toleranceDegrees,
+        driveTrain, log);
+  }
+  
+  /**
+	 * Resets the pose, gyro, and encoders on the drive train
+   * <p> Note:  This command can run while the robot is disabled.
+   * @param curPose Robot current pose on the field.  Pose components include
+   *    <p> Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
+   *    <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
+   *    <p> Robot angle on the field (0 = facing away from our drivestation, + to the left, - to the right)
+   * @param driveTrain DriveTrain subsytem
+   * @param log FileLog
+	 */
+  public DriveResetPose(Pose2d curPose, DriveTrain driveTrain, FileLog log) {
+    this(curPose.getX(), curPose.getY(), curPose.getRotation().getDegrees(), 0.0, 0.0,
         driveTrain, log);
   }
 
@@ -76,13 +109,36 @@ public class DriveResetPose extends CommandBase {
    * @param driveTrain DriveTrain subsytem
    * @param log FileLog
 	 */
-  public DriveResetPose(double curAngleinDegrees, boolean tolerance, DriveTrain driveTrain, FileLog log) {
+  public DriveResetPose(double curAngleinDegrees, double toleranceDegrees, DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
     curAngle = curAngleinDegrees;
     fromShuffleboard = false;
     onlyAngle = true;
-    this.tolerance = tolerance;
+    this.toleranceDegrees = toleranceDegrees;
+    this.toleranceMeters = 0.5; //Should be no difference in position, but just in case this makes sure it does not reset based on x/y
+
+    // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(driveTrain);
+  }
+
+  /**
+	 * Resets the pose, gyro, and encoders on the drive train.
+   * Reset the angle but keep the current position (use the current measured position as the new position).
+   * <p> Note:  This command can run while the robot is disabled.
+   * @param curAngleinDegrees Robot angle on the field, in degrees (0 = facing away from our drivestation)
+   * @param tolerance true = Don't reset if within 0.5m or 15 degrees of location, false = always reset
+   * @param driveTrain DriveTrain subsytem
+   * @param log FileLog
+	 */
+  public DriveResetPose(double curAngleinDegrees, DriveTrain driveTrain, FileLog log) {
+    this.driveTrain = driveTrain;
+    this.log = log;
+    curAngle = curAngleinDegrees;
+    fromShuffleboard = false;
+    onlyAngle = true;
+    this.toleranceDegrees = 0.0;
+    this.toleranceMeters = 0.5;
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(driveTrain);
@@ -99,7 +155,8 @@ public class DriveResetPose extends CommandBase {
     this.log = log;
     fromShuffleboard = true;
     onlyAngle = false;
-    tolerance = false;
+    toleranceMeters = 0.0;
+    toleranceDegrees = 0.0;
 
     addRequirements(driveTrain);
     
@@ -130,10 +187,9 @@ public class DriveResetPose extends CommandBase {
     
     log.writeLog(false, "DriveResetPose", "Init", "X", curX, "Y", curY, "Angle", curAngle);
 
-    if( !tolerance ||
-        Math.abs(curX - driveTrain.getPose().getX()) > 0.5 || 
-        Math.abs(curY - driveTrain.getPose().getY()) > 0.5 || 
-        Math.abs(MathBCR.normalizeAngle(curAngle - driveTrain.getPose().getRotation().getDegrees())) > 15.0 ) {
+    if( Math.abs(curX - driveTrain.getPose().getX()) > toleranceMeters || 
+        Math.abs(curY - driveTrain.getPose().getY()) > toleranceMeters || 
+        Math.abs(MathBCR.normalizeAngle(curAngle - driveTrain.getPose().getRotation().getDegrees())) > toleranceDegrees ) {
       driveTrain.resetPose(new Pose2d(curX, curY, Rotation2d.fromDegrees(curAngle)));
     }
   }

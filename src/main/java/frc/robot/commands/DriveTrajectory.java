@@ -64,10 +64,10 @@ public class DriveTrajectory extends SequentialCommandGroup {
         } else {
             if (trajectoryType == CoordType.kAbsoluteResetPose) {
                 // For AbsoluteResetPose trajectories, first command needs to be to reset the robot Pose
-                addCommands(new DriveResetPose(trajectoryFacing.getInitialPose(), false, driveTrain, log));
+                addCommands(new DriveResetPose(trajectoryFacing.getInitialPose(), driveTrain, log));
             } else if (trajectoryType == CoordType.kAbsoluteResetPoseTol) {
                 // For AbsoluteResetPoseTol trajectories, first command needs to be to reset the robot Pose
-                addCommands(new DriveResetPose(trajectoryFacing.getInitialPose(), true, driveTrain, log));
+                addCommands(new DriveResetPose(trajectoryFacing.getInitialPose(), 0.5, 15.0, driveTrain, log));
             }
 
             swerveControllerLogCommand =
