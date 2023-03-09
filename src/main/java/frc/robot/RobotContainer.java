@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -130,7 +131,7 @@ public class RobotContainer {
           ),
           driveTrain, log));
     SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
-    SmartDashboard.putData("Drive Smart Balance", new SmartBalance(0, 0, driveTrain));
+    // SmartDashboard.putData("Drive Smart Balance", new SequentialCommandGroup(new ResetPose,new SmartBalance(0.5, 0, driveTrain)));
 
     // Testing for autos
     // SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));

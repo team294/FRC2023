@@ -190,7 +190,9 @@ public class AutoSelection {
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
 
-				new AutoBalance(posCommunityInitial, posCommunityFinal, driveTrain, log)
+				new SmartBalance(0.5, driveTrain, log),
+				new ActiveBalance(driveTrain)
+				// new AutoBalance(posCommunityInitial, posCommunityFinal, driveTrain, log)
 	   		);
    	   	}
 
