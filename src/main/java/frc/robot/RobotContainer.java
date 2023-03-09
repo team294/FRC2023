@@ -130,6 +130,7 @@ public class RobotContainer {
           ),
           driveTrain, log));
     SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
+    SmartDashboard.putData("Drive Smart Balance", new SmartBalance(0, 0, driveTrain));
 
     // Testing for autos
     // SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));

@@ -10,6 +10,7 @@ public class SmartBalance extends CommandBase {
   private final double speed;
   private double initPitch = 0;
   private double pitch;
+  private double maxPitch;
   private double tolerance;
   private boolean ascend;
 
@@ -33,22 +34,26 @@ public class SmartBalance extends CommandBase {
   @Override
   public void initialize() {
     initPitch = drivetrain.getGyroPitch();
+    maxPitch = initPitch;
+
     ascend = Math.abs(initPitch) > 5;
     toleranceCounter = 0;
     SmartDashboard.putNumber("Initial Pitch", initPitch);
   }
 
-  private double getError() {
-    if (!ascend) {
+  // private double getError() {
+  //   if (!ascend) {
 
-    }
-  }
+  //   }
+  // }
 
   // Called every time the scheduler runs while the command is scheduled.
   // It is using the encoders to keep itself straight
   @Override
   public void execute() {    
-    drivetrain.drive(speed - kPDriveBalance * getError(), 0.0, 0.0, true, false);
+    drivetrain.drive(speed, 0.0, 0.0, true, false);
+
+    ascend = Math.abs(initPitch) > 11;
   }
 
 
@@ -63,19 +68,24 @@ public class SmartBalance extends CommandBase {
   public boolean isFinished() {
     
     pitch = drivetrain.getGyroPitch();
-    System.out.println( pitch );
+    // System.out.println( pitch );
     SmartDashboard.putNumber("Pitch", pitch);
+
+    if (pitch > maxPitch) maxPitch = pitch;
  
-    if (ascend) {
-      if(pitch < 1) done = true;  // reached the fulcrum
-      else done = false;
-    }
+    // if (ascend) {
+    //   if(pitch < 1) done = true;  // reached the fulcrum
+    //   else done = false;
+    // }
    
-    if (!elevator.encoderCalibrated() ||         // End immediately if encoder can't read
-      Math.abs(elevator.getElevatorPos() - target) <= 0.5) {
-        toleranceCounter++;
-    }
-    return (toleranceCounter > 5);
+    // if (!elevator.encoderCalibrated() ||         // End immediately if encoder can't read
+    //   Math.abs(elevator.getElevatorPos() - target) <= 0.5) {
+    //     toleranceCounter++;
+    // }
+    // return (toleranceCounter > 5);
+    
+
+    return ascend && pitch < maxPitch;
     
   }
 }
