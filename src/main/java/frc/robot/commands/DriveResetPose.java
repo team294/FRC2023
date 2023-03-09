@@ -26,8 +26,7 @@ public class DriveResetPose extends CommandBase {
   private final FileLog log;
   private final boolean fromShuffleboard;
   private final boolean onlyAngle;      // true = resent angle but not X-Y position
-  private final double toleranceMeters;
-  private final double toleranceDegrees;
+  private double toleranceMeters, toleranceDegrees; //Tolerances in meters and degrees
   private double curX, curY, curAngle;    // in meters and degrees
   
   /**
@@ -169,6 +168,12 @@ public class DriveResetPose extends CommandBase {
     if(SmartDashboard.getNumber("DriveResetPose Angle", -9999) == -9999){
       SmartDashboard.putNumber("DriveResetPose Angle", 0);
     }
+    if(SmartDashboard.getNumber("DriveResetPose Tolerance Meters", -9999) == -9999) {
+      SmartDashboard.putNumber("DriveResetPose Tolerance Meters", 0);
+    }
+    if(SmartDashboard.getNumber("DriveResetPose Tolerance Angle", -9999) == -9999){
+      SmartDashboard.putNumber("DriveResetPose Tolerance Angle", 0);
+    }
   }
 
   // Called when the command is initially scheduled.
@@ -178,6 +183,8 @@ public class DriveResetPose extends CommandBase {
       curX = SmartDashboard.getNumber("DriveResetPose X", 0);
       curY = SmartDashboard.getNumber("DriveResetPose Y", 0);
       curAngle = SmartDashboard.getNumber("DriveResetPose Angle", 0);
+      toleranceMeters = SmartDashboard.getNumber("DriveResetPose Tolerance Meters", 0);
+      toleranceMeters = SmartDashboard.getNumber("DriveResetPose Tolerance Angles", 0);
     }
 
     if(onlyAngle){
