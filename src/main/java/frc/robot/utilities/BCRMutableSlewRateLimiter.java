@@ -13,7 +13,7 @@ import edu.wpi.first.math.MathUtil;
  * controlled is a velocity or a voltage; when controlling a position, consider using a {@link
  * edu.wpi.first.math.trajectory.TrapezoidProfile} instead.
  */
-public class BCRSlewRateLimiter {
+public class BCRMutableSlewRateLimiter {
   private double m_positiveRateLimit;
   private double m_negativeRateLimit;
   private double m_prevVal;
@@ -29,7 +29,7 @@ public class BCRSlewRateLimiter {
    *     second. This is expected to be negative.
    * @param initialValue The initial value of the input.
    */
-  public BCRSlewRateLimiter(double positiveRateLimit, double negativeRateLimit, double initialValue) {
+  public BCRMutableSlewRateLimiter(double positiveRateLimit, double negativeRateLimit, double initialValue) {
     m_positiveRateLimit = positiveRateLimit;
     m_negativeRateLimit = negativeRateLimit;
     m_prevVal = initialValue;
@@ -46,7 +46,7 @@ public class BCRSlewRateLimiter {
    *     initalValue) instead.
    */
   @Deprecated(since = "2023", forRemoval = true)
-  public BCRSlewRateLimiter(double rateLimit, double initalValue) {
+  public BCRMutableSlewRateLimiter(double rateLimit, double initalValue) {
     this(rateLimit, -rateLimit, initalValue);
   }
 
@@ -56,7 +56,7 @@ public class BCRSlewRateLimiter {
    *
    * @param rateLimit The rate-of-change limit, in units per second.
    */
-  public BCRSlewRateLimiter(double rateLimit) {
+  public BCRMutableSlewRateLimiter(double rateLimit) {
     this(rateLimit, -rateLimit, 0);
   }
 

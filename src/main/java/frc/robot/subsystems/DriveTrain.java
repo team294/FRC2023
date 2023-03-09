@@ -79,7 +79,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   private boolean elevatorUpPriorIteration = false;       // Tracking for elevator position from prior iteration
 
 
-  private final BCRSlewRateLimiter filterX = new BCRSlewRateLimiter(maxAccelerationRate);
+  private final BCRMutableSlewRateLimiter filterX = new BCRMutableSlewRateLimiter(maxAccelerationRate);
   private final SlewRateLimiter filterY = new SlewRateLimiter(maxAccelerationRate);
   
   // tier 4 = slowest acceleration, tier 1 = fastest acceleration
@@ -313,14 +313,18 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
     // interpolates the 
     double rateLimit = MathUtil.clamp(
-      elevator.getElevatorPos() * (maxAccelerationRate-maxAccelerationRateWithElevatorUp)/ElevatorPosition.upperLimit.value, 
-      maxAccelerationRateWithElevatorUp, 
-      maxAccelerationRate); 
+    elevator.getElevatorPos() * (maxAccelerationRate-maxAccelerationRateWithElevatorUp)/ElevatorPosition.upperLimit.value, 
+    maxAccelerationRateWithElevatorUp, 
+    maxAccelerationRate); 
     filterX.setRateLimit(rateLimit);
 
     xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
-    omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
-
+    // omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
+    if(elevator.getElevatorRegion() != ElevatorRegion.bottom){
+      omegaLimited = MathUtil.clamp(chassisSpeeds.omegaRadiansPerSecond, -maxRotationRateWithElevatorUp, maxRotationRateWithElevatorUp);
+    }else {
+      omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
+    }
     // if (elevator.getElevatorRegion()==ElevatorRegion.bottom) {
     //   // Elevator is down.  We can X-travel at full speed
     //   if (elevatorUpPriorIteration) {
