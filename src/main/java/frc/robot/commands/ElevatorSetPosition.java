@@ -94,8 +94,7 @@ public class ElevatorSetPosition extends CommandBase {
       Math.abs(elevator.getElevatorPos() - target) <= 0.5) {
         toleranceCounter++;
     }
-    if(toleranceCounter > 5)return true;
-    else return false;
+    return (toleranceCounter > 5);
   }
 
 }
