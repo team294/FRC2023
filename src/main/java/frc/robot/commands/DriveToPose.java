@@ -269,6 +269,7 @@ public class DriveToPose extends CommandBase {
         "Trap X", desiredPose.getTranslation().getX(),
         "Trap Y", desiredPose.getTranslation().getY(),
         "Trap Vel", desiredVelocityMetersPerSecond,
+        "Robot XVel", robotSpeeds.vxMetersPerSecond,
         "Trap VelAng", desiredPose.getRotation().getDegrees(),
         "Target rot", desiredRotation.getDegrees(), 
         "Robot X", curRobotTranslation.getX(),
