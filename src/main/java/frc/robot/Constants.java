@@ -257,7 +257,7 @@ public final class Constants {
         public enum WristAngle {
             lowerLimit(-119.0),      // CALIBRATED
             startConfig(-119.0),     // CALIBRATED
-            loadConveyor(-117.5),    // CALIBRATED
+            loadConveyor(-119.0),    // Conveyor gone so this is unnecesary currently, was -117.5
             loadHumanStation(10.0),      // CALIBRATED
             scoreLow(0.0),
             scoreMidHigh(20.0),         // Was 10.0
@@ -288,8 +288,8 @@ public final class Constants {
             uncalibrated;       // Unknown region, elevator is not calibrated.
         }
         // Elevator region boundaries
-        public static final double boundBottomLow = 2.0;        // Boundary between bottom and low regions
-        public static final double boundMainLow = 2.0;      // Boundary between low and main regions.  CALIBRATED
+        public static final double boundBottomLow = 0.0;        // Boundary between bottom and low regions, was 2.0
+        public static final double boundMainLow = 0.0;      // Boundary between low and main regions.  not necessary because , was 2.0
 
         // Elevator pre-defined positions (in inches from bottom of elevator)
         public enum ElevatorPosition {
@@ -297,7 +297,7 @@ public final class Constants {
             bottom(0.0),            // CALIBRATED
             loadingStationCube(35.0),   // CALIBRATED
             loadingStationCone(45.0),   // CALIBRATED
-            scoreLow(5.0),          // CALIBRATED
+            scoreLow(0.0),          // CALIBRATED, was 5.0
             scoreMidCone(21.0),     // CALIBRATED
             scoreHighCone(41.0),    // CALIBRATED
             upperLimit(45.4);       // CALIBRATED

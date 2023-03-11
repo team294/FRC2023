@@ -150,7 +150,7 @@ public class RobotContainer {
   
     //Elevator Commands
     SmartDashboard.putData("Elevator Cal Encoder", new ElevatorCalibrateEncoderIfAtLowerLimit(elevator, log));
-    SmartDashboard.putData("Elevator Calibration", new ElevatorCalibration(0.05, elevator, log));
+    SmartDashboard.putData("Elevator Calibration", new ElevatorCalibration(1, elevator, log));
     SmartDashboard.putData("Elevator Set Percent", new ElevatorSetPercentOutput(elevator, log));
     SmartDashboard.putData("Elevator Set Position", new ElevatorSetPosition(elevator, log));
     SmartDashboard.putData("Elevator Move To Bottom", new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
@@ -223,7 +223,7 @@ public class RobotContainer {
     //a
     // xbA.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreLow, elevator, log)); 
     // Move elevator/wrist to score low position
-    xbA.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.scoreLow.value, elevator, wrist, log));
+    xbA.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value, elevator, wrist, log));
      
     //b
     // xbB.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreMidCone, elevator, log));         
