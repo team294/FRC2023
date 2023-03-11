@@ -59,7 +59,7 @@ public class AutoSelection {
 		autoChooser.addOption("Cone Balance 4ToWall", CONE_BALANCE_4TOWALL);
 		autoChooser.addOption("Balance 4ToWall", BALANCE_4TOWALL);
 		autoChooser.addOption("Cone Nearwall Cross", CONE_LEAVE_NEAR_WALL_CROSS);
-
+		autoChooser.addOption("Cone Nearwall Balance", CONE_LEAVE_NEAR_WALL_BALANCE);
 		// autoChooser.addOption("Straight", STRAIGHT);
 		// autoChooser.addOption("Leave Community", LEAVE_COMMUNITY);
 		// autoChooser.addOption("Right One Cone Balance", RIGHT_ONE_CONE_BALANCE);
@@ -163,24 +163,22 @@ public class AutoSelection {
 			  if (autoPlan == CONE_LEAVE_NEAR_WALL_BALANCE) {
 				// Starting position = facing drivers, against scoring position closest to wall
 				log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
-				Pose2d posScoreInitial, posLeave, posCross, posFinal;
+				Pose2d posScoreInitial, posLeave, posCross;
 				if (allianceSelection.getAlliance() == Alliance.Red) {
 					posScoreInitial = field.getFinalColumn(9);			// 1.77165, 7.490968, 180
 					// Travel  4.4 m in +X from starting position
-					posLeave = MathBCR.translate(posScoreInitial, 4.4, 0);  // 6.17165, 7.490968, 180
+					posLeave = MathBCR.translate(posScoreInitial, 4, 0);  // 6.17165, 7.490968, 180
 					// Travel in Y to cross the field to in front of charging station
 					// posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
-					posCross = field.getStationInitial(5);
+					posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
 					// Spin 180
-					posFinal = field.getStationCenter(2);
+					// posFinal = field.getStationCenter(2);
 				} else {
 					posScoreInitial = field.getFinalColumn(1);			// 1.77165, 0.512826, 180
-					// Travel  4.4 m in +X from starting position
-					posLeave = MathBCR.translate(posScoreInitial, 4.4, 0);		// 6.17165, 0.512826, 180
-					// Travel in Y to cross the field to the pickup side
-					posCross = new Pose2d(6.3, 6.0, Rotation2d.fromDegrees(180.0));
-					// Spin 180
-					// posFinal = new Pose2d(7.0, 6.0, Rotation2d.fromDegrees(0.0));
+					// Travel  3.5 m in +X from starting position
+					posLeave = MathBCR.translate(posScoreInitial, 4, 0);		// 6.17165, 0.512826, 180
+					// Travel in Y to cross the field to the in front of charging station
+					posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
 				}
 				
 				   autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
@@ -190,7 +188,8 @@ public class AutoSelection {
 						interimPositionErrorMeters, interimThetaErrorDegrees, driveTrain, log),
 					new DriveToPose(posCross, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
 						interimPositionErrorMeters, interimThetaErrorDegrees, driveTrain, log),
-					new DriveUpChargingStation(-0.5, 1.5, driveTrain, log)
+					new DriveUpChargingStation(-0.5, 1.5, driveTrain, log),
+					new ActiveBalance(driveTrain, log)
 					// new DriveToPose(posFinal, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
 					// 	TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log)
 				   );

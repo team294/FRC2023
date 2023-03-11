@@ -155,6 +155,10 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 		return -ahrs.getPitch();
   }
 
+  public void resetGyroPitch(){
+    pitchZero = getGyroPitchRaw();
+  }
+
   /**
 	 * Zero the gyro position in software to the current angle.
 	 */

@@ -453,7 +453,8 @@ public class RobotContainer {
     log.writeLogEcho(true, "Auto", "Mode Init");
 
     driveTrain.setDriveModeCoast(false);
-    driveTrain.cameraInit();
+    driveTrain.resetGyroPitch();
+    // driveTrain.cameraInit();
     elevator.setMotorModeCoast(false);
 
     if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
