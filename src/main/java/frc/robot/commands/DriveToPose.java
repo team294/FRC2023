@@ -264,7 +264,7 @@ public class DriveToPose extends CommandBase {
 
     //fudge in some kA
     //double desiredVelocityMetersPerSecond = desiredState.velocity;
-    double desiredVelocityMetersPerSecond = desiredState.velocity + (desiredState.acceleration * 0.050);
+    double desiredVelocityMetersPerSecond = desiredState.velocity + (desiredState.acceleration * 0.055);
 
     Rotation2d desiredRotation = goalPose.getRotation();
 
