@@ -1,19 +1,15 @@
 package frc.robot.utilities;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
-import frc.robot.Constants.CoordType;
-import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.SwerveConstants;
 import frc.robot.commands.*;
 import frc.robot.commands.autos.*;
 import frc.robot.commands.sequences.*;
@@ -36,6 +32,7 @@ public class AutoSelection {
 	public static final int SCORE_CONE = 8;
 	public static final int CONE_BALANCE_4TOWALL = 9;
 	public static final int BALANCE_4TOWALL = 10;
+	public static final int CONE_LEAVE_NEAR_WALL_CROSS = 11;
 
 	private final AllianceSelection allianceSelection;
 	private final TrajectoryCache trajectoryCache;
@@ -57,6 +54,7 @@ public class AutoSelection {
 		autoChooser.addOption("Cone Leave NearWall", CONE_LEAVE_NEAR_WALL);
 		autoChooser.addOption("Cone Balance 4ToWall", CONE_BALANCE_4TOWALL);
 		autoChooser.addOption("Balance 4ToWall", BALANCE_4TOWALL);
+		autoChooser.addOption("Cone Nearwall Cross", CONE_LEAVE_NEAR_WALL_CROSS);
 
 		// autoChooser.addOption("Straight", STRAIGHT);
 		// autoChooser.addOption("Leave Community", LEAVE_COMMUNITY);
@@ -71,18 +69,6 @@ public class AutoSelection {
 		// show auto parameters on Shuffleboard
 		SmartDashboard.putNumber("Autonomous delay", 0);
 		SmartDashboard.putBoolean("Autonomous use vision", false);
-	}
-
-	/**
-	 * Translates a pose by a given X and Y offset.
-	 * [Xnew Ynew ThetaNew] = [Xinit Yinit ThetaInit] + [xOffset yOffset 0]
-	 * @param initialPose
-	 * @param xOffset
-	 * @param yOffset
-	 * @return
-	 */
-	public Pose2d translate(Pose2d initialPose, double xOffset, double yOffset) {
-		return new Pose2d(initialPose.getTranslation().plus(new Translation2d(xOffset, yOffset)), initialPose.getRotation());
 	}
 
 	/**
@@ -127,7 +113,7 @@ public class AutoSelection {
 				posScoreInitial = field.getFinalColumn(1);
 			}
 			// Travel  4.4 m in +X from starting position
-			posLeaveFinal = translate(posScoreInitial, 4.4, 0);
+			posLeaveFinal = MathBCR.translate(posScoreInitial, 4.4, 0);
 
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
@@ -136,41 +122,55 @@ public class AutoSelection {
 	   		);
    	   	}
 
+		if (autoPlan == CONE_LEAVE_NEAR_WALL_CROSS) {
+			// Starting position = facing drivers, against scoring position closest to wall
+			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
+			Pose2d posScoreInitial, posLeave, posCross, posFinal;
+			if (allianceSelection.getAlliance() == Alliance.Red) {
+				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 7.490968, 180
+				// Travel  4.4 m in +X from starting position
+				posLeave = MathBCR.translate(posScoreInitial, 4.4, 0);  // 6.17165, 7.490968, 180
+				// Travel in Y to cross the field to the pickup side
+				posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
+				// Spin 180
+				posFinal = new Pose2d(7.0, 2.2, Rotation2d.fromDegrees(0.0));
+			} else {
+				posScoreInitial = field.getFinalColumn(1);			// 1.77165, 0.512826, 180
+				// Travel  4.4 m in +X from starting position
+				posLeave = MathBCR.translate(posScoreInitial, 4.4, 0);		// 6.17165, 0.512826, 180
+				// Travel in Y to cross the field to the pickup side
+				posCross = new Pose2d(6.3, 6.0, Rotation2d.fromDegrees(180.0));
+				// Spin 180
+				posFinal = new Pose2d(7.0, 6.0, Rotation2d.fromDegrees(0.0));
+			}
+
+	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
+			    new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
+				new DriveToPose(posLeave, driveTrain, log),
+				new DriveToPose(posCross, driveTrain, log),
+				new DriveToPose(posFinal, driveTrain, log)
+	   		);
+   	   	}
+
 		if (autoPlan == CONE_BALANCE_4TOWALL) {
 			// Starting position = facing drivers, 4th scoring position from wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Balance 4ToWall");
 			Pose2d posCommunityInitial = field.getStationInitial(2);
 			Pose2d posCommunityFinal = field.getStationCenter(2);
-			Pose2d posScoreInitial, posCommunityFarther, posCommunityCloser;
+			// Pose2d posCommunityFinal = translate(field.getStationCenter(2), 1.5, 0.0);		// overdrive due to wheel slip when climbing on charging station
+			Pose2d posScoreInitial;
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(6);
 			} else {
 				posScoreInitial = field.getFinalColumn(4);
 			}
-			posCommunityFarther = translate(posCommunityFinal, 2.0, 0.0);
-			posCommunityCloser = translate(posCommunityFinal, -2.0, 0.0);
 
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
 				new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
-				new DriveToPose(posCommunityInitial, driveTrain, log),
-				new DriveToPose(posCommunityFinal, driveTrain, log),
 
-				// TODO test balance robot
-				new ConditionalCommand(
-					new DriveToPose(posCommunityFarther, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, driveTrain, log)
-							.until(() -> driveTrain.getGyroPitch() < DriveConstants.maxPitchBalancedDegrees), // drive forward slowly
-					new WaitCommand(0.01), 
-					() -> driveTrain.getGyroPitch() > DriveConstants.maxPitchBalancedDegrees
-				),
-				new ConditionalCommand(
-					new DriveToPose(posCommunityCloser, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, driveTrain, log)
-							.until(() -> driveTrain.getGyroPitch() > -DriveConstants.maxPitchBalancedDegrees), // drive forward slowly
-					new WaitCommand(0.01), 
-					() -> driveTrain.getGyroPitch() < -DriveConstants.maxPitchBalancedDegrees
-				),
-
-				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
+				new AutoBalance(posCommunityInitial, posCommunityFinal, driveTrain, log)
 	   		);
    	   	}
 
@@ -179,35 +179,18 @@ public class AutoSelection {
 			log.writeLogEcho(true, "AutoSelect", "run Balance 4ToWall");
 			Pose2d posCommunityInitial = field.getStationInitial(2);
 			Pose2d posCommunityFinal = field.getStationCenter(2);
-			Pose2d posScoreInitial, posCommunityFarther, posCommunityCloser;
+			// Pose2d posCommunityFinal = translate(field.getStationCenter(2), 1.5, 0.0);		// overdrive due to wheel slip when climbing on charging station
+			Pose2d posScoreInitial;
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(6);
 			} else {
 				posScoreInitial = field.getFinalColumn(4);
 			}
-			posCommunityFarther = translate(posCommunityFinal, 2.0, 0.0);
-			posCommunityCloser = translate(posCommunityFinal, -2.0, 0.0);
 
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
-				new DriveToPose(posCommunityInitial, driveTrain, log),
-				new DriveToPose(posCommunityFinal, driveTrain, log),
 
-				// TODO test balance robot
-				new ConditionalCommand(
-					new DriveToPose(posCommunityFarther, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, driveTrain, log)
-							.until(() -> driveTrain.getGyroPitch() < DriveConstants.maxPitchBalancedDegrees), // drive forward slowly
-					new WaitCommand(0.01), 
-					() -> driveTrain.getGyroPitch() > DriveConstants.maxPitchBalancedDegrees
-				),
-				new ConditionalCommand(
-					new DriveToPose(posCommunityCloser, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, driveTrain, log)
-							.until(() -> driveTrain.getGyroPitch() > -DriveConstants.maxPitchBalancedDegrees), // drive forward slowly
-					new WaitCommand(0.01), 
-					() -> driveTrain.getGyroPitch() < -DriveConstants.maxPitchBalancedDegrees
-				),
-
-				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
+				new AutoBalance(posCommunityInitial, posCommunityFinal, driveTrain, log)
 	   		);
    	   	}
 

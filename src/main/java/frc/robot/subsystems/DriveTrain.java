@@ -54,7 +54,8 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   
   // variables for gyro and gyro calibration
   private final AHRS ahrs;
-  private double yawZero = 0;
+  private double yawZero = 0.0;
+  private double pitchZero = 0.0;
 
   // variables to help calculate angular velocity for turnGyro
   private double prevAng; // last recorded gyro angle
@@ -113,7 +114,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     ahrs = gyro;
 
     // zero gyro and initialize angular velocity variables
-    zeroGyroRotation();
+    zeroGyro();
     prevAng = getGyroRaw();
     currAng = getGyroRaw();
     prevTime = System.currentTimeMillis();
@@ -148,10 +149,18 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   }
 
   /**
+	 * @return double, gyro pitch from 180 to -180, in degrees (postitive is nose up, negative is nose down)
+	 */
+	public double getGyroPitchRaw() {
+		return -ahrs.getPitch();
+  }
+
+  /**
 	 * Zero the gyro position in software to the current angle.
 	 */
-	public void zeroGyroRotation() {
+	public void zeroGyro() {
     yawZero = getGyroRaw(); // set yawZero to gyro angle
+    pitchZero = getGyroPitchRaw();  // set pitchZero to gyro pitch
   }
   
   /**
@@ -177,7 +186,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 	 * @return double, gyro pitch from 180 to -180, in degrees (postitive is nose up, negative is nose down)
 	 */
 	public double getGyroPitch() {
-		return ahrs.getPitch();
+		return getGyroPitchRaw() - pitchZero;
   }
 
   /**
@@ -513,7 +522,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     ChassisSpeeds robotSpeeds = getRobotSpeeds();
     log.writeLog(logWhenDisabled, "Drive", "Update Variables", 
       "Gyro Angle", getGyroRotation(), "RawGyro", getGyroRaw(), 
-      "Gyro Velocity", angularVelocity, "Pitch", ahrs.getRoll(), 
+      "Gyro Velocity", angularVelocity, "Pitch", getGyroPitch(), 
       "Odometry X", pose.getTranslation().getX(), "Odometry Y", pose.getTranslation().getY(), 
       "Odometry Theta", pose.getRotation().getDegrees(),
       "Drive X Velocity", robotSpeeds.vxMetersPerSecond, 

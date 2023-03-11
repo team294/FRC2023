@@ -167,7 +167,7 @@ public final class Constants {
         public static final double maxRotationRateWithElevatorUp = 0.8;     // rad/sec
 
         // Auto balance constants
-        public static final double maxPitchBalancedDegrees = 6.0;       // If abs(Pitch) is under this value, then assume we are balanced
+        public static final double maxPitchBalancedDegrees = 5.0;       // If abs(Pitch) is under this value, then assume we are balanced
       }
 
       public static final class TrajectoryConstants {

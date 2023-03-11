@@ -48,7 +48,7 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryType;
  */
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
-  private final FileLog log = new FileLog("C1");
+  private final FileLog log = new FileLog("C3");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
   private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
   private final Field field = new Field(allianceSelection, log);
@@ -171,7 +171,7 @@ public class RobotContainer {
 
     // Intake Commands
     SmartDashboard.putData("Intake Stop", new IntakeStop(intake, log));
-    SmartDashboard.putData("Intake Pick Up",new IntakeSetPercentOutput(-0.8, intake, log));
+    SmartDashboard.putData("Intake Pick Up",new IntakeSetPercentOutput(-1.0, intake, log));
     SmartDashboard.putData("Intake Eject",new IntakeSetPercentOutput(0.5, intake, log));
     SmartDashboard.putData("Intake Deploy", new IntakePistonSetPosition(true, intake, log));
     SmartDashboard.putData("Intake Stow", new IntakePistonSetPosition(false, intake, log));
