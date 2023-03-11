@@ -35,6 +35,7 @@ public class AutoSelection {
 	public static final int BALANCE_4TOWALL = 10;
 	public static final int CONE_LEAVE_NEAR_WALL_CROSS = 11;
 	public static final int CONE_LEAVE_NEAR_WALL_BALANCE = 12;
+	public static final int CONE_LEAVE_NEAR_LOAD_BALANCE = 13;
 
 	private final AllianceSelection allianceSelection;
 	private final TrajectoryCache trajectoryCache;
@@ -58,6 +59,8 @@ public class AutoSelection {
 		autoChooser.addOption("Balance 4ToWall", BALANCE_4TOWALL);
 		autoChooser.addOption("Cone Nearwall Cross", CONE_LEAVE_NEAR_WALL_CROSS);
 		autoChooser.addOption("Cone Nearwall Balance", CONE_LEAVE_NEAR_WALL_BALANCE);
+		autoChooser.addOption("Cone Near Load Balance", CONE_LEAVE_NEAR_LOAD_BALANCE);
+		
 		// autoChooser.addOption("Straight", STRAIGHT);
 		// autoChooser.addOption("Leave Community", LEAVE_COMMUNITY);
 		// autoChooser.addOption("Right One Cone Balance", RIGHT_ONE_CONE_BALANCE);
@@ -158,40 +161,75 @@ public class AutoSelection {
 	   		);
    	   	}
 
-			  if (autoPlan == CONE_LEAVE_NEAR_WALL_BALANCE) {
-				// Starting position = facing drivers, against scoring position closest to wall
-				log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
-				Pose2d posScoreInitial, posLeave, posCross;
-				if (allianceSelection.getAlliance() == Alliance.Red) {
-					posScoreInitial = field.getFinalColumn(9);			// 1.77165, 7.490968, 180
-					// Travel  4.4 m in +X from starting position
-					posLeave = MathBCR.translate(posScoreInitial, 4, 0);  // 6.17165, 7.490968, 180
-					// Travel in Y to cross the field to in front of charging station
-					// posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
-					posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
-					// Spin 180
-					// posFinal = field.getStationCenter(2);
-				} else {
-					posScoreInitial = field.getFinalColumn(1);			// 1.77165, 0.512826, 180
-					// Travel  3.5 m in +X from starting position
-					posLeave = MathBCR.translate(posScoreInitial, 4, 0);		// 6.17165, 0.512826, 180
-					// Travel in Y to cross the field to the in front of charging station
-					posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
-				}
+		if (autoPlan == CONE_LEAVE_NEAR_WALL_BALANCE) {
+			// Starting position = facing drivers, against scoring position closest to wall
+			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
+			Pose2d posScoreInitial, posLeave, posCross;
+			if (allianceSelection.getAlliance() == Alliance.Red) {
+				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 7.490968, 180
+				// Travel  4.4 m in +X from starting position
+				posLeave = MathBCR.translate(posScoreInitial, 4, 0);  // 6.17165, 7.490968, 180
+				// Travel in Y to cross the field to in front of charging station
+				// posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
+				posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
+				// Spin 180
+				// posFinal = field.getStationCenter(2);
+			} else {
+				posScoreInitial = field.getFinalColumn(1);			// 1.77165, 0.512826, 180
+				// Travel  3.5 m in +X from starting position
+				posLeave = MathBCR.translate(posScoreInitial, 4, 0);		// 6.17165, 0.512826, 180
+				// Travel in Y to cross the field to the in front of charging station
+				posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
+			}
 				
-				   autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
-					new DriveResetPose(posScoreInitial, true, driveTrain, log),
-					new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
-					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
-						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
-					new DriveToPose(posCross, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
-						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
-					new DriveUpChargingStation(-0.5, 1.5, driveTrain, log),
-					new ActiveBalance(driveTrain, log)
-					// new DriveToPose(posFinal, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
-					// 	TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log)
-				   );
-				  }
+			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+			new DriveResetPose(posScoreInitial, true, driveTrain, log),
+			// new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
+			new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+				TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
+			new DriveToPose(posCross, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+				TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
+			new DriveUpChargingStation(-0.5, 1.5, driveTrain, log),
+			new ActiveBalance(driveTrain, log)
+			// new DriveToPose(posFinal, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+			// 	TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log)
+			);
+		}
+
+		if (autoPlan == CONE_LEAVE_NEAR_LOAD_BALANCE) {
+			// Starting position = facing drivers, against scoring position closest to wall
+			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
+			Pose2d posScoreInitial, posLeave, posCross;
+			if (allianceSelection.getAlliance() == Alliance.Red) {
+				posScoreInitial = field.getFinalColumn(1);			// 1.77165, 7.490968, 180
+				// Travel  4.4 m in +X from starting position
+				posLeave = MathBCR.translate(posScoreInitial, 4, 0);  // 6.17165, 7.490968, 180
+				// Travel in Y to cross the field to in front of charging station
+				// posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
+				posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
+				// Spin 180
+				// posFinal = field.getStationCenter(2);
+			} else {
+				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 0.512826, 180
+				// Travel  3.5 m in +X from starting position
+				posLeave = MathBCR.translate(posScoreInitial, 4, 0);		// 6.17165, 0.512826, 180
+				// Travel in Y to cross the field to the in front of charging station
+				posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
+			}
+				
+			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+			new DriveResetPose(posScoreInitial, true, driveTrain, log),
+			// new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
+			new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+				TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
+			new DriveToPose(posCross, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+				TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
+			new DriveUpChargingStation(-0.5, 1.5, driveTrain, log),
+			new ActiveBalance(driveTrain, log)
+			// new DriveToPose(posFinal, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+			// 	TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log)
+			);
+		}
 
 		if (autoPlan == CONE_BALANCE_4TOWALL) {
 			// Starting position = facing drivers, 4th scoring position from wall
