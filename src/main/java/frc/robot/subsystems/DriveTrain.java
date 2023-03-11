@@ -399,9 +399,8 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * @param xSpeed Speed of the robot in the x direction, in meters per second (+ = forward)
    * @param ySpeed Speed of the robot in the y direction, in meters per second (+ = move to the left)
    * @param rot Angular rate of the robot, in radians per second (+ = turn to the left)
-   * @param fieldRelative True = the provided x and y speeds are relative to the field.
-   * @param isOpenLoop true = fixed drive percent output to approximate velocity, false = closed loop drive velocity control
-   * False = the provided x and y speeds are relative to the current facing of the robot. 
+   * @param fieldRelative True = the provided x and y speeds are relative to the field. False = the provided x and y speeds are relative to the current facing of the robot.
+   * @param isOpenLoop true = fixed drive percent output to approximate velocity, false = closed loop drive velocity control 
    */
   public void drive(double xSpeed, double ySpeed, double rot, boolean fieldRelative, boolean isOpenLoop) {
     drive(xSpeed, ySpeed, rot, new Translation2d(), fieldRelative, isOpenLoop);
