@@ -15,6 +15,7 @@ public class DriveUpChargingStation extends CommandBase {
   private double maxPitch;
   private double initialX;
   private boolean ascended;
+  private double minDistance;
 
   /**
    * This command will drive robot up a ramp a given distance
@@ -23,11 +24,11 @@ public class DriveUpChargingStation extends CommandBase {
    * @param drivetrain the DriveTrain subsystem on which this command will run
    * @param log FileLog used for logging
    */
-  public DriveUpChargingStation(double speed, DriveTrain drivetrain, FileLog log) {
+  public DriveUpChargingStation(double speed, double minDistance, DriveTrain drivetrain, FileLog log) {
     this.speed = speed;
     this.drivetrain = drivetrain;
     this.log = log;
-
+    this.minDistance = minDistance;
     addRequirements(drivetrain);
   }
 
@@ -78,6 +79,6 @@ public class DriveUpChargingStation extends CommandBase {
     // and we have driven far enough 
     // then stop
 
-    return ascended && Math.abs(pitch) < 16 && drivetrain.getPose().getX() - initialX > 2.1;    
+    return ascended && Math.abs(pitch) < 16 && Math.abs(drivetrain.getPose().getX() - initialX) > minDistance;    
   }
 }
