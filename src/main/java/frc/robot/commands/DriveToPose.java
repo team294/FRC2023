@@ -245,7 +245,8 @@ public class DriveToPose extends CommandBase {
       "Goal rot", goalPose.getRotation().getDegrees(), 
       "Robot X", initialTranslation.getX(),
       "Robot Y", initialTranslation.getY(),
-      "Robot rot", initialPose.getRotation().getDegrees()
+      "Robot rot", initialPose.getRotation().getDegrees(),
+      "Profile time",profile.totalTime()
     );
   }
 
@@ -306,9 +307,25 @@ public class DriveToPose extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return timer.hasElapsed(profile.totalTime()+3.0) ||         // if we 3 seconds after the profile completed, then end even if we are not within tolerance 
+
+    var timeout = timer.hasElapsed(profile.totalTime()+3.0);
+    if (timeout) {
+      log.writeLog(false, "DriveToPose", "timeout"); 
+    }
+
+    var gyro = Math.abs(driveTrain.getGyroRotation() - goalPose.getRotation().getDegrees());
+    var posError = driveTrain.getPose().getTranslation().minus(goalPose.getTranslation()).getNorm();
+
+    var finished = timeout ||         // if we 3 seconds after the profile completed, then end even if we are not within tolerance 
       ( timer.hasElapsed(profile.totalTime())  && 
-        ( Math.abs(driveTrain.getGyroRotation() - goalPose.getRotation().getDegrees()) <= maxThetaErrorDegrees ) &&
-        ( driveTrain.getPose().getTranslation().minus(goalPose.getTranslation()).getNorm() <= maxPositionErrorMeters) );
+        ( gyro <= maxThetaErrorDegrees ) &&
+        ( posError  <= maxPositionErrorMeters) );
+
+    if (finished) {
+      log.writeLog(false, "DriveToPose", "finished", "gyro", gyro, "posError", posError, "maxTheta",maxThetaErrorDegrees, "maxMeters", maxPositionErrorMeters, "timer",timer.get()); 
+    }
+
+    return finished;
   }
+
 }
