@@ -264,7 +264,7 @@ public class DriveToPose extends CommandBase {
 
     //fudge in some kA
     //double desiredVelocityMetersPerSecond = desiredState.velocity;
-    double desiredVelocityMetersPerSecond = desiredState.velocity + (desiredState.acceleration * 0.055);
+    double desiredVelocityMetersPerSecond = desiredState.velocity + (desiredState.acceleration * 0.060);
 
     Rotation2d desiredRotation = goalPose.getRotation();
 
@@ -279,14 +279,16 @@ public class DriveToPose extends CommandBase {
         "Time", timer.get(), 
         "Trap X", desiredPose.getTranslation().getX(),
         "Trap Y", desiredPose.getTranslation().getY(),
-        "Trap Vel", desiredState.velocity,
         "Trap Accel", desiredState.acceleration,
+        "Trap Vel", desiredState.velocity,
         "Trap Vel w/kA", desiredVelocityMetersPerSecond,
+        "Robot XVel", robotSpeeds.vxMetersPerSecond,
+        "Robot Pos Err", driveTrain.getPose().getTranslation().minus(goalPose.getTranslation()).getNorm(),
+        "Robot Th Err", Math.abs(driveTrain.getGyroRotation() - goalPose.getRotation().getDegrees()),
         "Trap VelAng", desiredPose.getRotation().getDegrees(),
         "Target rot", desiredRotation.getDegrees(), 
         "Robot X", curRobotTranslation.getX(),
         "Robot Y", curRobotTranslation.getY(),
-        "Robot XVel", robotSpeeds.vxMetersPerSecond,
         "Robot Vel", Math.hypot(robotSpeeds.vyMetersPerSecond, robotSpeeds.vxMetersPerSecond),
         "Robot VelAng", Math.toDegrees(Math.atan2(robotSpeeds.vyMetersPerSecond, robotSpeeds.vxMetersPerSecond)),
         "Robot rot", robotPose.getRotation().getDegrees(),
