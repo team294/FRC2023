@@ -53,7 +53,7 @@ public class DriveUpChargingStation extends CommandBase {
     drivetrain.drive(speed, 0.0, 0.0, true, false);
 
     // track if we have reached the high threshold to determine if we are close to the top
-    if (!ascended) ascended = Math.abs(pitch) > 23;
+    if (!ascended) ascended = Math.abs(pitch) > 20;
   }
 
 

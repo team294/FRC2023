@@ -172,7 +172,7 @@ public final class Constants {
       public static final class TrajectoryConstants {
         // Max error for robot rotation
         public static final double maxThetaErrorDegrees = 1.0;
-        public static final double maxPositionErrorMeters = 0.02;
+        public static final double maxPositionErrorMeters = 0.04;
 
         // Feedback terms for holonomic drive controllers
 

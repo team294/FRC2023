@@ -14,7 +14,6 @@ import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.*;
 import frc.robot.commands.autos.*;
-import frc.robot.commands.sequences.*;
 import frc.robot.subsystems.*;
 
 
@@ -177,7 +176,7 @@ public class AutoSelection {
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
 				new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
 				new DriveUpChargingStation(0.5, driveTrain, log),
-				new ActiveBalance(driveTrain)
+				new ActiveBalance(driveTrain, log)
 				//new AutoBalance(posCommunityInitial, posCommunityFinal, driveTrain, log)
 	   		);
    	   	}
@@ -196,7 +195,7 @@ public class AutoSelection {
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
 				new DriveUpChargingStation(0.5, driveTrain, log),
-				new ActiveBalance(driveTrain)
+				new ActiveBalance(driveTrain, log)
 	   		);
    	   	}
 
