@@ -125,7 +125,7 @@ public final class Constants {
         // Max acceleration measured 1/25/2023 (with ~80lbs on robot):  Average of 4 wheels = 10.0 m/sec^2
         // Max acceleration measured 2/12/2023 (with new drive gears):  Average ~11 m/sec^2.  Keep value at 10.0 for now.
         public static final double kMaxAccelerationMetersPerSecondSquare = 10; // CALIBRATED-3
-        public static final double kNominalAccelerationMetersPerSecondSquare = 0.5*kMaxAccelerationMetersPerSecondSquare; // was 0.7 for week 1
+        public static final double kNominalAccelerationMetersPerSecondSquare = 3.5; // was 7.0 for week 1
         public static final double kMaxTurningRadiansPerSecond = 11.0;   // CALIBRATED-3 took 633 degreesPerSecond and converted to radians and rounded down
         public static final double kNominalTurningRadiansPerSecond = Math.PI;
         public static final double kMaxAngularAccelerationRadiansPerSecondSquared = 35.0;            // CALIBRATED-3 37.4 rad/sec^2
@@ -172,7 +172,11 @@ public final class Constants {
       public static final class TrajectoryConstants {
         // Max error for robot rotation
         public static final double maxThetaErrorDegrees = 1.0;
-        public static final double maxPositionErrorMeters = 0.04;
+        public static final double maxPositionErrorMeters = 0.04; // 1.6 inches
+
+        // Max error for interim positions (not final)
+        public static final double interimThetaErrorDegrees = 2.0;        
+        public static final double interimPositionErrorMeters = 0.102; // 4 inches
 
         // Feedback terms for holonomic drive controllers
 

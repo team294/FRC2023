@@ -31,9 +31,9 @@ public class ActiveBalance extends PIDCommand {
         () -> goalAngle,
         // This uses the output
         output -> {
-          if(Math.abs(driveTrain.getGyroPitch()) > 1)
-          driveTrain.drive(output, 0, 0, true, false);
-          else{
+          if(Math.abs(driveTrain.getGyroPitch()) > 1) {
+            driveTrain.drive(output, 0, 0, true, false);
+          } else {
             driveTrain.drive(0, 0, 0, true, false);
           }
           // Use the output here

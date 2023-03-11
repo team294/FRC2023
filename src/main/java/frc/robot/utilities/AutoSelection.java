@@ -39,8 +39,6 @@ public class AutoSelection {
 	private final AllianceSelection allianceSelection;
 	private final TrajectoryCache trajectoryCache;
 	private final Field field;
-	private final double interimPositionErrorMeters = TrajectoryConstants.maxPositionErrorMeters + Units.inchesToMeters(4);
-	private final double interimThetaErrorDegrees = TrajectoryConstants.maxThetaErrorDegrees + 1.0;
 	private SendableChooser<Integer> autoChooser = new SendableChooser<>();
 	
 	/**
@@ -152,9 +150,9 @@ public class AutoSelection {
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
 			    new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
 				new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
-					interimPositionErrorMeters, interimThetaErrorDegrees, driveTrain, log),
+					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
 				new DriveToPose(posCross, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
-					interimPositionErrorMeters, interimThetaErrorDegrees, driveTrain, log),
+				TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
 				new DriveToPose(posFinal, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
 					TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log)
 	   		);
@@ -185,9 +183,9 @@ public class AutoSelection {
 					new DriveResetPose(posScoreInitial, true, driveTrain, log),
 					new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
 					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
-						interimPositionErrorMeters, interimThetaErrorDegrees, driveTrain, log),
+						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
 					new DriveToPose(posCross, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
-						interimPositionErrorMeters, interimThetaErrorDegrees, driveTrain, log),
+						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
 					new DriveUpChargingStation(-0.5, 1.5, driveTrain, log),
 					new ActiveBalance(driveTrain, log)
 					// new DriveToPose(posFinal, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
