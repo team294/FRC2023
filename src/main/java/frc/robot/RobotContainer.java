@@ -113,7 +113,7 @@ public class RobotContainer {
     Rotation2d rotationFront = new Rotation2d();          // Facing away from drivers
     SmartDashboard.putData("Drive To Pose", new DriveToPose(driveTrain, log));
     SmartDashboard.putData("Drive To Pose Test", new DriveToPose(new Pose2d(1, 1, Rotation2d.fromDegrees(0)), driveTrain, log));
-    SmartDashboard.putData("Drive To Loading4", new DriveToPose(new Pose2d(16.17878-1.0, 6.749796, new Rotation2d(Math.PI)), driveTrain, log));
+    SmartDashboard.putData("Drive To Loading4", new DriveToPose(new Pose2d(16.17878-1.0, 6.749796, new Rotation2d(0)), driveTrain, log));
     // SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
     //     trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
     // SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 

@@ -69,7 +69,7 @@ public class DriveUpChargingStation extends CommandBase {
     pitch = drivetrain.getGyroPitch();
 
     SmartDashboard.putNumber("Pitch", pitch);
-    log.writeLog(false, "SmartBalance", "isFinished", StringUtil.buildString("Pitch", pitch, "Max Pitch", maxPitch, "Odometry X", drivetrain.getPose().getX(), "Speed", speed));
+    log.writeLog(false, "DriveUpChargingStation", "isFinished", StringUtil.buildString("Pitch", pitch, "Max Pitch", maxPitch, "Odometry X", drivetrain.getPose().getX(), "Speed", speed));
 
     if (Math.abs(pitch) > maxPitch) maxPitch = Math.abs(pitch);
 

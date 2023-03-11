@@ -8,6 +8,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.subsystems.DriveTrain;
+import frc.robot.utilities.FileLog;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -20,7 +21,7 @@ public class ActiveBalance extends PIDCommand {
    * Actively balances the robot to the goalAngle setpoint
    * @param driveTrain driveTrain
    */
-  public ActiveBalance(DriveTrain driveTrain) {
+  public ActiveBalance(DriveTrain driveTrain, FileLog log) {
     super(
         // The controller that the command will use
         new PIDController(DriveConstants.kPDriveBalance, 0, 0),
@@ -32,6 +33,7 @@ public class ActiveBalance extends PIDCommand {
         output -> {
           driveTrain.drive(output, 0, 0, true, false);
           // Use the output here
+          log.writeLog(false, "ActiveBalance", "Running");
         });
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(driveTrain);
