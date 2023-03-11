@@ -37,6 +37,9 @@ public class DriveToPose extends CommandBase {
   private SwerveDriveKinematics kinematics;
   private HolonomicDriveControllerBCR controller;
 
+  private double maxThetaErrorDegrees = TrajectoryConstants.maxThetaErrorDegrees;      
+  private double maxPositionErrorMeters = TrajectoryConstants.maxPositionErrorMeters;   
+
   // Options to control how the goal is specified
   public enum GoalMode {
     pose, poseSupplier, angleRelative, angleAbsolute, shuffleboard
@@ -80,13 +83,17 @@ public class DriveToPose extends CommandBase {
    *    <p> Robot angle on the field (0 = facing away from our drivestation, + to the left, - to the right)
    * @param maxVelMetersPerSecond max velocity to drive, in meters per second
    * @param maxAccelMetersPerSecondSquare max acceleration/deceleration, in meters per second squared
+   * @param maxPositionErrorMeters tolerance for end position in meters
+   * @param maxThetaErrorDegrees tolerance for end theta in degrees
    * @param driveTrain DriveTrain subsystem
    * @param log file for logging
    */
-  public DriveToPose(Pose2d goalPose, double maxVelMetersPerSecond, double maxAccelMetersPerSecondSquare, DriveTrain driveTrain, FileLog log) {
+  public DriveToPose(Pose2d goalPose, double maxVelMetersPerSecond, double maxAccelMetersPerSecondSquare, double maxPositionErrorMeters, double maxThetaErrorDegrees, DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
     this.goalPose = goalPose;
+    this.maxPositionErrorMeters = maxPositionErrorMeters;
+    this.maxThetaErrorDegrees = maxThetaErrorDegrees;
     goalMode = GoalMode.pose;
     trapProfileConstraints = new TrapezoidProfileBCR.Constraints(
       MathUtil.clamp(maxVelMetersPerSecond, -SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxSpeedMetersPerSecond), 
@@ -254,7 +261,11 @@ public class DriveToPose extends CommandBase {
     // Calculate current desired pose and velocity from the Trapezoid profile, relative to starting position
     TrapezoidProfileBCR.State desiredState = profile.calculate(curTime);
     Pose2d desiredPose = new Pose2d( goalDirection.times(desiredState.position), goalDirection.getAngle());
-    double desiredVelocityMetersPerSecond = desiredState.velocity;
+
+    //fudge in some kA
+    //double desiredVelocityMetersPerSecond = desiredState.velocity;
+    double desiredVelocityMetersPerSecond = desiredState.velocity + (desiredState.acceleration * 0.040);
+
     Rotation2d desiredRotation = goalPose.getRotation();
 
     ChassisSpeeds targetChassisSpeeds =
@@ -268,12 +279,14 @@ public class DriveToPose extends CommandBase {
         "Time", timer.get(), 
         "Trap X", desiredPose.getTranslation().getX(),
         "Trap Y", desiredPose.getTranslation().getY(),
-        "Trap Vel", desiredVelocityMetersPerSecond,
-        "Robot XVel", robotSpeeds.vxMetersPerSecond,
+        "Trap Vel", desiredState.velocity,
+        "Trap Accel", desiredState.acceleration,
+        "Trap Vel w/kA", desiredVelocityMetersPerSecond,
         "Trap VelAng", desiredPose.getRotation().getDegrees(),
         "Target rot", desiredRotation.getDegrees(), 
         "Robot X", curRobotTranslation.getX(),
         "Robot Y", curRobotTranslation.getY(),
+        "Robot XVel", robotSpeeds.vxMetersPerSecond,
         "Robot Vel", Math.hypot(robotSpeeds.vyMetersPerSecond, robotSpeeds.vxMetersPerSecond),
         "Robot VelAng", Math.toDegrees(Math.atan2(robotSpeeds.vyMetersPerSecond, robotSpeeds.vxMetersPerSecond)),
         "Robot rot", robotPose.getRotation().getDegrees(),
@@ -293,7 +306,7 @@ public class DriveToPose extends CommandBase {
   public boolean isFinished() {
     return timer.hasElapsed(profile.totalTime()+3.0) ||         // if we 3 seconds after the profile completed, then end even if we are not within tolerance 
       ( timer.hasElapsed(profile.totalTime())  && 
-        ( Math.abs(driveTrain.getGyroRotation() - goalPose.getRotation().getDegrees()) <= TrajectoryConstants.maxThetaErrorDegrees ) &&
-        ( driveTrain.getPose().getTranslation().minus(goalPose.getTranslation()).getNorm() <= TrajectoryConstants.maxPositionErrorMeters) );
+        ( Math.abs(driveTrain.getGyroRotation() - goalPose.getRotation().getDegrees()) <= maxThetaErrorDegrees ) &&
+        ( driveTrain.getPose().getTranslation().minus(goalPose.getTranslation()).getNorm() <= maxPositionErrorMeters) );
   }
 }

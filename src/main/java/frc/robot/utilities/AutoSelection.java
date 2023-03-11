@@ -6,10 +6,12 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+import frc.robot.Constants.SwerveConstants;
+import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.*;
 import frc.robot.commands.autos.*;
 import frc.robot.commands.sequences.*;
@@ -37,6 +39,8 @@ public class AutoSelection {
 	private final AllianceSelection allianceSelection;
 	private final TrajectoryCache trajectoryCache;
 	private final Field field;
+	private final double interimPositionErrorMeters = TrajectoryConstants.maxPositionErrorMeters + Units.inchesToMeters(4);
+	private final double interimThetaErrorDegrees = TrajectoryConstants.maxThetaErrorDegrees + 1.0;
 	private SendableChooser<Integer> autoChooser = new SendableChooser<>();
 	
 	/**
@@ -147,9 +151,12 @@ public class AutoSelection {
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
 			    new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
-				new DriveToPose(posLeave, driveTrain, log),
-				new DriveToPose(posCross, driveTrain, log),
-				new DriveToPose(posFinal, driveTrain, log)
+				new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+					interimPositionErrorMeters, interimThetaErrorDegrees, driveTrain, log),
+				new DriveToPose(posCross, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+					interimPositionErrorMeters, interimThetaErrorDegrees, driveTrain, log),
+				new DriveToPose(posFinal, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+					TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log)
 	   		);
    	   	}
 
