@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -170,7 +171,7 @@ public class RobotContainer {
 
     // Intake Commands
     SmartDashboard.putData("Intake Stop", new IntakeStop(intake, log));
-    SmartDashboard.putData("Intake Pick Up",new IntakeSetPercentOutput(0.5, intake, log));
+    SmartDashboard.putData("Intake Pick Up",new IntakeSetPercentOutput(-0.8, intake, log));
     SmartDashboard.putData("Intake Eject",new IntakeSetPercentOutput(0.5, intake, log));
     SmartDashboard.putData("Intake Deploy", new IntakePistonSetPosition(true, intake, log));
     SmartDashboard.putData("Intake Stow", new IntakePistonSetPosition(false, intake, log));
@@ -307,8 +308,10 @@ public class RobotContainer {
     left[2].onTrue(new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
    
     // left joystick right button
-    right[1].onTrue(new DriveToPose(CoordType.kAbsolute, 0, driveTrain, log));
-    right[2].onTrue(new DriveToPose(CoordType.kRelative, 180, driveTrain, log));
+    right[1].onTrue(new SequentialCommandGroup(new IntakePistonSetPosition(true, intake, log), new IntakeSetPercentOutput(-0.8, intake, log)));
+    right[2].onTrue(new SequentialCommandGroup(new IntakeSetPercentOutput(0, intake, log), new IntakePistonSetPosition(false, intake, log)));
+    // right[1].onTrue(new DriveToPose(CoordType.kAbsolute, 0, driveTrain, log));
+    // right[2].onTrue(new DriveToPose(CoordType.kRelative, 180, driveTrain, log));
 
     //left[2].onTrue(new IntakeRetractAndFlush(intakeFront, uptake, feeder, log));
       

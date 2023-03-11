@@ -83,8 +83,8 @@ public final class Constants {
         // Pneumatic solenoid ports
         public static final int SolManipulatorFwd = 1;
         public static final int SolManipulatorRev = 0;
-        public static final int SolIntakeFwd = 7;       // TODO set to actual channel
-        public static final int SolIntakeRev = 8;       // TODO set to actual channel
+        public static final int SolIntakeFwd = 3;       
+        public static final int SolIntakeRev = 2;     
 
     }
 
