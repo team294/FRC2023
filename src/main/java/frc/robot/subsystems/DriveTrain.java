@@ -292,7 +292,12 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     double ySlewed = filterY.calculate(chassisSpeeds.vyMetersPerSecond);
 
     double xSlewed, omegaLimited;
-    if (elevator.getElevatorRegion()==ElevatorRegion.bottom) {
+
+    
+    if (elevator.getElevatorRegion()==ElevatorRegion.bottom                                             // if elevator is down
+        || ((elevator.getElevatorVelocity() < -0.05) && (elevator.getElevatorPos() < 30))               // or if elevator is moving down 
+        || ((elevator.getElevatorVelocity() < -0.05) && (getRobotSpeeds().vxMetersPerSecond < -0.05)))  // or if driving away from loading station
+    {
       // Elevator is down.  We can X-travel at full speed
       if (elevatorUpPriorIteration) {
         // Elevator was up but is now down.  Reset the fast slew rate limiter
