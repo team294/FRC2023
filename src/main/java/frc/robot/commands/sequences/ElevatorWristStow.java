@@ -5,6 +5,7 @@
 package frc.robot.commands.sequences;
 
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.ElevatorConstants;
@@ -30,7 +31,7 @@ public class ElevatorWristStow extends SequentialCommandGroup {
     addCommands(
       // If elevator is not in main and wrist is in main or down region, then raise elevator
       new ConditionalCommand(
-        new ElevatorSetPosition(ElevatorConstants.boundMainLow+3.0, elevator, log),
+        new ElevatorSetPosition(ElevatorConstants.boundMainLow, elevator, log),
         new WaitCommand(0.01), 
         () -> (elevator.getElevatorRegion() != ElevatorRegion.main && 
                (wrist.getWristRegion() == WristRegion.main || wrist.getWristRegion() == WristRegion.down)
@@ -45,14 +46,22 @@ public class ElevatorWristStow extends SequentialCommandGroup {
       ),
 
       // lower elevator to lower edge of main region
-      new ElevatorSetPosition(ElevatorConstants.boundMainLow+3.0, elevator, log)
-        .until( () -> elevator.getElevatorPos() <= ElevatorConstants.boundMainLow+10.0),
+      // new ElevatorSetPosition(ElevatorConstants.boundMainLow+0.0, elevator, log),
+        // .until( () -> elevator.getElevatorPos() <= ElevatorConstants.boundMainLow+10.0),
 
       // move wrist to stow position
-      new WristSetAngle(WristAngle.loadConveyor, wrist, log),
+      // new WristSetAngle(WristAngle.loadConveyor, wrist, log),
 
       // move elevator to stow position
+      new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log).until(() -> elevator.getElevatorPos() < 2.5),
+
+      // move wrist to stow position
+      new ParallelCommandGroup(
+      new WristSetAngle(WristAngle.lowerLimit, wrist, log),
       new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log)
+      )
+      // new WristSetAngle(WristAngle.loadConveyor, wrist, log)
+
     );
   }
 }

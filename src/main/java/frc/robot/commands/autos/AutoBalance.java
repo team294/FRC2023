@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.CoordType;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.FileLog;
@@ -36,17 +37,20 @@ public class AutoBalance extends SequentialCommandGroup {
 
     addCommands(
       new DriveToPose(posCommunityInitial, driveTrain, log),
-      new DriveToPose(posCommunityFinal, 2.0, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, driveTrain, log),
+      new DriveToPose(posCommunityFinal, 2.0, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, 
+        TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log),
 
       // TODO test balance robot
       new ConditionalCommand(
-        new DriveToPose(posCommunityCloser, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, driveTrain, log)
+        new DriveToPose(posCommunityCloser, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, 
+          TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log)
             .until(() -> driveTrain.getGyroPitch() < DriveConstants.maxPitchBalancedDegrees), // drive forward slowly
         new WaitCommand(0.01), 
         () -> driveTrain.getGyroPitch() > DriveConstants.maxPitchBalancedDegrees
       ),
       new ConditionalCommand(
-        new DriveToPose(posCommunityFarther, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, driveTrain, log)
+        new DriveToPose(posCommunityFarther, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, 
+          TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log)
             .until(() -> driveTrain.getGyroPitch() > -DriveConstants.maxPitchBalancedDegrees), // drive forward slowly
         new WaitCommand(0.01), 
         () -> driveTrain.getGyroPitch() < -DriveConstants.maxPitchBalancedDegrees

@@ -86,7 +86,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   public DriveTrain(Field fieldUtil, Elevator elevator, FileLog log) {
     this.log = log; // save reference to the fileLog
     logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
-    this.camera = new PhotonCameraWrapper(fieldUtil, log);
+    this.camera = new PhotonCameraWrapper(fieldUtil, log, logRotationKey);
     this.elevator = elevator;
 
     // create swerve modules
@@ -153,6 +153,10 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 	 */
 	public double getGyroPitchRaw() {
 		return -ahrs.getPitch();
+  }
+
+  public void resetGyroPitch(){
+    pitchZero = getGyroPitchRaw();
   }
 
   /**
@@ -445,6 +449,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   @Override
   public void enableFastLogging(boolean enabled) {
     fastLogging = enabled;
+    camera.enableFastLogging(enabled);
   }
 
   /**
