@@ -78,9 +78,18 @@ public class BCRMutableSlewRateLimiter {
     return m_prevVal;
   }
 
+  /**
+   * Alters the BCRMutableSlewRateLimiter with the given positive rate limit and negative rate limit of
+   * -rate.
+   * @param rate The rate-of-change limit, in units per second.
+   */
   public void setRateLimit(double rate) {
     m_positiveRateLimit = rate;
     m_negativeRateLimit = -rate;
+  }
+
+  public double getPositiveRateLimit(double rate) {
+    return m_positiveRateLimit;
   }
 
   /**
