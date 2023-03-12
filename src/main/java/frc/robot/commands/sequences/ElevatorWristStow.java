@@ -5,6 +5,7 @@
 package frc.robot.commands.sequences;
 
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.ElevatorConstants;
@@ -52,10 +53,14 @@ public class ElevatorWristStow extends SequentialCommandGroup {
       // new WristSetAngle(WristAngle.loadConveyor, wrist, log),
 
       // move elevator to stow position
-      new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log),
+      new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log).until(() -> elevator.getElevatorPos() < 2.5),
 
-      // move wrist to stwo position
-      new WristSetAngle(WristAngle.loadConveyor, wrist, log)
+      // move wrist to stow position
+      new ParallelCommandGroup(
+      new WristSetAngle(WristAngle.lowerLimit, wrist, log),
+      new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log)
+      )
+      // new WristSetAngle(WristAngle.loadConveyor, wrist, log)
 
     );
   }
