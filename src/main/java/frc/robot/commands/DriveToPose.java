@@ -264,8 +264,7 @@ public class DriveToPose extends CommandBase {
     Pose2d desiredPose = new Pose2d( goalDirection.times(desiredState.position), goalDirection.getAngle());
 
     //fudge in some kA
-    //double desiredVelocityMetersPerSecond = desiredState.velocity;
-    double desiredVelocityMetersPerSecond = desiredState.velocity + (desiredState.acceleration * 0.060);
+    double desiredVelocityMetersPerSecond = desiredState.velocity + (desiredState.acceleration * SwerveConstants.kADriveToPose);
 
     Rotation2d desiredRotation = goalPose.getRotation();
 

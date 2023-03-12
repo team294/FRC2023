@@ -132,6 +132,7 @@ public final class Constants {
         public static final double kNominalAngularAccelerationRadiansPerSecondSquared = Math.PI;
         public static final double kVDrive = 0.2034; // CALIBRATED-3 = 0.2511.  in % output per meters per second.  Calibration says 0.2511, but better match on a trapezoid is 
         public static final double kADrive = 0.0;
+        public static final double kADriveToPose = 0.060;
         public static final double kSDrive = 0.016; // CALIBRATED-3 = 0.016.  in % output
 
     }
