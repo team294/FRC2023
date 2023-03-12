@@ -114,12 +114,12 @@ public class RobotContainer {
     Rotation2d rotationFront = new Rotation2d();          // Facing away from drivers
     SmartDashboard.putData("Drive To Pose", new DriveToPose(driveTrain, log));
     SmartDashboard.putData("Drive To Pose Test", new DriveToPose(new Pose2d(1, 1, Rotation2d.fromDegrees(0)), driveTrain, log));
-    SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
-        trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
-    SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
-        trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
-    SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-        trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
+    // SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
+    //     trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
+    // SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
+    //     trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
+    // SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
+    //     trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
     SmartDashboard.putData("Drive Trajectory Straight", new DriveTrajectory(
           CoordType.kRelative, StopType.kBrake,
           new TrajectoryFacing(rotationFront, rotationFront, 
@@ -132,6 +132,7 @@ public class RobotContainer {
           ),
           driveTrain, log));
     SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
+    // SmartDashboard.putData("Drive Smart Balance", new SequentialCommandGroup(new ResetPose,new SmartBalance(0.5, 0, driveTrain)));
 
     // Testing for autos
     // SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
