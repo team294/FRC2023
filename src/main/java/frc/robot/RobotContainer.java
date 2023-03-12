@@ -62,7 +62,7 @@ public class RobotContainer {
   private final DriveTrain driveTrain = new DriveTrain(field, elevator, log);
   private final Manipulator manipulator = new Manipulator(log);
   private final LED led = new LED();
-  private final Conveyor conveyor = new Conveyor(log);
+  // private final Conveyor conveyor = new Conveyor(log);
 
   // Define other utilities
   private final TrajectoryCache trajectoryCache = new TrajectoryCache(log);
@@ -172,9 +172,9 @@ public class RobotContainer {
     SmartDashboard.putData("LED Purple", new LEDSetStrip(Color.kPurple, 1, led, log));
 
     //Conveyor Commands
-    SmartDashboard.putData("Conveyor Custom Percent", new ConveyorMove(conveyor, log));
-    SmartDashboard.putData("Conveyor Run", new ConveyorMove(0.3, conveyor, log));
-    SmartDashboard.putData("Conveyor Stop", new ConveyorMove(0, conveyor, log));
+    // SmartDashboard.putData("Conveyor Custom Percent", new ConveyorMove(conveyor, log));
+    // SmartDashboard.putData("Conveyor Run", new ConveyorMove(0.3, conveyor, log));
+    // SmartDashboard.putData("Conveyor Stop", new ConveyorMove(0, conveyor, log));
 
 
     //Manipulator Commands
@@ -258,8 +258,8 @@ public class RobotContainer {
     // back
     // Turn off all motors
     xbBack.onTrue(Commands.parallel(
-      new ManipulatorStopMotor(manipulator, log),
-      new ConveyorMove(0, conveyor, log)
+      new ManipulatorStopMotor(manipulator, log)
+      // new ConveyorMove(0, conveyor, log)
       // TODO stop intake (if we and an intake subsystem)
     )); 
 
@@ -278,7 +278,8 @@ public class RobotContainer {
 
     // Left
     // Sets elevator/wrist to stowed, turn on conveyor, turn on manipulator to load piece
-    xbPOVLeft.onTrue(new LoadPieceConveyor(elevator, wrist, manipulator, conveyor, log));
+    // xbPOVLeft.onTrue();
+    // xbPOVLeft.onTrue(new LoadPieceConveyor(elevator, wrist, manipulator, conveyor, log));
 
     // Right
     // Move elevator to loading station config and turn on manipulator to grab piece
