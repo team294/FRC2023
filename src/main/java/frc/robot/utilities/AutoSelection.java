@@ -6,13 +6,14 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+import frc.robot.Constants.SwerveConstants;
+import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.commands.*;
 import frc.robot.commands.autos.*;
-import frc.robot.commands.sequences.*;
 import frc.robot.subsystems.*;
 
 
@@ -33,6 +34,7 @@ public class AutoSelection {
 	public static final int CONE_BALANCE_4TOWALL = 9;
 	public static final int BALANCE_4TOWALL = 10;
 	public static final int CONE_LEAVE_NEAR_WALL_CROSS = 11;
+	public static final int CONE_LEAVE_NEAR_WALL_BALANCE = 12;
 
 	private final AllianceSelection allianceSelection;
 	private final TrajectoryCache trajectoryCache;
@@ -55,7 +57,7 @@ public class AutoSelection {
 		autoChooser.addOption("Cone Balance 4ToWall", CONE_BALANCE_4TOWALL);
 		autoChooser.addOption("Balance 4ToWall", BALANCE_4TOWALL);
 		autoChooser.addOption("Cone Nearwall Cross", CONE_LEAVE_NEAR_WALL_CROSS);
-
+		autoChooser.addOption("Cone Nearwall Balance", CONE_LEAVE_NEAR_WALL_BALANCE);
 		// autoChooser.addOption("Straight", STRAIGHT);
 		// autoChooser.addOption("Leave Community", LEAVE_COMMUNITY);
 		// autoChooser.addOption("Right One Cone Balance", RIGHT_ONE_CONE_BALANCE);
@@ -147,17 +149,55 @@ public class AutoSelection {
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
 			    new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
-				new DriveToPose(posLeave, driveTrain, log),
-				new DriveToPose(posCross, driveTrain, log),
-				new DriveToPose(posFinal, driveTrain, log)
+				new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
+				new DriveToPose(posCross, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+				TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
+				new DriveToPose(posFinal, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+					TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log)
 	   		);
    	   	}
+
+			  if (autoPlan == CONE_LEAVE_NEAR_WALL_BALANCE) {
+				// Starting position = facing drivers, against scoring position closest to wall
+				log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
+				Pose2d posScoreInitial, posLeave, posCross;
+				if (allianceSelection.getAlliance() == Alliance.Red) {
+					posScoreInitial = field.getFinalColumn(9);			// 1.77165, 7.490968, 180
+					// Travel  4.4 m in +X from starting position
+					posLeave = MathBCR.translate(posScoreInitial, 4, 0);  // 6.17165, 7.490968, 180
+					// Travel in Y to cross the field to in front of charging station
+					// posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
+					posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
+					// Spin 180
+					// posFinal = field.getStationCenter(2);
+				} else {
+					posScoreInitial = field.getFinalColumn(1);			// 1.77165, 0.512826, 180
+					// Travel  3.5 m in +X from starting position
+					posLeave = MathBCR.translate(posScoreInitial, 4, 0);		// 6.17165, 0.512826, 180
+					// Travel in Y to cross the field to the in front of charging station
+					posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
+				}
+				
+				   autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
+					new DriveResetPose(posScoreInitial, true, driveTrain, log),
+					new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
+					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
+					new DriveToPose(posCross, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
+					new DriveUpChargingStation(-0.5, 1.5, driveTrain, log),
+					new ActiveBalance(driveTrain, log)
+					// new DriveToPose(posFinal, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+					// 	TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log)
+				   );
+				  }
 
 		if (autoPlan == CONE_BALANCE_4TOWALL) {
 			// Starting position = facing drivers, 4th scoring position from wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Balance 4ToWall");
-			Pose2d posCommunityInitial = field.getStationInitial(2);
-			Pose2d posCommunityFinal = field.getStationCenter(2);
+			// Pose2d posCommunityInitial = field.getStationInitial(2);
+			// Pose2d posCommunityFinal = field.getStationCenter(2);
 			// Pose2d posCommunityFinal = translate(field.getStationCenter(2), 1.5, 0.0);		// overdrive due to wheel slip when climbing on charging station
 			Pose2d posScoreInitial;
 			if (allianceSelection.getAlliance() == Alliance.Red) {
@@ -169,8 +209,9 @@ public class AutoSelection {
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
 				new AutoScoreConeHigh(elevator, wrist, manipulator, led, log),
-
-				new AutoBalance(posCommunityInitial, posCommunityFinal, driveTrain, log)
+				new DriveUpChargingStation(0.5, 2.1, driveTrain, log),
+				new ActiveBalance(driveTrain, log)
+				//new AutoBalance(posCommunityInitial, posCommunityFinal, driveTrain, log)
 	   		);
    	   	}
 
@@ -187,8 +228,8 @@ public class AutoSelection {
 
 	   		autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			    new DriveResetPose(posScoreInitial, true, driveTrain, log),
-				new DriveUpChargingStation(0.5, driveTrain, log),
-				new ActiveBalance(driveTrain)
+				new DriveUpChargingStation(0.5, 2.1, driveTrain, log),
+				new ActiveBalance(driveTrain, log)
 	   		);
    	   	}
 
