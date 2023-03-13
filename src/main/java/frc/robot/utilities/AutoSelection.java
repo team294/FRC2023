@@ -97,6 +97,8 @@ public class AutoSelection {
 
 		// Get parameters from Shuffleboard
 		int autoPlan = autoChooser.getSelected();
+		log.writeLogEcho(true, "AutoSelect", "autoPlan",autoPlan);
+
 
 		double waitTime = SmartDashboard.getNumber("Autonomous delay", 0);
 		waitTime = MathUtil.clamp(waitTime, 0, 15);		// make sure autoDelay isn't negative and is only active during auto
@@ -137,7 +139,7 @@ public class AutoSelection {
 
 		if (autoPlan == CONE_LEAVE_NEAR_WALL_CROSS) {
 			// Starting position = facing drivers, against scoring position closest to wall
-			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
+			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall Cross");
 			Pose2d posScoreInitial, posLeave, posCross, posFinal;
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 7.490968, 180
@@ -176,7 +178,7 @@ public class AutoSelection {
 
 		if (autoPlan == CONE_LEAVE_NEAR_WALL_BALANCE) {
 			// Starting position = facing drivers, against scoring position closest to wall
-			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
+			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall Balance");
 			Pose2d posScoreInitial, posLeave, posCross;
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 7.490968, 180
@@ -218,7 +220,7 @@ public class AutoSelection {
 
 		if (autoPlan == CONE_LEAVE_NEAR_LOAD_BALANCE) {
 			// Starting position = facing drivers, against scoring position closest to wall
-			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
+			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Load Balance");
 			Pose2d posScoreInitial, posLeave, posCross;
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(1);			// 1.77165, 7.490968, 180
@@ -258,7 +260,7 @@ public class AutoSelection {
 
 		if (autoPlan == CONE_LEAVE_NEAR_WALL_PICK_UP_CUBE) {
 			// Starting position = facing drivers, against scoring position closest to wall
-			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
+			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall Pickup cube");
 			Pose2d posScoreInitial, posLeave, posLineUp, posFinal;
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 7.490968, 180
@@ -308,7 +310,7 @@ public class AutoSelection {
 
 		if (autoPlan == CONE_LEAVE_NEAR_LOAD_PICK_UP_CUBE) {
 			// Starting position = facing drivers, against scoring position closest to wall
-			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
+			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Load Pick up cube");
 			Pose2d posScoreInitial, posLeave, posLineUp, posFinal;
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(1);			// 1.77165, 7.490968, 180
@@ -358,7 +360,7 @@ public class AutoSelection {
 
 		if (autoPlan == CONE_LEAVE_NEAR_WALL_PICK_UP_BALANCE) {
 			// Starting position = facing drivers, against scoring position closest to wall
-			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
+			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall pickup balance");
 			Pose2d posScoreInitial, posLeave, posCross;
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 7.490968, 180
@@ -402,7 +404,7 @@ public class AutoSelection {
 
 		if (autoPlan == CONE_LEAVE_NEAR_LOAD_PICK_UP_BALANCE) {
 			// Starting position = facing drivers, against scoring position closest to wall
-			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
+			log.writeLogEcho(true, "AutoSelect", "run Cone Leave load pickup balance");
 			Pose2d posScoreInitial, posLeave, posCross;
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(1);			// 1.77165, 7.490968, 180
