@@ -156,6 +156,7 @@ public class RobotContainer {
     SmartDashboard.putData("Elevator Move To Bottom", new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
     
     //Wrist Commands
+    SmartDashboard.putData("Wrist Calibration", new WristCalibration(0.1, wrist, log));
     SmartDashboard.putData("Wrist Stowed Position", new WristSetAngle(WristAngle.startConfig, wrist, log));
     SmartDashboard.putData("Wrist ElevMove Position", new WristSetAngle(WristAngle.elevatorMoving, wrist, log));
     SmartDashboard.putData("Wrist Scoring Position", new WristSetAngle(WristAngle.scoreMidHigh, wrist, log));
