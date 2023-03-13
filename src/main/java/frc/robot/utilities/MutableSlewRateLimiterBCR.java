@@ -88,10 +88,6 @@ public class MutableSlewRateLimiterBCR {
     m_negativeRateLimit = -rate;
   }
 
-  public double getPositiveRateLimit(double rate) {
-    return m_positiveRateLimit;
-  }
-
   /**
    * Resets the slew rate limiter to the specified value; ignores the rate limit when doing so.
    *

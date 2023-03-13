@@ -81,11 +81,6 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
   private final MutableSlewRateLimiterBCR filterX = new MutableSlewRateLimiterBCR(maxAccelerationRate);
   private final SlewRateLimiter filterY = new SlewRateLimiter(maxAccelerationRate);
-  
-  // tier 4 = slowest acceleration, tier 1 = fastest acceleration
-  // private final SlewRateLimiter filterXTier1 = new SlewRateLimiter(maxAccelerationRate);   // limiter in X direction when elevator is out
-  // private final SlewRateLimiter filterXTier2 = new SlewRateLimiter(maxAccelerationRateAtScoreMid);   // limiter in X direction when elevator is out
-  // private final SlewRateLimiter filterXTier3 = new SlewRateLimiter(maxAccelerationRateWithElevatorUp);   // limiter in X direction when elevator is out
 
   /**
    * Constructs the DriveTrain subsystem
@@ -303,56 +298,23 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
     double xSlewed, omegaLimited;
 
-    // if (elevator.getElevatorPos() <= ElevatorPosition.scoreLow.value) {
-    //   xSlewed = filterXTier1.calculate(chassisSpeeds.vxMetersPerSecond);
-    //   omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
-    // } else if (elevator.getElevatorPos() <= ElevatorPosition.scoreMidCone.value) {
-    //   xSlewed = filterXTier2.calculate(chassisSpeeds.vxMetersPerSecond);
-    //   omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
-    // } else {
-    //   xSlewed = filterXTier3.calculate(chassisSpeeds.vxMetersPerSecond);
-    //   omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
-    // }
-
-
     // interpolates the 
-    double rate = elevator.getElevatorPos() * (maxAccelerationRate-maxAccelerationRateWithElevatorUp)/ElevatorPosition.upperLimit.value;
+    double rate = maxAccelerationRate - elevator.getElevatorPos() * (maxAccelerationRate-maxAccelerationRateWithElevatorUp)/ElevatorPosition.scoreHighCone.value;
     double clampedRate = MathUtil.clamp(
       rate, 
       maxAccelerationRateWithElevatorUp, 
       maxAccelerationRate); 
     filterX.setRateLimit(clampedRate);
 
-    log.writeLogEcho(false, "DriveTrain", "Rate", rate, "Clamped Rate", clampedRate);
 
     xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
+
     // omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
-    if(elevator.getElevatorRegion() != ElevatorRegion.bottom){
+    if(elevator.getElevatorPos() < 3){
       omegaLimited = MathUtil.clamp(chassisSpeeds.omegaRadiansPerSecond, -maxRotationRateWithElevatorUp, maxRotationRateWithElevatorUp);
     }else {
       omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
     }
-    // if (elevator.getElevatorRegion()==ElevatorRegion.bottom) {
-    //   // Elevator is down.  We can X-travel at full speed
-    //   if (elevatorUpPriorIteration) {
-    //     // Elevator was up but is now down.  Reset the fast slew rate limiter
-    //     filterX.reset(getChassisSpeeds().vxMetersPerSecond);
-    //   }
-    //   elevatorUpPriorIteration = false;
-    //   // x slew rate limit chassisspeed
-    //   xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
-    //   omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
-    // } else {
-    //   // Elevator is up.  X-travel slowly!
-    //   if (!elevatorUpPriorIteration) {
-    //     // Elevator was down but is now up.  Reset the slow slew rate limiter
-    //     filterXSlow.reset(MathUtil.clamp(getChassisSpeeds().vxMetersPerSecond, -maxXSpeedWithElevatorUp, maxXSpeedWithElevatorUp));     // Rev B8:  Added clamp on current velocity (may cause sudden deceleration) 
-    //   }
-    //   elevatorUpPriorIteration = true;
-    //   // x slew rate limit chassisspeed
-    //   xSlewed = filterXSlow.calculate(MathUtil.clamp(chassisSpeeds.vxMetersPerSecond, -maxXSpeedWithElevatorUp, maxXSpeedWithElevatorUp));
-    //   omegaLimited = MathUtil.clamp(chassisSpeeds.omegaRadiansPerSecond, -maxRotationRateWithElevatorUp, maxRotationRateWithElevatorUp);
-    // }
 
     // convert back to swervem module states
     desiredStates = kDriveKinematics.toSwerveModuleStates(new ChassisSpeeds(xSlewed, ySlewed, omegaLimited), new Translation2d());
