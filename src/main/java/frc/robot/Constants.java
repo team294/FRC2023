@@ -177,15 +177,15 @@ public final class Constants {
 
         // Max error for interim positions (not final)
         public static final double interimThetaErrorDegrees = 2.0;        
-        public static final double interimPositionErrorMeters = 0.102; // 4 inches
+        public static final double interimPositionErrorMeters = 0.20; // 8 inches
 
         // Feedback terms for holonomic drive controllers
 
         // X-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)
-        public static final double kPXController = 1.1;  // was 1.0 week 1   
+        public static final double kPXController = 1;
 
         // Y-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)  
-        public static final double kPYController = 1.1;    // was 1.0 week 1   
+        public static final double kPYController = 1; 
 
         public static final double kPThetaController = 3;   // Theta-velocity controller:  kp.  Units = (rad/sec of velocity) / (radians of angle error)
 

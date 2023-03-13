@@ -38,8 +38,8 @@ public class ElevatorProfileGenerator {
 
 	private double kFF = 0.01945;    // CALIBRATED
 	private double kSu = 0.01425;	 // CALIBRATED
-	private double kVu = 0.0149;  // CALIBRATED
-	private double kAu = 0.001;   // CALIBRATED
+	private double kVu = 0.018;  // CALIBRATED was 0.0149 week 1
+	private double kAu = 0.002;   // CALIBRATED was 0.001 week 1
 	private double kPu = 0.10;    // CALIBRATED
 	private double kIu = 0;
 	private double kDu = 0;

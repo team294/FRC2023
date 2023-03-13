@@ -38,19 +38,18 @@ public class AutoBalance extends SequentialCommandGroup {
     addCommands(
       new DriveToPose(posCommunityInitial, driveTrain, log),
       new DriveToPose(posCommunityFinal, 2.0, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, 
-        TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log),
+        TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, false, driveTrain, log),
 
-      // TODO test balance robot
       new ConditionalCommand(
         new DriveToPose(posCommunityCloser, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, 
-          TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log)
+          TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, false, driveTrain, log)
             .until(() -> driveTrain.getGyroPitch() < DriveConstants.maxPitchBalancedDegrees), // drive forward slowly
         new WaitCommand(0.01), 
         () -> driveTrain.getGyroPitch() > DriveConstants.maxPitchBalancedDegrees
       ),
       new ConditionalCommand(
         new DriveToPose(posCommunityFarther, 0.3, SwerveConstants.kNominalAccelerationMetersPerSecondSquare, 
-          TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log)
+          TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, false, driveTrain, log)
             .until(() -> driveTrain.getGyroPitch() > -DriveConstants.maxPitchBalancedDegrees), // drive forward slowly
         new WaitCommand(0.01), 
         () -> driveTrain.getGyroPitch() < -DriveConstants.maxPitchBalancedDegrees
