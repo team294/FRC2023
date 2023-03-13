@@ -26,14 +26,13 @@ public class AutoScoreCubeHigh extends SequentialCommandGroup {
     addCommands(
       new FileLogWrite(true, false, "AutoScoreCubeHigh", "Start", log),
       new ManipulatorSetPistonPosition(false, led, manipulator, log),		// set to cube position
-      new ManipulatorSetPercent(ManipulatorConstants.pieceGrabPct, manipulator, log),				// Low power to hold piece
+      new ManipulatorSetPercent(ManipulatorConstants.pieceHoldPct, manipulator, log),				// Low power to hold piece
       new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, log),
-      new WaitCommand(0.25),
       new DriveToPose(finalPose, driveTrain, log),
       new EjectPiece(manipulator, log), 		// Runs for 1 second
       new DriveToPose(initPose, driveTrain, log),
       new ElevatorWristStow(elevator, wrist, log),
-      new FileLogWrite(true, false, "AutoScoreConeHigh", "Finish", log)
+      new FileLogWrite(true, false, "AutoScoreCubeHigh", "Finish", log)
     );
   }
 }

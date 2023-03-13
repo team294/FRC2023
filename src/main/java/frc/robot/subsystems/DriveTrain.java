@@ -294,7 +294,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     double xSlewed, omegaLimited;
 
     
-    if (elevator.getElevatorRegion()==ElevatorRegion.bottom                                             // if elevator is down
+    if (elevator.getElevatorPos() < 5                                             // if elevator is down
         || ((elevator.getElevatorVelocity() < -0.05) && (elevator.getElevatorPos() < 30))               // or if elevator is moving down 
         || ((elevator.getElevatorVelocity() < -0.05) && (getRobotSpeeds().vxMetersPerSecond < -0.05)))  // or if driving away from loading station
     {

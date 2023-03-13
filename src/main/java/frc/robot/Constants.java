@@ -177,7 +177,7 @@ public final class Constants {
 
         // Max error for interim positions (not final)
         public static final double interimThetaErrorDegrees = 2.0;        
-        public static final double interimPositionErrorMeters = 0.102; // 4 inches
+        public static final double interimPositionErrorMeters = 0.20; // 4 inches
 
         // Feedback terms for holonomic drive controllers
 
