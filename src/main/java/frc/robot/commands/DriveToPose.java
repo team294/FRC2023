@@ -302,6 +302,8 @@ public class DriveToPose extends CommandBase {
     if (regenerate && (goalMode == GoalMode.pose)) {
       log.writeLog(false, "DriveToPose", "Regenerate start");
 
+      /* *** needs to be tested ***
+
       timer.reset();
       timer.start();
       controller.reset();
@@ -327,7 +329,8 @@ public class DriveToPose extends CommandBase {
         "Robot rot", initialPose.getRotation().getDegrees(),
         "Profile time",profile.totalTime()
       );
-      
+
+      */
     }
 
   }
