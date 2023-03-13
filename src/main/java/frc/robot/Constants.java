@@ -182,10 +182,10 @@ public final class Constants {
         // Feedback terms for holonomic drive controllers
 
         // X-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)
-        public static final double kPXController = 1.1;  // was 1.0 week 1   
+        public static final double kPXController = 1;
 
         // Y-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)  
-        public static final double kPYController = 1.1;    // was 1.0 week 1   
+        public static final double kPYController = 1; 
 
         public static final double kPThetaController = 3;   // Theta-velocity controller:  kp.  Units = (rad/sec of velocity) / (radians of angle error)
 
