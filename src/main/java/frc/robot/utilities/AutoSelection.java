@@ -204,14 +204,14 @@ public class AutoSelection {
 				// 	TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log),
 				new ParallelCommandGroup(
 					new ElevatorWristStow(elevator, wrist, log),
-					new DriveToPose(posLeave, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
+					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, 2,
 					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
 				),
-				// new DriveToPose(posCross, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
+				new DriveToPose(posCross, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+					0.4, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
+				// new DriveToPose(posCross, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
 				// 	TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
-				new DriveToPose(posCross, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
-					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
-				new DriveUpChargingStation(-0.5, 1.5, driveTrain, log),
+				new DriveUpChargingStation(-1.5, 1.5, driveTrain, log),
 				new ActiveBalance(driveTrain, log)
 			// new DriveToPose(posFinal, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
 			// 	TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log)
@@ -247,8 +247,8 @@ public class AutoSelection {
 					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
 					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
 				),
-				new DriveToPose(posLeave, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
-					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
+				// new DriveToPose(posLeave, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
+				// 	TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
 				new DriveToPose(posCross, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
 					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
 				new DriveUpChargingStation(-0.5, 1.5, driveTrain, log),

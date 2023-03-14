@@ -288,7 +288,7 @@ public class DriveToPose extends CommandBase {
         "Trap Vel w/kA", desiredVelocityMetersPerSecond,
         "Robot XVel", robotSpeeds.vxMetersPerSecond,
         "Robot Pos Err", driveTrain.getPose().getTranslation().minus(goalPose.getTranslation()).getNorm(),
-        "Robot Th Err", Math.abs(driveTrain.getGyroRotation() - goalPose.getRotation().getDegrees()),
+        "Robot Th Err", Math.abs(Math.abs(driveTrain.getGyroRotation()) - Math.abs(goalPose.getRotation().getDegrees())),
         "Trap VelAng", desiredPose.getRotation().getDegrees(),
         "Target rot", desiredRotation.getDegrees(), 
         "Robot X", curRobotTranslation.getX(),
@@ -351,9 +351,9 @@ public class DriveToPose extends CommandBase {
       log.writeLog(false, "DriveToPose", "timeout"); 
     }
 
-    var gyro = Math.abs(driveTrain.getGyroRotation() - goalPose.getRotation().getDegrees());
+    var gyro = Math.abs(Math.abs(driveTrain.getGyroRotation()) - Math.abs(goalPose.getRotation().getDegrees()));
     var posError = driveTrain.getPose().getTranslation().minus(goalPose.getTranslation()).getNorm();
-
+    
     var finished = timeout ||         // if we 3 seconds after the profile completed, then end even if we are not within tolerance 
       ( timer.hasElapsed(profile.totalTime())  && 
         ( gyro <= maxThetaErrorDegrees ) &&
