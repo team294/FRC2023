@@ -162,7 +162,7 @@ public final class Constants {
         // Driving constants to cap acceleration
         public static final double maxXSpeedWithElevatorUp = 1.0;       // m/s
         public static final double maxAccelerationRate = 5.0;           // m/s^2
-        public static final double maxAccelerationRateWithElevatorUp = 2.0;           // m/s^2
+        public static final double maxAccelerationRateWithElevatorUp = 1.0;           // m/s^2
         public static final double maxAccelerationRateAtScoreMid = 3.5;           // m/s^2
         public static final double maxRotationRateWithElevatorUp = 0.8;     // rad/sec
 
