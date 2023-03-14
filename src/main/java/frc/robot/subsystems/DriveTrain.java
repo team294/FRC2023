@@ -298,19 +298,6 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
     double xSlewed, omegaLimited;
 
-<<<<<<< HEAD
-    // if (elevator.getElevatorPos() <= ElevatorPosition.scoreLow.value) {
-    //   xSlewed = filterXTier1.calculate(chassisSpeeds.vxMetersPerSecond);
-    //   omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
-    // } else if (elevator.getElevatorPos() <= ElevatorPosition.scoreMidCone.value) {
-    //   xSlewed = filterXTier2.calculate(chassisSpeeds.vxMetersPerSecond);
-    //   omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
-    // } else {
-    //   xSlewed = filterXTier3.calculate(chassisSpeeds.vxMetersPerSecond);
-    //   omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
-    // }
-
-
     // interpolates the elevator position and converts it to a desired acceleration rate
     // previously linear
     // double rate = elevator.getElevatorPos() * (maxAccelerationRate-maxAccelerationRateWithElevatorUp)/ElevatorPosition.upperLimit.value;
@@ -328,28 +315,6 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
     // omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
     if(elevator.getElevatorPos() < 3){
-=======
-    
-    if (elevator.getElevatorPos() < 5 || DriverStation.isAutonomousEnabled()) {
-      // Elevator is down.  We can X-travel at full speed
-      if (elevatorUpPriorIteration) {
-        // Elevator was up but is now down.  Reset the fast slew rate limiter
-        filterX.reset(getChassisSpeeds().vxMetersPerSecond);
-      }
-      elevatorUpPriorIteration = false;
-      // x slew rate limit chassisspeed
-      xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
-      omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
-    } else {
-      // Elevator is up.  X-travel slowly!
-      if (!elevatorUpPriorIteration) {
-        // Elevator was down but is now up.  Reset the slow slew rate limiter
-        filterXSlow.reset(MathUtil.clamp(getChassisSpeeds().vxMetersPerSecond, -maxXSpeedWithElevatorUp, maxXSpeedWithElevatorUp));     // Rev B8:  Added clamp on current velocity (may cause sudden deceleration) 
-      }
-      elevatorUpPriorIteration = true;
-      // x slew rate limit chassisspeed
-      xSlewed = filterXSlow.calculate(MathUtil.clamp(chassisSpeeds.vxMetersPerSecond, -maxXSpeedWithElevatorUp, maxXSpeedWithElevatorUp));
->>>>>>> main
       omegaLimited = MathUtil.clamp(chassisSpeeds.omegaRadiansPerSecond, -maxRotationRateWithElevatorUp, maxRotationRateWithElevatorUp);
     }else {
       omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
