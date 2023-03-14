@@ -41,6 +41,7 @@ public class DriveToPose extends CommandBase {
   private double maxPositionErrorMeters = TrajectoryConstants.maxPositionErrorMeters;   
 
   private boolean regenerate = false;
+  int cycle = 0;
 
   // Options to control how the goal is specified
   public enum GoalMode {
@@ -299,16 +300,17 @@ public class DriveToPose extends CommandBase {
         "Pitch", driveTrain.getGyroPitch()
     );
 
-    if (regenerate && (goalMode == GoalMode.pose)) {
-      log.writeLog(false, "DriveToPose", "Regenerate start");
-
-      /* *** needs to be tested ***
+    if (false && regenerate && (goalMode == GoalMode.pose) && (cycle++ % 5  == 0)) {
+      //log.writeLog(false, "DriveToPose", "Regenerate start");
 
       timer.reset();
       timer.start();
       controller.reset();
 
-      Translation2d trapezoidPath = goalPose.getTranslation().minus(driveTrain.getPose().getTranslation());
+      initialPose = driveTrain.getPose();
+      initialTranslation = initialPose.getTranslation();
+      curRobotTranslation = initialTranslation;
+      Translation2d trapezoidPath = goalPose.getTranslation().minus(initialPose.getTranslation());
       goalDirection = Translation2dBCR.normalize(trapezoidPath);
       double goalDistance = trapezoidPath.getNorm();
     
@@ -324,13 +326,13 @@ public class DriveToPose extends CommandBase {
         "Goal X", goalPose.getTranslation().getX(),
         "Goal Y", goalPose.getTranslation().getY(),
         "Goal rot", goalPose.getRotation().getDegrees(), 
-        "Robot X", initialTranslation.getX(),
-        "Robot Y", initialTranslation.getY(),
+        "Robot X", initialPose.getX(),
+        "Robot Y", initialPose.getY(),
         "Robot rot", initialPose.getRotation().getDegrees(),
+        "Goal distance", goalDistance,
         "Profile time",profile.totalTime()
       );
 
-      */
     }
 
   }
