@@ -299,10 +299,10 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     double xSlewed, omegaLimited;
 
     // interpolates the elevator position and converts it to a desired acceleration rate
-    // previously linear
-    // double rate = elevator.getElevatorPos() * (maxAccelerationRate-maxAccelerationRateWithElevatorUp)/ElevatorPosition.upperLimit.value;
+    // linear
+    double rate = (elevator.getElevatorPos() - 3) * (maxAccelerationRate-maxAccelerationRateWithElevatorUp)/ElevatorPosition.upperLimit.value;
     // logistic, callibrated, see logic in Software Design Notebook
-    double rate = -2.79099 * Math.log(elevator.getElevatorPos() + 3.7677) + 6.60782;
+    // double rate = -2.79099 * Math.log(elevator.getElevatorPos() + 3.7677) + 6.60782;
 
     double clampedRate = MathUtil.clamp(
       rate, 
