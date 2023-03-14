@@ -79,8 +79,14 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   private boolean elevatorUpPriorIteration = false;       // Tracking for elevator position from prior iteration
 
 
-  private final MutableSlewRateLimiterBCR filterX = new MutableSlewRateLimiterBCR(maxAccelerationRate);
   private final SlewRateLimiter filterY = new SlewRateLimiter(maxAccelerationRate);
+
+  //  tier 4 = slowest acceleration, tier 1 = fastest acceleration
+  private final SlewRateLimiter filterXTier1 = new SlewRateLimiter(maxAccelerationRate);   // limiter in X direction when elevator is out
+  private final SlewRateLimiter filterXTier2 = new SlewRateLimiter(maxAccelerationRateAtScoreMid);   // limiter in X direction when elevator is out
+  private final SlewRateLimiter filterXTier3 = new SlewRateLimiter(maxAccelerationRateBetweenScoreMidAndHigh);   // limiter in X direction when elevator is out
+  private final SlewRateLimiter filterXTier4 = new SlewRateLimiter(maxAccelerationRateWithElevatorUp);   // limiter in X direction when elevator is out
+  private byte elevetorPriorIteration = 0b0000;
 
   /**
    * Constructs the DriveTrain subsystem
@@ -300,21 +306,77 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
     // interpolates the elevator position and converts it to a desired acceleration rate
     // linear
-    double rate = (elevator.getElevatorPos() - 3) * (maxAccelerationRate-maxAccelerationRateWithElevatorUp)/ElevatorPosition.upperLimit.value;
+    // double rate = (elevator.getElevatorPos() - 3) * (maxAccelerationRate-maxAccelerationRateWithElevatorUp)/ElevatorPosition.upperLimit.value;
     // logistic, callibrated, see logic in Software Design Notebook
     // double rate = -2.79099 * Math.log(elevator.getElevatorPos() + 3.7677) + 6.60782;
 
-    double clampedRate = MathUtil.clamp(
-      rate, 
-      maxAccelerationRateWithElevatorUp, 
-      maxAccelerationRate); 
-    filterX.setRateLimit(clampedRate);
+    // double clampedRate = MathUtil.clamp(
+    //   rate, 
+    //   maxAccelerationRateWithElevatorUp, 
+    //   maxAccelerationRate); 
+    // filterX.setRateLimit(clampedRate);
 
 
-    xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
+    // if (elevator.getElevatorRegion()==ElevatorRegion.bottom) {
+    //   // Elevator is down.  We can X-travel at full speed
+    //   if (elevatorUpPriorIteration) {
+    //     // Elevator was up but is now down.  Reset the fast slew rate limiter
+    //     filterX.reset(getChassisSpeeds().vxMetersPerSecond);
+    //   }
+    //   elevatorUpPriorIteration = false;
+    //   // x slew rate limit chassisspeed
+    //   xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
+    //   omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
+    // } else {
+    //   // Elevator is up.  X-travel slowly!
+    //   if (!elevatorUpPriorIteration) {
+    //     // Elevator was down but is now up.  Reset the slow slew rate limiter
+    //     filterXSlow.reset(MathUtil.clamp(getChassisSpeeds().vxMetersPerSecond, -maxXSpeedWithElevatorUp, maxXSpeedWithElevatorUp));     // Rev B8:  Added clamp on current velocity (may cause sudden deceleration) 
+    //   }
+    //   elevatorUpPriorIteration = true;
+    //   // x slew rate limit chassisspeed
+    //   xSlewed = filterXSlow.calculate(MathUtil.clamp(chassisSpeeds.vxMetersPerSecond, -maxXSpeedWithElevatorUp, maxXSpeedWithElevatorUp));
+    //   omegaLimited = MathUtil.clamp(chassisSpeeds.omegaRadiansPerSecond, -maxRotationRateWithElevatorUp, maxRotationRateWithElevatorUp);
+    // }
+
+    if (elevator.getElevatorPos() <= 6) {
+      // Elevator is down.  We can X-travel at full speed
+      xSlewed = filterXTier1.calculate(chassisSpeeds.vxMetersPerSecond);
+      if (!(elevetorPriorIteration == 0b0001)) {
+        // Elevator was up but is now down.  Reset the fast slew rate limiter
+        filterXTier1.reset(getChassisSpeeds().vxMetersPerSecond);
+      }
+      elevetorPriorIteration = 0b0001;
+      // omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
+    } else if (elevator.getElevatorPos() <= ElevatorPosition.scoreMidCone.value) {
+      xSlewed = filterXTier2.calculate(chassisSpeeds.vxMetersPerSecond);
+      // omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
+      if (!(elevetorPriorIteration == 0b0010)) {
+        // Elevator was up but is now down.  Reset the fast slew rate limiter
+        filterXTier2.reset(getChassisSpeeds().vxMetersPerSecond);
+      }
+      elevetorPriorIteration = 0b0010;
+    } else if (elevator.getElevatorPos() <= (ElevatorPosition.scoreMidCone.value+ElevatorPosition.scoreHighCone.value)/2) {
+      xSlewed = filterXTier3.calculate(chassisSpeeds.vxMetersPerSecond);
+      // omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
+      if (!(elevetorPriorIteration == 0b0100)) {
+        // Elevator was up but is now down.  Reset the fast slew rate limiter
+        filterXTier3.reset(getChassisSpeeds().vxMetersPerSecond);
+      }
+      elevetorPriorIteration = 0b0100;
+    } else {
+      // Elevator is up.  X-travel slowly!
+      xSlewed = filterXTier4.calculate(chassisSpeeds.vxMetersPerSecond);
+      // omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
+      if (!(elevetorPriorIteration == 0b1000)) {
+        // Elevator was up but is now down.  Reset the fast slew rate limiter
+        filterXTier4.reset(getChassisSpeeds().vxMetersPerSecond);
+      }
+      elevetorPriorIteration = 0b1000;
+    }
 
     // omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
-    if(elevator.getElevatorPos() < 3){
+    if(elevator.getElevatorPos() > 3){
       omegaLimited = MathUtil.clamp(chassisSpeeds.omegaRadiansPerSecond, -maxRotationRateWithElevatorUp, maxRotationRateWithElevatorUp);
     }else {
       omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
