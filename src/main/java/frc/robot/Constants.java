@@ -169,7 +169,7 @@ public final class Constants {
 
         // Auto balance constants
         public static final double maxPitchBalancedDegrees = 5.0;       // If abs(Pitch) is under this value, then assume we are balanced
-        public static final double kPDriveBalance = 0.017;       // 
+        public static final double kPDriveBalance = 0.018;       // 
       }
 
       public static final class TrajectoryConstants {
