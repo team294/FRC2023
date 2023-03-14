@@ -211,7 +211,7 @@ public class AutoSelection {
 					0.4, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
 				// new DriveToPose(posCross, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
 				// 	TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
-				new DriveUpChargingStation(-1.5, 1.5, driveTrain, log),
+				new DriveUpChargingStation(-1.2, 1.5, driveTrain, log),
 				new ActiveBalance(driveTrain, log)
 			// new DriveToPose(posFinal, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
 			// 	TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log)
