@@ -4,6 +4,7 @@
 
 package frc.robot.commands.autos;
 
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.ManipulatorConstants;
@@ -19,7 +20,7 @@ public class AutoScoreConeHigh extends SequentialCommandGroup {
   /**
    * Raise elevator to high position, score cone, and lower elevator
    */
-  public AutoScoreConeHigh(Elevator elevator, Wrist wrist, Manipulator manipulator, LED led, FileLog log) {
+  public AutoScoreConeHigh(boolean retract, Elevator elevator, Wrist wrist, Manipulator manipulator, LED led, FileLog log) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
@@ -29,7 +30,11 @@ public class AutoScoreConeHigh extends SequentialCommandGroup {
       new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, log),
       new WaitCommand(0.25),
       new EjectPiece(manipulator, log), 		// Runs for 1 second
-      new ElevatorWristStow(elevator, wrist, log),
+      new ConditionalCommand(
+        new ElevatorWristStow(elevator, wrist, log),
+        new WaitCommand(0.001), 
+        () -> retract
+      ),
       new FileLogWrite(true, false, "AutoScoreConeHigh", "Finish", log)
     );
   }
