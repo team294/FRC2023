@@ -65,7 +65,8 @@ public final class Constants {
         // public static final int CANElevatorMotor2 = 22;
         public static final int CANWristMotor = 45; 
 
-        public static final int CANIntake = 40;
+        public static final int CANIntake1 = 40;
+        public static final int CANIntake2 = 15;
         public static final int CANManipulator = 43; 
         public static final int CANConveyor = 47;
 
