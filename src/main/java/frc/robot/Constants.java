@@ -128,13 +128,14 @@ public final class Constants {
         // Max acceleration measured 1/25/2023 (with ~80lbs on robot):  Average of 4 wheels = 10.0 m/sec^2
         // Max acceleration measured 2/12/2023 (with new drive gears):  Average ~11 m/sec^2.  Keep value at 10.0 for now.
         public static final double kMaxAccelerationMetersPerSecondSquare = 10; // CALIBRATED-3
-        public static final double kNominalAccelerationMetersPerSecondSquare = 0.7*kMaxAccelerationMetersPerSecondSquare;
+        public static final double kNominalAccelerationMetersPerSecondSquare = 3.5; // was 7.0 for week 1
         public static final double kMaxTurningRadiansPerSecond = 11.0;   // CALIBRATED-3 took 633 degreesPerSecond and converted to radians and rounded down
         public static final double kNominalTurningRadiansPerSecond = Math.PI;
         public static final double kMaxAngularAccelerationRadiansPerSecondSquared = 35.0;            // CALIBRATED-3 37.4 rad/sec^2
         public static final double kNominalAngularAccelerationRadiansPerSecondSquared = Math.PI;
         public static final double kVDrive = 0.2034; // CALIBRATED-3 = 0.2511.  in % output per meters per second.  Calibration says 0.2511, but better match on a trapezoid is 
         public static final double kADrive = 0.0;
+        public static final double kADriveToPose = 0.060;
         public static final double kSDrive = 0.016; // CALIBRATED-3 = 0.016.  in % output
 
     }
@@ -165,6 +166,7 @@ public final class Constants {
         public static final double maxXSpeedWithElevatorUp = 1.0;       // m/s
         public static final double maxAccelerationRate = 5.0;           // m/s^2
         public static final double maxAccelerationRateWithElevatorUp = 2.0;           // m/s^2
+        public static final double maxAccelerationRateAtScoreMid = 3.5;           // m/s^2
         public static final double maxRotationRateWithElevatorUp = 0.8;     // rad/sec
 
         // Auto balance constants
@@ -175,11 +177,20 @@ public final class Constants {
       public static final class TrajectoryConstants {
         // Max error for robot rotation
         public static final double maxThetaErrorDegrees = 1.0;
-        public static final double maxPositionErrorMeters = 0.02;
+        public static final double maxPositionErrorMeters = 0.04; // 1.6 inches
+
+        // Max error for interim positions (not final)
+        public static final double interimThetaErrorDegrees = 2.0;        
+        public static final double interimPositionErrorMeters = 0.20; // 8 inches
 
         // Feedback terms for holonomic drive controllers
-        public static final double kPXController = 1;       // X-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)
-        public static final double kPYController = 1;       // Y-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)
+
+        // X-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)
+        public static final double kPXController = 1;
+
+        // Y-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)  
+        public static final double kPYController = 1; 
+
         public static final double kPThetaController = 3;   // Theta-velocity controller:  kp.  Units = (rad/sec of velocity) / (radians of angle error)
 
         public static final TrajectoryConfig swerveTrajectoryConfig =
@@ -209,16 +220,8 @@ public final class Constants {
         public static final Transform3d robotToCam =
                 new Transform3d(
                     // new Translation3d(Units.inchesToMeters(6.0), 0.0, Units.inchesToMeters(30.5)),       Changed in B3
-                    new Translation3d(Units.inchesToMeters(6.0)+0.02, -0.005, Units.inchesToMeters(30.5)),
-                        new Rotation3d(
-                                0, 0,
-                                0)); // Cam mounted facing forward in center of robot
-                // new Transform3d(
-                //         new Translation3d(0.5, 0.0, 0.5),
-                //         new Rotation3d(
-                //                 0, 0,
-                //                 0)); // Cam mounted facing forward, half a meter forward of center, half a meter up
-        // from center.
+                    new Translation3d(Units.inchesToMeters(6.75), -0.005, Units.inchesToMeters(30.5)),
+                    new Rotation3d(0, 0, 0)); // Cam mounted facing forward in center of robot
         public static final String cameraName = "CenterCamera";
         public static final double targetSideLength = Units.inchesToMeters(6);
     }
@@ -259,7 +262,7 @@ public final class Constants {
         public enum WristAngle {
             lowerLimit(-119.0),      // CALIBRATED
             startConfig(-119.0),     // CALIBRATED
-            loadConveyor(-117.5),    // CALIBRATED
+            loadConveyor(-119.0),    // Conveyor gone so this is unnecesary currently, was -117.5
             loadHumanStation(10.0),      // CALIBRATED
             scoreLow(0.0),
             scoreMidHigh(20.0),         // Was 10.0
@@ -290,8 +293,8 @@ public final class Constants {
             uncalibrated;       // Unknown region, elevator is not calibrated.
         }
         // Elevator region boundaries
-        public static final double boundBottomLow = 2.0;        // Boundary between bottom and low regions
-        public static final double boundMainLow = 2.0;      // Boundary between low and main regions.  CALIBRATED
+        public static final double boundBottomLow = 0.0;        // Boundary between bottom and low regions, was 2.0
+        public static final double boundMainLow = 0.0;      // Boundary between low and main regions.  not necessary because , was 2.0
 
         // Elevator pre-defined positions (in inches from bottom of elevator)
         public enum ElevatorPosition {
@@ -299,7 +302,7 @@ public final class Constants {
             bottom(0.0),            // CALIBRATED
             loadingStationCube(35.0),   // CALIBRATED
             loadingStationCone(45.0),   // CALIBRATED
-            scoreLow(5.0),          // CALIBRATED
+            scoreLow(0.0),          // CALIBRATED, was 5.0
             scoreMidCone(21.0),     // CALIBRATED
             scoreHighCone(41.0),    // CALIBRATED
             upperLimit(45.4);       // CALIBRATED
