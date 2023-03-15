@@ -21,6 +21,7 @@ public class DriveUpChargingStation extends CommandBase {
    * This command will drive robot up a ramp a given distance
    * or until the ramp tilts. It will print the maximum slope of the ramp.
    * @param speed the speed (m/s) at which the robot will drive, field relative
+   * @param minDistance minimum distance travelled to end command
    * @param drivetrain the DriveTrain subsystem on which this command will run
    * @param log FileLog used for logging
    */

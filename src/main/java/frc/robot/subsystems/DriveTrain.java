@@ -79,6 +79,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   private boolean elevatorUpPriorIteration = false;       // Tracking for elevator position from prior iteration
 
 
+  private final SlewRateLimiter filterXSlow = new SlewRateLimiter(maxAccelerationRateWithElevatorUp);
   private final MutableSlewRateLimiterBCR filterX = new MutableSlewRateLimiterBCR(maxAccelerationRate);
   private final SlewRateLimiter filterY = new SlewRateLimiter(maxAccelerationRate);
 
@@ -298,23 +299,30 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
     double xSlewed, omegaLimited;
 
+    if (elevator.getElevatorPos() < 5 || DriverStation.isAutonomousEnabled()) {
+      xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
+    } else {
+      xSlewed = filterXSlow.calculate(chassisSpeeds.vxMetersPerSecond);
+    }
+    
     // interpolates the elevator position and converts it to a desired acceleration rate
     // previously linear
+    // double rate = (elevator.getElevatorPos() - 3) * (maxAccelerationRate-maxAccelerationRateWithElevatorUp)/ElevatorPosition.upperLimit.value;
     // double rate = elevator.getElevatorPos() * (maxAccelerationRate-maxAccelerationRateWithElevatorUp)/ElevatorPosition.upperLimit.value;
     // logistic, callibrated, see logic in Software Design Notebook
-    double rate = -2.79099 * Math.log(elevator.getElevatorPos() + 3.7677) + 6.60782;
+    // double rate = -2.79099 * Math.log(elevator.getElevatorPos() + 3.7677) + 6.60782;
 
-    double clampedRate = MathUtil.clamp(
-      rate, 
-      maxAccelerationRateWithElevatorUp, 
-      maxAccelerationRate); 
-    filterX.setRateLimit(clampedRate);
+    // double clampedRate = MathUtil.clamp(
+    //   rate, 
+    //   maxAccelerationRateWithElevatorUp, 
+    //   maxAccelerationRate); 
+    // filterX.setRateLimit(clampedRate);
 
 
-    xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
+    // xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
 
     // omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
-    if(elevator.getElevatorPos() < 3){
+    if(elevator.getElevatorPos() > 3){
       omegaLimited = MathUtil.clamp(chassisSpeeds.omegaRadiansPerSecond, -maxRotationRateWithElevatorUp, maxRotationRateWithElevatorUp);
     }else {
       omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
