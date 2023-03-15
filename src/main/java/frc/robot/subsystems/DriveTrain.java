@@ -314,7 +314,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
 
     // omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
-    if(elevator.getElevatorPos() < 3){
+    if(elevator.getElevatorPos() > 3){
       omegaLimited = MathUtil.clamp(chassisSpeeds.omegaRadiansPerSecond, -maxRotationRateWithElevatorUp, maxRotationRateWithElevatorUp);
     }else {
       omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
