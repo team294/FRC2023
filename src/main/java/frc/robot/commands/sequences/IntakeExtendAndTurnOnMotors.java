@@ -25,7 +25,7 @@ public class IntakeExtendAndTurnOnMotors extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new IntakePistonSetPosition(true, intake, log),
-      new IntakeSetPercentOutput(0.25, intake, log)
+      new IntakeSetPercentOutput(0.75, intake, log)
     );
   }
 }
