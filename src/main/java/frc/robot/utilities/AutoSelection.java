@@ -11,6 +11,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
@@ -21,6 +22,7 @@ import frc.robot.commands.sequences.ElevatorWristMoveToUpperPosition;
 import frc.robot.commands.sequences.ElevatorWristStow;
 import frc.robot.commands.sequences.IntakeExtendAndTurnOnMotors;
 import frc.robot.commands.sequences.IntakeRetractAndTurnOffMotors;
+import frc.robot.commands.sequences.IntakeToManipulator;
 import frc.robot.subsystems.*;
 
 
@@ -166,7 +168,7 @@ public class AutoSelection {
 			    new AutoScoreConeHigh(false, elevator, wrist, manipulator, led, log),
 				new ParallelCommandGroup(
 					new ElevatorWristStow(elevator, wrist, log),
-					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
 					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
 				),
 				new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
@@ -207,7 +209,7 @@ public class AutoSelection {
 				new ParallelCommandGroup(
 					new ElevatorWristStow(elevator, wrist, log),
 					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
-					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
+						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
 				),
 				new DriveToPose(posCross, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
 					0.4, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
@@ -247,7 +249,7 @@ public class AutoSelection {
 				new ParallelCommandGroup(
 					new ElevatorWristStow(elevator, wrist, log),
 					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
-					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
+						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
 				),
 				// new DriveToPose(posLeave, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
 				// 	TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
@@ -287,20 +289,17 @@ public class AutoSelection {
 				new DriveResetPose(posScoreInitial, true, driveTrain, log),
 				new AutoScoreConeHigh(false, elevator, wrist, manipulator, led, log),
 				new ParallelCommandGroup(
-					new ElevatorWristStow(elevator, wrist, log),
+					// new ElevatorWristStow(elevator, wrist, log),
+					new ManipulatorSetPistonPosition(false, led, manipulator, log),
+					new IntakeToManipulator(intake, elevator, wrist, manipulator, log),
 					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
-					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
+						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log).until(() -> manipulator.isCubePresent())
 				),
-				new ManipulatorSetPistonPosition(false, led, manipulator, log),
-				new ParallelCommandGroup(
-					new IntakeExtendAndTurnOnMotors(intake, log),
-					new DriveToPose(posLeave, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
-						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log)
-				),
+				new ManipulatorSetPercent(ManipulatorConstants.pieceHoldPct, manipulator, log),
 				new ParallelCommandGroup(
 					new IntakeRetractAndTurnOffMotors(intake, log),
 					new DriveToPose(posLineUp, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
-					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
+						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
 					new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value, elevator, wrist, log)
 				),	
 				new AutoScoreCubeHigh(posLineUp, posFinal, driveTrain, elevator, wrist, manipulator, led, log)
@@ -335,24 +334,18 @@ public class AutoSelection {
 			new DriveResetPose(posScoreInitial, true, driveTrain, log),
 			new AutoScoreConeHigh(false, elevator, wrist, manipulator, led, log),
 			new ParallelCommandGroup(
-					new ElevatorWristStow(elevator, wrist, log),
+					new ManipulatorSetPistonPosition(false, led, manipulator, log),
+					new IntakeToManipulator(intake, elevator, wrist, manipulator, log),
 					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
-					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
+					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log).until(() -> manipulator.isCubePresent())
 				),
-			new ManipulatorSetPistonPosition(false, led, manipulator, log),
-			new ParallelCommandGroup(
-				new IntakeExtendAndTurnOnMotors(intake, log),
-				new DriveToPose(posLeave, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
-					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log)
-			),
+			new ManipulatorSetPercent(ManipulatorConstants.pieceHoldPct, manipulator, log),
 			new ParallelCommandGroup(
 				new IntakeRetractAndTurnOffMotors(intake, log),
 				new DriveToPose(posLineUp, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
-				TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
+					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
 				new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value, elevator, wrist, log)
 			),
-			// new DriveToPose(posFinal, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
-			// TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, false, driveTrain, log)
 			new AutoScoreCubeHigh(posLineUp, posFinal, driveTrain, elevator, wrist, manipulator, led, log)
 			
 			);
@@ -383,21 +376,19 @@ public class AutoSelection {
 				new DriveResetPose(posScoreInitial, true, driveTrain, log),
 				new AutoScoreConeHigh(false, elevator, wrist, manipulator, led, log),
 				new ParallelCommandGroup(
-					new ElevatorWristStow(elevator, wrist, log),
-					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
-					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
+					new ManipulatorSetPistonPosition(false, led, manipulator, log),
+					new IntakeToManipulator(intake, elevator, wrist, manipulator, log),
+					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
+						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
 				),
-				// new ParallelCommandGroup(
-				// Deploy intake
-				new DriveToPose(posLeave, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
-					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
-				// ),
-				// new ParallelCommandGroup(
-				// Retract Intake
-				new DriveToPose(posCross, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
-					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
-				new DriveUpChargingStation(-0.5, 1.5, driveTrain, log),
-				new ActiveBalance(driveTrain, log)
+				new ManipulatorSetPercent(ManipulatorConstants.pieceHoldPct, manipulator, log),
+				new ParallelCommandGroup(
+					new IntakeRetractAndTurnOffMotors(intake, log),
+					new DriveToPose(posCross, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
+						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log)
+				),
+				new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
+				new ActiveBalance(driveTrain, log)	
 			);
 		}
 
@@ -426,20 +417,18 @@ public class AutoSelection {
 			new DriveResetPose(posScoreInitial, true, driveTrain, log),
 			new AutoScoreConeHigh(false, elevator, wrist, manipulator, led, log),
 			new ParallelCommandGroup(
-					new ElevatorWristStow(elevator, wrist, log),
-					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
-					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
-				),
-			// new ParallelCommandGroup(
-			// Deploy intake
-			new DriveToPose(posLeave, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
-			TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
-			// ),
-			// new ParallelCommandGroup(
-			// Retract Intake
-			new DriveToPose(posCross, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
-			TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
-			new DriveUpChargingStation(-0.5, 1.5, driveTrain, log),
+					new ManipulatorSetPistonPosition(false, led, manipulator, log),
+					new IntakeToManipulator(intake, elevator, wrist, manipulator, log),
+					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
+						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
+			),
+			new ManipulatorSetPercent(ManipulatorConstants.pieceHoldPct, manipulator, log),
+			new ParallelCommandGroup(
+				new IntakeRetractAndTurnOffMotors(intake, log),
+				new DriveToPose(posCross, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
+					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log)
+			),
+			new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
 			new ActiveBalance(driveTrain, log)
 			);
 		}

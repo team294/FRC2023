@@ -5,27 +5,31 @@
 package frc.robot.commands.sequences;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.commands.IntakePistonSetPosition;
-import frc.robot.commands.IntakeSetPercentOutput;
+import frc.robot.Constants.ManipulatorConstants;
+import frc.robot.commands.ManipulatorSetPercent;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.FileLog;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class IntakeExtendAndTurnOnMotors extends SequentialCommandGroup {
-  /** Creates a new IntakeExtendAndTurnOnMotors. */
+public class IntakeToManipulator extends SequentialCommandGroup {
+  /** Creates a new IntakeToManipulator. */
   /**
-   * Extends intake and runs intake motor
+   *  Extends intake and runs intake motor, Stows Wrist and Elevator, Runs manipulator motor to pick up from ground
    * @param intake
+   * @param elevator
+   * @param wrist
+   * @param manipulator
    * @param log
    */
-  public IntakeExtendAndTurnOnMotors(Intake intake, FileLog log) {
+  public IntakeToManipulator(Intake intake, Elevator elevator, Wrist wrist, Manipulator manipulator, FileLog log) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      new IntakePistonSetPosition(true, intake, log),
-      new IntakeSetPercentOutput(0.25, intake, log)
+      new IntakeExtendAndTurnOnMotors(intake, log),
+      new ElevatorWristStow(elevator, wrist, log),
+      new ManipulatorSetPercent(ManipulatorConstants.pieceGrabPct, manipulator, log)
     );
   }
 }

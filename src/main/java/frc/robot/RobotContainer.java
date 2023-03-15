@@ -402,7 +402,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoSelection.getAutoCommand(elevator, wrist, manipulator, driveTrain, led, log);
+    return autoSelection.getAutoCommand(intake, elevator, wrist, manipulator, driveTrain, led, log);
   }
 
 
