@@ -129,6 +129,7 @@ public final class Constants {
         // Max acceleration measured 2/12/2023 (with new drive gears):  Average ~11 m/sec^2.  Keep value at 10.0 for now.
         public static final double kMaxAccelerationMetersPerSecondSquare = 10; // CALIBRATED-3
         public static final double kNominalAccelerationMetersPerSecondSquare = 3.5; // was 7.0 for week 1
+        public static final double kMaxRetractingAccelerationMetersPerSecondSquare = 2; // 
         public static final double kMaxTurningRadiansPerSecond = 11.0;   // CALIBRATED-3 took 633 degreesPerSecond and converted to radians and rounded down
         public static final double kNominalTurningRadiansPerSecond = Math.PI;
         public static final double kMaxAngularAccelerationRadiansPerSecondSquared = 35.0;            // CALIBRATED-3 37.4 rad/sec^2
@@ -165,16 +166,18 @@ public final class Constants {
         // Driving constants to cap acceleration
         public static final double maxXSpeedWithElevatorUp = 1.0;       // m/s
         public static final double maxAccelerationRate = 5.0;           // m/s^2
-        public static final double maxAccelerationRateWithElevatorUp = 2.0;           // m/s^2
+        public static final double maxAccelerationRateWithElevatorUp = 1.0;           // m/s^2
         public static final double maxAccelerationRateAtScoreMid = 3.5;           // m/s^2
         public static final double maxRotationRateWithElevatorUp = 0.8;     // rad/sec
 
         // Auto balance constants
         public static final double maxPitchBalancedDegrees = 5.0;       // If abs(Pitch) is under this value, then assume we are balanced
-        public static final double kPDriveBalance = 0.019;       // 
+        public static final double kPDriveBalance = 0.018;       // 
       }
 
       public static final class TrajectoryConstants {
+        public static final double ChargeStationVelocity = 1.2;
+
         // Max error for robot rotation
         public static final double maxThetaErrorDegrees = 1.0;
         public static final double maxPositionErrorMeters = 0.04; // 1.6 inches
@@ -220,8 +223,8 @@ public final class Constants {
         public static final Transform3d robotToCam =
                 new Transform3d(
                     // new Translation3d(Units.inchesToMeters(6.0), 0.0, Units.inchesToMeters(30.5)),       Changed in B3
-                    new Translation3d(Units.inchesToMeters(6.75), -0.005, Units.inchesToMeters(30.5)),
-                    new Rotation3d(0, 0, 0)); // Cam mounted facing forward in center of robot
+                    new Translation3d(Units.inchesToMeters(7.75), -0.005, Units.inchesToMeters(30.5)),
+                    new Rotation3d(0, Units.degreesToRadians(15), 0)); // Cam mounted facing forward in center of robot
         public static final String cameraName = "CenterCamera";
         public static final double targetSideLength = Units.inchesToMeters(6);
     }
