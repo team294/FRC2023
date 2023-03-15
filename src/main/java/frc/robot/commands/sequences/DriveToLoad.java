@@ -20,7 +20,7 @@ public class DriveToLoad extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new DriveToPose(new Pose2d(16.17878-1.7, 6.749796-0.25, new Rotation2d(0)),
-        SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
+        SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
         TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, true, driveTrain, log),
       new DriveStop(driveTrain, log),
       new ManipulatorGrab(0.8, BehaviorType.immediatelyEnd, manipulator, log),

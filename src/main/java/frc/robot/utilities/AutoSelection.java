@@ -207,7 +207,7 @@ public class AutoSelection {
 					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
 					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
 				),
-				new DriveToPose(posCross, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+				new DriveToPose(posCross, SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
 					0.4, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
 				// new DriveToPose(posCross, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
 				// 	TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
@@ -249,7 +249,7 @@ public class AutoSelection {
 				),
 				// new DriveToPose(posLeave, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
 				// 	TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
-				new DriveToPose(posCross, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
+				new DriveToPose(posCross, SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
 					0.4, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
 				new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
 				new ActiveBalance(driveTrain, log)
@@ -292,12 +292,12 @@ public class AutoSelection {
 				new ManipulatorSetPistonPosition(false, led, manipulator, log),
 				// new ParallelCommandGroup(
 				// Deploy intake
-				new DriveToPose(posLeave, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
+				new DriveToPose(posLeave, SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
 					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
 				// ),
 				// new ParallelCommandGroup(
 				// Retract Intake
-				new DriveToPose(posLineUp, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
+				new DriveToPose(posLineUp, SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
 					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
 				new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value, elevator, wrist, log),
 				// ),
@@ -342,12 +342,12 @@ public class AutoSelection {
 			new ManipulatorSetPistonPosition(false, led, manipulator, log),
 			// new ParallelCommandGroup(
 			// Deploy intake
-			new DriveToPose(posLeave, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
+			new DriveToPose(posLeave, SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
 			TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
 			// ),
 			// new ParallelCommandGroup(
 			// Retract Intake
-			new DriveToPose(posLineUp, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
+			new DriveToPose(posLineUp, SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
 			TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
 			new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value, elevator, wrist, log),
 			// ),
@@ -389,12 +389,12 @@ public class AutoSelection {
 				),
 				// new ParallelCommandGroup(
 				// Deploy intake
-				new DriveToPose(posLeave, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
+				new DriveToPose(posLeave, SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
 					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
 				// ),
 				// new ParallelCommandGroup(
 				// Retract Intake
-				new DriveToPose(posCross, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
+				new DriveToPose(posCross, SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
 					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
 				new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
 				new ActiveBalance(driveTrain, log)
@@ -433,12 +433,12 @@ public class AutoSelection {
 				),
 			// new ParallelCommandGroup(
 			// Deploy intake
-			new DriveToPose(posLeave, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
+			new DriveToPose(posLeave, SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
 			TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
 			// ),
 			// new ParallelCommandGroup(
 			// Retract Intake
-			new DriveToPose(posCross, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxAccelerationMetersPerSecondSquare,
+			new DriveToPose(posCross, SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
 			TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
 			new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
 			new ActiveBalance(driveTrain, log)
