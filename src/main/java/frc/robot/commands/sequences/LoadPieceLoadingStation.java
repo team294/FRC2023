@@ -6,6 +6,7 @@ package frc.robot.commands.sequences;
 
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.commands.*;
@@ -31,7 +32,7 @@ public class LoadPieceLoadingStation extends SequentialCommandGroup {
         new ElevatorWristMoveToUpperPosition(ElevatorPosition.loadingStationCube.value, WristAngle.loadHumanStation.value, elevator, wrist, log), 
         manipulator::getPistonCone
       ),
-      new ManipulatorGrab(0.8, BehaviorType.waitForConeOrCube, manipulator, log)
+      new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log)
     );
   }
 }

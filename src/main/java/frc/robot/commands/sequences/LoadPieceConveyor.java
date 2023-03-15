@@ -5,6 +5,7 @@
 package frc.robot.commands.sequences;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.commands.*;
 import frc.robot.commands.ManipulatorGrab.BehaviorType;
 import frc.robot.subsystems.*;
@@ -25,7 +26,7 @@ public class LoadPieceConveyor extends SequentialCommandGroup {
     addCommands(
       new ElevatorWristStow(elevator, wrist, log),
       new ConveyorMove(0.3, conveyor, log),
-      new ManipulatorGrab(0.8, BehaviorType.waitForConeOrCube, manipulator, log),
+      new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log),
       new ConveyorMove(0, conveyor, log)
     );
   }

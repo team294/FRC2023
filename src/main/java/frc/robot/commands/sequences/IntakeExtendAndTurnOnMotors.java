@@ -4,9 +4,15 @@
 
 package frc.robot.commands.sequences;
 
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.commands.IntakePistonSetPosition;
 import frc.robot.commands.IntakeSetPercentOutput;
+import frc.robot.commands.ManipulatorGrab;
+import frc.robot.commands.ManipulatorSetPercent;
+import frc.robot.commands.ManipulatorGrab.BehaviorType;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.FileLog;
 
@@ -16,16 +22,24 @@ import frc.robot.utilities.FileLog;
 public class IntakeExtendAndTurnOnMotors extends SequentialCommandGroup {
   /** Creates a new IntakeExtendAndTurnOnMotors. */
   /**
-   * Extends intake and runs intake motor
+   * Extends intake and runs intake and manipulator motors if the elevator is down
+   * @param manipulator
    * @param intake
    * @param log
    */
-  public IntakeExtendAndTurnOnMotors(Intake intake, FileLog log) {
+  public IntakeExtendAndTurnOnMotors(Manipulator manipulator, Intake intake, Elevator elevator, FileLog log) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      new IntakePistonSetPosition(true, intake, log),
-      new IntakeSetPercentOutput(0.75, intake, log)
+      new ConditionalCommand(
+        new SequentialCommandGroup(
+        new IntakePistonSetPosition(true, intake, log),
+        new IntakeSetPercentOutput(0.75, intake, log),
+        new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log)
+        ),
+        new WaitCommand(0.01),
+      () -> elevator.getElevatorPos() < 2
+    )
     );
   }
 }
