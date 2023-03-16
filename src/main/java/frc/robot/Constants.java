@@ -298,8 +298,8 @@ public final class Constants {
             uncalibrated;       // Unknown region, elevator is not calibrated.
         }
         // Elevator region boundaries
-        public static final double boundBottomLow = 2.0;        // Boundary between bottom and low regions, was 2.0
-        public static final double boundMainLow = 2.0;      // Boundary between low and main regions.  not necessary because , was 2.0
+        public static final double boundBottomLow = 2.0;        // Boundary between bottom and low regions
+        public static final double boundMainLow = 2.0;      // Boundary between low and main regions
 
         // Elevator pre-defined positions (in inches from bottom of elevator)
         public enum ElevatorPosition {
