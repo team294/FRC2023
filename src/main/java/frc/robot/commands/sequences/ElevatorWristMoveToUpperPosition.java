@@ -42,10 +42,12 @@ public class ElevatorWristMoveToUpperPosition extends SequentialCommandGroup {
     }
 
     addCommands(
-      // If wrist is in backFar region, then move wrist into BackMid region
-      // so that the elevator can move up
+      // Only extend the elevator if the intake is not deployed
       new ConditionalCommand(
+        
         new SequentialCommandGroup(
+          // If wrist is in backFar region, then move wrist into BackMid region
+          // so that the elevator can move up
           new ConditionalCommand(
             new WristSetAngle(WristConstants.boundBackFarMid+1.0, wrist, log), 
             new WaitCommand(0.01), 
@@ -69,6 +71,8 @@ public class ElevatorWristMoveToUpperPosition extends SequentialCommandGroup {
           // move wrist to final position
           new WristSetAngle(wristAngle, wrist, log)
         ),
+        
+        // Don't extend if the intake is deployed
         new WaitCommand(.01),
         () -> !intake.isDeployed()
       )
