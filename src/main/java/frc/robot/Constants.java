@@ -161,7 +161,6 @@ public final class Constants {
         public static double offsetAngleBackRightMotor = 0; // -170.2
 
         // Driving constants to cap acceleration
-        public static final double maxXSpeedWithElevatorUp = 1.0;       // m/s
         public static final double maxAccelerationRate = 5.0;           // m/s^2
         public static final double maxAccelerationRateAtScoreMid = 3.5;           // m/s^2
         public static final double maxAccelerationRateBetweenScoreMidAndHigh = 3.0;           // m/s^2
@@ -314,13 +313,23 @@ public final class Constants {
         }
 
         public enum ElevatorSlewRegion {
-            min(6),
-            low(ElevatorPosition.scoreMidCone.value),
-            medium((ElevatorPosition.scoreMidCone.value+ElevatorPosition.scoreHighCone.value)/2),
-            max(ElevatorPosition.upperLimit.value);
+            min(6.0, SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxTurningRadiansPerSecond),
+            low(ElevatorPosition.scoreMidCone.value, 3.0, 5.0),
+            medium((ElevatorPosition.scoreMidCone.value+ElevatorPosition.scoreHighCone.value)/2, 2.0, 1.6),
+            max(ElevatorPosition.upperLimit.value, 1.0, 0.8);
 
-            public final double position;
-            ElevatorSlewRegion(double position) { this.position = position; }
+            public final double position, velocity, rotationRate;
+            /**
+             * 
+             * @param position position of elevator
+             * @param velocity max velocity of the robot when the elevator is at the position
+             * @param rotationRate max rotation rate of the robot when the elevator is at the position
+             */
+            ElevatorSlewRegion(double position, double velocity, double rotationRate) { 
+                this.position = position;
+                this.velocity = velocity;
+                this.rotationRate = rotationRate;
+            }
         }
       }
 
