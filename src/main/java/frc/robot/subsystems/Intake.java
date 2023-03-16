@@ -51,13 +51,13 @@ public class Intake extends SubsystemBase implements Loggable {
     logRotationKey = log.allocateLogRotation();
 
     motor1.setNeutralMode(NeutralMode.Coast);
-    motor1.setInverted(false);
+    motor1.setInverted(true);
     motor1.configVoltageCompSaturation(12.0, 100);
     motor1.enableVoltageCompensation(true);
     motor1.configOpenloopRamp(0.3, 100);     //seconds from neutral to full
 
     motor2.setNeutralMode(NeutralMode.Coast);
-    motor2.setInverted(false);
+    motor2.setInverted(true);
     motor2.configVoltageCompSaturation(12.0, 100);
     motor2.enableVoltageCompensation(true);
     motor2.configOpenloopRamp(0.3, 100);     //seconds from neutral to full
