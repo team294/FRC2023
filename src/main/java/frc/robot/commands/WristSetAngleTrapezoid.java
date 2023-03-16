@@ -13,7 +13,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.Constants.SwerveConstants;
+import frc.robot.Constants.CoordType;
+import frc.robot.Constants.WristConstants;;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.*;
 
@@ -23,18 +24,15 @@ public class WristSetAngleTrapezoid extends CommandBase {
    * Does not regenerate the profile every time
    */
 
-  private DriveTrain driveTrain; // reference to driveTrain
-  private boolean fieldRelative;
-  private double target; // how many more degrees to the right to turn
+  private Wrist wrist; // reference to driveTrain
+  private CoordType coordType;
+  private double target; // goal angle
+  private double currAngle;
+  private double startAngle;
   private double maxVel; // max velocity, between 0 and kMaxSpeedMetersPerSecond in Constants 
   private double maxAccel; // max acceleration, between 0 and kMaxAccelerationMetersPerSecondSquared in Constants
   private long profileStartTime; // initial time (time of starting point)
-  private double currDist;
   private boolean regenerate;
-  private boolean fromShuffleboard;
-  private double angleInput, angleTarget;   // angleTarget is an absolute gyro angle
-  private Translation2d startLocation;
-  private SwerveModuleState[] desiredStates;
   private FileLog log;
   private boolean isOpenLoop;
 
@@ -59,84 +57,31 @@ public class WristSetAngleTrapezoid extends CommandBase {
    * @param driveTrain reference to the drive train subsystem
    * @param log
    */
-  public WristSetAngleTrapezoid(double target, boolean fieldRelative, double angle, double maxVel, double maxAccel, boolean regenerate, boolean isOpenLoop, DriveTrain driveTrain, FileLog log) {
-    this.driveTrain = driveTrain;
+  public WristSetAngleTrapezoid(double target, CoordType coordType, double maxVel, double maxAccel, boolean regenerate, boolean isOpenLoop, Wrist wrist, FileLog log) {
+    this.wrist = wrist;
     this.log = log;
-    this.fieldRelative = fieldRelative;
-    angleInput = angle;
     this.regenerate = regenerate;
     this.isOpenLoop = isOpenLoop;
-    this.fromShuffleboard = false;
     this.target = target;
-    this.maxVel = MathUtil.clamp(Math.abs(maxVel), 0, SwerveConstants.kMaxSpeedMetersPerSecond);
-    this.maxAccel = MathUtil.clamp(Math.abs(maxAccel), 0, SwerveConstants.kMaxAccelerationMetersPerSecondSquare);
+    this.coordType = coordType;
+    this.maxVel = MathUtil.clamp(Math.abs(maxVel), 0, WristConstants.kMaxAngularVel);
+    this.maxAccel = MathUtil.clamp(Math.abs(maxAccel), 0, WristConstants.kMaxAngularAcc);
 
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(driveTrain);
+    addRequirements(wrist);
   }
 
 
-  /**
-   * Use this constructor when reading values from Shuffleboard
-   * @param fieldRelative false = angle is relative to current robot facing,
-   *   true = angle is an absolute field angle (0 = away from drive station)
-   * @param regenerate true = regenerate profile each cycle (to accurately reach target distance), false = don't regenerate (for debugging)
-   * @param isOpenLoop true = feed-forward only for velocity control, false = PID feedback velocity control
-   * @param driveTrain reference to the drive train subsystem
-   * @param log
-   */
-  public WristSetAngleTrapezoid(boolean fieldRelative, boolean regenerate, boolean isOpenLoop, DriveTrain driveTrain, FileLog log) {
-    this.driveTrain = driveTrain;
-    this.log = log;
-    this.fieldRelative = fieldRelative;
-    angleInput = 0;
-    this.regenerate = regenerate;
-    this.isOpenLoop = isOpenLoop;
-    this.fromShuffleboard = true;
-    this.target = 0;
-    this.maxVel = 0.5 * SwerveConstants.kMaxSpeedMetersPerSecond;
-    this.maxAccel = 0.5 * SwerveConstants.kMaxAccelerationMetersPerSecondSquare;
-
-    // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(driveTrain);
-
-    if(SmartDashboard.getNumber("WristSetAngleTrapezoid Manual Target Dist", -9999) == -9999) {
-      SmartDashboard.putNumber("WristSetAngleTrapezoid Manual Target Dist", 2);
-    }
-    if(SmartDashboard.getNumber("WristSetAngleTrapezoid Manual Angle", -9999) == -9999) {
-      SmartDashboard.putNumber("WristSetAngleTrapezoid Manual Angle", 0);
-    }
-    if(SmartDashboard.getNumber("WristSetAngleTrapezoid Manual MaxVel", -9999) == -9999) {
-      SmartDashboard.putNumber("WristSetAngleTrapezoid Manual MaxVel", 0.5*SwerveConstants.kMaxSpeedMetersPerSecond);
-    }
-    if(SmartDashboard.getNumber("WristSetAngleTrapezoid Manual MaxAccel", -9999) == -9999) {
-      SmartDashboard.putNumber("WristSetAngleTrapezoid Manual MaxAccel", 0.5*SwerveConstants.kMaxAccelerationMetersPerSecondSquare);
-    }
-  }
+  
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    if(fromShuffleboard) {
-      target = SmartDashboard.getNumber("WristSetAngleTrapezoid Manual Target Dist", 2);
-      angleInput = SmartDashboard.getNumber("WristSetAngleTrapezoid Manual Angle", 0);
-      maxVel = SmartDashboard.getNumber("WristSetAngleTrapezoid Manual MaxVel", SwerveConstants.kMaxSpeedMetersPerSecond);
-      maxVel = MathUtil.clamp(Math.abs(maxVel), 0, SwerveConstants.kMaxSpeedMetersPerSecond);
-      maxAccel = SmartDashboard.getNumber("WristSetAngleTrapezoid Manual MaxAccel", SwerveConstants.kMaxAccelerationMetersPerSecondSquare);
-      maxAccel = MathUtil.clamp(Math.abs(maxAccel), 0, SwerveConstants.kMaxAccelerationMetersPerSecondSquare);
-    }
-
     // Calculate target angle
-    if (fieldRelative) {
-      angleTarget = angleInput - driveTrain.getGyroRotation();
-    } else {
-      angleTarget = angleInput;
+    if (coordType == CoordType.kAbsolute) {
+      target = target;
     }
-
-    // Initialize swerve states
-    SwerveModuleState state = new SwerveModuleState(0, Rotation2d.fromDegrees(angleTarget));
-    desiredStates = new SwerveModuleState[] { state, state, state, state };
-
+    
     tStateFinal = new TrapezoidProfileBCR.State(target, 0.0); // initialize goal state (degrees to turn)
     tStateCurr = new TrapezoidProfileBCR.State(0.0, 0.0); // initialize initial state (relative turning, so assume initPos is 0 degrees)
     tConstraints = new TrapezoidProfileBCR.Constraints(maxVel, maxAccel); // initialize velocity and accel limits
@@ -144,9 +89,7 @@ public class WristSetAngleTrapezoid extends CommandBase {
     log.writeLog(false, "WristSetAngleTrapezoid", "init", "Target", target, "Profile total time", tProfile.totalTime());
     
     profileStartTime = System.currentTimeMillis(); // save starting time of profile
-    startLocation = driveTrain.getPose().getTranslation();
-    
-    driveTrain.setDriveModeCoast(false);
+    startAngle = wrist.getWristAngle();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -155,7 +98,7 @@ public class WristSetAngleTrapezoid extends CommandBase {
     // Update data for this iteration
     long currProfileTime = System.currentTimeMillis();
     double timeSinceStart = (double)(currProfileTime - profileStartTime) * 0.001;
-    currDist = driveTrain.getPose().getTranslation().getDistance(startLocation);
+    currAngle = driveTrain.getPose().getTranslation().getDistance(startAngle);
 
     // Get next state from trapezoid profile
     tStateNext = tProfile.calculate(timeSinceStart + 0.010);
@@ -179,7 +122,7 @@ public class WristSetAngleTrapezoid extends CommandBase {
     log.writeLog(false, "WristSetAngleTrapezoid", "profile", "angT", angleTarget,
       "posT", tStateNext.position, 
       "velT", targetVel, "accT", targetAccel,
-      "posA", currDist, 
+      "posA", currAngle, 
       "velA", linearVel,
       "velA-FL", currentStates[0].speedMetersPerSecond, 
       "velA-FR", currentStates[1].speedMetersPerSecond, 
@@ -188,7 +131,7 @@ public class WristSetAngleTrapezoid extends CommandBase {
     );
 
     if(regenerate) {
-      tStateCurr = new TrapezoidProfileBCR.State(currDist, linearVel);
+      tStateCurr = new TrapezoidProfileBCR.State(currAngle, linearVel);
       tProfile = new TrapezoidProfileBCR(tConstraints, tStateFinal, tStateCurr);
       profileStartTime = currProfileTime;
     }
@@ -204,9 +147,9 @@ public class WristSetAngleTrapezoid extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if(Math.abs(target - currDist) < 0.0125) {
+    if(Math.abs(target - currAngle) < 0.0125) {
       accuracyCounter++;
-      log.writeLog(false, "WristSetAngleTrapezoid", "WithinTolerance", "Target Dist", target, "Actual Dist", currDist, "Counter", accuracyCounter);
+      log.writeLog(false, "WristSetAngleTrapezoid", "WithinTolerance", "Target Dist", target, "Actual Dist", currAngle, "Counter", accuracyCounter);
     } else {
       accuracyCounter = 0;
     }
