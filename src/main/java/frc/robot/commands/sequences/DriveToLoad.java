@@ -11,22 +11,25 @@ import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.commands.*;
 import frc.robot.commands.ManipulatorGrab.BehaviorType;
 import frc.robot.subsystems.*;
+import frc.robot.utilities.Field;
 import frc.robot.utilities.FileLog;
 
 public class DriveToLoad extends SequentialCommandGroup {
 
   /**
-   * ADD A DESCRIPTION HERE
+   * Drives robot to loading position in front of loading station, 
+   * extends elevator, turns on manipulator, drives forward, and
+   * grabs game piece
    * @param driveTrain
    * @param wrist
    * @param elevator
    * @param manipulator
+   * @param field
    * @param log
    */
-  public DriveToLoad(DriveTrain driveTrain, Wrist wrist, Elevator elevator, Manipulator manipulator, FileLog log) {
+  public DriveToLoad(DriveTrain driveTrain, Wrist wrist, Elevator elevator, Manipulator manipulator, Field field, FileLog log) {
     addCommands(
-      //TODO This is only coded for one color team right now!!!  Which team?  Code for both teams.
-      new DriveToPose(new Pose2d(16.17878-1.7, 6.749796-0.25, new Rotation2d(0)),
+      new DriveToPose(field.getLoadingPositionInitial(),
         SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
         TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, true, driveTrain, log),
       new DriveStop(driveTrain, log),
@@ -37,7 +40,7 @@ public class DriveToLoad extends SequentialCommandGroup {
         manipulator::getPistonCone
       ),
       // new ManipulatorGrab(0.8, BehaviorType.immediatelyEnd, manipulator, log),
-      new DriveToPose(new Pose2d(16.17878-1.6, 6.749796-0.25, new Rotation2d(0)), driveTrain, log).until(() -> (manipulator.isConePresent() || manipulator.isCubePresent())),
+      new DriveToPose(field.getLoadingPositionFinal(), driveTrain, log).until(() -> (manipulator.isConePresent() || manipulator.isCubePresent())),
       new ManipulatorGrab(0.8, BehaviorType.waitForConeOrCube, manipulator, log),
       new DriveStop(driveTrain, log)
       // new ManipulatorGrab(0.8, BehaviorType.waitForConeOrCube, manipulator, log)
