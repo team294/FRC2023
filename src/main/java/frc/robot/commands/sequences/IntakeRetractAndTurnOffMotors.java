@@ -10,11 +10,8 @@ import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.FileLog;
 
-// NOTE:  Consider using this command inline, rather than writing a subclass.  For more
-// information, see:
-// https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class IntakeRetractAndTurnOffMotors extends SequentialCommandGroup {
-  /** Creates a new IntakeRetractAndTurnOffMotors. */
+
   /**
    * Retracts intake, waits one second, turns off intake motor
    * @param intake
@@ -22,8 +19,6 @@ public class IntakeRetractAndTurnOffMotors extends SequentialCommandGroup {
    * @param log
    */
   public IntakeRetractAndTurnOffMotors(Intake intake, Elevator elevator, FileLog log) {
-    // Add your commands in the addCommands() call, e.g.
-    // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new IntakePistonSetPosition(false, intake, elevator, log),
       new WaitCommand(1),

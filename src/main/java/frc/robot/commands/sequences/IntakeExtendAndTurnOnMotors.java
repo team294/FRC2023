@@ -15,11 +15,7 @@ import frc.robot.commands.ManipulatorGrab.BehaviorType;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.FileLog;
 
-// NOTE:  Consider using this command inline, rather than writing a subclass.  For more
-// information, see:
-// https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class IntakeExtendAndTurnOnMotors extends SequentialCommandGroup {
-  /** Creates a new IntakeExtendAndTurnOnMotors. */
   /**
    * Extends intake and runs intake and manipulator motors if the elevator is down
    * @param manipulator
@@ -28,13 +24,15 @@ public class IntakeExtendAndTurnOnMotors extends SequentialCommandGroup {
    * @param log
    */
   public IntakeExtendAndTurnOnMotors(Manipulator manipulator, Intake intake, Elevator elevator, FileLog log) {
-    // Add your commands in the addCommands() call, e.g.
-    // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      new SequentialCommandGroup(
-      new IntakePistonSetPosition(true, intake, elevator, log),
-      new IntakeSetPercentOutput(0.75, .35, intake, log),
-      new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log)
+      new ConditionalCommand(
+        new SequentialCommandGroup(
+          new IntakePistonSetPosition(true, intake, elevator, log),
+          new IntakeSetPercentOutput(0.75, .35, intake, log),
+          new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log)
+        ),
+        new WaitCommand(0.01),
+        () -> elevator.isElevatorAtLowerLimit()
       )
     );
   }

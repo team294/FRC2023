@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
@@ -20,12 +19,11 @@ import frc.robot.utilities.FileLog;
 import frc.robot.utilities.Loggable;
 
 public class Intake extends SubsystemBase implements Loggable {
-  /** Creates a new Intake. */
   private final FileLog log;
   private final int logRotationKey;         // key for the logging cycle for this subsystem
   private boolean fastLogging = false; 
 
-  private String subsystemName;
+  private final String subsystemName;
 
   private final WPI_TalonSRX motor1;
   private final WPI_TalonSRX motor2;
@@ -35,10 +33,6 @@ public class Intake extends SubsystemBase implements Loggable {
 
   /**
    * Constructs the Intake subsystem, including rollers and a solenoid to change between deploy and stowed.
-   * @param subsystemName  String name for subsystem
-   * @param inverted inverts the motor, true inverts motor
-   * @param solenoidForwardChannel
-   * @param solenoidReverseChannel
    * @param log object for logging
    */
   public Intake(FileLog log) {
@@ -143,17 +137,20 @@ public class Intake extends SubsystemBase implements Loggable {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
     if(fastLogging || log.isMyLogRotation(logRotationKey)) {
       updateIntakeLog(false);
+    }
+
+    if(log.isMyLogRotation(logRotationKey)) {
       // Update data on SmartDashboard
-      SmartDashboard.putNumber(buildString(subsystemName, "Motor 1 Amps"), getMotor1Amps());
-      SmartDashboard.putNumber(buildString(subsystemName, "Motor 1 Bus Volt"), motor1.getBusVoltage());
-      SmartDashboard.putNumber(buildString(subsystemName, "Motor 1 Out Percent"), motor1.getMotorOutputPercent());
-      SmartDashboard.putNumber(buildString(subsystemName, "Motor 2 Amps"), getMotor2Amps());
-      SmartDashboard.putNumber(buildString(subsystemName, "Motor 2 Bus Volt"), motor2.getBusVoltage());
-      SmartDashboard.putNumber(buildString(subsystemName, "Motor 2 Out Percent"), motor2.getMotorOutputPercent());
-      SmartDashboard.putBoolean(buildString(subsystemName, "Piston extend"), pistonExtended);
-      
+      SmartDashboard.putNumber("Intake Motor 1 Amps", getMotor1Amps());
+      SmartDashboard.putNumber("Intake Motor 1 Bus Volt", motor1.getBusVoltage());
+      SmartDashboard.putNumber("Intake Motor 1 Out Percent", motor1.getMotorOutputPercent());
+      SmartDashboard.putNumber("Intake Motor 2 Amps", getMotor2Amps());
+      SmartDashboard.putNumber("Intake Motor 2 Bus Volt", motor2.getBusVoltage());
+      SmartDashboard.putNumber("Intake Motor 2 Out Percent", motor2.getMotorOutputPercent());
+      SmartDashboard.putBoolean("Intake Piston extend", pistonExtended);
     }
   }
 
@@ -167,7 +164,7 @@ public class Intake extends SubsystemBase implements Loggable {
     "Motor 1 Out Percent", motor1.getMotorOutputPercent(),
     "Motor 1 Amps", getMotor1Amps(),
     "Motor 2 Bus Volt", motor2.getBusVoltage(),
-    "Motor 1 Out Percent", motor2.getMotorOutputPercent(),
+    "Motor 2 Out Percent", motor2.getMotorOutputPercent(),
     "Motor 2 Amps", getMotor2Amps(),
     "Piston extended", isDeployed()
     );
