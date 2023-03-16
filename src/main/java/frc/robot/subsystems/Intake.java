@@ -72,8 +72,8 @@ public class Intake extends SubsystemBase implements Loggable {
 
   /**
    * Sets the percent of the motor, + is intake, - is outtake
-   * @param percent1 -1.0 to +1.0 percent for motor 1
-   * @param percent2 -1.0 to +1.0 percent for motor 2
+   * @param percent1 -1.0 to +1.0 percent for motor 1, motor that deploys
+   * @param percent2 -1.0 to +1.0 percent for motor 2, motor that doesn't deploy
    */
   public void setMotorPercentOutput(double percent1, double percent2){
     motor1.set(percent1);
@@ -89,14 +89,14 @@ public class Intake extends SubsystemBase implements Loggable {
   }
 
   /**
-   * @return stator current of the motor in amps
+   * @return stator current of motor1 in amps(Motor that deploys)
    */
   public double getMotor1Amps(){
     return motor1.getStatorCurrent();
   }
 
   /**
-   * @return stator current of the motor in amps
+   * @return stator current of motor2 in amps(Motor that doesn't deploy)
    */
   public double getMotor2Amps(){
     return motor2.getStatorCurrent();
