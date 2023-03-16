@@ -41,7 +41,7 @@ public class WristWithTrapezoidProfile extends CommandBase {
     initialAngle = wrist.getWristAngle();
     tStateFinal = new TrapezoidProfileBCR.State(goalAngle, 0.0); // initialize goal state (degrees to turn)
     tStateCurr = new TrapezoidProfileBCR.State(initialAngle, 0.0); // initialize initial state (relative turning, so assume initPos is 0 degrees)
-    tConstraints = new TrapezoidProfileBCR.Constraints(WristConstants.maxSpeed, WristConstants.maxAccel); // initialize velocity and accel limits
+    tConstraints = new TrapezoidProfileBCR.Constraints(WristConstants.kMaxAngularVel, WristConstants.kMaxAngularAcc); // initialize velocity and accel limits
     tProfile = new TrapezoidProfileBCR(tConstraints, tStateFinal, tStateCurr); // generate profile
     
 
@@ -59,7 +59,7 @@ public class WristWithTrapezoidProfile extends CommandBase {
     double targetVel = tStateNext.velocity;                                                                                                             
 
 
-    wrist.setWristMotorPercentOutput();
+    wrist.setWristVelocity(targetVel);
     //TrapezoidProfileBCR.State desiredState = tProfile.calculate(curTime);
 
   }

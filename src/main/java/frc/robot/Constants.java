@@ -227,11 +227,12 @@ public final class Constants {
         public static final double kWristGearRatio = (50.0 / 1.0);       // From CAD, should be 50:1.  Gear reduction ratio between Falcon and gear driving the wrist (planetary and chain gears)
         public static final double kWristDegreesPerTick =  360.0 / kEncoderCPR / kWristGearRatio * 0.9726;      // CALIBRATED (fudge factor 0.9726)
 
+        public static final double kMaxAngularAcc = 1.0; // radians per second squared // TODO calibrate please
+        public static final double kMaxAngularVel = 1.0; // radians per second // TODO calibrate please
+
         public static final double maxUncalibratedPercentOutput = 0.05;     // CALIBRATED
         public static final double maxPercentOutput = 0.1;          // CALIBRATED
         
-        public static final double maxSpeed = 0.0; //NEED TO CALIBRATE
-        public static final double maxAccel = 0.0; //NEED TO CALIBRATE
 
         // Update the REV through bore encoder offset angle in RobotPreferences (in Shuffleboard), not in this code!
         // After updating in RobotPreferences, you will need to re-start the robot code for the changes to take effect.

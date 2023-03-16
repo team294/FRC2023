@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.CTREConfigs;
 import frc.robot.Constants.Ports;
+import frc.robot.Constants.WristConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
 import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.Constants.WristConstants.WristRegion;
@@ -183,6 +184,25 @@ public class Wrist extends SubsystemBase implements Loggable{
       log.writeLog(false, subsystemName, "Set angle", "Desired angle", angle, "Set angle", safeAngle,
        "Elevator Pos", elevator.getElevatorPos(), "Elevator Target", elevator.getCurrentElevatorTarget());  
       SmartDashboard.putNumber("Wrist set raw ticks", wristDegreesToEncoderTickPosition(safeAngle));
+    }
+  }
+
+
+  /**
+   * Only works when encoder is working and calibrated
+   * Interlocks with elevator position
+   * @param angle target angle, in degrees (0 = horizontal in front of robot, + = up, - = down)
+   */
+  public void setWristVelocity(double velocity) {
+    if (wristCalibrated) {
+      // Keep wrist in usable range
+      velocity = MathUtil.clamp(velocity, -WristConstants.kMaxAngularVel, WristConstants.kMaxAngularVel);
+
+
+      wristMotor.set(ControlMode.Velocity, wristDegreesToEncoderTickPosition(velocity/10.0));
+
+      log.writeLog(false, subsystemName, "Set velocity", "Desired velocity", velocity, "Set velocity", velocity);  
+      SmartDashboard.putNumber("Wrist set velocity", wristDegreesToEncoderTickPosition(velocity/10.0));
     }
   }
 
