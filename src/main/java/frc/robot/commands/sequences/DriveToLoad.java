@@ -17,16 +17,18 @@ import frc.robot.utilities.FileLog;
 public class DriveToLoad extends SequentialCommandGroup {
 
   /**
-   * ADD A DESCRIPTION HERE
+   * Drives robot to loading position in front of loading station, 
+   * extends elevator, turns on manipulator, drives forward, and
+   * grabs game piece
    * @param driveTrain
    * @param wrist
    * @param elevator
    * @param manipulator
+   * @param field
    * @param log
    */
   public DriveToLoad(DriveTrain driveTrain, Wrist wrist, Elevator elevator, Manipulator manipulator, Field field, FileLog log) {
     addCommands(
-      //TODO This is only coded for one color team right now!!!  Which team?  Code for both teams.
       new DriveToPose(field.getLoadingPositionInitial(),
         SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
         TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, true, driveTrain, log),

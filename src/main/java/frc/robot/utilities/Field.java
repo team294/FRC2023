@@ -285,6 +285,11 @@ public class Field {
         }
     }
 
+    /**
+	 * Gets the position to approach the loading station from
+     * <p> Note that the position will be different for red vs blue alliance, based on the current alliance in the alliance object.
+     * @return Loading station initial position
+     */
     public Pose2d getLoadingPositionInitial() {
         if(alliance.getAlliance() == Alliance.Blue){
             return BlueLoadingStationInitial;
@@ -293,6 +298,11 @@ public class Field {
         }
     }
 
+    /**
+	 * Gets the position to grab a piece at the loading station
+     * <p> Note that the position will be different for red vs blue alliance, based on the current alliance in the alliance object.
+     * @return Loading station "get piece" position
+     */
     public Pose2d getLoadingPositionFinal() {
         if(alliance.getAlliance() == Alliance.Blue){
             return BlueLoadingStationFinal;
