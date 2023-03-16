@@ -316,8 +316,8 @@ public final class Constants {
 
         public enum ElevatorSlewRegion {
             min(6.0, 4.5, 11.0),
-            low(20.0, 3.0, 5.0),
-            medium(30.0, 2.0, 1.6),
+            low(15.0, 3.0, 5.0),
+            medium(30.0, 2.2, 1.6),
             max(45.4, 1.0, 0.8);
 
             public final double position, velocity, rotationRate;
