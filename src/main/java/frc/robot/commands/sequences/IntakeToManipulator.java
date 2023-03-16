@@ -27,7 +27,7 @@ public class IntakeToManipulator extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      new IntakePistonSetPosition(true, intake, log),
+      new IntakePistonSetPosition(true, intake, elevator, log),
       new IntakeSetPercentOutput(0.75, intake, log),
       new ElevatorWristStow(elevator, wrist, log),
       new ManipulatorSetPercent(ManipulatorConstants.pieceGrabPct, manipulator, log)

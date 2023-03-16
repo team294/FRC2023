@@ -121,7 +121,7 @@ public class RobotContainer {
     SmartDashboard.putData("Drive To Loading4", new DriveToPose(new Pose2d(16.17878-1.0, 6.749796, new Rotation2d(0)),
       SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
       TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, true,  driveTrain, log));
-    SmartDashboard.putData("Drive to Load Station", new DriveToLoad(driveTrain, wrist, elevator, manipulator, log));
+    SmartDashboard.putData("Drive to Load Station", new DriveToLoad(driveTrain, wrist, elevator, manipulator, intake, log));
     // SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
     //     trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
     // SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
@@ -182,8 +182,8 @@ public class RobotContainer {
     SmartDashboard.putData("Intake Stop", new IntakeStop(intake, log));
     SmartDashboard.putData("Intake Pick Up",new IntakeSetPercentOutput(-1.0, intake, log));
     SmartDashboard.putData("Intake Eject",new IntakeSetPercentOutput(0.5, intake, log));
-    SmartDashboard.putData("Intake Deploy", new IntakePistonSetPosition(true, intake, log));
-    SmartDashboard.putData("Intake Stow", new IntakePistonSetPosition(false, intake, log));
+    SmartDashboard.putData("Intake Deploy", new IntakePistonSetPosition(true, intake, elevator, log));
+    SmartDashboard.putData("Intake Stow", new IntakePistonSetPosition(false, intake, elevator, log));
 
     //Manipulator Commands
     SmartDashboard.putData("Manipulator Stop", new ManipulatorStopMotor(manipulator, log));
@@ -231,17 +231,17 @@ public class RobotContainer {
     //a
     // xbA.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreLow, elevator, log)); 
     // Move elevator/wrist to score low position
-    xbA.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value, elevator, wrist, log));
+    xbA.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value, elevator, wrist, intake, log));
      
     //b
     // xbB.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreMidCone, elevator, log));         
     // Move elevator/wrist to score mid position
-    xbB.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreMidCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, log));
+    xbB.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreMidCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log));
  
     //y
     // xbY.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreHighCone, elevator, log));
     // Move elevator/wrist to score high position
-    xbY.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, log));
+    xbY.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log));
     
     //x
     // xbX.onTrue(new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
@@ -291,7 +291,7 @@ public class RobotContainer {
 
     // Right
     // Move elevator to loading station config and turn on manipulator to grab piece
-    xbPOVRight.onTrue( new LoadPieceLoadingStation(elevator, wrist, manipulator, log) );
+    xbPOVRight.onTrue( new LoadPieceLoadingStation(elevator, wrist, manipulator, intake, log) );
   }
 
   /**
@@ -319,7 +319,7 @@ public class RobotContainer {
    
     // left joystick right button
     right[1].onTrue(new IntakeExtendAndTurnOnMotors(manipulator, intake, elevator, log));
-    right[2].onTrue(new IntakeRetractAndTurnOffMotors(intake, log));
+    right[2].onTrue(new IntakeRetractAndTurnOffMotors(intake, elevator, log));
     // right[1].onTrue(new DriveToPose(CoordType.kAbsolute, 0, driveTrain, log));
     // right[2].onTrue(new DriveToPose(CoordType.kRelative, 180, driveTrain, log));
 

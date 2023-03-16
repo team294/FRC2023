@@ -6,10 +6,12 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Elevator;
 import frc.robot.utilities.FileLog;
 
 public class IntakePistonSetPosition extends CommandBase {
   Intake intake;
+  Elevator elevator;
   FileLog log;
   boolean deploy;
 
@@ -17,10 +19,12 @@ public class IntakePistonSetPosition extends CommandBase {
    * Sets intake pistion position
    * @param boolean true = deploy, false = stow
    * @param intake intake subsystem
+   * @param elevator elevator subsystem
    * @param log log file
    */
-  public IntakePistonSetPosition(boolean deploy, Intake intake, FileLog log) {
-    this.intake  = intake;
+  public IntakePistonSetPosition(boolean deploy, Intake intake, Elevator elevator, FileLog log) {
+    this.intake = intake;
+    this.elevator = elevator;
     this.deploy = deploy;
     this.log = log;
     addRequirements(intake);
@@ -29,8 +33,13 @@ public class IntakePistonSetPosition extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    intake.setDeployed(deploy);
-    log.writeLog(false, "IntakePistonSetPosition", "Initialize", "IntakePiston", (deploy) ? "Deploy" : "Retract");
+    if (!elevator.isElevatorAtLowerLimit()) {
+      log.writeLog(false, "IntakePistonSetPosition", "Initialize", "IntakePiston", (deploy) ? "Deploy" : "Retract", "Failure");
+    } else {
+      intake.setDeployed(deploy);
+      log.writeLog(false, "IntakePistonSetPosition", "Initialize", "IntakePiston", (deploy) ? "Deploy" : "Retract", "Success");
+
+    }
   }
 
   // Called every time the scheduler runs while the command is scheduled.

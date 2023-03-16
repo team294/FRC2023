@@ -25,21 +25,18 @@ public class IntakeExtendAndTurnOnMotors extends SequentialCommandGroup {
    * Extends intake and runs intake and manipulator motors if the elevator is down
    * @param manipulator
    * @param intake
+   * @param elevator
    * @param log
    */
   public IntakeExtendAndTurnOnMotors(Manipulator manipulator, Intake intake, Elevator elevator, FileLog log) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      new ConditionalCommand(
-        new SequentialCommandGroup(
-        new IntakePistonSetPosition(true, intake, log),
-        new IntakeSetPercentOutput(0.75, intake, log),
-        new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log)
-        ),
-        new WaitCommand(0.01),
-      () -> elevator.getElevatorPos() < 2
-    )
+      new SequentialCommandGroup(
+      new IntakePistonSetPosition(true, intake, elevator, log),
+      new IntakeSetPercentOutput(0.75, intake, log),
+      new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log)
+      )
     );
   }
 }

@@ -23,13 +23,14 @@ public class LoadPieceLoadingStation extends SequentialCommandGroup {
    * @param elevator
    * @param wrist
    * @param manipulator
+   * @param intake
    * @param log
    */
-  public LoadPieceLoadingStation(Elevator elevator, Wrist wrist, Manipulator manipulator, FileLog log) {
+  public LoadPieceLoadingStation(Elevator elevator, Wrist wrist, Manipulator manipulator, Intake intake, FileLog log) {
     addCommands(
       new ConditionalCommand(
-        new ElevatorWristMoveToUpperPosition(ElevatorPosition.loadingStationCone.value, WristAngle.loadHumanStation.value, elevator, wrist, log), 
-        new ElevatorWristMoveToUpperPosition(ElevatorPosition.loadingStationCube.value, WristAngle.loadHumanStation.value, elevator, wrist, log), 
+        new ElevatorWristMoveToUpperPosition(ElevatorPosition.loadingStationCone.value, WristAngle.loadHumanStation.value, elevator, wrist, intake, log), 
+        new ElevatorWristMoveToUpperPosition(ElevatorPosition.loadingStationCube.value, WristAngle.loadHumanStation.value, elevator, wrist, intake, log), 
         manipulator::getPistonCone
       ),
       new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log)

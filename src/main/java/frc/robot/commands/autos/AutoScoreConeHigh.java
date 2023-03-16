@@ -20,14 +20,14 @@ public class AutoScoreConeHigh extends SequentialCommandGroup {
   /**
    * Raise elevator to high position, score cone, and lower elevator
    */
-  public AutoScoreConeHigh(boolean retract, Elevator elevator, Wrist wrist, Manipulator manipulator, LED led, FileLog log) {
+  public AutoScoreConeHigh(boolean retract, Elevator elevator, Wrist wrist, Manipulator manipulator, Intake intake, LED led, FileLog log) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new FileLogWrite(true, false, "AutoScoreConeHigh", "Start", log),
       new ManipulatorSetPistonPosition(true, led, manipulator, log),		// set to cone position
       new ManipulatorSetPercent(ManipulatorConstants.pieceGrabPct, manipulator, log),				// Low power to hold piece
-      new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, log),
+      new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log),
       new WaitCommand(0.25),
       new EjectPiece(manipulator, log), 		// Runs for 1 second
       new ConditionalCommand(

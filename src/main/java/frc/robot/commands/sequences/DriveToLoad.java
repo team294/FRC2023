@@ -16,7 +16,7 @@ import frc.robot.utilities.FileLog;
 
 public class DriveToLoad extends SequentialCommandGroup {
   /** Creates a new DriveToLoad. */
-  public DriveToLoad(DriveTrain driveTrain, Wrist wrist, Elevator elevator, Manipulator manipulator, FileLog log) {
+  public DriveToLoad(DriveTrain driveTrain, Wrist wrist, Elevator elevator, Manipulator manipulator, Intake intake, FileLog log) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
@@ -26,8 +26,8 @@ public class DriveToLoad extends SequentialCommandGroup {
       new DriveStop(driveTrain, log),
       new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.immediatelyEnd, manipulator, log),
       new ConditionalCommand(
-        new ElevatorWristMoveToUpperPosition(ElevatorPosition.loadingStationCone.value, WristAngle.loadHumanStation.value, elevator, wrist, log), 
-        new ElevatorWristMoveToUpperPosition(ElevatorPosition.loadingStationCube.value, WristAngle.loadHumanStation.value, elevator, wrist, log), 
+        new ElevatorWristMoveToUpperPosition(ElevatorPosition.loadingStationCone.value, WristAngle.loadHumanStation.value, elevator, wrist, intake, log), 
+        new ElevatorWristMoveToUpperPosition(ElevatorPosition.loadingStationCube.value, WristAngle.loadHumanStation.value, elevator, wrist, intake, log), 
         manipulator::getPistonCone
       ),
       // new ManipulatorGrab(0.8, BehaviorType.immediatelyEnd, manipulator, log),
