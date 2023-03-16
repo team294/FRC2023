@@ -352,7 +352,10 @@ public class RobotContainer {
     }
 
     // top row UP then DOWN, from LEFT to RIGHT
-    // coP[1].onTrue(new IntakeToColorSensor(intakeFront, uptake, log)); 
+    coP[1].onTrue(new SequentialCommandGroup(
+      new IntakeSetPercentOutput(-.5, -.25, intake, log),
+      new ManipulatorSetPercent(-.5, manipulator, log)
+    )); 
     // coP[2].onTrue(new ShooterSetVelocity(InputMode.kSpeedRPM, ShooterConstants.shooterDefaultRPM, shooter, log)); 
 
     // coP[3].onTrue(new UptakeFeedBall(uptake, feeder, log)); 

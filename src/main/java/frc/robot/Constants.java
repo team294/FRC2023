@@ -265,9 +265,9 @@ public final class Constants {
         // 0 degrees = horizontal (in front of robot) relative to wrist center of gravity
         // -90 degrees = vertical = wrist is hanging "down" naturally due to gravity
         public enum WristAngle {
-            lowerLimit(-119.0),      // CALIBRATED
+            lowerLimit(-144.0),      // CALIBRATED
             startConfig(-119.0),     // CALIBRATED
-            loadConveyor(-119.0),    // Conveyor gone so this is unnecesary currently, was -117.5
+            loadIntake(-135.0),    // Conveyor gone so this is unnecesary currently, was -117.5
             loadHumanStation(10.0),      // CALIBRATED
             scoreLow(0.0),
             scoreMidHigh(20.0),         // Was 10.0

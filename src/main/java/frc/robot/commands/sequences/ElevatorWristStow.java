@@ -57,7 +57,7 @@ public class ElevatorWristStow extends SequentialCommandGroup {
 
       // move wrist to stow position
       new ParallelCommandGroup(
-      new WristSetAngle(WristAngle.lowerLimit, wrist, log),
+      new WristSetAngle(WristAngle.loadIntake, wrist, log),
       new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log)
       )
       // new WristSetAngle(WristAngle.loadConveyor, wrist, log)
