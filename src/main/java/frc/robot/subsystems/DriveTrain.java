@@ -77,7 +77,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
   //Slew rate limiter
   private final Elevator elevator;
-  private boolean elevatorUpPriorIteration = false;       // Tracking for elevator position from prior iteration
+  // private boolean elevatorUpPriorIteration = false;       // Tracking for elevator position from prior iteration
 
 
   private final SlewRateLimiter filterY = new SlewRateLimiter(maxAccelerationRate);
@@ -308,6 +308,12 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
     double xSlewed, omegaLimited;
 
+    // if (elevator.getElevatorPos() < 5 || DriverStation.isAutonomousEnabled()) {
+    //   xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
+    // } else {
+    //   xSlewed = filterXSlow.calculate(chassisSpeeds.vxMetersPerSecond);
+    // }
+    
     // interpolates the elevator position and converts it to a desired acceleration rate
     // linear
     // double rate = (elevator.getElevatorPos() - 3) * (maxAccelerationRate-maxAccelerationRateWithElevatorUp)/ElevatorPosition.upperLimit.value;

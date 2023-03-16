@@ -26,6 +26,7 @@ import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.HolonomicDriveControllerBCR;
+import frc.robot.utilities.MathBCR;
 import frc.robot.utilities.Translation2dBCR;
 import frc.robot.utilities.TrapezoidProfileBCR;
 
@@ -288,7 +289,7 @@ public class DriveToPose extends CommandBase {
         "Trap Vel w/kA", desiredVelocityMetersPerSecond,
         "Robot XVel", robotSpeeds.vxMetersPerSecond,
         "Robot Pos Err", driveTrain.getPose().getTranslation().minus(goalPose.getTranslation()).getNorm(),
-        "Robot Th Err", Math.abs(driveTrain.getGyroRotation() - goalPose.getRotation().getDegrees()),
+        "Robot Th Err", MathBCR.angleMinus(driveTrain.getGyroRotation(), goalPose.getRotation().getDegrees()),
         "Trap VelAng", desiredPose.getRotation().getDegrees(),
         "Target rot", desiredRotation.getDegrees(), 
         "Robot X", curRobotTranslation.getX(),
@@ -300,37 +301,36 @@ public class DriveToPose extends CommandBase {
     );
 
     if (regenerate && (goalMode == GoalMode.pose)) {
-      log.writeLog(false, "DriveToPose", "Regenerate start");
+      log.writeLog(false, "DriveToPose", "Regenerate NOT implemented, needs testing");
+    //   timer.reset();
+    //   timer.start();
+    //   controller.reset();
 
-      /* *** needs to be tested ***
-
-      timer.reset();
-      timer.start();
-      controller.reset();
-
-      Translation2d trapezoidPath = goalPose.getTranslation().minus(driveTrain.getPose().getTranslation());
-      goalDirection = Translation2dBCR.normalize(trapezoidPath);
-      double goalDistance = trapezoidPath.getNorm();
+    //   initialPose = driveTrain.getPose();
+    //   initialTranslation = initialPose.getTranslation();
+    //   curRobotTranslation = initialTranslation;
+    //   Translation2d trapezoidPath = goalPose.getTranslation().minus(initialPose.getTranslation());
+    //   goalDirection = Translation2dBCR.normalize(trapezoidPath);
+    //   double goalDistance = trapezoidPath.getNorm();
     
-      ChassisSpeeds robotSpeed = driveTrain.getRobotSpeeds();
-      double initialVelocity = robotSpeed.vxMetersPerSecond*goalDirection.getX() + robotSpeed.vyMetersPerSecond*goalDirection.getY();
+    //   ChassisSpeeds robotSpeed = driveTrain.getRobotSpeeds();
+    //   double initialVelocity = robotSpeed.vxMetersPerSecond*goalDirection.getX() + robotSpeed.vyMetersPerSecond*goalDirection.getY();
 
-      TrapezoidProfileBCR.State initialState = new TrapezoidProfileBCR.State(0, initialVelocity);
-      TrapezoidProfileBCR.State goalState = new TrapezoidProfileBCR.State(goalDistance, 0);
-      profile = new TrapezoidProfileBCR(trapProfileConstraints, goalState, initialState); 
+    //   TrapezoidProfileBCR.State initialState = new TrapezoidProfileBCR.State(0, initialVelocity);
+    //   TrapezoidProfileBCR.State goalState = new TrapezoidProfileBCR.State(goalDistance, 0);
+    //   profile = new TrapezoidProfileBCR(trapProfileConstraints, goalState, initialState); 
 
-      log.writeLog(false, "DriveToPose", "Regenerate", 
-        "Time", timer.get(), 
-        "Goal X", goalPose.getTranslation().getX(),
-        "Goal Y", goalPose.getTranslation().getY(),
-        "Goal rot", goalPose.getRotation().getDegrees(), 
-        "Robot X", initialTranslation.getX(),
-        "Robot Y", initialTranslation.getY(),
-        "Robot rot", initialPose.getRotation().getDegrees(),
-        "Profile time",profile.totalTime()
-      );
-
-      */
+    //   log.writeLog(false, "DriveToPose", "Regenerate", 
+    //     "Time", timer.get(), 
+    //     "Goal X", goalPose.getTranslation().getX(),
+    //     "Goal Y", goalPose.getTranslation().getY(),
+    //     "Goal rot", goalPose.getRotation().getDegrees(), 
+    //     "Robot X", initialPose.getX(),
+    //     "Robot Y", initialPose.getY(),
+    //     "Robot rot", initialPose.getRotation().getDegrees(),
+    //     "Goal distance", goalDistance,
+    //     "Profile time",profile.totalTime()
+    //   );
     }
 
   }
@@ -351,9 +351,9 @@ public class DriveToPose extends CommandBase {
       log.writeLog(false, "DriveToPose", "timeout"); 
     }
 
-    var gyro = Math.abs(driveTrain.getGyroRotation() - goalPose.getRotation().getDegrees());
+    var gyro = MathBCR.angleMinus(driveTrain.getGyroRotation(), goalPose.getRotation().getDegrees());
     var posError = driveTrain.getPose().getTranslation().minus(goalPose.getTranslation()).getNorm();
-
+    
     var finished = timeout ||         // if we 3 seconds after the profile completed, then end even if we are not within tolerance 
       ( timer.hasElapsed(profile.totalTime())  && 
         ( gyro <= maxThetaErrorDegrees ) &&
