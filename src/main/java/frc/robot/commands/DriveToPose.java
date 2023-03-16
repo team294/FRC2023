@@ -101,8 +101,8 @@ public class DriveToPose extends CommandBase {
     this.regenerate = regenerate;
     goalMode = GoalMode.pose;
     trapProfileConstraints = new TrapezoidProfileBCR.Constraints(
-      MathUtil.clamp(maxVelMetersPerSecond, -SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxSpeedMetersPerSecond), 
-      MathUtil.clamp(maxAccelMetersPerSecondSquare, -SwerveConstants.kMaxAccelerationMetersPerSecondSquare, SwerveConstants.kMaxAccelerationMetersPerSecondSquare)
+      MathUtil.clamp(maxVelMetersPerSecond, -SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullSpeedMetersPerSecond), 
+      MathUtil.clamp(maxAccelMetersPerSecondSquare, -SwerveConstants.kFullAccelerationMetersPerSecondSquare, SwerveConstants.kFullAccelerationMetersPerSecondSquare)
     );
 
     constructorCommonCode();
@@ -356,11 +356,11 @@ public class DriveToPose extends CommandBase {
     
     var finished = timeout ||         // if we 3 seconds after the profile completed, then end even if we are not within tolerance 
       ( timer.hasElapsed(profile.totalTime())  && 
-        ( gyro <= maxThetaErrorDegrees ) &&
+        ( Math.abs(gyro) <= maxThetaErrorDegrees ) &&
         ( posError  <= maxPositionErrorMeters) );
 
     if (finished) {
-      log.writeLog(false, "DriveToPose", "finished", "gyro", gyro, "posError", posError, "maxTheta",maxThetaErrorDegrees, "maxMeters", maxPositionErrorMeters, "timer",timer.get()); 
+      log.writeLog(false, "DriveToPose", "finished", "gyroError", gyro, "posError", posError, "maxTheta",maxThetaErrorDegrees, "maxMeters", maxPositionErrorMeters, "timer",timer.get()); 
     }
 
     return finished;
