@@ -11,18 +11,21 @@ import frc.robot.utilities.FileLog;
 public class IntakeSetPercentOutput extends CommandBase {
   /** Creates a new IntakeSetPercentOutput. */
   private Intake intake;
-  private double intakePercentOutput;
+  private double intake1PercentOutput;
+  private double intake2PercentOutput;
   private FileLog log;
 
   /**
    * Sets the percent output of the intake motor, + is intake, - is outtake
-   * @param intakePercentOutput -1.0 to +1.0
+   * @param intake1PercentOutput -1.0 to +1.0, Motor that deploys
+   * @param intake2PercentOutput -1.0 to +1.0, Motor that doesn't deploy
    * @param intake intake subsystem
    * @param log log file
    */
-  public IntakeSetPercentOutput(double intakePercentOutput, Intake intake, FileLog log) {
+  public IntakeSetPercentOutput(double intakePercentOutput, double intake2PercentOutput, Intake intake, FileLog log) {
     this.intake = intake;
-    this.intakePercentOutput = intakePercentOutput;
+    this.intake1PercentOutput = intakePercentOutput;
+    this.intake2PercentOutput = intakePercentOutput;
     this.log = log;
     addRequirements(intake);
   }
@@ -30,9 +33,8 @@ public class IntakeSetPercentOutput extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    log.writeLog(false, "IntakeSetPercentOutput", "Initialize" ,"Intake Percent", intakePercentOutput);
-
-    intake.setMotorPercentOutput(intakePercentOutput);
+    log.writeLog(false, "IntakeSetPercentOutput", "Initialize" ,"Motor 1 Intake Percent", intake1PercentOutput, "Motor 2 Intake Percent", intake2PercentOutput);
+    intake.setMotorPercentOutput(intake1PercentOutput, intake2PercentOutput);
   }
 
   // Called every time the scheduler runs while the command is scheduled.

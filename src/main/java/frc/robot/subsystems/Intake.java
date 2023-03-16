@@ -61,9 +61,6 @@ public class Intake extends SubsystemBase implements Loggable {
     motor2.configVoltageCompSaturation(12.0, 100);
     motor2.enableVoltageCompensation(true);
     motor2.configOpenloopRamp(0.3, 100);     //seconds from neutral to full
-
-    motor2.set(ControlMode.Follower, Ports.CANIntake1);
-    motor2.follow(motor1);
   }
 
     /**
@@ -75,10 +72,12 @@ public class Intake extends SubsystemBase implements Loggable {
 
   /**
    * Sets the percent of the motor, + is intake, - is outtake
-   * @param percent -1.0 to +1.0
+   * @param percent1 -1.0 to +1.0 percent for motor 1
+   * @param percent2 -1.0 to +1.0 percent for motor 2
    */
-  public void setMotorPercentOutput(double percent){
-    motor1.set(percent);
+  public void setMotorPercentOutput(double percent1, double percent2){
+    motor1.set(percent1);
+    motor2.set(percent2);
   }
 
   /**
@@ -86,13 +85,21 @@ public class Intake extends SubsystemBase implements Loggable {
    */
   public void stopMotor(){
     motor1.stopMotor();
+    motor2.stopMotor();
   }
 
   /**
    * @return stator current of the motor in amps
    */
-  public double getAmps(){
+  public double getMotor1Amps(){
     return motor1.getStatorCurrent();
+  }
+
+  /**
+   * @return stator current of the motor in amps
+   */
+  public double getMotor2Amps(){
+    return motor2.getStatorCurrent();
   }
 
   /**
@@ -139,9 +146,12 @@ public class Intake extends SubsystemBase implements Loggable {
     if(fastLogging || log.isMyLogRotation(logRotationKey)) {
       updateIntakeLog(false);
       // Update data on SmartDashboard
-      SmartDashboard.putNumber(buildString(subsystemName, "Amps"), getAmps());
-      SmartDashboard.putNumber(buildString(subsystemName, "Bus Volt"), motor1.getBusVoltage());
-      SmartDashboard.putNumber(buildString(subsystemName, "Out Percent"), motor1.getMotorOutputPercent());
+      SmartDashboard.putNumber(buildString(subsystemName, "Motor 1 Amps"), getMotor1Amps());
+      SmartDashboard.putNumber(buildString(subsystemName, "Motor 1 Bus Volt"), motor1.getBusVoltage());
+      SmartDashboard.putNumber(buildString(subsystemName, "Motor 1 Out Percent"), motor1.getMotorOutputPercent());
+      SmartDashboard.putNumber(buildString(subsystemName, "Motor 2 Amps"), getMotor2Amps());
+      SmartDashboard.putNumber(buildString(subsystemName, "Motor 2 Bus Volt"), motor2.getBusVoltage());
+      SmartDashboard.putNumber(buildString(subsystemName, "Motor 2 Out Percent"), motor2.getMotorOutputPercent());
       SmartDashboard.putBoolean(buildString(subsystemName, "Piston extend"), pistonExtended);
       
     }
@@ -153,9 +163,12 @@ public class Intake extends SubsystemBase implements Loggable {
    */
   public void updateIntakeLog(boolean logWhenDisabled){
     log.writeLog(logWhenDisabled, subsystemName, "Update Variables",
-    "Bus Volt", motor1.getBusVoltage(),
-    "Out Percent", motor1.getMotorOutputPercent(),
-    "Amps", getAmps(),
+    "Motor 1 Bus Volt", motor1.getBusVoltage(),
+    "Motor 1 Out Percent", motor1.getMotorOutputPercent(),
+    "Motor 1 Amps", getMotor1Amps(),
+    "Motor 2 Bus Volt", motor2.getBusVoltage(),
+    "Motor 1 Out Percent", motor2.getMotorOutputPercent(),
+    "Motor 2 Amps", getMotor2Amps(),
     "Piston extended", isDeployed()
     );
   }

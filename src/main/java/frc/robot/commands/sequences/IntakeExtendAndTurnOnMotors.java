@@ -11,7 +11,6 @@ import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.commands.IntakePistonSetPosition;
 import frc.robot.commands.IntakeSetPercentOutput;
 import frc.robot.commands.ManipulatorGrab;
-import frc.robot.commands.ManipulatorSetPercent;
 import frc.robot.commands.ManipulatorGrab.BehaviorType;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.FileLog;
@@ -34,7 +33,7 @@ public class IntakeExtendAndTurnOnMotors extends SequentialCommandGroup {
     addCommands(
       new SequentialCommandGroup(
       new IntakePistonSetPosition(true, intake, elevator, log),
-      new IntakeSetPercentOutput(0.75, intake, log),
+      new IntakeSetPercentOutput(0.75, .35, intake, log),
       new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log)
       )
     );

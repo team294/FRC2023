@@ -28,7 +28,7 @@ public class IntakeToManipulator extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new IntakePistonSetPosition(true, intake, elevator, log),
-      new IntakeSetPercentOutput(0.75, intake, log),
+      new IntakeSetPercentOutput(0.75, 0.35, intake, log),
       new ElevatorWristStow(elevator, wrist, log),
       new ManipulatorSetPercent(ManipulatorConstants.pieceGrabPct, manipulator, log)
     );
