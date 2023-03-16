@@ -14,11 +14,18 @@ import frc.robot.subsystems.*;
 import frc.robot.utilities.FileLog;
 
 public class DriveToLoad extends SequentialCommandGroup {
-  /** Creates a new DriveToLoad. */
+
+  /**
+   * ADD A DESCRIPTION HERE
+   * @param driveTrain
+   * @param wrist
+   * @param elevator
+   * @param manipulator
+   * @param log
+   */
   public DriveToLoad(DriveTrain driveTrain, Wrist wrist, Elevator elevator, Manipulator manipulator, FileLog log) {
-    // Add your commands in the addCommands() call, e.g.
-    // addCommands(new FooCommand(), new BarCommand());
     addCommands(
+      //TODO This is only coded for one color team right now!!!  Which team?  Code for both teams.
       new DriveToPose(new Pose2d(16.17878-1.7, 6.749796-0.25, new Rotation2d(0)),
         SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
         TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, true, driveTrain, log),
