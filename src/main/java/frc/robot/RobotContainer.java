@@ -318,7 +318,7 @@ public class RobotContainer {
     left[2].onTrue(new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
    
     // left joystick right button
-    right[1].onTrue(new IntakeExtendAndTurnOnMotors(manipulator, intake, elevator, log));
+    right[1].onTrue(new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, log));
     right[2].onTrue(new IntakeRetractAndTurnOffMotors(intake, elevator, log));
     // right[1].onTrue(new DriveToPose(CoordType.kAbsolute, 0, driveTrain, log));
     // right[2].onTrue(new DriveToPose(CoordType.kRelative, 180, driveTrain, log));

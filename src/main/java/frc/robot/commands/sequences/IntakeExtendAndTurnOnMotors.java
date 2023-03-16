@@ -23,12 +23,13 @@ public class IntakeExtendAndTurnOnMotors extends SequentialCommandGroup {
    * @param elevator
    * @param log
    */
-  public IntakeExtendAndTurnOnMotors(Manipulator manipulator, Intake intake, Elevator elevator, FileLog log) {
+  public IntakeExtendAndTurnOnMotors(Manipulator manipulator, Intake intake, Wrist wrist, Elevator elevator, FileLog log) {
     addCommands(
       new ConditionalCommand(
         new SequentialCommandGroup(
           new IntakePistonSetPosition(true, intake, elevator, log),
-          new IntakeSetPercentOutput(0.75, .35, intake, log),
+          new IntakeSetPercentOutput(0.4, .3, intake, log),
+          new ElevatorWristStow(elevator, wrist, log),
           new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log)
         ),
         new WaitCommand(0.01),

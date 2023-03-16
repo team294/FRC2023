@@ -70,7 +70,7 @@ public class AutoSelection {
 		autoChooser.addOption("Cone Leave Near Wall pick up cube", CONE_LEAVE_NEAR_WALL_PICK_UP_CUBE);
 		autoChooser.addOption("Cone Leave Near Load pick up cube", CONE_LEAVE_NEAR_LOAD_PICK_UP_CUBE);
 		autoChooser.addOption("Cone Leave Near Wall Pick Up Balance", CONE_LEAVE_NEAR_WALL_PICK_UP_BALANCE);
-		autoChooser.addOption("Cone Leave Near LoadPick Up Balance", CONE_LEAVE_NEAR_LOAD_PICK_UP_BALANCE);
+		autoChooser.addOption("Cone Leave Near Load Pick Up Balance", CONE_LEAVE_NEAR_LOAD_PICK_UP_BALANCE);
 		
 		// autoChooser.addOption("Straight", STRAIGHT);
 		// autoChooser.addOption("Leave Community", LEAVE_COMMUNITY);
@@ -291,7 +291,7 @@ public class AutoSelection {
 					new SequentialCommandGroup(
 					new ManipulatorSetPistonPosition(false, led, manipulator, log),
 					new ElevatorWristStow(elevator, wrist, log),
-					new IntakeExtendAndTurnOnMotors(manipulator, intake, elevator, log)
+					new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, log)
 					),
 					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
 						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log).until(() -> manipulator.isCubePresent())
@@ -338,7 +338,7 @@ public class AutoSelection {
 				new SequentialCommandGroup(
 					new ManipulatorSetPistonPosition(false, led, manipulator, log), 
 					new ElevatorWristStow(elevator, wrist, log),
-					new IntakeExtendAndTurnOnMotors(manipulator, intake, elevator, log)
+					new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, log)
 				),
 				new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
 					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log).until(() -> manipulator.isCubePresent())
@@ -383,7 +383,7 @@ public class AutoSelection {
 					new SequentialCommandGroup(
 						new ManipulatorSetPistonPosition(false, led, manipulator, log),
 						new ElevatorWristStow(elevator, wrist, log),
-						new IntakeExtendAndTurnOnMotors(manipulator, intake, elevator, log)
+						new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, log)
 					),
 					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
 						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
