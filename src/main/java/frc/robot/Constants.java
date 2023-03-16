@@ -309,6 +309,16 @@ public final class Constants {
             public final double value;
             ElevatorPosition(double value) { this.value = value; }
         }
+
+        public enum ElevatorSlewRegion {
+            min(6),
+            low(ElevatorPosition.scoreMidCone.value),
+            medium((ElevatorPosition.scoreMidCone.value+ElevatorPosition.scoreHighCone.value)/2),
+            max(ElevatorPosition.upperLimit.value);
+
+            public final double position;
+            ElevatorSlewRegion(double position) { this.position = position; }
+        }
       }
 
       public static final class ManipulatorConstants {
