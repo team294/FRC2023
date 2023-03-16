@@ -120,11 +120,13 @@ public final class Constants {
         // and further derate (initial test by 5%) to account for some battery droop under heavy loads.
         // Max speed measured values 2/12/2023:  All 4 motors are between 4.6 an 4.7 meters/sec.  So use 4.5 as a conservative value
         public static final double kMaxSpeedMetersPerSecond = 4.5;          // CALIBRATED-3
+        public static final double kFullSpeedMetersPerSecond = 0.9*kMaxSpeedMetersPerSecond;
         public static final double kNominalSpeedMetersPerSecond = 0.5*kMaxSpeedMetersPerSecond;
         // Max acceleration measured values 1/13/2023: FL = 28.073, FR = 26.343, BL = 18.482, BR = 19.289
         // Max acceleration measured 1/25/2023 (with ~80lbs on robot):  Average of 4 wheels = 10.0 m/sec^2
         // Max acceleration measured 2/12/2023 (with new drive gears):  Average ~11 m/sec^2.  Keep value at 10.0 for now.
         public static final double kMaxAccelerationMetersPerSecondSquare = 10; // CALIBRATED-3
+        public static final double kFullAccelerationMetersPerSecondSquare = 0.9*kMaxAccelerationMetersPerSecondSquare;
         public static final double kNominalAccelerationMetersPerSecondSquare = 3.5; // was 7.0 for week 1
         public static final double kMaxRetractingAccelerationMetersPerSecondSquare = 2; // 
         public static final double kMaxTurningRadiansPerSecond = 11.0;   // CALIBRATED-3 took 633 degreesPerSecond and converted to radians and rounded down
