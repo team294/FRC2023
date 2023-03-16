@@ -16,8 +16,8 @@ public class IntakePistonSetPosition extends CommandBase {
   boolean deploy;
 
   /**
-   * Sets intake pistion position
-   * @param boolean true = deploy, false = stow
+   * Sets intake pistion position.
+   * @param deploy true = deploy, false = stow
    * @param intake intake subsystem
    * @param elevator elevator subsystem
    * @param log log file
@@ -33,12 +33,13 @@ public class IntakePistonSetPosition extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    if (!elevator.isElevatorAtLowerLimit()) {
-      log.writeLog(false, "IntakePistonSetPosition", "Initialize", "IntakePiston", (deploy) ? "Deploy" : "Retract", "Failure");
+    if (!elevator.isElevatorAtLowerLimit() && deploy) {
+      log.writeLog(false, "IntakePistonSetPosition", "Initialize", "IntakePiston", (deploy) ? "Deploy" : "Retract", 
+        "Elevator down", elevator.isElevatorAtLowerLimit(), "Failure");
     } else {
       intake.setDeployed(deploy);
-      log.writeLog(false, "IntakePistonSetPosition", "Initialize", "IntakePiston", (deploy) ? "Deploy" : "Retract", "Success");
-
+      log.writeLog(false, "IntakePistonSetPosition", "Initialize", "IntakePiston", (deploy) ? "Deploy" : "Retract", 
+        "Elevator down", elevator.isElevatorAtLowerLimit(), "Success");
     }
   }
 
