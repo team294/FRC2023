@@ -109,7 +109,7 @@ public final class CTREConfigs {
 
         // kP = (desired-output-1023max) / (error-in-encoder-ticks)
         //    = (desired-output-1.0max)*(1023max/1.0max) * kWristDegreesPerTick/(error-in-degrees) 
-        wristFXConfig.slot0.kP = 0.04;     // CALIBRATED 0.02
+        wristFXConfig.slot0.kP = 0.03;     // CALIBRATED 0.02.  Tried 0.04 in lab, but bangs wrist when stowing.
         // kI = (desired-output-1023max) / [(time-ms) * (error-in-encoder-ticks)]
         //    = (desired-output-1.0max)*(1023max/1.0max) * (1.0sec/1000ms) * kWristDegreesPerTick / [(time-sec) * (error-in-degrees)]
         wristFXConfig.slot0.kI = 0.0;       // Example from manual = 0.0005

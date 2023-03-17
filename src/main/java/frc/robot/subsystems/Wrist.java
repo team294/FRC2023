@@ -154,34 +154,22 @@ public class Wrist extends SubsystemBase implements Loggable{
       WristRegion curRegion = getRegion(getWristAngle());
 
       // Check elevator interlocks
-      if (curRegion == WristRegion.backFar) {
-        safeAngle = MathUtil.clamp(safeAngle, WristAngle.lowerLimit.value, boundBackMidDown);
-      }
-      if (curRegion == WristRegion.backMid) {
-        if (elevator.getElevatorRegion() == ElevatorRegion.bottom) {
-          safeAngle = MathUtil.clamp(safeAngle, WristAngle.lowerLimit.value, boundBackMidDown);
-        } else if (elevator.getElevatorRegion() == ElevatorRegion.main) {
-          safeAngle = MathUtil.clamp(safeAngle, boundBackFarMid, WristAngle.upperLimit.value);
-        } else {
-          safeAngle = MathUtil.clamp(safeAngle, boundBackFarMid, boundBackMidDown);
-        }
-      }
-      if (curRegion == WristRegion.down) {
-        safeAngle = MathUtil.clamp(safeAngle, boundBackFarMid, WristAngle.upperLimit.value);
-      }
-      if (curRegion == WristRegion.main) {
+      if (curRegion == WristRegion.main && elevator != null ) {
         if (elevator.getElevatorRegion() == ElevatorRegion.main) {
-          safeAngle = MathUtil.clamp(safeAngle, boundBackFarMid, WristAngle.upperLimit.value);
-        } else {
-          safeAngle = MathUtil.clamp(safeAngle, boundDownMain, WristAngle.upperLimit.value);
+          safeAngle = MathUtil.clamp(safeAngle, boundBackMain, WristAngle.upperLimit.value);
         }
       }
 
       wristMotor.set(ControlMode.Position, wristDegreesToEncoderTickPosition(safeAngle), 
         DemandType.ArbitraryFeedForward, kG * Math.cos(safeAngle*Math.PI/180.0));
 
-      log.writeLog(false, subsystemName, "Set angle", "Desired angle", angle, "Set angle", safeAngle,
-       "Elevator Pos", elevator.getElevatorPos(), "Elevator Target", elevator.getCurrentElevatorTarget());  
+      if (elevator != null) {
+        log.writeLog(false, subsystemName, "Set angle", "Desired angle", angle, "Set angle", safeAngle,
+        "Elevator Pos", elevator.getElevatorPos(), "Elevator Target", elevator.getCurrentElevatorTarget());
+      } else {
+        log.writeLog(false, subsystemName, "Set angle", "Desired angle", angle, "Set angle", safeAngle,
+        "Elevator", "null object");
+      }
       SmartDashboard.putNumber("Wrist set raw ticks", wristDegreesToEncoderTickPosition(safeAngle));
     }
   }
@@ -221,9 +209,7 @@ public class Wrist extends SubsystemBase implements Loggable{
 	 * @return corresponding wrist region
 	 */
 	private WristRegion getRegion(double degrees) {
-      if (degrees <= boundBackFarMid) return WristRegion.backFar;
-      else if (degrees < boundBackMidDown) return WristRegion.backMid;
-      else if (degrees <= boundDownMain) return WristRegion.down;
+      if (degrees <= boundBackMain) return WristRegion.back;
       else return WristRegion.main; 
 	}
 
@@ -242,14 +228,7 @@ public class Wrist extends SubsystemBase implements Loggable{
     if (wristMotor.getControlMode() == ControlMode.Position) {
       WristRegion targetRegion = getRegion(safeAngle);
 
-      if (curRegion == WristRegion.backMid) {
-        if (targetRegion == WristRegion.backFar) curRegion = WristRegion.backFar;
-        if (targetRegion == WristRegion.down || targetRegion == WristRegion.main) curRegion = WristRegion.down;
-      }
-
-      if (curRegion == WristRegion.main) {
-        if (targetRegion != WristRegion.main) curRegion = WristRegion.down;
-      }
+      if (targetRegion != WristRegion.main) curRegion = WristRegion.back;
     }
       
     return curRegion;
@@ -446,31 +425,24 @@ public class Wrist extends SubsystemBase implements Loggable{
       double pct = wristMotor.getMotorOutputPercent();
       double tol = 1.0;     // degrees tolerance for safeties
 
-      // TODO test code
       switch (elevator.getElevatorRegion()) {
         case uncalibrated:
           // No interlock.  Danger zone!!!!!!!
-          break;
-        case bottom:
           if ( (angle <= (WristAngle.lowerLimit.value+tol) && pct < 0.0) ||
-               (angle >= (boundBackMidDown-tol) && angle <= (boundDownMidpoint) && pct > 0.0) ||
-               (angle >= (boundDownMidpoint) && angle <= (boundDownMain+tol) && pct < 0.0) ||
                (angle >= (WristAngle.upperLimit.value-tol) && pct > 0.0)
              ) {
             stopWrist();
           }
           break;
-        case low:
-          if ( (angle <= (boundBackFarMid+tol) && pct < 0.0) ||
-              (angle >= (boundBackMidDown-tol) && angle <= (boundDownMidpoint) && pct > 0.0) ||
-              (angle >= (boundDownMidpoint) && angle <= (boundDownMain+tol) && pct < 0.0) ||
-              (angle >= (WristAngle.upperLimit.value-tol) && pct > 0.0)
-              ) {
+        case bottom:
+          if ( (angle <= (WristAngle.lowerLimit.value+tol) && pct < 0.0) ||
+               (angle >= (WristAngle.upperLimit.value-tol) && pct > 0.0)
+             ) {
             stopWrist();
           }
-         break;
+          break;
         case main:
-          if ( (angle <= (boundBackFarMid+tol) && pct < 0.0) ||
+          if ( (angle <= (boundBackMain+tol) && pct < 0.0) ||
               (angle >= (WristAngle.upperLimit.value-tol) && pct > 0.0)
               ) {
             stopWrist();

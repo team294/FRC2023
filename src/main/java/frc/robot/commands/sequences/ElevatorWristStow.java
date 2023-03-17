@@ -5,14 +5,11 @@
 package frc.robot.commands.sequences;
 
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
-import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
 import frc.robot.Constants.WristConstants.WristAngle;
-import frc.robot.Constants.WristConstants.WristRegion;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.FileLog;
@@ -21,7 +18,7 @@ public class ElevatorWristStow extends SequentialCommandGroup {
 
 
   /**
-   * Stows the elevator and wrist in the starting position.  Appropriately moves the
+   * Stows the elevator and wrist in the load-intake position.  Appropriately moves the
    * wrist and elevator regardless of starting configuration
    * @param elevator
    * @param wrist
@@ -29,39 +26,23 @@ public class ElevatorWristStow extends SequentialCommandGroup {
    */
   public ElevatorWristStow(Elevator elevator, Wrist wrist, FileLog log) {
     addCommands(
-      // If elevator is not in main and wrist is in main or down region, then raise elevator
-      new ConditionalCommand(
-        new ElevatorSetPosition(ElevatorConstants.boundMainLow, elevator, log),
-        new WaitCommand(0.01), 
-        () -> (elevator.getElevatorRegion() != ElevatorRegion.main && 
-               (wrist.getWristRegion() == WristRegion.main || wrist.getWristRegion() == WristRegion.down)
-              )
-      ),
-
       // If elevator is higher than a little into main, then put wrist back before lowering
       new ConditionalCommand(
         new WristSetAngle(WristAngle.elevatorMoving, wrist, log),
         new WaitCommand(0.01), 
-        () -> (elevator.getElevatorPos() >= ElevatorConstants.boundMainLow+8.0)
+        () -> (elevator.getElevatorPos() >= ElevatorPosition.belowScoringPegs.value)
       ),
 
-      // lower elevator to lower edge of main region
-      // new ElevatorSetPosition(ElevatorConstants.boundMainLow+0.0, elevator, log),
-        // .until( () -> elevator.getElevatorPos() <= ElevatorConstants.boundMainLow+10.0),
+      // lower elevator.  Continue code when safe to start moving wrist (past cone pegs)
+      new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log)
+        .until( () -> elevator.getElevatorPos() <= ElevatorPosition.belowScoringPegs.value),
+
+      // start moving wrist.  Continue code when safe to stow wrist (elevator is down)
+      new WristSetAngle(WristAngle.startConfig, wrist, log)        
+        .until( () -> elevator.getElevatorPos() < ElevatorConstants.boundBottomMain),
 
       // move wrist to stow position
-      // new WristSetAngle(WristAngle.loadConveyor, wrist, log),
-
-      // move elevator to stow position
-      new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log).until(() -> elevator.getElevatorPos() < ElevatorConstants.boundBottomLow),
-
-      // move wrist to stow position
-      new ParallelCommandGroup(
-        new WristSetAngle(WristAngle.loadIntake, wrist, log),
-        new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log)
-      )
-      // new WristSetAngle(WristAngle.loadConveyor, wrist, log)
-
+      new WristSetAngle(WristAngle.loadIntake, wrist, log)
     );
   }
 }

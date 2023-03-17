@@ -251,25 +251,27 @@ public final class Constants {
 
         // Wrist regions
         public enum WristRegion {
-            backFar,        // In the wrist backFar region, the elevator must be in the bottom region (not allowed to go to elevator main or low regions).
-            backMid,        // In the wrist backMid region, the elevator may be in any elevator region.
-            down,           // Wrist pointed down, the elevator must be in the main region.
+            // backFar,        // In the wrist backFar region, the elevator must be in the bottom region (not allowed to go to elevator main or low regions).
+            // backMid,        // In the wrist backMid region, the elevator may be in any elevator region.
+            // down,           // Wrist pointed down, the elevator must be in the main region.
+            back,           // In the wrist back region, the elevator must be in the bottom region (not allowed to go to elevator main).
             main,           // In the wrist main region, the elevator may be in any elevator region.
             uncalibrated    // Unknown region, wrist is not calibrated
         } 
         // Wrist region boundaries
-        public static final double boundBackFarMid = -119.0;      // Boundary between backFar and backMid regions.  CALIBRATED
-        public static final double boundBackMidDown = -116.0;      // Boundary between backMid and down regions.  CALIBRATED
-        public static final double boundDownMain = -91.0;      // Boundary between down and main regions.  CALIBRATED
-        public static final double boundDownMidpoint = (boundBackMidDown+boundDownMain)/2.0;      // Midpoint in down region
+        // public static final double boundBackFarMid = -119.0;      // Boundary between backFar and backMid regions.  CALIBRATED
+        // public static final double boundBackMidDown = -116.0;      // Boundary between backMid and down regions.  CALIBRATED
+        // public static final double boundDownMain = -91.0;      // Boundary between down and main regions.  CALIBRATED
+        // public static final double boundDownMidpoint = (boundBackMidDown+boundDownMain)/2.0;      // Midpoint in down region
+        public static final double boundBackMain = -120.0;      // Boundary between back and main regions.  CALIBRATED
 
         // Wrist pre-defined angles (in degrees)
         // 0 degrees = horizontal (in front of robot) relative to wrist center of gravity
         // -90 degrees = vertical = wrist is hanging "down" naturally due to gravity
         public enum WristAngle {
-            lowerLimit(-144.0),      // CALIBRATED
-            startConfig(-119.0),     // CALIBRATED
+            lowerLimit(-138.0),      // CALIBRATED
             loadIntake(-135.0),    // Conveyor gone so this is unnecesary currently, was -117.5
+            startConfig(-115.0),     // CALIBRATED
             loadHumanStation(10.0),      // CALIBRATED
             scoreLow(0.0),
             scoreMidHigh(20.0),         // Was 10.0
@@ -295,18 +297,20 @@ public final class Constants {
         // Elevator regions
         public enum ElevatorRegion {
             bottom,     // In the elevator bottom region, the wrist may be in any wrist region.
-            low,        // Slightly up, wrist can not go far-back or main
+            // low,        // Slightly up, wrist can not go far-back or main
             main,       // In the elevator main region, the wrist must be in the wrist main region (not allowed to go to wrist back region).
             uncalibrated;       // Unknown region, elevator is not calibrated.
         }
         // Elevator region boundaries
-        public static final double boundBottomLow = 2.0;        // Boundary between bottom and low regions
-        public static final double boundMainLow = 2.0;      // Boundary between low and main regions
+        // public static final double boundBottomLow = 2.0;        // Boundary between bottom and low regions
+        // public static final double boundMainLow = 2.0;      // Boundary between low and main regions
+        public static final double boundBottomMain = 2.5;      // Boundary between low and main regions
 
         // Elevator pre-defined positions (in inches from bottom of elevator)
         public enum ElevatorPosition {
             lowerLimit(0.0),        // CALIBRATED
             bottom(0.0),            // CALIBRATED
+            belowScoringPegs(10.5),
             loadingStationCube(35.0),   // CALIBRATED
             loadingStationCone(45.0),   // CALIBRATED
             scoreLow(0.0),          // CALIBRATED, was 5.0
