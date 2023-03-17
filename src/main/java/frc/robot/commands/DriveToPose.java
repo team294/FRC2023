@@ -128,6 +128,29 @@ public class DriveToPose extends CommandBase {
   }
 
 
+   /**
+   * Drives the robot to the desired pose in field coordinates.
+   * @param goalPoseSupplier A function that supplies the target pose in field coordinates.  Pose components include
+   *    <p> Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
+   *    <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
+   *    <p> Robot angle on the field (0 = facing away from our drivestation, + to the left, - to the right)
+   * @param maxPositionErrorMeters tolerance for end position in meters
+   * @param maxThetaErrorDegrees tolerance for end theta in degrees
+   * @param driveTrain DriveTrain subsystem
+   * @param log file for logging
+   */
+  public DriveToPose(Supplier<Pose2d> goalPoseSupplier, double maxPositionErrorMeters, double maxThetaErrorDegrees, DriveTrain driveTrain, FileLog log) {
+    this.driveTrain = driveTrain;
+    this.log = log;
+    this.maxPositionErrorMeters = maxPositionErrorMeters;
+    this.maxThetaErrorDegrees = maxThetaErrorDegrees;
+    goalSupplier = goalPoseSupplier;
+    goalMode = GoalMode.poseSupplier;
+    trapProfileConstraints = TrajectoryConstants.kDriveProfileConstraints;
+
+    constructorCommonCode();
+  }
+
   /**
    * Rotates the robot to the specified rotation using an arbitrary angle without moving laterally
    * @param type CoordType, kRelative (turn relative to current angle) or kAbsolute (turn to field angle)

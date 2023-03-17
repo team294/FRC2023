@@ -50,7 +50,7 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryType;
  */
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
-  private final FileLog log = new FileLog("D1");
+  private final FileLog log = new FileLog("D2");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
   private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
   private final Field field = new Field(allianceSelection, log);
@@ -78,7 +78,7 @@ public class RobotContainer {
   private boolean rumbling = false;
 
   // Set to this pattern when the robot is disabled
-  private final Command patternTeamMoving = new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 0.5, led, log);
+  private final Command patternTeamMoving = new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 60, led, log);
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -314,10 +314,15 @@ public class RobotContainer {
     // resets current angle to 0, keeps current X and Y
     left[1].onTrue(new DriveResetPose(0, false, driveTrain, log));
     // drive to closest goal
-    left[2].onTrue(new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
+    left[2].onTrue(
+      new SequentialCommandGroup(
+        new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), 0.15, 10, driveTrain, log),
+        new DriveToPose(() -> field.getFinalColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log)
+      )
+    );
    
     // left joystick right button
-    right[1].onTrue(new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, log));
+    right[1].onTrue(new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, led, log));
     right[2].onTrue(new IntakeRetractAndTurnOffMotors(intake, elevator, log));
     // right[1].onTrue(new DriveToPose(CoordType.kAbsolute, 0, driveTrain, log));
     // right[2].onTrue(new DriveToPose(CoordType.kRelative, 180, driveTrain, log));
