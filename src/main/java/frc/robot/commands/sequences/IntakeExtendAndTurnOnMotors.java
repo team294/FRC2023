@@ -28,7 +28,7 @@ public class IntakeExtendAndTurnOnMotors extends SequentialCommandGroup {
       new ConditionalCommand(
         new SequentialCommandGroup(
           new IntakePistonSetPosition(true, intake, elevator, log),
-          new IntakeSetPercentOutput(0.4, .3, intake, log),
+          new IntakeSetPercentOutput(0.75, .6, intake, log),
           new ElevatorWristStow(elevator, wrist, log),
           new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log)
         ),
