@@ -65,7 +65,8 @@ public final class Constants {
         // public static final int CANElevatorMotor2 = 22;
         public static final int CANWristMotor = 45; 
 
-        public static final int CANIntake = 40;
+        public static final int CANIntake1 = 40;
+        public static final int CANIntake2 = 15;
         public static final int CANManipulator = 43; 
         public static final int CANConveyor = 47;
 
@@ -83,6 +84,8 @@ public final class Constants {
         // Pneumatic solenoid ports
         public static final int SolManipulatorFwd = 1;
         public static final int SolManipulatorRev = 0;
+        public static final int SolIntakeFwd = 3;       
+        public static final int SolIntakeRev = 2;     
 
     }
 
@@ -120,7 +123,7 @@ public final class Constants {
         // and further derate (initial test by 5%) to account for some battery droop under heavy loads.
         // Max speed measured values 2/12/2023:  All 4 motors are between 4.6 an 4.7 meters/sec.  So use 4.5 as a conservative value
         public static final double kMaxSpeedMetersPerSecond = 4.5;          // CALIBRATED-3
-        public static final double kFullSpeedMetersPerSecond = 0.9*kMaxSpeedMetersPerSecond;
+        public static final double kFullSpeedMetersPerSecond = 0.95*kMaxSpeedMetersPerSecond;
         public static final double kNominalSpeedMetersPerSecond = 0.5*kMaxSpeedMetersPerSecond;
         // Max acceleration measured values 1/13/2023: FL = 28.073, FR = 26.343, BL = 18.482, BR = 19.289
         // Max acceleration measured 1/25/2023 (with ~80lbs on robot):  Average of 4 wheels = 10.0 m/sec^2
@@ -262,9 +265,9 @@ public final class Constants {
         // 0 degrees = horizontal (in front of robot) relative to wrist center of gravity
         // -90 degrees = vertical = wrist is hanging "down" naturally due to gravity
         public enum WristAngle {
-            lowerLimit(-119.0),      // CALIBRATED
+            lowerLimit(-144.0),      // CALIBRATED
             startConfig(-119.0),     // CALIBRATED
-            loadConveyor(-119.0),    // Conveyor gone so this is unnecesary currently, was -117.5
+            loadIntake(-135.0),    // Conveyor gone so this is unnecesary currently, was -117.5
             loadHumanStation(10.0),      // CALIBRATED
             scoreLow(0.0),
             scoreMidHigh(20.0),         // Was 10.0
@@ -295,8 +298,8 @@ public final class Constants {
             uncalibrated;       // Unknown region, elevator is not calibrated.
         }
         // Elevator region boundaries
-        public static final double boundBottomLow = 0.0;        // Boundary between bottom and low regions, was 2.0
-        public static final double boundMainLow = 0.0;      // Boundary between low and main regions.  not necessary because , was 2.0
+        public static final double boundBottomLow = 2.0;        // Boundary between bottom and low regions
+        public static final double boundMainLow = 2.0;      // Boundary between low and main regions
 
         // Elevator pre-defined positions (in inches from bottom of elevator)
         public enum ElevatorPosition {

@@ -61,6 +61,7 @@ public class RobotContainer {
   private final Elevator elevator = new Elevator(wrist, log);
   private final DriveTrain driveTrain = new DriveTrain(field, elevator, log);
   private final Manipulator manipulator = new Manipulator(log);
+  private final Intake intake = new Intake(log);
   private final LED led = new LED();
   // private final Conveyor conveyor = new Conveyor(log);
 
@@ -120,7 +121,7 @@ public class RobotContainer {
     SmartDashboard.putData("Drive To Loading4", new DriveToPose(new Pose2d(16.17878-1.0, 6.749796, new Rotation2d(0)),
       SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
       TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, true,  driveTrain, log));
-    SmartDashboard.putData("Drive to Load Station", new DriveToLoad(driveTrain, wrist, elevator, manipulator, field, log));
+    SmartDashboard.putData("Drive to Load Station", new DriveToLoad(driveTrain, wrist, elevator, manipulator, intake, field, log));
     // SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
     //     trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
     // SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
@@ -157,7 +158,7 @@ public class RobotContainer {
     SmartDashboard.putData("Elevator Move To Bottom", new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
     
     //Wrist Commands
-    SmartDashboard.putData("Wrist Stowed Position", new WristSetAngle(WristAngle.startConfig, wrist, log));
+    SmartDashboard.putData("Wrist Start Position", new WristSetAngle(WristAngle.startConfig, wrist, log));
     SmartDashboard.putData("Wrist ElevMove Position", new WristSetAngle(WristAngle.elevatorMoving, wrist, log));
     SmartDashboard.putData("Wrist Scoring Position", new WristSetAngle(WristAngle.scoreMidHigh, wrist, log));
     SmartDashboard.putData("Wrist Set Angle", new WristSetAngle(wrist, log));
@@ -177,6 +178,12 @@ public class RobotContainer {
     // SmartDashboard.putData("Conveyor Run", new ConveyorMove(0.3, conveyor, log));
     // SmartDashboard.putData("Conveyor Stop", new ConveyorMove(0, conveyor, log));
 
+    // Intake Commands
+    SmartDashboard.putData("Intake Stop", new IntakeStop(intake, log));
+    SmartDashboard.putData("Intake Pick Up",new IntakeSetPercentOutput(.75, .35, intake, log));
+    SmartDashboard.putData("Intake Eject",new IntakeSetPercentOutput(-0.5, -.25, intake, log));
+    SmartDashboard.putData("Intake Deploy", new IntakePistonSetPosition(true, intake, elevator, log));
+    SmartDashboard.putData("Intake Stow", new IntakePistonSetPosition(false, intake, elevator, log));
 
     //Manipulator Commands
     SmartDashboard.putData("Manipulator Stop", new ManipulatorStopMotor(manipulator, log));
@@ -224,17 +231,17 @@ public class RobotContainer {
     //a
     // xbA.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreLow, elevator, log)); 
     // Move elevator/wrist to score low position
-    xbA.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value, elevator, wrist, log));
+    xbA.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value, elevator, wrist, intake, log));
      
     //b
     // xbB.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreMidCone, elevator, log));         
     // Move elevator/wrist to score mid position
-    xbB.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreMidCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, log));
+    xbB.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreMidCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log));
  
     //y
     // xbY.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreHighCone, elevator, log));
     // Move elevator/wrist to score high position
-    xbY.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, log));
+    xbY.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log));
     
     //x
     // xbX.onTrue(new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
@@ -284,7 +291,7 @@ public class RobotContainer {
 
     // Right
     // Move elevator to loading station config and turn on manipulator to grab piece
-    xbPOVRight.onTrue( new LoadPieceLoadingStation(elevator, wrist, manipulator, log) );
+    xbPOVRight.onTrue( new LoadPieceLoadingStation(elevator, wrist, manipulator, intake, log) );
   }
 
   /**
@@ -311,8 +318,10 @@ public class RobotContainer {
     left[2].onTrue(new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
    
     // left joystick right button
-    right[1].onTrue(new DriveToPose(CoordType.kAbsolute, 0, driveTrain, log));
-    right[2].onTrue(new DriveToPose(CoordType.kRelative, 180, driveTrain, log));
+    right[1].onTrue(new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, log));
+    right[2].onTrue(new IntakeRetractAndTurnOffMotors(intake, elevator, log));
+    // right[1].onTrue(new DriveToPose(CoordType.kAbsolute, 0, driveTrain, log));
+    // right[2].onTrue(new DriveToPose(CoordType.kRelative, 180, driveTrain, log));
 
     //left[2].onTrue(new IntakeRetractAndFlush(intakeFront, uptake, feeder, log));
       
@@ -343,7 +352,10 @@ public class RobotContainer {
     }
 
     // top row UP then DOWN, from LEFT to RIGHT
-    // coP[1].onTrue(new IntakeToColorSensor(intakeFront, uptake, log)); 
+    coP[1].onTrue(new SequentialCommandGroup(
+      new IntakeSetPercentOutput(-.5, -.25, intake, log),
+      new ManipulatorSetPercent(-.5, manipulator, log)
+    )); 
     // coP[2].onTrue(new ShooterSetVelocity(InputMode.kSpeedRPM, ShooterConstants.shooterDefaultRPM, shooter, log)); 
 
     // coP[3].onTrue(new UptakeFeedBall(uptake, feeder, log)); 
@@ -393,7 +405,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoSelection.getAutoCommand(elevator, wrist, manipulator, driveTrain, led, log);
+    return autoSelection.getAutoCommand(intake, elevator, wrist, manipulator, driveTrain, led, log);
   }
 
 

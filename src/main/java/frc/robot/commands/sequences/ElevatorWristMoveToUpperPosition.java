@@ -30,9 +30,10 @@ public class ElevatorWristMoveToUpperPosition extends SequentialCommandGroup {
    * @param wristAngle target angle in degrees.  (0 = horizontal in front of robot, + = up, - = down)
    * @param elevator
    * @param wrist
+   * @param intake
    * @param log
    */
-  public ElevatorWristMoveToUpperPosition(double elevatorPosition, double wristAngle, Elevator elevator, Wrist wrist, FileLog log) {
+  public ElevatorWristMoveToUpperPosition(double elevatorPosition, double wristAngle, Elevator elevator, Wrist wrist, Intake intake, FileLog log) {
     if (elevatorPosition<ElevatorConstants.boundMainLow) {
       elevatorPosition = ElevatorConstants.boundMainLow + 1.0;
     }
@@ -41,31 +42,40 @@ public class ElevatorWristMoveToUpperPosition extends SequentialCommandGroup {
     }
 
     addCommands(
-      // If wrist is in backFar region, then move wrist into BackMid region
-      // so that the elevator can move up
+      // Only extend the elevator if the intake is not deployed
       new ConditionalCommand(
-        new WristSetAngle(WristConstants.boundBackFarMid+1.0, wrist, log), 
-        new WaitCommand(0.01), 
-        () -> (wrist.getWristRegion() == WristRegion.backFar)
-      ),
+        
+        new SequentialCommandGroup(
+          // If wrist is in backFar region, then move wrist into BackMid region
+          // so that the elevator can move up
+          new ConditionalCommand(
+            new WristSetAngle(WristConstants.boundBackFarMid+1.0, wrist, log), 
+            new WaitCommand(0.01), 
+            () -> (wrist.getWristRegion() == WristRegion.backFar)
+          ),
 
-      // If elevator is not in the main region (and wrist is not in main region), 
-      // then move elevator to main region so that the wrist is free to move forward
-      new ConditionalCommand(
-        new ElevatorSetPosition(ElevatorConstants.boundMainLow+2.0, elevator, log), 
-        new WaitCommand(0.01), 
-        () -> (elevator.getElevatorRegion() != ElevatorRegion.main && wrist.getWristRegion() != WristRegion.main)
-      ),
+          // If elevator is not in the main region (and wrist is not in main region), 
+          // then move elevator to main region so that the wrist is free to move forward
+          new ConditionalCommand(
+            new ElevatorSetPosition(ElevatorConstants.boundMainLow+2.0, elevator, log), 
+            new WaitCommand(0.01), 
+            () -> (elevator.getElevatorRegion() != ElevatorRegion.main && wrist.getWristRegion() != WristRegion.main)
+          ),
 
-      // move wrist to safe travel position
-      new WristSetAngle(WristAngle.elevatorMoving, wrist, log),
+          // move wrist to safe travel position
+          new WristSetAngle(WristAngle.elevatorMoving, wrist, log),
 
-      // move elevator to final position
-      new ElevatorSetPosition(elevatorPosition, elevator, log),
+          // move elevator to final position
+          new ElevatorSetPosition(elevatorPosition, elevator, log),
 
-      // move wrist to final position
-      new WristSetAngle(wristAngle, wrist, log)
-      
+          // move wrist to final position
+          new WristSetAngle(wristAngle, wrist, log)
+        ),
+        
+        // Don't extend if the intake is deployed
+        new WaitCommand(.01),
+        () -> !intake.isDeployed()
+      )
     );
   }
 }

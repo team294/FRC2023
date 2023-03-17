@@ -6,6 +6,7 @@ package frc.robot.commands.sequences;
 
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.commands.*;
@@ -22,16 +23,17 @@ public class LoadPieceLoadingStation extends SequentialCommandGroup {
    * @param elevator
    * @param wrist
    * @param manipulator
+   * @param intake
    * @param log
    */
-  public LoadPieceLoadingStation(Elevator elevator, Wrist wrist, Manipulator manipulator, FileLog log) {
+  public LoadPieceLoadingStation(Elevator elevator, Wrist wrist, Manipulator manipulator, Intake intake, FileLog log) {
     addCommands(
       new ConditionalCommand(
-        new ElevatorWristMoveToUpperPosition(ElevatorPosition.loadingStationCone.value, WristAngle.loadHumanStation.value, elevator, wrist, log), 
-        new ElevatorWristMoveToUpperPosition(ElevatorPosition.loadingStationCube.value, WristAngle.loadHumanStation.value, elevator, wrist, log), 
+        new ElevatorWristMoveToUpperPosition(ElevatorPosition.loadingStationCone.value, WristAngle.loadHumanStation.value, elevator, wrist, intake, log), 
+        new ElevatorWristMoveToUpperPosition(ElevatorPosition.loadingStationCube.value, WristAngle.loadHumanStation.value, elevator, wrist, intake, log), 
         manipulator::getPistonCone
       ),
-      new ManipulatorGrab(0.8, BehaviorType.waitForConeOrCube, manipulator, log)
+      new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log)
     );
   }
 }

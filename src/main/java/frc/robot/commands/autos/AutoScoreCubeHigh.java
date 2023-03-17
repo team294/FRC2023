@@ -6,7 +6,6 @@ package frc.robot.commands.autos;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.*;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.WristConstants.WristAngle;
@@ -20,14 +19,14 @@ import frc.robot.utilities.FileLog;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class AutoScoreCubeHigh extends SequentialCommandGroup {
   /** Creates a new AutoScoreCubeHigh. */
-  public AutoScoreCubeHigh(Pose2d initPose, Pose2d finalPose, DriveTrain driveTrain, Elevator elevator, Wrist wrist, Manipulator manipulator, LED led, FileLog log) {
+  public AutoScoreCubeHigh(Pose2d initPose, Pose2d finalPose, DriveTrain driveTrain, Elevator elevator, Wrist wrist, Manipulator manipulator, Intake intake, LED led, FileLog log) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       new FileLogWrite(true, false, "AutoScoreCubeHigh", "Start", log),
       new ManipulatorSetPistonPosition(false, led, manipulator, log),		// set to cube position
       new ManipulatorSetPercent(ManipulatorConstants.pieceHoldPct, manipulator, log),				// Low power to hold piece
-      new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, log),
+      new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log),
       new DriveToPose(finalPose, driveTrain, log),
       new EjectPiece(manipulator, log), 		// Runs for 1 second
       new DriveToPose(initPose, driveTrain, log),
