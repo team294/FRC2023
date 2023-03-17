@@ -7,8 +7,6 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
-import static frc.robot.utilities.StringUtil.*;
-
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
@@ -27,7 +25,8 @@ public class Intake extends SubsystemBase implements Loggable {
 
   private final WPI_TalonSRX motor1;
   private final WPI_TalonSRX motor2;
-  private final DoubleSolenoid pneumaticDoubleSolenoid;
+  private final DoubleSolenoid pneumaticDoubleSolenoidLeft;
+  private final DoubleSolenoid pneumaticDoubleSolenoidRight;
 
   private boolean pistonExtended = false;     // Default state = retracted
 
@@ -38,7 +37,8 @@ public class Intake extends SubsystemBase implements Loggable {
   public Intake(FileLog log) {
     motor1 = new WPI_TalonSRX(Ports.CANIntake1);
     motor2 = new WPI_TalonSRX(Ports.CANIntake2);
-    pneumaticDoubleSolenoid = new DoubleSolenoid(Ports.CANPneumaticHub, PneumaticsModuleType.REVPH, Ports.SolIntakeFwd, Ports.SolIntakeRev);
+    pneumaticDoubleSolenoidLeft = new DoubleSolenoid(Ports.CANPneumaticHub, PneumaticsModuleType.REVPH, Ports.SolIntakeLeftFwd, Ports.SolIntakeLeftRev);
+    pneumaticDoubleSolenoidRight = new DoubleSolenoid(Ports.CANPneumaticHub, PneumaticsModuleType.REVPH, Ports.SolIntakeRightFwd, Ports.SolIntakeRightRev);
     subsystemName = "Intake";
     this.log = log;
     
@@ -103,7 +103,8 @@ public class Intake extends SubsystemBase implements Loggable {
    */
   public void setDeployed(boolean extend) {
     pistonExtended = extend;
-    pneumaticDoubleSolenoid.set(extend ? Value.kForward : Value.kReverse);
+    pneumaticDoubleSolenoidLeft.set(extend ? Value.kForward : Value.kReverse);
+    pneumaticDoubleSolenoidRight.set(extend ? Value.kForward : Value.kReverse);
   }
 
   /**
