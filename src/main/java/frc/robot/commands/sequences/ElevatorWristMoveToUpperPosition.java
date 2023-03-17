@@ -35,11 +35,11 @@ public class ElevatorWristMoveToUpperPosition extends SequentialCommandGroup {
    * @param log
    */
   public ElevatorWristMoveToUpperPosition(double elevatorPosition, double wristAngle, Elevator elevator, Wrist wrist, Intake intake, FileLog log) {
-    if (elevatorPosition<ElevatorConstants.boundBottomMain) {
-      elevatorPosition = ElevatorConstants.boundBottomMain + 1.0;
-    }
+    // if (elevatorPosition<ElevatorConstants.boundBottomMain) {
+    //   elevatorPosition = ElevatorConstants.boundBottomMain + 1.0;
+    // }
     if (wristAngle<WristConstants.boundBackMain) {
-      wristAngle = WristConstants.boundBackMain + 1.0;
+      wristAngle = WristConstants.boundBackMain + 5.0;
     }
 
     addCommands(

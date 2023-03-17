@@ -50,7 +50,7 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryType;
  */
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
-  private final FileLog log = new FileLog("D1");
+  private final FileLog log = new FileLog("D2");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
   private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
   private final Field field = new Field(allianceSelection, log);
@@ -78,7 +78,7 @@ public class RobotContainer {
   private boolean rumbling = false;
 
   // Set to this pattern when the robot is disabled
-  private final Command patternTeamMoving = new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 0.5, led, log);
+  private final Command patternTeamMoving = new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 60, led, log);
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

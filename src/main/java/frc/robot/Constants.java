@@ -310,7 +310,7 @@ public final class Constants {
         public enum ElevatorPosition {
             lowerLimit(0.0),        // CALIBRATED
             bottom(0.0),            // CALIBRATED
-            belowScoringPegs(10.5),
+            belowScoringPegs(4.0),
             loadingStationCube(35.0),   // CALIBRATED
             loadingStationCone(45.0),   // CALIBRATED
             scoreLow(0.0),          // CALIBRATED, was 5.0
