@@ -43,6 +43,8 @@ public class ElevatorWristMoveToUpperPosition extends SequentialCommandGroup {
     }
 
     addCommands(
+      new FileLogWrite(false, false, "ElevatorWristMoveToUpperPosition", "Start", log),
+
       // Only extend the elevator if the intake is not deployed
       new ConditionalCommand(
         
@@ -67,11 +69,13 @@ public class ElevatorWristMoveToUpperPosition extends SequentialCommandGroup {
           new ElevatorSetPosition(elevatorPosition, elevator, log),
 
           // move wrist to final position
-          new WristSetAngle(wristAngle, wrist, log)
-        ),
+          new WristSetAngle(wristAngle, wrist, log),
+
+          new FileLogWrite(false, false, "ElevatorWristMoveToUpperPosition", "Finish", log)
+          ),
         
         // Don't extend if the intake is deployed
-        new WaitCommand(.01),
+        new FileLogWrite(false, false, "ElevatorWristMoveToUpperPosition", "Intake deployed", log),
         () -> !intake.isDeployed()
       )
     );

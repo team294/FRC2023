@@ -28,12 +28,14 @@ public class LoadPieceLoadingStation extends SequentialCommandGroup {
    */
   public LoadPieceLoadingStation(Elevator elevator, Wrist wrist, Manipulator manipulator, Intake intake, FileLog log) {
     addCommands(
+      new FileLogWrite(false, false, "LoadPieceLoadingStation", "Start", log),
       new ConditionalCommand(
         new ElevatorWristMoveToUpperPosition(ElevatorPosition.loadingStationCone.value, WristAngle.loadHumanStation.value, elevator, wrist, intake, log), 
         new ElevatorWristMoveToUpperPosition(ElevatorPosition.loadingStationCube.value, WristAngle.loadHumanStation.value, elevator, wrist, intake, log), 
         manipulator::getPistonCone
       ),
-      new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log)
+      new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log),
+      new FileLogWrite(false, false, "LoadPieceLoadingStation", "Finish", log)
     );
   }
 }
