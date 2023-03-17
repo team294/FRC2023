@@ -265,9 +265,9 @@ public class RobotContainer {
     // back
     // Turn off all motors
     xbBack.onTrue(Commands.parallel(
-      new ManipulatorStopMotor(manipulator, log)
+      new ManipulatorStopMotor(manipulator, log),
+      new IntakeStop(intake, log)
       // new ConveyorMove(0, conveyor, log)
-      // TODO stop intake (if we and an intake subsystem)
     )); 
 
     // start 
@@ -314,7 +314,7 @@ public class RobotContainer {
     // resets current angle to 0, keeps current X and Y
     left[1].onTrue(new DriveResetPose(0, false, driveTrain, log));
     // drive to closest goal
-    left[2].onTrue(
+    left[2].whileTrue(
       new SequentialCommandGroup(
         new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), 0.15, 10, driveTrain, log),
         new DriveToPose(() -> field.getFinalColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log)
