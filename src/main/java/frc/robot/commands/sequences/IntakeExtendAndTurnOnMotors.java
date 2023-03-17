@@ -8,29 +8,35 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.ManipulatorConstants;
-import frc.robot.commands.IntakePistonSetPosition;
-import frc.robot.commands.IntakeSetPercentOutput;
-import frc.robot.commands.ManipulatorGrab;
+import frc.robot.commands.*;
 import frc.robot.commands.ManipulatorGrab.BehaviorType;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.FileLog;
 
 public class IntakeExtendAndTurnOnMotors extends SequentialCommandGroup {
   /**
-   * Extends intake and runs intake and manipulator motors if the elevator is down
+   * Extends intake, sets manipulator to cube mode, and runs intake and manipulator motors.
+   * Once a piece is detected in the manipulator, retracts intake.
+   * Only runs if the elevator is down.  If the elevator is not down, then does nothing.
    * @param manipulator
    * @param intake
    * @param elevator
    * @param log
    */
-  public IntakeExtendAndTurnOnMotors(Manipulator manipulator, Intake intake, Wrist wrist, Elevator elevator, FileLog log) {
+  public IntakeExtendAndTurnOnMotors(Manipulator manipulator, Intake intake, Wrist wrist, Elevator elevator, LED led, FileLog log) {
     addCommands(
       new ConditionalCommand(
         new SequentialCommandGroup(
           new IntakePistonSetPosition(true, intake, elevator, log),
           new IntakeSetPercentOutput(0.4, .52, intake, log),
+          new ManipulatorSetPistonPosition(false, led, manipulator, log),     // Set manipulator to cube
           new ElevatorWristStow(elevator, wrist, log),
-          new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log)
+
+          // Grab piece, wait for piece to be held
+          new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log),
+
+          // Retract and turn off intake
+          new IntakeRetractAndTurnOffMotors(intake, elevator, log)
         ),
         new WaitCommand(0.01),
         () -> elevator.isElevatorAtLowerLimit()

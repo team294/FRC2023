@@ -289,9 +289,8 @@ public class AutoSelection {
 				new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
 				new ParallelCommandGroup(
 					new SequentialCommandGroup(
-					new ManipulatorSetPistonPosition(false, led, manipulator, log),
 					new ElevatorWristStow(elevator, wrist, log),
-					new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, log)
+					new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, led, log)
 					),
 					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
 						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log).until(() -> manipulator.isCubePresent())
@@ -336,9 +335,8 @@ public class AutoSelection {
 			new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
 			new ParallelCommandGroup(
 				new SequentialCommandGroup(
-					new ManipulatorSetPistonPosition(false, led, manipulator, log), 
 					new ElevatorWristStow(elevator, wrist, log),
-					new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, log)
+					new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, led, log)
 				),
 				new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
 					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log).until(() -> manipulator.isCubePresent())
@@ -381,9 +379,8 @@ public class AutoSelection {
 				new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
 				new ParallelCommandGroup(
 					new SequentialCommandGroup(
-						new ManipulatorSetPistonPosition(false, led, manipulator, log),
 						new ElevatorWristStow(elevator, wrist, log),
-						new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, log)
+						new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, led, log)
 					),
 					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
 						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)

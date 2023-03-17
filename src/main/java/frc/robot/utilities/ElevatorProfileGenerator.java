@@ -20,7 +20,7 @@ public class ElevatorProfileGenerator {
 	private double maxVelocity = 63.0;			// in inches per second.  CALIBRATED
 	private double currentMPVelocity;
 
-	private double maxAcceleration = 150;		// in inches per second^2.  CALIBRATED
+	private double maxAcceleration = 150;		// in inches per second^2.  Was 100 at week 1, increased to 150.  CALIBRATED
 	private double stoppingAcceleration = .75 * maxAcceleration;
 	private double currentMPAcceleration;
 	private boolean approachingTarget = false;		// true = decelerating towards target;  false = not close enough to start decelerating
