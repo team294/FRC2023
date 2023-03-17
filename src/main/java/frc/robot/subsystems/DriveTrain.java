@@ -29,11 +29,8 @@ import static frc.robot.Constants.Ports.*;
 
 import static frc.robot.Constants.DriveConstants.*;
 
-import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.SwerveConstants;
-import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
-import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
 import frc.robot.Constants.ElevatorConstants.ElevatorSlewRegion;
 import frc.robot.utilities.*;
 

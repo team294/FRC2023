@@ -263,15 +263,15 @@ public final class Constants {
         // public static final double boundBackMidDown = -116.0;      // Boundary between backMid and down regions.  CALIBRATED
         // public static final double boundDownMain = -91.0;      // Boundary between down and main regions.  CALIBRATED
         // public static final double boundDownMidpoint = (boundBackMidDown+boundDownMain)/2.0;      // Midpoint in down region
-        public static final double boundBackMain = -119.0;      // Boundary between back and main regions.  TODO CALIBRATE
+        public static final double boundBackMain = -120.0;      // Boundary between back and main regions.  CALIBRATED
 
         // Wrist pre-defined angles (in degrees)
         // 0 degrees = horizontal (in front of robot) relative to wrist center of gravity
         // -90 degrees = vertical = wrist is hanging "down" naturally due to gravity
         public enum WristAngle {
-            lowerLimit(-144.0),      // CALIBRATED
-            startConfig(-119.0),     // CALIBRATED
+            lowerLimit(-138.0),      // CALIBRATED
             loadIntake(-135.0),    // Conveyor gone so this is unnecesary currently, was -117.5
+            startConfig(-115.0),     // CALIBRATED
             loadHumanStation(10.0),      // CALIBRATED
             scoreLow(0.0),
             scoreMidHigh(20.0),         // Was 10.0
@@ -304,12 +304,13 @@ public final class Constants {
         // Elevator region boundaries
         // public static final double boundBottomLow = 2.0;        // Boundary between bottom and low regions
         // public static final double boundMainLow = 2.0;      // Boundary between low and main regions
-        public static final double boundBottomMain = 2.0;      // Boundary between low and main regions
+        public static final double boundBottomMain = 2.5;      // Boundary between low and main regions
 
         // Elevator pre-defined positions (in inches from bottom of elevator)
         public enum ElevatorPosition {
             lowerLimit(0.0),        // CALIBRATED
             bottom(0.0),            // CALIBRATED
+            belowScoringPegs(10.5),
             loadingStationCube(35.0),   // CALIBRATED
             loadingStationCone(45.0),   // CALIBRATED
             scoreLow(0.0),          // CALIBRATED, was 5.0
