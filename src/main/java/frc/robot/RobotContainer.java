@@ -314,7 +314,12 @@ public class RobotContainer {
     // resets current angle to 0, keeps current X and Y
     left[1].onTrue(new DriveResetPose(0, false, driveTrain, log));
     // drive to closest goal
-    left[2].onTrue(new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
+    left[2].onTrue(
+      new SequentialCommandGroup(
+        new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), 0.15, 10, driveTrain, log),
+        new DriveToPose(() -> field.getFinalColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log)
+      )
+    );
    
     // left joystick right button
     right[1].onTrue(new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, led, log));

@@ -32,15 +32,15 @@ public class Field {
     // #0 = furthest to right (from driver point of view)
     // #8 = furthest to left (from driver point of view)
     private final Pose2d[] BlueCommunityColumnInitial = {
-        new Pose2d(2.0871258795062873, 0.512826, facingDrivers), //54.25+(31/2)*sqrt(2)+6 inches to meters for x value
-        new Pose2d(2.0871258795062873, 1.071626, facingDrivers), 
-        new Pose2d(2.0871258795062873, 1.630426, facingDrivers), 
-        new Pose2d(2.0871258795062873, 2.189226, facingDrivers), 
-        new Pose2d(2.0871258795062873, 2.748026, facingDrivers), 
-        new Pose2d(2.0871258795062873, 3.306826, facingDrivers), 
-        new Pose2d(2.0871258795062873, 3.865626, facingDrivers), 
-        new Pose2d(2.0871258795062873, 4.424426, facingDrivers), 
-        new Pose2d(2.0871258795062873, 4.983226, facingDrivers) 
+        new Pose2d(2.03, 0.512826, facingDrivers), //54.25+(31/2)*sqrt(2)+6 inches to meters for x value
+        new Pose2d(2.03, 1.071626, facingDrivers), 
+        new Pose2d(2.03, 1.630426, facingDrivers), 
+        new Pose2d(2.03, 2.189226, facingDrivers), 
+        new Pose2d(2.03, 2.748026, facingDrivers), 
+        new Pose2d(2.03, 3.306826, facingDrivers), 
+        new Pose2d(2.03, 3.865626, facingDrivers), 
+        new Pose2d(2.03, 4.424426, facingDrivers), 
+        new Pose2d(2.03, 4.983226, facingDrivers) 
     };
 
     //Community -> Place part
@@ -62,15 +62,15 @@ public class Field {
     // #0 = furthest to right (from driver point of view)
     // #8 = furthest to left (from driver point of view)
     private final Pose2d[] RedCommunityColumnInitial = {
-        new Pose2d(2.0871258795062873, 3.020568, facingDrivers), //118.92 inches
-        new Pose2d(2.0871258795062873, 3.579368, facingDrivers), //140.92 inches
-        new Pose2d(2.0871258795062873, 4.138168, facingDrivers), //162.92 inches
-        new Pose2d(2.0871258795062873, 4.696968, facingDrivers), //184.92 inches
-        new Pose2d(2.0871258795062873, 5.255768, facingDrivers), //206.92 inches
-        new Pose2d(2.0871258795062873, 5.814568, facingDrivers), //228.92 inches
-        new Pose2d(2.0871258795062873, 6.373368, facingDrivers), //250.92 inches
-        new Pose2d(2.0871258795062873, 6.932168, facingDrivers), //272.92 inches
-        new Pose2d(2.0871258795062873, 7.490968, facingDrivers)  //294.92 inches
+        new Pose2d(2.03, 3.020568, facingDrivers), //118.92 inches
+        new Pose2d(2.03, 3.579368, facingDrivers), //140.92 inches
+        new Pose2d(2.03, 4.138168, facingDrivers), //162.92 inches
+        new Pose2d(2.03, 4.696968, facingDrivers), //184.92 inches
+        new Pose2d(2.03, 5.255768, facingDrivers), //206.92 inches
+        new Pose2d(2.03, 5.814568, facingDrivers), //228.92 inches
+        new Pose2d(2.03, 6.373368, facingDrivers), //250.92 inches
+        new Pose2d(2.03, 6.932168, facingDrivers), //272.92 inches
+        new Pose2d(2.03, 7.490968, facingDrivers)  //294.92 inches
     };
 
     //Community -> Place part
