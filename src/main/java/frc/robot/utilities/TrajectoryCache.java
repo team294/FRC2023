@@ -238,12 +238,12 @@ public class TrajectoryCache {
     	try {
 
 			log.writeLogEcho(true, "TrajectoryGeneration", trajName, 
-				"maxSpeed", SwerveConstants.kMaxSpeedMetersPerSecond * maxVelRatio,
-				"maxAcceleration", SwerveConstants.kMaxAccelerationMetersPerSecondSquare * maxAccelRatio);
+				"maxSpeed", SwerveConstants.kFullSpeedMetersPerSecond * maxVelRatio,
+				"maxAcceleration", SwerveConstants.kFullAccelerationMetersPerSecondSquare * maxAccelRatio);
 
 			// Create config for trajectory
-            TrajectoryConfig config = new TrajectoryConfig(SwerveConstants.kMaxSpeedMetersPerSecond * maxVelRatio,
-				SwerveConstants.kMaxAccelerationMetersPerSecondSquare * maxAccelRatio)
+            TrajectoryConfig config = new TrajectoryConfig(SwerveConstants.kFullSpeedMetersPerSecond * maxVelRatio,
+				SwerveConstants.kFullAccelerationMetersPerSecondSquare * maxAccelRatio)
 				.setKinematics(DriveConstants.kDriveKinematics)
 				.setReversed(setReversed);			// Set to true if robot is running backwards
 

@@ -33,4 +33,17 @@ public class MathBCR {
       return new Pose2d(initialPose.getTranslation().plus(new Translation2d(xOffset, yOffset)), initialPose.getRotation());
     }
 
+    /**
+     * Calculates the number of degrees between two angles. Angles should be normalized [-180,180]
+     * @param a angle 1
+     * @param b angle 2
+     * @return the degrees between the angles
+     */
+    public static double angleMinus(double a, double b) {
+      double d = a - b;
+      if (d > 180) d -= 360; 
+      if (d < -180) d += 360;
+      return d;
+    }
+
 }

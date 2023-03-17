@@ -7,27 +7,25 @@ package frc.robot.commands.sequences;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.commands.*;
-import frc.robot.commands.ManipulatorGrab.BehaviorType;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.FileLog;
 
-public class LoadPieceConveyor extends SequentialCommandGroup {
-
+public class IntakeToManipulator extends SequentialCommandGroup {
 
   /**
-   * Sets the elevator and wrist for intake from conveyor.  Then turns on manipulator motor until a piece is picked up.
+   *  Stows Wrist and Elevator, Extends intake and runs intake motor, Runs manipulator motor to pick up from ground
+   * @param intake
    * @param elevator
    * @param wrist
    * @param manipulator
-   * @param conveyor
    * @param log
    */
-  public LoadPieceConveyor(Elevator elevator, Wrist wrist, Manipulator manipulator, Conveyor conveyor, FileLog log) {
+  public IntakeToManipulator(Intake intake, Elevator elevator, Wrist wrist, Manipulator manipulator, FileLog log) {
     addCommands(
       new ElevatorWristStow(elevator, wrist, log),
-      new ConveyorMove(0.3, conveyor, log),
-      new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log),
-      new ConveyorMove(0, conveyor, log)
+      new IntakePistonSetPosition(true, intake, elevator, log),
+      new IntakeSetPercentOutput(0.75, 0.35, intake, log),
+      new ManipulatorSetPercent(ManipulatorConstants.pieceGrabPct, manipulator, log)
     );
   }
 }

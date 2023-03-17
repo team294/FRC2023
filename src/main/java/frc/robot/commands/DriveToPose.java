@@ -26,6 +26,7 @@ import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.HolonomicDriveControllerBCR;
+import frc.robot.utilities.MathBCR;
 import frc.robot.utilities.Translation2dBCR;
 import frc.robot.utilities.TrapezoidProfileBCR;
 
@@ -39,6 +40,8 @@ public class DriveToPose extends CommandBase {
 
   private double maxThetaErrorDegrees = TrajectoryConstants.maxThetaErrorDegrees;      
   private double maxPositionErrorMeters = TrajectoryConstants.maxPositionErrorMeters;   
+
+  private boolean regenerate = false;
 
   // Options to control how the goal is specified
   public enum GoalMode {
@@ -85,19 +88,21 @@ public class DriveToPose extends CommandBase {
    * @param maxAccelMetersPerSecondSquare max acceleration/deceleration, in meters per second squared
    * @param maxPositionErrorMeters tolerance for end position in meters
    * @param maxThetaErrorDegrees tolerance for end theta in degrees
+   * @param regenerate regenerate the profile each time (set to true when using vision to get the latest position)
    * @param driveTrain DriveTrain subsystem
    * @param log file for logging
    */
-  public DriveToPose(Pose2d goalPose, double maxVelMetersPerSecond, double maxAccelMetersPerSecondSquare, double maxPositionErrorMeters, double maxThetaErrorDegrees, DriveTrain driveTrain, FileLog log) {
+  public DriveToPose(Pose2d goalPose, double maxVelMetersPerSecond, double maxAccelMetersPerSecondSquare, double maxPositionErrorMeters, double maxThetaErrorDegrees, boolean regenerate, DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
     this.goalPose = goalPose;
     this.maxPositionErrorMeters = maxPositionErrorMeters;
     this.maxThetaErrorDegrees = maxThetaErrorDegrees;
+    this.regenerate = regenerate;
     goalMode = GoalMode.pose;
     trapProfileConstraints = new TrapezoidProfileBCR.Constraints(
-      MathUtil.clamp(maxVelMetersPerSecond, -SwerveConstants.kMaxSpeedMetersPerSecond, SwerveConstants.kMaxSpeedMetersPerSecond), 
-      MathUtil.clamp(maxAccelMetersPerSecondSquare, -SwerveConstants.kMaxAccelerationMetersPerSecondSquare, SwerveConstants.kMaxAccelerationMetersPerSecondSquare)
+      MathUtil.clamp(maxVelMetersPerSecond, -SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullSpeedMetersPerSecond), 
+      MathUtil.clamp(maxAccelMetersPerSecondSquare, -SwerveConstants.kFullAccelerationMetersPerSecondSquare, SwerveConstants.kFullAccelerationMetersPerSecondSquare)
     );
 
     constructorCommonCode();
@@ -284,7 +289,7 @@ public class DriveToPose extends CommandBase {
         "Trap Vel w/kA", desiredVelocityMetersPerSecond,
         "Robot XVel", robotSpeeds.vxMetersPerSecond,
         "Robot Pos Err", driveTrain.getPose().getTranslation().minus(goalPose.getTranslation()).getNorm(),
-        "Robot Th Err", Math.abs(driveTrain.getGyroRotation() - goalPose.getRotation().getDegrees()),
+        "Robot Th Err", MathBCR.angleMinus(driveTrain.getGyroRotation(), goalPose.getRotation().getDegrees()),
         "Trap VelAng", desiredPose.getRotation().getDegrees(),
         "Target rot", desiredRotation.getDegrees(), 
         "Robot X", curRobotTranslation.getX(),
@@ -294,6 +299,40 @@ public class DriveToPose extends CommandBase {
         "Robot rot", robotPose.getRotation().getDegrees(),
         "Pitch", driveTrain.getGyroPitch()
     );
+
+    if (regenerate && (goalMode == GoalMode.pose)) {
+      log.writeLog(false, "DriveToPose", "Regenerate NOT implemented, needs testing");
+    //   timer.reset();
+    //   timer.start();
+    //   controller.reset();
+
+    //   initialPose = driveTrain.getPose();
+    //   initialTranslation = initialPose.getTranslation();
+    //   curRobotTranslation = initialTranslation;
+    //   Translation2d trapezoidPath = goalPose.getTranslation().minus(initialPose.getTranslation());
+    //   goalDirection = Translation2dBCR.normalize(trapezoidPath);
+    //   double goalDistance = trapezoidPath.getNorm();
+    
+    //   ChassisSpeeds robotSpeed = driveTrain.getRobotSpeeds();
+    //   double initialVelocity = robotSpeed.vxMetersPerSecond*goalDirection.getX() + robotSpeed.vyMetersPerSecond*goalDirection.getY();
+
+    //   TrapezoidProfileBCR.State initialState = new TrapezoidProfileBCR.State(0, initialVelocity);
+    //   TrapezoidProfileBCR.State goalState = new TrapezoidProfileBCR.State(goalDistance, 0);
+    //   profile = new TrapezoidProfileBCR(trapProfileConstraints, goalState, initialState); 
+
+    //   log.writeLog(false, "DriveToPose", "Regenerate", 
+    //     "Time", timer.get(), 
+    //     "Goal X", goalPose.getTranslation().getX(),
+    //     "Goal Y", goalPose.getTranslation().getY(),
+    //     "Goal rot", goalPose.getRotation().getDegrees(), 
+    //     "Robot X", initialPose.getX(),
+    //     "Robot Y", initialPose.getY(),
+    //     "Robot rot", initialPose.getRotation().getDegrees(),
+    //     "Goal distance", goalDistance,
+    //     "Profile time",profile.totalTime()
+    //   );
+    }
+
   }
 
   // Called once the command ends or is interrupted.
@@ -312,16 +351,16 @@ public class DriveToPose extends CommandBase {
       log.writeLog(false, "DriveToPose", "timeout"); 
     }
 
-    var gyro = Math.abs(driveTrain.getGyroRotation() - goalPose.getRotation().getDegrees());
+    var gyro = MathBCR.angleMinus(driveTrain.getGyroRotation(), goalPose.getRotation().getDegrees());
     var posError = driveTrain.getPose().getTranslation().minus(goalPose.getTranslation()).getNorm();
-
+    
     var finished = timeout ||         // if we 3 seconds after the profile completed, then end even if we are not within tolerance 
       ( timer.hasElapsed(profile.totalTime())  && 
-        ( gyro <= maxThetaErrorDegrees ) &&
+        ( Math.abs(gyro) <= maxThetaErrorDegrees ) &&
         ( posError  <= maxPositionErrorMeters) );
 
     if (finished) {
-      log.writeLog(false, "DriveToPose", "finished", "gyro", gyro, "posError", posError, "maxTheta",maxThetaErrorDegrees, "maxMeters", maxPositionErrorMeters, "timer",timer.get()); 
+      log.writeLog(false, "DriveToPose", "finished", "gyroError", gyro, "posError", posError, "maxTheta",maxThetaErrorDegrees, "maxMeters", maxPositionErrorMeters, "timer",timer.get()); 
     }
 
     return finished;
