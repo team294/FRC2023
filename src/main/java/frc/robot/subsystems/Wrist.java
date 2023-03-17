@@ -154,26 +154,9 @@ public class Wrist extends SubsystemBase implements Loggable{
       WristRegion curRegion = getRegion(getWristAngle());
 
       // Check elevator interlocks
-      if (curRegion == WristRegion.backFar) {
-        safeAngle = MathUtil.clamp(safeAngle, WristAngle.lowerLimit.value, boundBackMidDown);
-      }
-      if (curRegion == WristRegion.backMid) {
-        if (elevator.getElevatorRegion() == ElevatorRegion.bottom) {
-          safeAngle = MathUtil.clamp(safeAngle, WristAngle.lowerLimit.value, boundBackMidDown);
-        } else if (elevator.getElevatorRegion() == ElevatorRegion.main) {
-          safeAngle = MathUtil.clamp(safeAngle, boundBackFarMid, WristAngle.upperLimit.value);
-        } else {
-          safeAngle = MathUtil.clamp(safeAngle, boundBackFarMid, boundBackMidDown);
-        }
-      }
-      if (curRegion == WristRegion.down) {
-        safeAngle = MathUtil.clamp(safeAngle, boundBackFarMid, WristAngle.upperLimit.value);
-      }
       if (curRegion == WristRegion.main) {
         if (elevator.getElevatorRegion() == ElevatorRegion.main) {
-          safeAngle = MathUtil.clamp(safeAngle, boundBackFarMid, WristAngle.upperLimit.value);
-        } else {
-          safeAngle = MathUtil.clamp(safeAngle, boundDownMain, WristAngle.upperLimit.value);
+          safeAngle = MathUtil.clamp(safeAngle, boundBackMain, WristAngle.upperLimit.value);
         }
       }
 
@@ -221,9 +204,7 @@ public class Wrist extends SubsystemBase implements Loggable{
 	 * @return corresponding wrist region
 	 */
 	private WristRegion getRegion(double degrees) {
-      if (degrees <= boundBackFarMid) return WristRegion.backFar;
-      else if (degrees < boundBackMidDown) return WristRegion.backMid;
-      else if (degrees <= boundDownMain) return WristRegion.down;
+      if (degrees <= boundBackMain) return WristRegion.back;
       else return WristRegion.main; 
 	}
 
@@ -242,14 +223,7 @@ public class Wrist extends SubsystemBase implements Loggable{
     if (wristMotor.getControlMode() == ControlMode.Position) {
       WristRegion targetRegion = getRegion(safeAngle);
 
-      if (curRegion == WristRegion.backMid) {
-        if (targetRegion == WristRegion.backFar) curRegion = WristRegion.backFar;
-        if (targetRegion == WristRegion.down || targetRegion == WristRegion.main) curRegion = WristRegion.down;
-      }
-
-      if (curRegion == WristRegion.main) {
-        if (targetRegion != WristRegion.main) curRegion = WristRegion.down;
-      }
+      if (targetRegion != WristRegion.main) curRegion = WristRegion.back;
     }
       
     return curRegion;
