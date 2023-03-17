@@ -84,8 +84,10 @@ public final class Constants {
         // Pneumatic solenoid ports
         public static final int SolManipulatorFwd = 1;
         public static final int SolManipulatorRev = 0;
-        public static final int SolIntakeFwd = 3;       
-        public static final int SolIntakeRev = 2;     
+        public static final int SolIntakeLeftFwd = 3;       
+        public static final int SolIntakeLeftRev = 2;     
+        public static final int SolIntakeRightFwd = 9;       
+        public static final int SolIntakeRightRev = 10;     
 
     }
 
