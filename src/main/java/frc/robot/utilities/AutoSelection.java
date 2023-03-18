@@ -2,6 +2,7 @@ package frc.robot.utilities;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.math.MathUtil;
@@ -21,7 +22,6 @@ import frc.robot.commands.sequences.ElevatorWristMoveToUpperPosition;
 import frc.robot.commands.sequences.ElevatorWristStow;
 import frc.robot.commands.sequences.IntakeExtendAndTurnOnMotors;
 import frc.robot.commands.sequences.IntakeRetractAndTurnOffMotors;
-import frc.robot.commands.sequences.IntakeToManipulator;
 import frc.robot.subsystems.*;
 
 
@@ -268,7 +268,7 @@ public class AutoSelection {
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 7.490968, 180
 				// Travel  4.4 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.6896, -.407174);  // 6.17165, 7.490968, 180
+				posLeave = MathBCR.translate(posScoreInitial, 5.39, -.407174);  // 6.17165, 7.490968, 180
 				// Travel in Y to cross the field to in front of charging station
 				// posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
 				posLineUp = field.getInitialColumn(8);
@@ -278,7 +278,7 @@ public class AutoSelection {
 			} else {
 				posScoreInitial = field.getFinalColumn(1);			// 1.77165, 0.512826, 180
 				// Travel  3.5 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.6896, .407174);		
+				posLeave = MathBCR.translate(posScoreInitial, 5.39, .407174);		
 				// Travel in Y to cross the field to the in front of charging station
 				posLineUp = field.getInitialColumn(2);
 				posFinal = field.getFinalColumn(2);
@@ -287,13 +287,13 @@ public class AutoSelection {
 			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 				new DriveResetPose(posScoreInitial, true, driveTrain, log),
 				new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
-				new ParallelCommandGroup(
-					new SequentialCommandGroup(
-					new ElevatorWristStow(elevator, wrist, log),
-					new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, led, log)
-					),
+				new ParallelDeadlineGroup(
 					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
-						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log).until(() -> manipulator.isCubePresent())
+						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log).until(() -> manipulator.isCubePresent()),
+					new SequentialCommandGroup(
+						new ElevatorWristStow(elevator, wrist, log),
+						new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, led, log)
+					)
 				),
 				new ManipulatorSetPercent(ManipulatorConstants.pieceHoldPct, manipulator, log),
 				new ParallelCommandGroup(
@@ -314,7 +314,7 @@ public class AutoSelection {
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(1);			// 1.77165, 7.490968, 180
 				// Travel  4.4 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.6896, .407174);  // 6.17165, 7.490968, 180
+				posLeave = MathBCR.translate(posScoreInitial, 5.39, .407174);  // 6.17165, 7.490968, 180
 				// Travel in Y to cross the field to in front of charging station
 				// posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
 				posLineUp = field.getInitialColumn(2);
@@ -324,7 +324,7 @@ public class AutoSelection {
 			} else {
 				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 0.512826, 180
 				// Travel  3.5 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.6896, -.407174);		
+				posLeave = MathBCR.translate(posScoreInitial, 5.39, -.407174);		
 				// Travel in Y to cross the field to the in front of charging station
 				posLineUp = field.getInitialColumn(8);
 				posFinal = field.getFinalColumn(8);
@@ -333,13 +333,13 @@ public class AutoSelection {
 			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			new DriveResetPose(posScoreInitial, true, driveTrain, log),
 			new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
-			new ParallelCommandGroup(
+			new ParallelDeadlineGroup(
+				new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
+					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log).until(() -> manipulator.isCubePresent()),
 				new SequentialCommandGroup(
 					new ElevatorWristStow(elevator, wrist, log),
 					new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, led, log)
-				),
-				new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
-					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log).until(() -> manipulator.isCubePresent())
+				)
 			),
 			new ManipulatorSetPercent(ManipulatorConstants.pieceHoldPct, manipulator, log),
 			new ParallelCommandGroup(
@@ -360,7 +360,7 @@ public class AutoSelection {
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 7.490968, 180
 				// Travel  4.4 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.6896, -.407174);  // 6.17165, 7.490968, 180
+				posLeave = MathBCR.translate(posScoreInitial, 5.39, -.407174);  // 6.17165, 7.490968, 180
 				// Travel in Y to cross the field to in front of charging station
 				// posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
 				posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
@@ -369,7 +369,7 @@ public class AutoSelection {
 			} else {
 				posScoreInitial = field.getFinalColumn(1);			// 1.77165, 0.512826, 180
 				// Travel  3.5 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.6896, .407174);		// 6.17165, 0.512826, 180
+				posLeave = MathBCR.translate(posScoreInitial, 5.39, .407174);		// 6.17165, 0.512826, 180
 				// Travel in Y to cross the field to the in front of charging station
 				posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
 			}
@@ -377,13 +377,13 @@ public class AutoSelection {
 			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 				new DriveResetPose(posScoreInitial, true, driveTrain, log),
 				new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
-				new ParallelCommandGroup(
+				new ParallelDeadlineGroup(
+					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
+						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log),
 					new SequentialCommandGroup(
 						new ElevatorWristStow(elevator, wrist, log),
 						new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, led, log)
-					),
-					new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
-						TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
+					)
 				),
 				new ManipulatorSetPercent(ManipulatorConstants.pieceHoldPct, manipulator, log),
 				new ParallelCommandGroup(
@@ -403,7 +403,7 @@ public class AutoSelection {
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(1);			// 1.77165, 7.490968, 180
 				// Travel  4.4 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.6896, .407174);  // 6.17165, 7.490968, 180
+				posLeave = MathBCR.translate(posScoreInitial, 5.39, .407174);  // 6.17165, 7.490968, 180
 				// Travel in Y to cross the field to in front of charging station
 				// posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
 				posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
@@ -412,7 +412,7 @@ public class AutoSelection {
 			} else {
 				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 0.512826, 180
 				// Travel  3.5 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.6896, -.407174);		// 6.17165, 0.512826, 180
+				posLeave = MathBCR.translate(posScoreInitial, 5.39, -.407174);		// 6.17165, 0.512826, 180
 				// Travel in Y to cross the field to the in front of charging station
 				posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
 			}
@@ -420,14 +420,14 @@ public class AutoSelection {
 			autonomousCommand = new SequentialCommandGroup(new WaitCommand(waitTime),
 			new DriveResetPose(posScoreInitial, true, driveTrain, log),
 			new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
-			new ParallelCommandGroup(
+			new ParallelDeadlineGroup(
+				new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
+					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log),
 				new SequentialCommandGroup(
 					new ManipulatorSetPistonPosition(false, led, manipulator, log),
 					new ElevatorWristStow(elevator, wrist, log),
-					new IntakeToManipulator(intake, elevator, wrist, manipulator, log)
-				),
-				new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
-					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
+					new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, led, log)
+				)
 			),
 			new ManipulatorSetPercent(ManipulatorConstants.pieceHoldPct, manipulator, log),
 			new ParallelCommandGroup(

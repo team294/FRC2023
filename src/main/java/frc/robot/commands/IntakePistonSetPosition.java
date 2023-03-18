@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Intake;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.subsystems.Elevator;
 import frc.robot.utilities.FileLog;
 
@@ -33,13 +34,15 @@ public class IntakePistonSetPosition extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    if (!elevator.isElevatorAtLowerLimit() && deploy) {
+    double elevatorPos = elevator.getElevatorPos();
+
+    if (elevatorPos > ElevatorConstants.boundBottomMain && deploy) {
       log.writeLog(false, "IntakePistonSetPosition", "Initialize", "IntakePiston", (deploy) ? "Deploy" : "Retract", 
-        "Elevator down", elevator.isElevatorAtLowerLimit(), "Failure");
+        "Elevator pos", elevatorPos, "Command Ok?", "Failure");
     } else {
       intake.setDeployed(deploy);
       log.writeLog(false, "IntakePistonSetPosition", "Initialize", "IntakePiston", (deploy) ? "Deploy" : "Retract", 
-        "Elevator down", elevator.isElevatorAtLowerLimit(), "Success");
+        "Elevator pos", elevatorPos, "Command Ok?", "Success");
     }
   }
 

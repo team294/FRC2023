@@ -31,13 +31,16 @@ public class ActiveBalance extends PIDCommand {
         () -> goalAngle,
         // This uses the output
         output -> {
-          if(Math.abs(driveTrain.getGyroPitch()) > 1) {
+          if (Math.abs(driveTrain.getGyroPitch()) > 10) {
+            output = -0.3*Math.signum(driveTrain.getGyroPitch());
+            driveTrain.drive(output, 0, 0, true, false);
+          } else if (Math.abs(driveTrain.getGyroPitch()) > 1) {
             driveTrain.drive(output, 0, 0, true, false);
           } else {
             driveTrain.drive(0, 0, 0, true, false);
           }
           // Use the output here
-          log.writeLog(false, "ActiveBalance", "Pitch", driveTrain.getGyroPitch(), "Output", output);
+          log.writeLog(false, "ActiveBalance", "PID Loop", "Pitch", driveTrain.getGyroPitch(), "Output", output);
         });
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(driveTrain);
