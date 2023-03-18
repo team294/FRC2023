@@ -2,7 +2,6 @@ package frc.robot.utilities;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.math.MathUtil;
@@ -12,7 +11,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.CoordType;
-import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
@@ -290,7 +288,8 @@ public class AutoSelection {
 				new DriveResetPose(posScoreInitial, true, driveTrain, log),
 				new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
 				new AutoPickUpCube(posLeave, posLineUp, true, intake, elevator, wrist, manipulator, driveTrain, led, log),
-				new AutoScoreCubeHigh(posLineUp, posFinal, driveTrain, elevator, wrist, manipulator, intake, led, log)
+				new AutoScoreCube(posLineUp, posFinal, ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value,
+					driveTrain, elevator, wrist, manipulator, intake, led, log)
 			);
 		}
 
@@ -322,8 +321,8 @@ public class AutoSelection {
 				new DriveResetPose(posScoreInitial, true, driveTrain, log),
 				new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
 				new AutoPickUpCube(posLeave, posLineUp, true, intake, elevator, wrist, manipulator, driveTrain, led, log),
-				new AutoScoreCubeHigh(posLineUp, posFinal, driveTrain, elevator, wrist, manipulator, intake, led, log)
-			);
+				new AutoScoreCube(posLineUp, posFinal, ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value,
+					driveTrain, elevator, wrist, manipulator, intake, led, log)			);
 		}
 
 		if (autoPlan == CONE_LEAVE_NEAR_WALL_PICK_UP_BALANCE) {
