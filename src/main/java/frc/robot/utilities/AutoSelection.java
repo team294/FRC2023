@@ -268,7 +268,7 @@ public class AutoSelection {
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 7.490968, 180
 				// Travel  4.4 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.6896, -.407174);  // 6.17165, 7.490968, 180
+				posLeave = MathBCR.translate(posScoreInitial, 5.39, -.407174);  // 6.17165, 7.490968, 180
 				// Travel in Y to cross the field to in front of charging station
 				// posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
 				posLineUp = field.getInitialColumn(8);
@@ -278,7 +278,7 @@ public class AutoSelection {
 			} else {
 				posScoreInitial = field.getFinalColumn(1);			// 1.77165, 0.512826, 180
 				// Travel  3.5 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.6896, .407174);		
+				posLeave = MathBCR.translate(posScoreInitial, 5.39, .407174);		
 				// Travel in Y to cross the field to the in front of charging station
 				posLineUp = field.getInitialColumn(2);
 				posFinal = field.getFinalColumn(2);
@@ -314,7 +314,7 @@ public class AutoSelection {
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(1);			// 1.77165, 7.490968, 180
 				// Travel  4.4 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.6896, .407174);  // 6.17165, 7.490968, 180
+				posLeave = MathBCR.translate(posScoreInitial, 5.39, .407174);  // 6.17165, 7.490968, 180
 				// Travel in Y to cross the field to in front of charging station
 				// posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
 				posLineUp = field.getInitialColumn(2);
@@ -324,7 +324,7 @@ public class AutoSelection {
 			} else {
 				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 0.512826, 180
 				// Travel  3.5 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.6896, -.407174);		
+				posLeave = MathBCR.translate(posScoreInitial, 5.39, -.407174);		
 				// Travel in Y to cross the field to the in front of charging station
 				posLineUp = field.getInitialColumn(8);
 				posFinal = field.getFinalColumn(8);
@@ -360,7 +360,7 @@ public class AutoSelection {
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 7.490968, 180
 				// Travel  4.4 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.6896, -.407174);  // 6.17165, 7.490968, 180
+				posLeave = MathBCR.translate(posScoreInitial, 5.39, -.407174);  // 6.17165, 7.490968, 180
 				// Travel in Y to cross the field to in front of charging station
 				// posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
 				posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
@@ -369,7 +369,7 @@ public class AutoSelection {
 			} else {
 				posScoreInitial = field.getFinalColumn(1);			// 1.77165, 0.512826, 180
 				// Travel  3.5 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.6896, .407174);		// 6.17165, 0.512826, 180
+				posLeave = MathBCR.translate(posScoreInitial, 5.39, .407174);		// 6.17165, 0.512826, 180
 				// Travel in Y to cross the field to the in front of charging station
 				posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
 			}
@@ -403,7 +403,7 @@ public class AutoSelection {
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(1);			// 1.77165, 7.490968, 180
 				// Travel  4.4 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.6896, .407174);  // 6.17165, 7.490968, 180
+				posLeave = MathBCR.translate(posScoreInitial, 5.39, .407174);  // 6.17165, 7.490968, 180
 				// Travel in Y to cross the field to in front of charging station
 				// posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
 				posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
@@ -412,7 +412,7 @@ public class AutoSelection {
 			} else {
 				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 0.512826, 180
 				// Travel  3.5 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.6896, -.407174);		// 6.17165, 0.512826, 180
+				posLeave = MathBCR.translate(posScoreInitial, 5.39, -.407174);		// 6.17165, 0.512826, 180
 				// Travel in Y to cross the field to the in front of charging station
 				posCross = MathBCR.translate(field.getStationInitial(5), 1, 0);
 			}
