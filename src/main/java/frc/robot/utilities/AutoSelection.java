@@ -349,12 +349,14 @@ public class AutoSelection {
 			}
 				
 			autonomousCommand = new SequentialCommandGroup(
-				new WaitCommand(waitTime),
-				new DriveResetPose(posScoreInitial, true, driveTrain, log),
-				new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
-				new AutoPickUpCube(posLeave, posCross, false, intake, elevator, wrist, manipulator, driveTrain, led, log),
-				new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
-				new ActiveBalance(driveTrain, log),
+				new SequentialCommandGroup(
+					new WaitCommand(waitTime),
+					new DriveResetPose(posScoreInitial, true, driveTrain, log),
+					new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
+					new AutoPickUpCube(posLeave, posCross, false, intake, elevator, wrist, manipulator, driveTrain, led, log),
+					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
+					new ActiveBalance(driveTrain, log)
+				).withTimeout(14.5),
 				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
 			);
 		}
@@ -381,12 +383,14 @@ public class AutoSelection {
 			}
 				
 			autonomousCommand = new SequentialCommandGroup(
-				new WaitCommand(waitTime),
-				new DriveResetPose(posScoreInitial, true, driveTrain, log),
-				new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
-				new AutoPickUpCube(posLeave, posCross, false, intake, elevator, wrist, manipulator, driveTrain, led, log),
-				new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
-				new ActiveBalance(driveTrain, log),
+				new SequentialCommandGroup(
+					new WaitCommand(waitTime),
+					new DriveResetPose(posScoreInitial, true, driveTrain, log),
+					new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
+					new AutoPickUpCube(posLeave, posCross, false, intake, elevator, wrist, manipulator, driveTrain, led, log),
+					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
+					new ActiveBalance(driveTrain, log)
+				).withTimeout(14.5),
 				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
 			);
 		}
