@@ -7,6 +7,7 @@ package frc.robot.commands.sequences;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.commands.*;
 import frc.robot.commands.ManipulatorGrab.BehaviorType;
@@ -25,6 +26,7 @@ public class IntakeExtendAndTurnOnMotors extends SequentialCommandGroup {
    */
   public IntakeExtendAndTurnOnMotors(Manipulator manipulator, Intake intake, Wrist wrist, Elevator elevator, LED led, FileLog log) {
     addCommands(
+      new FileLogWrite(false, false, "IntakeExtendAndTurnOnMotors", "Start", log),
       new ConditionalCommand(
         new SequentialCommandGroup(
           new IntakePistonSetPosition(true, intake, elevator, log),
@@ -36,10 +38,12 @@ public class IntakeExtendAndTurnOnMotors extends SequentialCommandGroup {
           new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log),
 
           // Retract and turn off intake
-          new IntakeRetractAndTurnOffMotors(intake, elevator, log)
+          new IntakeRetractAndTurnOffMotors(intake, elevator, log),
+
+          new FileLogWrite(false, false, "IntakeExtendAndTurnOnMotors", "End", log)
         ),
-        new WaitCommand(0.01),
-        () -> elevator.isElevatorAtLowerLimit()
+        new FileLogWrite(false, false, "IntakeExtendAndTurnOnMotors", "Elevator Not Down", log),
+        () -> (elevator.getElevatorPos() <= ElevatorConstants.boundBottomMain)
       )
     );
   }

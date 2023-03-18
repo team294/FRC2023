@@ -424,7 +424,7 @@ public class AutoSelection {
 				new SequentialCommandGroup(
 					new ManipulatorSetPistonPosition(false, led, manipulator, log),
 					new ElevatorWristStow(elevator, wrist, log),
-					new IntakeToManipulator(intake, elevator, wrist, manipulator, log)
+					new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, led, log)
 				),
 				new DriveToPose(posLeave, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kMaxRetractingAccelerationMetersPerSecondSquare,
 					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log)
