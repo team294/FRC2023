@@ -16,12 +16,14 @@ import frc.robot.utilities.FileLog;
 public class ActiveBalance extends PIDCommand {
   // the setpoint for the Balance PID loop
   public static double goalAngle = 0;
+  private final DriveTrain driveTrain;
+  private int toleranceCounter = 0;
   
   /**
    * Actively balances the robot to the goalAngle setpoint
    * @param driveTrain driveTrain
    */
-  public ActiveBalance(DriveTrain driveTrain, FileLog log) {
+  public ActiveBalance(DriveTrain driveTrain, FileLog log) {   
     super(
         // The controller that the command will use
         new PIDController(DriveConstants.kPDriveBalance, 0, 0),
@@ -31,25 +33,33 @@ public class ActiveBalance extends PIDCommand {
         () -> goalAngle,
         // This uses the output
         output -> {
-          if (Math.abs(driveTrain.getGyroPitch()) > 10) {
-            output = -0.3*Math.signum(driveTrain.getGyroPitch());
-            driveTrain.drive(output, 0, 0, true, false);
-          } else if (Math.abs(driveTrain.getGyroPitch()) > 1) {
+          // if (Math.abs(driveTrain.getGyroPitch()) > 10) {
+          //   output = -0.3*Math.signum(driveTrain.getGyroPitch());
+          //   driveTrain.drive(output, 0, 0, true, false);
+          // } else 
+          if (Math.abs(driveTrain.getGyroPitch()) > 1) {
             driveTrain.drive(output, 0, 0, true, false);
           } else {
             driveTrain.drive(0, 0, 0, true, false);
           }
           // Use the output here
-          log.writeLog(false, "ActiveBalance", "PID Loop", "Pitch", driveTrain.getGyroPitch(), "Output", output);
+          log.writeLog(false, "ActiveBalance", "PID Loop", "Pitch", driveTrain.getGyroPitch(), "Goal Angle", goalAngle, "Output", output);
         });
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(driveTrain);
+    this.driveTrain = driveTrain;
     // Configure additional PID options by calling `getController` here.
   }
 
-  // Returns true when the command should end. TODO tolerance counter?
+  // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    if (Math.abs(driveTrain.getGyroPitch()-goalAngle) <= 1.0) {
+      toleranceCounter++;
+    } else {
+      toleranceCounter = 0;
+    }
+
+    return toleranceCounter>=10;
   }
 }
