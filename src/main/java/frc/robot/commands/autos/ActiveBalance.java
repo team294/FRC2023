@@ -32,7 +32,8 @@ public class ActiveBalance extends PIDCommand {
         // This uses the output
         output -> {
           if (Math.abs(driveTrain.getGyroPitch()) > 10) {
-            driveTrain.drive(-0.4*Math.signum(driveTrain.getGyroPitch()), 0, 0, true, false);
+            output = -0.3*Math.signum(driveTrain.getGyroPitch());
+            driveTrain.drive(output, 0, 0, true, false);
           } else if (Math.abs(driveTrain.getGyroPitch()) > 1) {
             driveTrain.drive(output, 0, 0, true, false);
           } else {
