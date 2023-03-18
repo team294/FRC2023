@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
@@ -92,11 +93,10 @@ public class AutoPickUpCube extends SequentialCommandGroup {
         )
 
       ),
-      // Stop and retract the intake, in case the manipulator never saw a cube
-      new ParallelCommandGroup(
-        new IntakePistonSetPosition(false, intake, elevator, log),
-        new IntakeStop(intake, log)
-      )
+      // Stop and retract the intake and slow down manipulator, in case the manipulator never saw a cube
+      new ManipulatorSetPercent(ManipulatorConstants.pieceHoldPct, manipulator, log),
+      new IntakePistonSetPosition(false, intake, elevator, log),
+      new IntakeStop(intake, log)
     );
 
   }

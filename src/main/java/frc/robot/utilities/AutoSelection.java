@@ -296,15 +296,16 @@ public class AutoSelection {
 		if (autoPlan == CONE_LEAVE_NEAR_LOAD_PICK_UP_CUBE) {
 			// Starting position = facing drivers, against scoring position closest to wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Load Pick up cube");
-			Pose2d posScoreInitial, posLeave, posLineUp, posFinal;
+			Pose2d posScoreInitial, posLeave, posLineUp, posScore, posEnd;
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(1);			// 1.77165, 7.490968, 180
 				// Travel  4.4 m in +X from starting position
 				posLeave = MathBCR.translate(posScoreInitial, 5.39, .407174);  // 6.17165, 7.490968, 180
 				// Travel in Y to cross the field to in front of charging station
 				// posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
-				posLineUp = field.getInitialColumn(2);
-				posFinal = field.getFinalColumn(2);
+				posLineUp = MathBCR.translate(posScoreInitial, 1.5, 0.25);			// 1.5, .25  : Add a little room to clear between charging station and loading area
+				posScore = field.getFinalColumn(1);
+				posEnd = field.getInitialColumn(1);
 				// Spin 180
 				// posFinal = field.getStationCenter(2);
 			} else {
@@ -312,8 +313,9 @@ public class AutoSelection {
 				// Travel  3.5 m in +X from starting position
 				posLeave = MathBCR.translate(posScoreInitial, 5.39, -.407174);		
 				// Travel in Y to cross the field to the in front of charging station
-				posLineUp = field.getInitialColumn(8);
-				posFinal = field.getFinalColumn(8);
+				posLineUp = MathBCR.translate(posScoreInitial, 1.5, -.25);			// 1.5, .25  : Add a little room to clear between charging station and loading area
+				posScore = field.getFinalColumn(9);
+				posEnd = field.getInitialColumn(9);
 			}
 				
 			autonomousCommand = new SequentialCommandGroup(
@@ -321,7 +323,7 @@ public class AutoSelection {
 				new DriveResetPose(posScoreInitial, true, driveTrain, log),
 				new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
 				new AutoPickUpCube(posLeave, posLineUp, true, intake, elevator, wrist, manipulator, driveTrain, led, log),
-				new AutoScoreCube(posLineUp, posFinal, ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value,
+				new AutoScoreCube(posEnd, posScore, ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value,
 					driveTrain, elevator, wrist, manipulator, intake, led, log)			);
 		}
 
