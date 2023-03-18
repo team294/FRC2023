@@ -39,8 +39,10 @@ public class DriveUpChargingStation extends CommandBase {
     initPitch = drivetrain.getGyroPitch();
     SmartDashboard.putNumber("Initial Pitch", initPitch);
 
+    // The pitch is reset to zero during autonomousInit().
+    // D4:  Commented out setting the goal angle here, due to error in initialPitch due to robot motion in auto
     // pass the initial pitch to the ActiveBalance command so it knows what is level
-    ActiveBalance.goalAngle = initPitch;
+    // ActiveBalance.goalAngle = initPitch;
 
     initialX = drivetrain.getPose().getX();
     maxPitch = Math.abs(initPitch);
