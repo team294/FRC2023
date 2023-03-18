@@ -5,6 +5,7 @@
 package frc.robot.commands.sequences;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.commands.*;
 import frc.robot.subsystems.*;
@@ -24,7 +25,7 @@ public class IntakeToManipulator extends SequentialCommandGroup {
     addCommands(
       new ElevatorWristStow(elevator, wrist, log),
       new IntakePistonSetPosition(true, intake, elevator, log),
-      new IntakeSetPercentOutput(0.75, 0.35, intake, log),
+      new IntakeSetPercentOutput(IntakeConstants.motor1NominalIntakePct, IntakeConstants.motor2NominalIntakePct, intake, log),
       new ManipulatorSetPercent(ManipulatorConstants.pieceGrabPct, manipulator, log)
     );
   }

@@ -349,4 +349,8 @@ public final class Constants {
         public static final double pieceHoldPct = 0.2;
       }
 
+      public static final class IntakeConstants {
+        public static final double motor1NominalIntakePct = 0.4;
+        public static final double motor2NominalIntakePct = 0.52;
+      }
 }
