@@ -24,6 +24,7 @@ import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.Ports;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
+import frc.robot.Constants.WristConstants.WristRegion;
 import frc.robot.utilities.ElevatorProfileGenerator;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.Loggable;
@@ -123,25 +124,26 @@ public class Elevator extends SubsystemBase implements Loggable{
 
 	/**
 	 * Sets elevator to manual control mode with the specified percent output voltage.
-	 * Does not move the elevator up if the wrist is not in the main region (interlock to prevent crashing).
+	 * Does not move the elevator up if the wrist is in the back region (interlock to prevent crashing).
 	 * @param percentOutput between -1.0 (down) and 1.0 (up)
 	 */
 	public void setElevatorMotorPercentOutput(double percentOutput) {
 		elevPosControl = false;
 		elevatorProfile.disableProfileControl();
 
-		// Clamp speed if not calibrated
-		if (!elevCalibrated) {
+		// Clamp speed depending on calibration
+		if (elevCalibrated) {
+			percentOutput = MathUtil.clamp(percentOutput, 
+			-ElevatorConstants.maxManualPercentOutput, ElevatorConstants.maxManualPercentOutput);
+		} else {
 			percentOutput = MathUtil.clamp(percentOutput, 
 			-ElevatorConstants.maxUncalibratedPercentOutput, ElevatorConstants.maxUncalibratedPercentOutput);
 		}
 
-		// TODO fix interlock
-		// TODO also add code to periodic() for interlock updates (see wrist for an example)
-		// Do not move the elevator up if the wrist is not in the main region (interlock to prevent crashing).
-		// if (wrist.getWristRegion() != WristRegion.main && percentOutput > 0.0) {
-		// 	percentOutput = 0.0;
-		// }
+		// Do not move the elevator up if the wrist is in the back region (interlock to prevent crashing).
+		if (wrist.getWristRegion() == WristRegion.back && percentOutput > 0.0) {
+			percentOutput = 0.0;
+		}
 
 		elevatorMotor.set(ControlMode.PercentOutput, percentOutput);
 	}
@@ -157,11 +159,10 @@ public class Elevator extends SubsystemBase implements Loggable{
 
 			pos = MathUtil.clamp(pos, ElevatorPosition.lowerLimit.value, ElevatorPosition.upperLimit.value);
 
-			// TODO fix interlock
 			// Do not move the elevator out of the bottom region if the wrist is not in the main region (interlock to prevent crashing).
-			// if (wrist.getWristRegion() != WristRegion.main && pos > ElevatorConstants.mainBottom) {
-			// 	pos = ElevatorConstants.mainBottom;
-			// }
+			if (wrist.getWristRegion() != WristRegion.main && pos > ElevatorConstants.boundBottomMain) {
+				pos = ElevatorConstants.boundBottomMain;
+			}
 
 			elevatorProfile.setProfileTarget(pos);
 
@@ -181,12 +182,16 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 * @return desired inches of elevator height
 	 */
 	public double getCurrentElevatorTarget() {
-		if (elevCalibrated && elevPosControl) {
-			// Motion profile control
-			return elevatorProfile.getFinalPosition();
+		if (elevCalibrated) {
+			if (elevPosControl) {
+				// Motion profile control
+				return elevatorProfile.getFinalPosition();
+			} else {
+				// Manual control mode
+				return getElevatorPos();
+			}
 		} else {
-			// Manual control mode
-			return getElevatorPos();
+			return ElevatorConstants.boundBottomMain + 10.0;
 		}
 	}
 
@@ -229,7 +234,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 		if (elevCalibrated) {
 			return getElevatorEncTicks()*ElevatorConstants.kElevEncoderInchesPerTick;
 		} else {
-			return ElevatorConstants.boundMainLow + 10.0;
+			return ElevatorConstants.boundBottomMain + 10.0;
 		}
 	}
 
@@ -241,11 +246,9 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 */
 	private ElevatorRegion calcElevatorRegion(double pos) {
 		if (elevCalibrated) {
-			if (pos >= ElevatorConstants.boundMainLow) {
+			if (pos >= ElevatorConstants.boundBottomMain) {
 				return ElevatorRegion.main;
-			 } else if (pos > ElevatorConstants.boundBottomLow) {
-				return ElevatorRegion.low;
-			 }else {
+			 } else {
 				return ElevatorRegion.bottom;
 			 }
 		} else {
@@ -258,9 +261,10 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 * @return current elevatorRegion
 	 */
 	public ElevatorRegion getElevatorRegion() {
-		// TODO change description/function:  If elevator is moving between regions, then return the most restrictive region (=low)
 		if (elevCalibrated) {
-			if (elevatorMotor.getMotorOutputPercent() > 0.05) {
+			if (elevatorMotor.getMotorOutputPercent() > 0.05 ||
+				(elevPosControl && calcElevatorRegion(getCurrentElevatorTarget())==ElevatorRegion.main) 
+			   ) {
 				return ElevatorRegion.main;		// Elevator is moving up.  For safety, assume we are in the main region
 			} else {
 				return calcElevatorRegion(getElevatorPos());
@@ -341,6 +345,15 @@ public class Elevator extends SubsystemBase implements Loggable{
 		// Do not call setElevatorMotorPercentOutput(), since that will change the elevPosControl to false (manual control).
 		if (elevPosControl) {
 			elevatorMotor.set(ControlMode.PercentOutput, elevatorProfile.trackProfilePeriodic());  
+		}
+
+		// If in manual drive mode, 
+   		// then enforce interlocks (stop elevator if at edge of allowed region based on wrist)
+		if (!elevPosControl && elevCalibrated) {
+			// Do not move the elevator up if the wrist is in the back region (interlock to prevent crashing).
+			if (wrist.getWristRegion() == WristRegion.back && elevatorMotor.getMotorOutputPercent() > 0.0) {
+				stopElevator();
+			}
 		}
 
 		// Autocalibrate if the encoder is OK and the elevator is at the lower limit switch

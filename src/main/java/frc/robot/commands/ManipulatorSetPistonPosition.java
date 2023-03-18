@@ -19,7 +19,7 @@ public class ManipulatorSetPistonPosition extends CommandBase {
   private final LED led;
 
   /**
-   * Sets piston position to handle either cone or cube
+   * Sets piston position to handle either cone or cube and ends immediately
    * @param cone true = cone, false = cube
    * @param manipulator manipulator subsystem
    * @param log filelog

@@ -20,7 +20,7 @@ public class ElevatorProfileGenerator {
 	private double maxVelocity = 63.0;			// in inches per second.  CALIBRATED
 	private double currentMPVelocity;
 
-	private double maxAcceleration = 100;		// in inches per second^2.  CALIBRATED
+	private double maxAcceleration = 150;		// in inches per second^2.  Was 100 at week 1, increased to 150.  CALIBRATED
 	private double stoppingAcceleration = .75 * maxAcceleration;
 	private double currentMPAcceleration;
 	private boolean approachingTarget = false;		// true = decelerating towards target;  false = not close enough to start decelerating
@@ -38,14 +38,14 @@ public class ElevatorProfileGenerator {
 
 	private double kFF = 0.01945;    // CALIBRATED
 	private double kSu = 0.01425;	 // CALIBRATED
-	private double kVu = 0.0149;  // CALIBRATED
-	private double kAu = 0.001;   // CALIBRATED
+	private double kVu = 0.0149;  // CALIBRATED was 0.0149 week 1.  Tried 0.022 in lab, too high
+	private double kAu = 0.001;   // CALIBRATED was 0.001 week 1.  Tried 0.003 in lab, too high
 	private double kPu = 0.10;    // CALIBRATED
 	private double kIu = 0;
 	private double kDu = 0;
 	private double kSd = 0.01425;	// CALIBRATED
-	private double kVd = 0.0135;  // CALIBRATED
-	private double kAd = 0.001;   // CALIBRATED
+	private double kVd = 0.0135;  // CALIBRATED was 0.0135 week 1.  Tried 0.018 in lab, too high
+	private double kAd = 0.001;   // CALIBRATED.  Tried 0.002 in lab, too high
 	private double kPd = 0.05;	  // CALIBRATED
 	private double kId = 0;
 	private double kDd = 0;
@@ -172,7 +172,7 @@ public class ElevatorProfileGenerator {
 			prevError = error;
 
 			// Cap feedback power to prevent jerking the elevator
-			percentPowerFB = MathUtil.clamp(percentPowerFB, -0.2, 0.2);
+			percentPowerFB = MathUtil.clamp(percentPowerFB, -0.4, 0.4);			// Used 0.2 in Port Huemene, trying 0.4
 
 			return percentPowerFF + percentPowerFB;
 		} else {
