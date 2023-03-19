@@ -78,7 +78,7 @@ public class Field {
     // #8 = furthest to left (from driver point of view)
     private final Pose2d[] RedCommunityColumnFinal = {
         new Pose2d(1.77165, 3.020568, facingDrivers), 
-        new Pose2d(1.77165, 3.579368, facingDrivers), 
+        new Pose2d(1.77165, 3.579368 + 0.100, facingDrivers),           // was 3.579368.  F1:  In LA elims, cube was landing on border of position 1 and 2, so move 4in (0.1m) towards pos 3.
         new Pose2d(1.77165, 4.138168, facingDrivers), 
         new Pose2d(1.77165, 4.696968, facingDrivers), 
         new Pose2d(1.77165, 5.255768, facingDrivers), 
