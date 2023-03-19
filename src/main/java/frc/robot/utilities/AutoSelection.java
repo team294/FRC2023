@@ -1,6 +1,7 @@
 package frc.robot.utilities;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -327,14 +328,26 @@ public class AutoSelection {
 				new DriveResetPose(posScoreInitial, true, driveTrain, log),
 				new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
 				new AutoPickUpCube(posCube, posMidPoint, true, intake, elevator, wrist, manipulator, driveTrain, led, log),
-				new AutoScoreCube(posScore, driveTrain, elevator, wrist, manipulator, intake, led, log),
 
-				// Go towards getting next piece
-				new DriveToPose(posMidPoint, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
-            		TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
-				new DriveToPose(posCube, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
-					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log),
-				new DriveToPose(posEnd, driveTrain, log)
+				new ConditionalCommand(
+					// If we have a cube in the manipulator, then score and then drive out to get the next cube
+					new SequentialCommandGroup(
+						new AutoScoreCube(posScore, driveTrain, elevator, wrist, manipulator, intake, led, log),
+
+						// Go towards getting next piece
+						new DriveToPose(posMidPoint, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
+							TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
+						new DriveToPose(posCube, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
+							TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log),
+						new DriveToPose(posEnd, driveTrain, log)
+					),
+
+					// If we don't have a cube in the manipulator, then just try score and stay at the scoring area
+					new AutoScoreCube(posScore, driveTrain, elevator, wrist, manipulator, intake, led, log), 
+
+					() -> manipulator.isCubePresent()
+				)
+
 			);
 		}
 
