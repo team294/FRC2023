@@ -54,7 +54,7 @@ public class Field {
         new Pose2d(1.77165, 2.748026, facingDrivers), 
         new Pose2d(1.77165, 3.306826, facingDrivers), 
         new Pose2d(1.77165, 3.865626, facingDrivers), 
-        new Pose2d(1.77165, 4.424426, facingDrivers), 
+        new Pose2d(1.77165, 4.424426 - 0.100, facingDrivers),           // was 4.424426.  F2:  In LA elims, cube was landing on border of position 8 and 9, so move 4in (0.1m) towards pos 7.
         new Pose2d(1.77165, 4.983226, facingDrivers) 
     };
 
