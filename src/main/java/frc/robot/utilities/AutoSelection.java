@@ -292,43 +292,50 @@ public class AutoSelection {
 				new DriveResetPose(posScoreInitial, true, driveTrain, log),
 				new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
 				new AutoPickUpCube(posLeave, posLineUp, true, intake, elevator, wrist, manipulator, driveTrain, led, log),
-				new AutoScoreCube(posLineUp, posFinal, ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value,
-					driveTrain, elevator, wrist, manipulator, intake, led, log)
+				new AutoScoreCube(posFinal, driveTrain, elevator, wrist, manipulator, intake, led, log),
+				new DriveToPose(posLineUp, driveTrain, log)
 			);
 		}
 
 		if (autoPlan == CONE_LEAVE_NEAR_LOAD_PICK_UP_CUBE) {
 			// Starting position = facing drivers, against scoring position closest to wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Load Pick up cube");
-			Pose2d posScoreInitial, posLeave, posLineUp, posScore, posEnd;
+			Pose2d posScoreInitial, posCube, posMidPoint, posScore, posEnd;
 			if (allianceSelection.getAlliance() == Alliance.Red) {
 				posScoreInitial = field.getFinalColumn(1);			// 1.77165, 7.490968, 180
 				// Travel  4.4 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.39, .407174);  // 6.17165, 7.490968, 180
+				posCube = MathBCR.translate(posScoreInitial, 5.39, .407174);  // 6.17165, 7.490968, 180
 				// Travel in Y to cross the field to in front of charging station
 				// posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
-				posLineUp = MathBCR.translate(posScoreInitial, 1.5, 0.25);			// 1.5, .25  : Add a little room to clear between charging station and loading area
-				posScore = field.getFinalColumn(1);
-				posEnd = field.getInitialColumn(1);
+				posMidPoint = MathBCR.translate(posScoreInitial, 1.5, 0.25);			// 1.5, .25  : Add a little room to clear between charging station and loading area
+				posScore = field.getFinalColumn(2);
+				posEnd = new Pose2d( posCube.getTranslation(), posCube.getRotation().plus(Rotation2d.fromDegrees(90)) );
 				// Spin 180
 				// posFinal = field.getStationCenter(2);
 			} else {
 				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 0.512826, 180
 				// Travel  3.5 m in +X from starting position
-				posLeave = MathBCR.translate(posScoreInitial, 5.39, -.407174);		
+				posCube = MathBCR.translate(posScoreInitial, 5.39, -.407174);		
 				// Travel in Y to cross the field to the in front of charging station
-				posLineUp = MathBCR.translate(posScoreInitial, 1.5, -.25);			// 1.5, .25  : Add a little room to clear between charging station and loading area
-				posScore = field.getFinalColumn(9);
-				posEnd = field.getInitialColumn(9);
+				posMidPoint = MathBCR.translate(posScoreInitial, 1.5, -.25);			// 1.5, .25  : Add a little room to clear between charging station and loading area
+				posScore = field.getFinalColumn(8);
+				posEnd = new Pose2d( posCube.getTranslation(), posCube.getRotation().plus(Rotation2d.fromDegrees(-90)) );
 			}
 				
 			autonomousCommand = new SequentialCommandGroup(
 				new WaitCommand(waitTime),
 				new DriveResetPose(posScoreInitial, true, driveTrain, log),
 				new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
-				new AutoPickUpCube(posLeave, posLineUp, true, intake, elevator, wrist, manipulator, driveTrain, led, log),
-				new AutoScoreCube(posEnd, posScore, ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value,
-					driveTrain, elevator, wrist, manipulator, intake, led, log)			);
+				new AutoPickUpCube(posCube, posMidPoint, true, intake, elevator, wrist, manipulator, driveTrain, led, log),
+				new AutoScoreCube(posScore, driveTrain, elevator, wrist, manipulator, intake, led, log),
+
+				// Go towards getting next piece
+				new DriveToPose(posMidPoint, SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
+            		TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
+				new DriveToPose(posCube, SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
+					TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees,false, driveTrain, log),
+				new DriveToPose(posEnd, driveTrain, log)
+			);
 		}
 
 		if (autoPlan == CONE_LEAVE_NEAR_WALL_PICK_UP_BALANCE) {
