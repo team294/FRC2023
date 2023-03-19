@@ -26,7 +26,7 @@ public class ActiveBalance extends PIDCommand {
   public ActiveBalance(DriveTrain driveTrain, FileLog log) {   
     super(
         // The controller that the command will use
-        new PIDController(DriveConstants.kPDriveBalance, 0, 0),
+        new PIDController(DriveConstants.kPDriveBalance, 0, DriveConstants.kDDriveBalance),
         // This should return the measurement
         () -> driveTrain.getGyroPitch(),
         // This should return the setpoint (can also be a constant)

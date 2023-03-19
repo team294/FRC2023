@@ -177,6 +177,7 @@ public final class Constants {
         // Auto balance constants
         public static final double maxPitchBalancedDegrees = 5.0;       // If abs(Pitch) is under this value, then assume we are balanced
         public static final double kPDriveBalance = 0.018;       // 0.018 works, trying faster.  0.027 oscillates
+        public static final double kDDriveBalance = 0.008;       // 0.018 works, trying faster.  0.027 oscillates
       }
 
       public static final class TrajectoryConstants {
@@ -349,4 +350,8 @@ public final class Constants {
         public static final double pieceHoldPct = 0.2;
       }
 
+      public static final class IntakeConstants {
+        public static final double motor1NominalIntakePct = 0.4;
+        public static final double motor2NominalIntakePct = 0.52;
+      }
 }

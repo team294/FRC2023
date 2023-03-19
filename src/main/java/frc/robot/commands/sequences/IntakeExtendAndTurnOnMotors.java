@@ -7,6 +7,7 @@ package frc.robot.commands.sequences;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.ElevatorConstants;
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.commands.*;
 import frc.robot.commands.ManipulatorGrab.BehaviorType;
@@ -29,7 +30,7 @@ public class IntakeExtendAndTurnOnMotors extends SequentialCommandGroup {
       new ConditionalCommand(
         new SequentialCommandGroup(
           new IntakePistonSetPosition(true, intake, elevator, log),
-          new IntakeSetPercentOutput(0.4, .52, intake, log),
+          new IntakeSetPercentOutput(IntakeConstants.motor1NominalIntakePct, IntakeConstants.motor2NominalIntakePct, intake, log),
           new ManipulatorSetPistonPosition(false, led, manipulator, log),     // Set manipulator to cube
           new ElevatorWristStow(elevator, wrist, log),
 

@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
-import frc.robot.utilities.StringUtil;;
 
 public class DriveUpChargingStation extends CommandBase {
   private final FileLog log;
@@ -73,7 +72,7 @@ public class DriveUpChargingStation extends CommandBase {
     pitch = drivetrain.getGyroPitch();
 
     SmartDashboard.putNumber("Pitch", pitch);
-    log.writeLog(false, "DriveUpChargingStation", "isFinished", StringUtil.buildString("Pitch", pitch, "Max Pitch", maxPitch, "Odometry X", drivetrain.getPose().getX(), "Speed", speed));
+    log.writeLog(false, "DriveUpChargingStation", "isFinished", "Pitch", pitch, "Max Pitch", maxPitch, "Ascended", ascended, "Odometry X", drivetrain.getPose().getX(), "Speed", speed);
 
     if (Math.abs(pitch) > maxPitch) maxPitch = Math.abs(pitch);
 
