@@ -50,7 +50,7 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryType;
  */
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
-  private final FileLog log = new FileLog("E5");
+  private final FileLog log = new FileLog("F2");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
   private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
   private final Field field = new Field(allianceSelection, log);
@@ -76,6 +76,7 @@ public class RobotContainer {
 
   private final CommandXboxController xboxController = new CommandXboxController(OIConstants.usbXboxController);
   private boolean rumbling = false;
+  private boolean lastEnabledModeAuto = false;    // True if the last mode was auto
 
   // Set to this pattern when the robot is disabled
   private final Command patternTeamMoving = new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 60, led, log);
@@ -421,6 +422,7 @@ public class RobotContainer {
     if(!RobotPreferences.prefsExist()) {
       RobotPreferences.recordStickyFaults("RobotPreferences", log);
     }
+    lastEnabledModeAuto = false;
 
     // compressor.disable();
     compressor.enableDigital();
@@ -444,7 +446,10 @@ public class RobotContainer {
   public void disabledInit() {
     log.writeLogEcho(true, "Disabled", "Robot disabled");   // Don't log the word "Init" here -- it affects the Excel macro
 
-    driveTrain.setDriveModeCoast(true);     // When pushing a disabled robot by hand, it is a lot easier to push in Coast mode!!!!
+    if (!lastEnabledModeAuto) {
+      driveTrain.setDriveModeCoast(true);     // When pushing a disabled robot by hand, it is a lot easier to push in Coast mode!!!!
+    }
+
     driveTrain.stopMotors();                // SAFETY:  Turn off any closed loop control that may be running, so the robot does not move when re-enabled.
 
     elevator.setMotorModeCoast(true);
@@ -475,6 +480,7 @@ public class RobotContainer {
    */
   public void autonomousInit() {
     log.writeLogEcho(true, "Auto", "Mode Init");
+    lastEnabledModeAuto = true;
 
     driveTrain.setDriveModeCoast(false);
     driveTrain.resetGyroPitch();
@@ -503,6 +509,7 @@ public class RobotContainer {
    */
   public void teleopInit() {
     log.writeLogEcho(true, "Teleop", "Mode Init");
+    lastEnabledModeAuto = false;
 
     driveTrain.setDriveModeCoast(false);
     driveTrain.cameraInit();

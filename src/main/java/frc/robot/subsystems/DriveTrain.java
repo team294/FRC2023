@@ -602,7 +602,8 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   public void updateOdometry() {
     poseEstimator.update(Rotation2d.fromDegrees(getGyroRotation()), getModulePositions());
 
-    if (camera.hasInit()) {
+    // Only run camera updates for pose estimator in teleop mode
+    if (camera.hasInit() && DriverStation.isTeleop()) {
       Optional<EstimatedRobotPose> result = camera.getEstimatedGlobalPose(poseEstimator.getEstimatedPosition());
 
       if (result.isPresent()) {

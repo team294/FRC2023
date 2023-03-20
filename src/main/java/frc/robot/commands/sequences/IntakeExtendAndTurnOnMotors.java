@@ -35,7 +35,7 @@ public class IntakeExtendAndTurnOnMotors extends SequentialCommandGroup {
           new ElevatorWristStow(elevator, wrist, log),
 
           // Grab piece, wait for piece to be held
-          new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log),
+          new ManipulatorGrab(ManipulatorConstants.pieceGrabFromIntakePct, BehaviorType.waitForConeOrCube, manipulator, log),
 
           // Retract and turn off intake
           new IntakeRetractAndTurnOffMotors(intake, elevator, log),
