@@ -18,17 +18,17 @@ import frc.robot.utilities.*;
 
 public class WristSetAngleTrapezoid extends CommandBase {
   /**
-   * Uses wpilib TrapezoidProfile generator to generate a motion profile for drive train turning
+   * Uses wpilib TrapezoidProfile generator to generate a motion profile for Wrist turning
    * Does not regenerate the profile every time
    */
 
-  private Wrist wrist; // reference to driveTrain
+  private Wrist wrist; // reference to wrist
   private CoordType coordType;
   private double target; // goal angle
   private double currAngle;
   private double startAngle;
-  private double maxVel; // max velocity, between 0 and kMaxAngularVel in Constants 
-  private double maxAccel; // max acceleration, between 0 and kMaxAngularAcc in Constants
+  private double maxVel; // max velocity, between 0 and kMaxAngularVel in WristConstants 
+  private double maxAccel; // max acceleration, between 0 and kMaxAngularAcc in WristConstants
   private long profileStartTime; // initial time (time of starting point)
   // private boolean regenerate;
   private boolean fromShuffleboard;
@@ -66,11 +66,7 @@ public class WristSetAngleTrapezoid extends CommandBase {
   }
 
   /**
-   * Drives the robot straight.
-   * @param coordType relative, relative to the current angle of the wrist,
-   *   absolute, angle is absolute to the actual wrist angle of the wrist
-   * @param maxVel max angular velocity in degrees/second, between 0 and kMaxAngularVel in Constants
-   * @param maxAccel max acceleration in degrees/second2, between 0 and kMaxAngularAcc in constants
+   * Sets Wrist angle with trapezoid profile using values from shuffleboard.
    * @param wrist reference to the wrist subsystem
    * @param log
    */
@@ -148,10 +144,10 @@ public class WristSetAngleTrapezoid extends CommandBase {
 
     wrist.setWristVelocity(targetVel);
 
-    log.writeLog(false, "WristSetAngleTrapezoid", "profile", "angT", target,
-      "posT", tStateNext.position, 
-      "velT", targetVel, "accT", targetAccel,
-      "posA", currAngle
+
+    log.writeLog(false, "WristSetAngleTrapezoid", "profile", "Target Angle", tStateNext.position,
+      "Target Velocity", targetVel, "Target Acceleration", targetAccel,
+      "Actual Angle", currAngle 
     );
 
     // if(regenerate) {
