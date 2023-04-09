@@ -163,7 +163,7 @@ public class RobotContainer {
     SmartDashboard.putData("Wrist Scoring Position", new WristSetAngle(WristAngle.scoreMidHigh, wrist, log));
     SmartDashboard.putData("Wrist Set Angle", new WristSetAngle(wrist, log));
     SmartDashboard.putData("Wrist Set Output", new WristSetPercentOutput(wrist, log));
-
+    SmartDashboard.putData("Wrist Set Angle Trapezoid", new WristSetAngleTrapezoid(wrist, log));
     //LED commands
     SmartDashboard.putData("LED Rainbow", new LEDSetPattern(LED.rainbowLibrary, 0, 0.5, led, log));
     SmartDashboard.putData("LED Flash Team Color", new LEDSetPattern(LED.teamFlashingColorsLibrary, 0, 0.5, led, log));
