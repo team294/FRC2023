@@ -139,14 +139,15 @@ public class WristSetAngleTrapezoid extends CommandBase {
 
     // Get next state from trapezoid profile
     tStateNext = tProfile.calculate(timeSinceStart + 0.010);
-    double targetVel = tStateNext.velocity;
     double targetAccel = tStateNext.acceleration;
+    double targetVel = tStateNext.velocity + targetAccel*maxAccel;
+
 
     wrist.setWristVelocity(targetVel);
 
 
     log.writeLog(false, "WristSetAngleTrapezoid", "profile", "Target Angle", tStateNext.position,
-      "Target Velocity", targetVel, "Target Acceleration", targetAccel,
+      "Trap Velocity", targetVel, "Trap Acceleration", targetAccel,
       "Actual Angle", currAngle 
     );
 
