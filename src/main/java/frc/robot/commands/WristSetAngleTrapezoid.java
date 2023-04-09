@@ -91,8 +91,7 @@ public class WristSetAngleTrapezoid extends CommandBase {
       SmartDashboard.putNumber("WristSetAngleTrapezoid Manual MaxAccel", 0.5*WristConstants.kMaxAngularAcc);
     }
   }
-
-
+  
   
 
   // Called when the command is initially scheduled.
