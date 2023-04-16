@@ -59,6 +59,7 @@ public class DriveToPose extends CommandBase {
 
   /**
    * Drives the robot to the desired pose in field coordinates.
+   * Stops the robot at the end of the command, unless the command is interrupted.
    * @param goalPose target pose in field coordinates.  Pose components include
    *    <p> Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
    *    <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
@@ -78,6 +79,7 @@ public class DriveToPose extends CommandBase {
 
   /**
    * Drives the robot to the desired pose in field coordinates.
+   * Stops the robot at the end of the command, unless the command is interrupted.
    * @param goalPose target pose in field coordinates.  Pose components include
    *    <p> Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
    *    <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
@@ -106,6 +108,7 @@ public class DriveToPose extends CommandBase {
 
   /**
    * Drives the robot to the desired pose in field coordinates.
+   * Stops the robot at the end of the command, unless the command is interrupted.
    * @param goalPoseSupplier A function that supplies the target pose in field coordinates.  Pose components include
    *    <p> Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
    *    <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
@@ -126,6 +129,7 @@ public class DriveToPose extends CommandBase {
 
    /**
    * Drives the robot to the desired pose in field coordinates.
+   * Stops the robot at the end of the command, unless the command is interrupted.
    * @param goalPoseSupplier A function that supplies the target pose in field coordinates.  Pose components include
    *    <p> Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
    *    <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
@@ -148,7 +152,8 @@ public class DriveToPose extends CommandBase {
   }
 
   /**
-   * Rotates the robot to the specified rotation using an arbitrary angle without moving laterally
+   * Rotates the robot to the specified rotation using an arbitrary angle without moving laterally.
+   * Stops the robot at the end of the command, unless the command is interrupted.
    * @param type CoordType, kRelative (turn relative to current angle) or kAbsolute (turn to field angle)
    * @param rotation rotation to turn to, in degrees (+=turn left, -=turn right).  For absolute rotation,
    * the 0 degrees is facing away from the driver station.
@@ -171,6 +176,7 @@ public class DriveToPose extends CommandBase {
 
   /**
    * Drives the robot to the desired pose based on numbers inputed in shuffleboard.
+   * Stops the robot at the end of the command, unless the command is interrupted.
    * @param driveTrain DriveTrain subsystem
    * @param log file for logging
    */
