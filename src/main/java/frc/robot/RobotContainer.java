@@ -120,7 +120,7 @@ public class RobotContainer {
     // SmartDashboard.putData("Drive To Pose Test", new Pose2d(16.17878-1.7, 6.749796-0.25, new Rotation2d(0), driveTrain, log));
     SmartDashboard.putData("Drive To Loading4", new DriveToPose(new Pose2d(16.17878-1.0, 6.749796, new Rotation2d(0)),
       SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
-      TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, true,  driveTrain, log));
+      TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log));
     SmartDashboard.putData("Drive to Load Station", new DriveToLoad(driveTrain, wrist, elevator, manipulator, intake, field, log));
     // SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
     //     trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
