@@ -31,7 +31,7 @@ public class DriveToLoad extends SequentialCommandGroup {
     addCommands(
       new DriveToPose(field.getLoadingPositionInitial(),
         SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
-        TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, true, driveTrain, log),
+        TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
       new DriveStop(driveTrain, log),
       new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.immediatelyEnd, manipulator, log),
       new ConditionalCommand(

@@ -41,8 +41,6 @@ public class DriveToPose extends CommandBase {
   private double maxThetaErrorDegrees = TrajectoryConstants.maxThetaErrorDegrees;      
   private double maxPositionErrorMeters = TrajectoryConstants.maxPositionErrorMeters;   
 
-  private boolean regenerate = false;
-
   // Options to control how the goal is specified
   public enum GoalMode {
     pose, poseSupplier, angleRelative, angleAbsolute, shuffleboard
@@ -88,17 +86,15 @@ public class DriveToPose extends CommandBase {
    * @param maxAccelMetersPerSecondSquare max acceleration/deceleration, in meters per second squared
    * @param maxPositionErrorMeters tolerance for end position in meters
    * @param maxThetaErrorDegrees tolerance for end theta in degrees
-   * @param regenerate regenerate the profile each time (set to true when using vision to get the latest position)
    * @param driveTrain DriveTrain subsystem
    * @param log file for logging
    */
-  public DriveToPose(Pose2d goalPose, double maxVelMetersPerSecond, double maxAccelMetersPerSecondSquare, double maxPositionErrorMeters, double maxThetaErrorDegrees, boolean regenerate, DriveTrain driveTrain, FileLog log) {
+  public DriveToPose(Pose2d goalPose, double maxVelMetersPerSecond, double maxAccelMetersPerSecondSquare, double maxPositionErrorMeters, double maxThetaErrorDegrees, DriveTrain driveTrain, FileLog log) {
     this.driveTrain = driveTrain;
     this.log = log;
     this.goalPose = goalPose;
     this.maxPositionErrorMeters = maxPositionErrorMeters;
     this.maxThetaErrorDegrees = maxThetaErrorDegrees;
-    this.regenerate = regenerate;
     goalMode = GoalMode.pose;
     trapProfileConstraints = new TrapezoidProfileBCR.Constraints(
       MathUtil.clamp(maxVelMetersPerSecond, -SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullSpeedMetersPerSecond), 
@@ -323,46 +319,18 @@ public class DriveToPose extends CommandBase {
         "Pitch", driveTrain.getGyroPitch()
     );
 
-    if (regenerate && (goalMode == GoalMode.pose)) {
-      log.writeLog(false, "DriveToPose", "Regenerate NOT implemented, needs testing");
-    //   timer.reset();
-    //   timer.start();
-    //   controller.reset();
-
-    //   initialPose = driveTrain.getPose();
-    //   initialTranslation = initialPose.getTranslation();
-    //   curRobotTranslation = initialTranslation;
-    //   Translation2d trapezoidPath = goalPose.getTranslation().minus(initialPose.getTranslation());
-    //   goalDirection = Translation2dBCR.normalize(trapezoidPath);
-    //   double goalDistance = trapezoidPath.getNorm();
-    
-    //   ChassisSpeeds robotSpeed = driveTrain.getRobotSpeeds();
-    //   double initialVelocity = robotSpeed.vxMetersPerSecond*goalDirection.getX() + robotSpeed.vyMetersPerSecond*goalDirection.getY();
-
-    //   TrapezoidProfileBCR.State initialState = new TrapezoidProfileBCR.State(0, initialVelocity);
-    //   TrapezoidProfileBCR.State goalState = new TrapezoidProfileBCR.State(goalDistance, 0);
-    //   profile = new TrapezoidProfileBCR(trapProfileConstraints, goalState, initialState); 
-
-    //   log.writeLog(false, "DriveToPose", "Regenerate", 
-    //     "Time", timer.get(), 
-    //     "Goal X", goalPose.getTranslation().getX(),
-    //     "Goal Y", goalPose.getTranslation().getY(),
-    //     "Goal rot", goalPose.getRotation().getDegrees(), 
-    //     "Robot X", initialPose.getX(),
-    //     "Robot Y", initialPose.getY(),
-    //     "Robot rot", initialPose.getRotation().getDegrees(),
-    //     "Goal distance", goalDistance,
-    //     "Profile time",profile.totalTime()
-    //   );
-    }
-
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     timer.stop();
-    log.writeLog(false, "DriveToPose", "End"); 
+
+    if (!interrupted) {
+      driveTrain.stopMotors();
+    }
+
+    log.writeLog(false, "DriveToPose", "End", "Interrupted", interrupted); 
   }
 
   // Returns true when the command should end.
