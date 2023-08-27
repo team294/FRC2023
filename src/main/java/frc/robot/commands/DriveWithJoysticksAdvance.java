@@ -88,6 +88,7 @@ public class DriveWithJoysticksAdvance extends CommandBase {
       if(firstInDeadband){
         goalAngle = driveTrain.getPose().getRotation().getRadians();
         goalAngle = MathUtil.angleModulus(goalAngle);
+        turnRateController.reset(goalAngle);      // sets the current setpoint for the controller
       }
 
       // When the right button on the right joystick is pressed then the robot turns pi radians(180 degrees)
@@ -103,7 +104,7 @@ public class DriveWithJoysticksAdvance extends CommandBase {
       nextTurnRate = turnRateController.calculate(driveTrain.getPose().getRotation().getRadians(), goalAngle);
 
       if(log.isMyLogRotation(logRotationKey)) {
-        log.writeLog(false, "DriveWithJoystickAdvance", "Joystick", "Fwd", fwdVelocity, "Left", leftVelocity, "Turn", nextTurnRate);
+        log.writeLog(false, "DriveWithJoystickAdvance", "Joystick", "Fwd", fwdVelocity, "Left", leftVelocity, "Turn", nextTurnRate, "Goal Angle", goalAngle);
       }
     
       driveTrain.drive(fwdVelocity, leftVelocity, nextTurnRate, true, false);
