@@ -82,9 +82,12 @@ public class DriveWithJoysticksAdvance extends CommandBase {
     leftVelocity = (Math.abs(leftVelocity) < OIConstants.joystickDeadband) ? 0 : scaleJoystick(leftVelocity) * SwerveConstants.kMaxSpeedMetersPerSecond;
     turnRate = (Math.abs(turnRate) < OIConstants.joystickDeadband) ? 0 : scaleTurn(turnRate) * SwerveConstants.kMaxTurningRadiansPerSecond;
 
-
+    goalAngle = driveTrain.getPose().getRotation().getRadians();
+    // SmartDashboard.putNumber("Goal Angle", goalAngle);
+    // SmartDashboard.putNumber("Current Angle", driveTrain.getPose().getRotation().getRadians());
     // Uses profiled PID controller if the joystick is in the deadband
     if(turnRate == 0){
+      SmartDashboard.putBoolean("Adjusting Angle",  true);
       if(firstInDeadband){
         goalAngle = driveTrain.getPose().getRotation().getRadians();
         goalAngle = MathUtil.angleModulus(goalAngle);
@@ -100,6 +103,8 @@ public class DriveWithJoysticksAdvance extends CommandBase {
       goalAngle = rightJoystick.getRawButtonPressed(1) ? 0 : goalAngle;
 
       // Calculates using the profiledPIDController what the next speed should be
+      SmartDashboard.putNumber("Goal Angle", goalAngle);
+      SmartDashboard.putNumber("Current Angle", driveTrain.getPose().getRotation().getRadians());
       nextTurnRate = turnRateController.calculate(driveTrain.getPose().getRotation().getRadians(), goalAngle);
 
       if(log.isMyLogRotation(logRotationKey)) {
@@ -113,6 +118,7 @@ public class DriveWithJoysticksAdvance extends CommandBase {
 
     // Just uses the regular turnRate if the joystick is not in the deadband
     else{
+      SmartDashboard.putBoolean("Adjusting Angle",  false);
       if(log.isMyLogRotation(logRotationKey)) {
         log.writeLog(false, "DriveWithJoystickAdvance", "Joystick", "Fwd", fwdVelocity, "Left", leftVelocity, "Turn", turnRate);
       }
