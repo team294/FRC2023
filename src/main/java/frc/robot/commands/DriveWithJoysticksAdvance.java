@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.TrajectoryConstants;
@@ -42,7 +43,7 @@ public class DriveWithJoysticksAdvance extends CommandBase {
     this.rightJoystick = rightJoystick;
     this.driveTrain = driveTrain;
     this.log = log;
-    turnRateController = new ProfiledPIDController(TrajectoryConstants.kPThetaController, 0, 0, TrajectoryConstants.kThetaControllerConstraints);
+    turnRateController = new ProfiledPIDController(DriveConstants.kPJoystickThetaController, 0, 0, TrajectoryConstants.kThetaControllerConstraints);
     turnRateController.enableContinuousInput(-Math.PI, Math.PI);
 
 
@@ -82,12 +83,11 @@ public class DriveWithJoysticksAdvance extends CommandBase {
     leftVelocity = (Math.abs(leftVelocity) < OIConstants.joystickDeadband) ? 0 : scaleJoystick(leftVelocity) * SwerveConstants.kMaxSpeedMetersPerSecond;
     turnRate = (Math.abs(turnRate) < OIConstants.joystickDeadband) ? 0 : scaleTurn(turnRate) * SwerveConstants.kMaxTurningRadiansPerSecond;
 
-    goalAngle = driveTrain.getPose().getRotation().getRadians();
+    // goalAngle = driveTrain.getPose().getRotation().getRadians();
     // SmartDashboard.putNumber("Goal Angle", goalAngle);
     // SmartDashboard.putNumber("Current Angle", driveTrain.getPose().getRotation().getRadians());
     // Uses profiled PID controller if the joystick is in the deadband
     if(turnRate == 0){
-      SmartDashboard.putBoolean("Adjusting Angle",  true);
       if(firstInDeadband){
         goalAngle = driveTrain.getPose().getRotation().getRadians();
         goalAngle = MathUtil.angleModulus(goalAngle);
@@ -95,17 +95,16 @@ public class DriveWithJoysticksAdvance extends CommandBase {
       }
 
       // When the right button on the right joystick is pressed then the robot turns pi radians(180 degrees)
-      if(rightJoystick.getRawButtonPressed(2)){
-        goalAngle += Math.PI;
-        MathUtil.angleModulus(goalAngle);
-      }
+      // This button works but its used for other commands
+      // if(rightJoystick.getRawButtonPressed(2)){
+      //   goalAngle += Math.PI;
+      //   MathUtil.angleModulus(goalAngle);
+      // }
 
       // When the left button on the right joystick is pressed then the robot goes to 0 radians absolute
-      goalAngle = rightJoystick.getRawButtonPressed(1) ? 0 : goalAngle;
+      // goalAngle = rightJoystick.getRawButtonPressed(1) ? 0 : goalAngle; This works but buttons are used for other commands
 
       // Calculates using the profiledPIDController what the next speed should be
-      SmartDashboard.putNumber("Goal Angle", goalAngle);
-      SmartDashboard.putNumber("Current Angle", driveTrain.getPose().getRotation().getRadians());
       nextTurnRate = turnRateController.calculate(driveTrain.getPose().getRotation().getRadians(), goalAngle);
 
       if(log.isMyLogRotation(logRotationKey)) {
@@ -119,7 +118,6 @@ public class DriveWithJoysticksAdvance extends CommandBase {
 
     // Just uses the regular turnRate if the joystick is not in the deadband
     else{
-      SmartDashboard.putBoolean("Adjusting Angle",  false);
       if(log.isMyLogRotation(logRotationKey)) {
         log.writeLog(false, "DriveWithJoystickAdvance", "Joystick", "Fwd", fwdVelocity, "Left", leftVelocity, "Turn", turnRate);
       }

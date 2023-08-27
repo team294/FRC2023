@@ -178,6 +178,8 @@ public final class Constants {
         public static final double maxPitchBalancedDegrees = 5.0;       // If abs(Pitch) is under this value, then assume we are balanced
         public static final double kPDriveBalance = 0.018;       // 0.018 works, trying faster.  0.027 oscillates
         public static final double kDDriveBalance = 0.008;       // 0.018 works, trying faster.  0.027 oscillates
+
+        public static final double kPJoystickThetaController = 3; // Theta kp value for joystick in rad/sec
       }
 
       public static final class TrajectoryConstants {
