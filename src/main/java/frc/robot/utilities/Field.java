@@ -25,65 +25,67 @@ import frc.robot.Constants.FieldConstants;
  */
 public class Field {
     //Robot probably 31" with bumpers
+    private final Rotation2d facingDrivers = new Rotation2d(Math.PI);
+    private final Rotation2d facingAwayFromDrivers = new Rotation2d(0.0);
 
     //Community -> Loading
     // #0 = furthest to right (from driver point of view)
     // #8 = furthest to left (from driver point of view)
     private final Pose2d[] BlueCommunityColumnInitial = {
-        new Pose2d(2.0871258795062873, 0.512826, new Rotation2d(Math.PI)), //54.25+(31/2)*sqrt(2)+6 inches to meters for x value
-        new Pose2d(2.0871258795062873, 1.071626, new Rotation2d(Math.PI)), 
-        new Pose2d(2.0871258795062873, 1.630426, new Rotation2d(Math.PI)), 
-        new Pose2d(2.0871258795062873, 2.189226, new Rotation2d(Math.PI)), 
-        new Pose2d(2.0871258795062873, 2.748026, new Rotation2d(Math.PI)), 
-        new Pose2d(2.0871258795062873, 3.306826, new Rotation2d(Math.PI)), 
-        new Pose2d(2.0871258795062873, 3.865626, new Rotation2d(Math.PI)), 
-        new Pose2d(2.0871258795062873, 4.424426, new Rotation2d(Math.PI)), 
-        new Pose2d(2.0871258795062873, 4.983226, new Rotation2d(Math.PI)) 
+        new Pose2d(2.03, 0.512826, facingDrivers), //54.25+(31/2)*sqrt(2)+6 inches to meters for x value
+        new Pose2d(2.03, 1.071626, facingDrivers), 
+        new Pose2d(2.03, 1.630426, facingDrivers), 
+        new Pose2d(2.03, 2.189226, facingDrivers), 
+        new Pose2d(2.03, 2.748026, facingDrivers), 
+        new Pose2d(2.03, 3.306826, facingDrivers), 
+        new Pose2d(2.03, 3.865626, facingDrivers), 
+        new Pose2d(2.03, 4.424426, facingDrivers), 
+        new Pose2d(2.03, 4.983226, facingDrivers) 
     };
 
     //Community -> Place part
     // #0 = furthest to right (from driver point of view)
     // #8 = furthest to left (from driver point of view)
     private final Pose2d[] BlueCommunityColumnFinal = {
-        new Pose2d(1.77165, 0.512826, new Rotation2d(Math.PI)), //54.25+(31/2) inches to meters for x value
-        new Pose2d(1.77165, 1.071626, new Rotation2d(Math.PI)), 
-        new Pose2d(1.77165, 1.630426, new Rotation2d(Math.PI)), 
-        new Pose2d(1.77165, 2.189226, new Rotation2d(Math.PI)), 
-        new Pose2d(1.77165, 2.748026, new Rotation2d(Math.PI)), 
-        new Pose2d(1.77165, 3.306826, new Rotation2d(Math.PI)), 
-        new Pose2d(1.77165, 3.865626, new Rotation2d(Math.PI)), 
-        new Pose2d(1.77165, 4.424426, new Rotation2d(Math.PI)), 
-        new Pose2d(1.77165, 4.983226, new Rotation2d(Math.PI)) 
+        new Pose2d(1.77165, 0.512826, facingDrivers), //54.25+(31/2) inches to meters for x value
+        new Pose2d(1.77165, 1.071626, facingDrivers), 
+        new Pose2d(1.77165, 1.630426, facingDrivers), 
+        new Pose2d(1.77165, 2.189226, facingDrivers), 
+        new Pose2d(1.77165, 2.748026, facingDrivers), 
+        new Pose2d(1.77165, 3.306826, facingDrivers), 
+        new Pose2d(1.77165, 3.865626, facingDrivers), 
+        new Pose2d(1.77165, 4.424426 - 0.100, facingDrivers),           // was 4.424426.  F2:  In LA elims, cube was landing on border of position 8 and 9, so move 4in (0.1m) towards pos 7.
+        new Pose2d(1.77165, 4.983226, facingDrivers) 
     };
 
     //Loading -> Community
     // #0 = furthest to right (from driver point of view)
     // #8 = furthest to left (from driver point of view)
     private final Pose2d[] RedCommunityColumnInitial = {
-        new Pose2d(2.0871258795062873, 3.020568, new Rotation2d(Math.PI)), //118.92 inches
-        new Pose2d(2.0871258795062873, 3.579368, new Rotation2d(Math.PI)), //140.92 inches
-        new Pose2d(2.0871258795062873, 4.138168, new Rotation2d(Math.PI)), //162.92 inches
-        new Pose2d(2.0871258795062873, 4.696968, new Rotation2d(Math.PI)), //184.92 inches
-        new Pose2d(2.0871258795062873, 5.255768, new Rotation2d(Math.PI)), //206.92 inches
-        new Pose2d(2.0871258795062873, 5.814568, new Rotation2d(Math.PI)), //228.92 inches
-        new Pose2d(2.0871258795062873, 6.373368, new Rotation2d(Math.PI)), //250.92 inches
-        new Pose2d(2.0871258795062873, 6.932168, new Rotation2d(Math.PI)), //272.92 inches
-        new Pose2d(2.0871258795062873, 7.490968, new Rotation2d(Math.PI))  //294.92 inches
+        new Pose2d(2.03, 3.020568, facingDrivers), //118.92 inches
+        new Pose2d(2.03, 3.579368, facingDrivers), //140.92 inches
+        new Pose2d(2.03, 4.138168, facingDrivers), //162.92 inches
+        new Pose2d(2.03, 4.696968, facingDrivers), //184.92 inches
+        new Pose2d(2.03, 5.255768, facingDrivers), //206.92 inches
+        new Pose2d(2.03, 5.814568, facingDrivers), //228.92 inches
+        new Pose2d(2.03, 6.373368, facingDrivers), //250.92 inches
+        new Pose2d(2.03, 6.932168, facingDrivers), //272.92 inches
+        new Pose2d(2.03, 7.490968, facingDrivers)  //294.92 inches
     };
 
     //Community -> Place part
     // #0 = furthest to right (from driver point of view)
     // #8 = furthest to left (from driver point of view)
     private final Pose2d[] RedCommunityColumnFinal = {
-        new Pose2d(1.77165, 3.020568, new Rotation2d(Math.PI)), 
-        new Pose2d(1.77165, 3.579368, new Rotation2d(Math.PI)), 
-        new Pose2d(1.77165, 4.138168, new Rotation2d(Math.PI)), 
-        new Pose2d(1.77165, 4.696968, new Rotation2d(Math.PI)), 
-        new Pose2d(1.77165, 5.255768, new Rotation2d(Math.PI)), 
-        new Pose2d(1.77165, 5.814568, new Rotation2d(Math.PI)), 
-        new Pose2d(1.77165, 6.373368, new Rotation2d(Math.PI)), 
-        new Pose2d(1.77165, 6.932168, new Rotation2d(Math.PI)), 
-        new Pose2d(1.77165, 7.490968, new Rotation2d(Math.PI)) 
+        new Pose2d(1.77165, 3.020568, facingDrivers), 
+        new Pose2d(1.77165, 3.579368 + 0.100, facingDrivers),           // was 3.579368.  F1:  In LA elims, cube was landing on border of position 1 and 2, so move 4in (0.1m) towards pos 3.
+        new Pose2d(1.77165, 4.138168, facingDrivers), 
+        new Pose2d(1.77165, 4.696968, facingDrivers), 
+        new Pose2d(1.77165, 5.255768, facingDrivers), 
+        new Pose2d(1.77165, 5.814568, facingDrivers), 
+        new Pose2d(1.77165, 6.373368, facingDrivers), 
+        new Pose2d(1.77165, 6.932168, facingDrivers), 
+        new Pose2d(1.77165, 7.490968, facingDrivers) 
     };
 
     // #0 -> 2 = right to left, closest to driver (from driver point of view)
@@ -93,21 +95,21 @@ public class Field {
     //  2  1  0
     // Community
     private final Pose2d[] BlueStationInitial = {
-        new Pose2d(2.148713, 2.130489, new Rotation2d(0)),
-        new Pose2d(2.148713, 2.748026, new Rotation2d(0)),
-        new Pose2d(2.148713, 3.365563, new Rotation2d(0)),
-        new Pose2d(4.855718, 2.130489, new Rotation2d(Math.PI)),
-        new Pose2d(4.855718, 2.748026, new Rotation2d(Math.PI)),
-        new Pose2d(4.855718, 3.365563, new Rotation2d(Math.PI))
+        new Pose2d(2.148713, 2.130489, facingDrivers),
+        new Pose2d(2.148713, 2.748026, facingDrivers),
+        new Pose2d(2.148713, 3.365563, facingDrivers),
+        new Pose2d(4.855718, 2.130489, facingDrivers),
+        new Pose2d(4.855718, 2.748026, facingDrivers),
+        new Pose2d(4.855718, 3.365563, facingDrivers)
     };
     
     //Community/Field -> Station
     // #0 = furthest to right (from driver point of view)
     // #2 = furthest to left (from driver point of view)
     private final Pose2d[] BlueStationFinal = {
-        new Pose2d(3.8354, 2.130489, new Rotation2d(0)), //Always faces away from communities, this could cause issues
-        new Pose2d(3.8354, 2.748026, new Rotation2d(0)),
-        new Pose2d(3.8354, 3.365563, new Rotation2d(0))
+        new Pose2d(3.8354, 2.130489, facingDrivers), //Always faces away from communities, this could cause issues
+        new Pose2d(3.8354, 2.748026, facingDrivers),
+        new Pose2d(3.8354, 3.365563, facingDrivers)
     };
 
     // #0 -> 2 = right to left, closest to driver (from driver point of view)
@@ -117,50 +119,56 @@ public class Field {
     //  2  1  0
     // Community
     private final Pose2d[] RedStationInitial = {
-        new Pose2d(2.148713, 4.646867, new Rotation2d(0)),
-        new Pose2d(2.148713, 5.264404, new Rotation2d(0)),
-        new Pose2d(2.148713, 5.881941, new Rotation2d(0)),
-        new Pose2d(4.855718, 4.646867, new Rotation2d(Math.PI)),
-        new Pose2d(4.855718, 5.264404, new Rotation2d(Math.PI)),
-        new Pose2d(4.855718, 5.881941, new Rotation2d(Math.PI))
+        new Pose2d(2.148713, 4.646867, facingDrivers),
+        new Pose2d(2.148713, 5.264404, facingDrivers),
+        new Pose2d(2.148713, 5.881941, facingDrivers),
+        new Pose2d(4.855718, 4.646867, facingDrivers),
+        new Pose2d(4.855718, 5.264404, facingDrivers),
+        new Pose2d(4.855718, 5.881941, facingDrivers)
     };
     
     //Community/Field -> Station
     // #0 = furthest to right (from driver point of view)
     // #2 = furthest to left (from driver point of view)
     private final Pose2d[] RedStationFinal = {
-        new Pose2d(3.8354, 4.646867, new Rotation2d(0)), //Always faces away from communities, this could cause issues
-        new Pose2d(3.8354, 5.264404, new Rotation2d(0)), //Values found by adding loading zone width (99.07 inches) to Blue values
-        new Pose2d(3.8354, 5.881941, new Rotation2d(0))
+        new Pose2d(3.8354, 4.646867, facingDrivers), //Always faces away from communities, this could cause issues
+        new Pose2d(3.8354, 5.264404, facingDrivers), //Values found by adding loading zone width (99.07 inches) to Blue values
+        new Pose2d(3.8354, 5.881941, facingDrivers)
     };
 
     // #0 -> 3 = red(far) side, right to left (from driver point of view)
     // #4 -> 7 = blue(close) side, left to right (from driver point of view)
     // #3 and 4 are loading zone tags
     private final AprilTag[] AprilTagsBlue = {
-        new AprilTag(1, new Pose3d(new Pose2d(15.51356, 1.071626, new Rotation2d(Math.PI)))),
-        new AprilTag(2, new Pose3d(new Pose2d(15.51356, 2.748026, new Rotation2d(Math.PI)))),
-        new AprilTag(3, new Pose3d(new Pose2d(15.51356, 4.424426, new Rotation2d(Math.PI)))),
-        new AprilTag(4, new Pose3d(new Pose2d(16.17878, 6.749796, new Rotation2d(Math.PI)))),
-        new AprilTag(5, new Pose3d(new Pose2d(0.36195, 6.749796, new Rotation2d(0)))),
-        new AprilTag(6, new Pose3d(new Pose2d(1.02743, 4.424426, new Rotation2d(0)))),
-        new AprilTag(7, new Pose3d(new Pose2d(1.02743, 2.748026, new Rotation2d(0)))),
-        new AprilTag(8, new Pose3d(new Pose2d(1.02743, 1.071626, new Rotation2d(0))))
+        new AprilTag(1, new Pose3d(new Pose2d(15.51356, 1.071626, facingDrivers))),
+        new AprilTag(2, new Pose3d(new Pose2d(15.51356, 2.748026, facingDrivers))),
+        new AprilTag(3, new Pose3d(new Pose2d(15.51356, 4.424426, facingDrivers))),
+        new AprilTag(4, new Pose3d(new Pose2d(16.17878, 6.749796, facingDrivers))),
+        new AprilTag(5, new Pose3d(new Pose2d(0.36195, 6.749796, facingAwayFromDrivers))),
+        new AprilTag(6, new Pose3d(new Pose2d(1.02743, 4.424426, facingAwayFromDrivers))),
+        new AprilTag(7, new Pose3d(new Pose2d(1.02743, 2.748026, facingAwayFromDrivers))),
+        new AprilTag(8, new Pose3d(new Pose2d(1.02743, 1.071626, facingAwayFromDrivers)))
     };
     
     // #0 -> 3 = red(close) side, left to right (from driver point of view)
     // #4 -> 7 = blue(far) side, right to left (from driver point of view)
     // #3 and 4 are loading zone tags
     private final AprilTag[] AprilTagsRed = {
-        new AprilTag(1, new Pose3d(new Pose2d(1.02743, 6.932168, new Rotation2d(0)))),
-        new AprilTag(2, new Pose3d(new Pose2d(1.02743, 5.255768, new Rotation2d(0)))),
-        new AprilTag(3, new Pose3d(new Pose2d(1.02743, 3.579368, new Rotation2d(0)))),
-        new AprilTag(4, new Pose3d(new Pose2d(0.36195, 1.253998, new Rotation2d(0)))),
-        new AprilTag(5, new Pose3d(new Pose2d(16.17878, 1.253998, new Rotation2d(Math.PI)))),
-        new AprilTag(6, new Pose3d(new Pose2d(15.51356, 3.579368, new Rotation2d(Math.PI)))),
-        new AprilTag(7, new Pose3d(new Pose2d(15.51356, 5.255768, new Rotation2d(Math.PI)))),
-        new AprilTag(8, new Pose3d(new Pose2d(15.51356, 6.932168, new Rotation2d(Math.PI))))
+        new AprilTag(1, new Pose3d(new Pose2d(1.02743, 6.932168, facingAwayFromDrivers))),
+        new AprilTag(2, new Pose3d(new Pose2d(1.02743, 5.255768, facingAwayFromDrivers))),
+        new AprilTag(3, new Pose3d(new Pose2d(1.02743, 3.579368, facingAwayFromDrivers))),
+        new AprilTag(4, new Pose3d(new Pose2d(0.36195, 1.253998, facingAwayFromDrivers))),
+        new AprilTag(5, new Pose3d(new Pose2d(16.17878, 1.253998, facingDrivers))),
+        new AprilTag(6, new Pose3d(new Pose2d(15.51356, 3.579368, facingDrivers))),
+        new AprilTag(7, new Pose3d(new Pose2d(15.51356, 5.255768, facingDrivers))),
+        new AprilTag(8, new Pose3d(new Pose2d(15.51356, 6.932168, facingDrivers)))
     };
+
+    private final Pose2d BlueLoadingStationInitial = new Pose2d(14.47878, 6.499796, facingAwayFromDrivers);//16.17878-1.7, 6.749796-0.25
+    private final Pose2d BlueLoadingStationFinal = new Pose2d(14.57878, 6.499796, facingAwayFromDrivers);//16.17878-1.6, 6.749796-0.25
+    private final Pose2d RedLoadingStationInitial = new Pose2d(14.47878, 1.003998, facingAwayFromDrivers);//16.17878-1.7, 1.253998-0.25
+    private final Pose2d RedLoadingStationFinal = new Pose2d(14.57878, 1.003998, facingAwayFromDrivers);//16.17878-1.6, 1.253998-0.25
+    
 
     private final AllianceSelection alliance;
     private final FileLog log;
@@ -274,6 +282,32 @@ public class Field {
             }
         } else {
             throw new IndexOutOfBoundsException(String.format("AprilTag ID %d out of range", ID));
+        }
+    }
+
+    /**
+	 * Gets the position to approach the loading station from
+     * <p> Note that the position will be different for red vs blue alliance, based on the current alliance in the alliance object.
+     * @return Loading station initial position
+     */
+    public Pose2d getLoadingPositionInitial() {
+        if(alliance.getAlliance() == Alliance.Blue){
+            return BlueLoadingStationInitial;
+        } else {
+            return RedLoadingStationInitial;
+        }
+    }
+
+    /**
+	 * Gets the position to grab a piece at the loading station
+     * <p> Note that the position will be different for red vs blue alliance, based on the current alliance in the alliance object.
+     * @return Loading station "get piece" position
+     */
+    public Pose2d getLoadingPositionFinal() {
+        if(alliance.getAlliance() == Alliance.Blue){
+            return BlueLoadingStationFinal;
+        } else {
+            return RedLoadingStationFinal;
         }
     }
 

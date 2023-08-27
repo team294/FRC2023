@@ -13,7 +13,7 @@ import frc.robot.utilities.FileLog;
 import java.io.IOException;
 import java.util.Optional;
 
-import javax.lang.model.util.Elements.Origin;
+// import javax.lang.model.util.Elements.Origin;
 
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -28,10 +28,21 @@ public class PhotonCameraWrapper extends SubsystemBase {
   private FileLog log;
   private boolean hasInit = false;
   private Alliance currAlliance = Alliance.Invalid;
+  private int logRotationKey;
+  private boolean fastLogging = false;
 
-  public PhotonCameraWrapper(Field field, FileLog log) {
+  public PhotonCameraWrapper(Field field, FileLog log, int logRotationKey) {
     this.log = log;
     this.field = field;
+    this.logRotationKey = logRotationKey;
+  }
+
+  /**
+   * Turns file logging on every scheduler cycle (~20ms) or every 10 cycles (~0.2 sec)
+   * @param enabled true = every cycle, false = every 10 cycles
+   */ 
+  public void enableFastLogging(boolean enabled) {
+    this.fastLogging = enabled;
   }
 
   public void init() {
@@ -104,9 +115,10 @@ public class PhotonCameraWrapper extends SubsystemBase {
     photonPoseEstimator.setReferencePose(prevEstimatedRobotPose);
     var newPoseOptional = photonPoseEstimator.update();
     if (newPoseOptional.isPresent()) {
-      // log.writeLog(true, "PhotonCameraWrapper", "getEstimatedGlobalPose", "PreviousPose", "X",prevEstimatedRobotPose.getX(),"Y",prevEstimatedRobotPose.getY());
       EstimatedRobotPose newPose = newPoseOptional.get();
-      // log.writeLog(true, "PhotonCameraWrapper", "getEstimatedGlobalPose", "NewPose", "X",newPose.estimatedPose.getX(),"Y",newPose.estimatedPose.getY());
+      if(fastLogging || log.isMyLogRotation(logRotationKey)) {
+        log.writeLog(false, "PhotonCameraWrapper", "getEstimatedGlobalPose", "NewPose", "X",newPose.estimatedPose.getX(),"Y",newPose.estimatedPose.getY());
+      }
     }
     return newPoseOptional;
   }

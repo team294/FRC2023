@@ -5,27 +5,31 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Grabber;
+import frc.robot.subsystems.Intake;
 import frc.robot.utilities.FileLog;
 
-public class GrabberStopMotor extends CommandBase {
-  /** Creates a new GrabberStopMotor. */
-  private final Grabber grabber;
-  private final FileLog log;
+public class IntakeStop extends CommandBase {
   
-  public GrabberStopMotor(Grabber grabber, FileLog log) {
-    this.grabber = grabber;
-    this.log = log;
+  /** Creates a new IntakeStop. */
+  Intake intake;
+  FileLog log;
 
-    addRequirements(grabber);
-    // Use addRequirements() here to declare subsystem dependencies.
+  /**
+   * Stops the intake motor
+   * @param intake Intake subsystem
+   * @param log log file
+   */
+  public IntakeStop(Intake intake, FileLog log) {
+    this.intake = intake;
+    this.log = log;
+    addRequirements(intake);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    grabber.stopMotor();
-    log.writeLog(false, "GrabberStopMotor", "Initialize");
+    log.writeLog(false, "IntakeStop", "Initialize");
+    intake.stopMotor();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -39,6 +43,6 @@ public class GrabberStopMotor extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return true;
   }
 }

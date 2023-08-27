@@ -4,9 +4,12 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.subsystems.*;
 import frc.robot.utilities.FileLog;
+
 public class ManipulatorGrab extends CommandBase {
 
     public enum BehaviorType{
@@ -19,6 +22,7 @@ public class ManipulatorGrab extends CommandBase {
 
     private final Manipulator manipulator;
     private final FileLog log;
+    private final Timer timer = new Timer();
 
     private double motorPercent = 0.0;
     // private double ampSensitivity = 0.0;
@@ -69,7 +73,8 @@ public class ManipulatorGrab extends CommandBase {
     }
     log.writeLog(false, "ManipulatorGet", "Start", "Percent", motorPercent, "Behavior", behaviorType);
 
-
+    timer.stop();
+    timer.reset();
   }
 
   //Called in a loop every time the command is executed
@@ -100,17 +105,26 @@ public class ManipulatorGrab extends CommandBase {
       case runForever:
         return false;
       case waitForCone:
-        // return hasObject;
-        return manipulator.isConePresent();
-      case waitForCube:
-        // return hasObject;
-        return (manipulator.isCubePresent());
-      case waitForConeOrCube:
-        // return hasObject;
-        if(manipulator.getPistonCone()){
-          return manipulator.isConePresent();
+        if (manipulator.isConePresent()) {
+          timer.start();
         }
-        return manipulator.isCubePresent();
+        return (manipulator.isConePresent() && timer.get()>=0.3) ;
+      case waitForCube:
+        if (manipulator.isCubePresent()) {
+          timer.start();
+        }
+        return (manipulator.isCubePresent() && timer.get()>=0.3) ;
+      case waitForConeOrCube:
+        if(manipulator.getPistonCone()){
+          if (manipulator.isConePresent()) {
+            timer.start();
+          }
+          return (manipulator.isConePresent() && timer.get()>=0.3) ;
+        }
+        if (manipulator.isCubePresent()) {
+          timer.start();
+        }
+        return (manipulator.isCubePresent() && timer.get()>=0.3) ;
   
       default:
         return true;
@@ -120,7 +134,14 @@ public class ManipulatorGrab extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    manipulator.stopMotor();
+    if (behaviorType == BehaviorType.waitForCone || behaviorType == BehaviorType.waitForCube ||
+        behaviorType == BehaviorType.waitForConeOrCube) {
+      manipulator.setMotorPercentOutput(ManipulatorConstants.pieceHoldPct);
+    } else if(behaviorType == BehaviorType.immediatelyEnd){
+      manipulator.setMotorPercentOutput(motorPercent);
+    }else {
+      manipulator.stopMotor();
+    }
   }
 
 }

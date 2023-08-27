@@ -16,13 +16,13 @@ import frc.robot.Constants.Ports;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.Loggable;
 
-public class Grabber extends SubsystemBase implements Loggable{
+public class Conveyor extends SubsystemBase implements Loggable{
   /** Creates a new Grabber. */
   private final FileLog log;
   private int logRotationKey;         // key for the logging cycle for this subsystem
   private boolean fastLogging = false; // true is enabled to run every cycle; false follows normal logging cycles
 
-  private String subsystemName;
+  private String subsystemName = "Conveyor";
 
   private final WPI_TalonFX motor;
   
@@ -30,9 +30,8 @@ public class Grabber extends SubsystemBase implements Loggable{
    * Constructs the Grabber subsystem
    * @param logFileLog object for logging
    */
-  public Grabber(String subsystemName, FileLog log) {
-    motor = new WPI_TalonFX(Ports.CANGrabber);
-    this.subsystemName = subsystemName;
+  public Conveyor(FileLog log) {
+    motor = new WPI_TalonFX(Ports.CANConveyor);
     this.log = log;
     logRotationKey = log.allocateLogRotation();
 
@@ -103,7 +102,7 @@ public class Grabber extends SubsystemBase implements Loggable{
   public void periodic() {
     // This method will be called once per scheduler run
     if(fastLogging || log.isMyLogRotation(logRotationKey)) {
-      updateGrabberLog(false);
+    updateConveyorLog(false);
       // Update data on SmartDashboard
       SmartDashboard.putNumber(buildString(subsystemName, "Amps"), motor.getStatorCurrent());
       SmartDashboard.putNumber(buildString(subsystemName, "Bus Volt"), motor.getBusVoltage());
@@ -117,7 +116,7 @@ public class Grabber extends SubsystemBase implements Loggable{
    * Writes information about the Grabber to the filelog
    * @param logWhenDisabled true will log when disabled, false will discard the string
    */
-  public void updateGrabberLog(boolean logWhenDisabled){
+  public void updateConveyorLog(boolean logWhenDisabled){
     log.writeLog(logWhenDisabled, subsystemName, "Update Variables",
     "Bus Volt", motor.getBusVoltage(),
     "Out Percent", motor.getMotorOutputPercent(),

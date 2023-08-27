@@ -18,19 +18,24 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj.util.Color;
-
 import frc.robot.Constants.CoordType;
+import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.StopType;
+import frc.robot.Constants.SwerveConstants;
+import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.commands.*;
 import frc.robot.commands.ManipulatorGrab.BehaviorType;
 import frc.robot.commands.autos.*;
+import frc.robot.commands.sequences.*;
 import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
 import frc.robot.utilities.*;
@@ -45,22 +50,23 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryType;
  */
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
-  private final FileLog log = new FileLog("A1");
+  private final FileLog log = new FileLog("F2");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
   private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
   private final Field field = new Field(allianceSelection, log);
 
   // Define robot subsystems  
-  private final DriveTrain driveTrain = new DriveTrain(field, log);
-  private final Grabber grabber = new Grabber("Grabber", log);
-  private final Manipulator manipulator = new Manipulator(log);
   private final Wrist wrist = new Wrist(log);
   private final Elevator elevator = new Elevator(wrist, log);
+  private final DriveTrain driveTrain = new DriveTrain(field, elevator, log);
+  private final Manipulator manipulator = new Manipulator(log);
+  private final Intake intake = new Intake(log);
   private final LED led = new LED();
+  // private final Conveyor conveyor = new Conveyor(log);
 
   // Define other utilities
   private final TrajectoryCache trajectoryCache = new TrajectoryCache(log);
-  private final AutoSelection autoSelection = new AutoSelection(trajectoryCache, allianceSelection, log);
+  private final AutoSelection autoSelection = new AutoSelection(trajectoryCache, allianceSelection, field, log);
 
   // Define controllers
   // private final Joystick xboxController = new Joystick(OIConstants.usbXboxController); //assuming usbxboxcontroller is int
@@ -70,9 +76,10 @@ public class RobotContainer {
 
   private final CommandXboxController xboxController = new CommandXboxController(OIConstants.usbXboxController);
   private boolean rumbling = false;
+  private boolean lastEnabledModeAuto = false;    // True if the last mode was auto
 
   // Set to this pattern when the robot is disabled
-  private final Command patternTeamMoving = new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 0.5, led, log);
+  private final Command patternTeamMoving = new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 60, led, log);
   
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -106,17 +113,23 @@ public class RobotContainer {
     SmartDashboard.putData("Drive Wheels +95 deg", new DriveSetState(0, 95, false, driveTrain, log));
     SmartDashboard.putData("Drive 1.5 mps 0 deg", new DriveSetState(1.5, 0, false, driveTrain, log));
     SmartDashboard.putData("Drive Straight", new DriveStraight(false, false, false, driveTrain, log));
+    SmartDashboard.putData("Drive Lock Wheels", new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log));
 
     // Testing for trajectories
     Rotation2d rotationFront = new Rotation2d();          // Facing away from drivers
     SmartDashboard.putData("Drive To Pose", new DriveToPose(driveTrain, log));
     SmartDashboard.putData("Drive To Pose Test", new DriveToPose(new Pose2d(1, 1, Rotation2d.fromDegrees(0)), driveTrain, log));
-    SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
-        trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
-    SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
-        trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
-    SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-        trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
+    // SmartDashboard.putData("Drive To Pose Test", new Pose2d(16.17878-1.7, 6.749796-0.25, new Rotation2d(0), driveTrain, log));
+    SmartDashboard.putData("Drive To Loading4", new DriveToPose(new Pose2d(16.17878-1.0, 6.749796, new Rotation2d(0)),
+      SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
+      TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log));
+    SmartDashboard.putData("Drive to Load Station", new DriveToLoad(driveTrain, wrist, elevator, manipulator, intake, field, log));
+    // SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
+    //     trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
+    // SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
+    //     trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
+    // SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
+    //     trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
     SmartDashboard.putData("Drive Trajectory Straight", new DriveTrajectory(
           CoordType.kRelative, StopType.kBrake,
           new TrajectoryFacing(rotationFront, rotationFront, 
@@ -129,29 +142,25 @@ public class RobotContainer {
           ),
           driveTrain, log));
     SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
+    // SmartDashboard.putData("Drive Smart Balance", new SequentialCommandGroup(new ResetPose,new SmartBalance(0.5, 0, driveTrain)));
 
     // Testing for autos
-    SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
-    SmartDashboard.putData("Center Balance Blue", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-        trajectoryCache.cache[TrajectoryType.CenterBalanceBlue.value], driveTrain, log));
-    SmartDashboard.putData("Center Balance Community Blue", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-        trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value], driveTrain, log));
-    SmartDashboard.putData("Auto OneConeBalance", new OuterOneConeBalanceMiddleAuto(driveTrain));     // TODO put on auto selector and remove this button
+    // SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
+    // SmartDashboard.putData("Center Balance Blue", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
+    //     trajectoryCache.cache[TrajectoryType.CenterBalanceBlue.value], driveTrain, log));
+    // SmartDashboard.putData("Center Balance Community Blue", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
+    //     trajectoryCache.cache[TrajectoryType.MiddleOuterOneConeBalanceBlue.value], driveTrain, log));
+    // SmartDashboard.putData("Auto OneConeBalance", new OuterOneConeBalanceMiddleAuto(driveTrain));
   
-    //Grabber commands
-    SmartDashboard.putData("Grabber Stop", new GrabberStopMotor(grabber, log));
-    SmartDashboard.putData("Grabber Pick Up",new GrabberPickUp(grabber, log));
-    SmartDashboard.putData("Grabber Eject", new GrabberEject(grabber, log));
-
     //Elevator Commands
     SmartDashboard.putData("Elevator Cal Encoder", new ElevatorCalibrateEncoderIfAtLowerLimit(elevator, log));
-    SmartDashboard.putData("Elevator Calibration", new ElevatorCalibration(0.05, elevator, log));
+    SmartDashboard.putData("Elevator Calibration", new ElevatorCalibration(1, elevator, log));
     SmartDashboard.putData("Elevator Set Percent", new ElevatorSetPercentOutput(elevator, log));
     SmartDashboard.putData("Elevator Set Position", new ElevatorSetPosition(elevator, log));
     SmartDashboard.putData("Elevator Move To Bottom", new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
     
     //Wrist Commands
-    SmartDashboard.putData("Wrist Stowed Position", new WristSetAngle(WristAngle.startConfig, wrist, log));
+    SmartDashboard.putData("Wrist Start Position", new WristSetAngle(WristAngle.startConfig, wrist, log));
     SmartDashboard.putData("Wrist ElevMove Position", new WristSetAngle(WristAngle.elevatorMoving, wrist, log));
     SmartDashboard.putData("Wrist Scoring Position", new WristSetAngle(WristAngle.scoreMidHigh, wrist, log));
     SmartDashboard.putData("Wrist Set Angle", new WristSetAngle(wrist, log));
@@ -166,9 +175,21 @@ public class RobotContainer {
     SmartDashboard.putData("LED Yellow", new LEDSetStrip(Color.kYellow, 1, led, log));
     SmartDashboard.putData("LED Purple", new LEDSetStrip(Color.kPurple, 1, led, log));
 
+    //Conveyor Commands
+    // SmartDashboard.putData("Conveyor Custom Percent", new ConveyorMove(conveyor, log));
+    // SmartDashboard.putData("Conveyor Run", new ConveyorMove(0.3, conveyor, log));
+    // SmartDashboard.putData("Conveyor Stop", new ConveyorMove(0, conveyor, log));
+
+    // Intake Commands
+    SmartDashboard.putData("Intake Stop", new IntakeStop(intake, log));
+    SmartDashboard.putData("Intake Pick Up",new IntakeSetPercentOutput(.75, .35, intake, log));
+    SmartDashboard.putData("Intake Eject",new IntakeSetPercentOutput(-0.5, -.25, intake, log));
+    SmartDashboard.putData("Intake Deploy", new IntakePistonSetPosition(true, intake, elevator, log));
+    SmartDashboard.putData("Intake Stow", new IntakePistonSetPosition(false, intake, elevator, log));
+
     //Manipulator Commands
     SmartDashboard.putData("Manipulator Stop", new ManipulatorStopMotor(manipulator, log));
-    SmartDashboard.putData("Manipulator Pick Up",new ManipulatorGrab(0.8, BehaviorType.waitForConeOrCube, manipulator, log));
+    SmartDashboard.putData("Manipulator Pick Up",new ManipulatorGrab(ManipulatorConstants.pieceGrabPct, BehaviorType.waitForConeOrCube, manipulator, log));
     SmartDashboard.putData("Manipulator Eject",new ManipulatorSetPercent(-0.5, manipulator, log));
     SmartDashboard.putData("Manipulator Cone", new ManipulatorSetPistonPosition(true, led, manipulator, log));
     SmartDashboard.putData("Manipulator Cube", new ManipulatorSetPistonPosition(false, led, manipulator, log));
@@ -192,64 +213,87 @@ public class RobotContainer {
    */
   private void configureXboxButtons(){
     //check povtrigger and axis trigger number bindings
-    // Trigger xbPOVUp = new POVTrigger(xboxController, 0);
-    // Trigger xbPOVRight = new POVTrigger(xboxController, 90);
-    //Trigger xbPOVDown = new POVTrigger(xboxController, 180);
-    // Trigger xbPOVLeft = new POVTrigger(xboxController, 270);
     
     // Triggers for all xbox buttons
     Trigger xbLT = xboxController.leftTrigger();
     Trigger xbRT = xboxController.rightTrigger();
     Trigger xbA = xboxController.a();
-    // Trigger xbB = xboxController.b();
-    // Trigger xbY = xboxController.y();
-    // Trigger xbX = xboxController.x();
-    // Trigger xbLB = xboxController.leftBumper();
-    // Trigger xbRB = xboxController.rightBumper();
-    // Trigger xbBack = xboxController.back();
-    // Trigger xbStart = xboxController.start();
-    // Trigger xbPOVUp = xboxController.povUp();
-    // Trigger xbPOVRight = xboxController.povRight();
-    // Trigger xbPOVLeft = xboxController.povLeft();
-    // Trigger xbPOVDown = xboxController.povDown();
-    
-    // right trigger 
-    xbRT.whileTrue(new GrabberPickUp(grabber, log));
-    // xbRT.whenActive(new ShootSequence(uptake, feeder, shooter, log),false);
-
-    // left trigger
-    xbLT.whileTrue(new GrabberEject(grabber, log));
-    // xbLT.whenActive(new TurretTurnAngleTwice(TargetType.kVisionOnScreen, false, turret, pivisionhub, log));
-    // xbLT.whenInactive(new TurretStop(turret, log));
-
-    
+    Trigger xbB = xboxController.b();
+    Trigger xbY = xboxController.y();
+    Trigger xbX = xboxController.x();
+    Trigger xbLB = xboxController.leftBumper();
+    Trigger xbRB = xboxController.rightBumper();
+    Trigger xbBack = xboxController.back();
+    Trigger xbStart = xboxController.start();
+    Trigger xbPOVUp = xboxController.povUp();
+    Trigger xbPOVRight = xboxController.povRight();
+    Trigger xbPOVLeft = xboxController.povLeft();
+    Trigger xbPOVDown = xboxController.povDown();
+   
     //a
-    xbA.whileTrue(new GrabberStopMotor(grabber, log));       
-    
+    // xbA.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreLow, elevator, log)); 
+    // Move elevator/wrist to score low position
+    xbA.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value, elevator, wrist, intake, log));
+     
     //b
-    // xbB.whileTrue(command));         
+    // xbB.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreMidCone, elevator, log));         
+    // Move elevator/wrist to score mid position
+    xbB.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreMidCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log));
  
     //y
-    // xb[4].whenHeld(new ShootSetup(false, 4100, pivisionhub, shooter, log));        
+    // xbY.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreHighCone, elevator, log));
+    // Move elevator/wrist to score high position
+    xbY.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log));
     
     //x
-    // xb[3].whileTrue(new ShootSetup(true, 3100, pivisionhub, shooter, log));        
+    // xbX.onTrue(new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
+    // Store elevator and wrist for traveling or pickup from conveyor
+    xbX.onTrue(new ElevatorWristStow(elevator, wrist, log));        
     
-    // LB = 5, RB = 6
-    // xb[5].onTrue(new TurretSetPercentOutput(-0.1, turret, log));
-    // xb[5].whenReleased(new TurretStop(turret, log));
-    // xb[6].onTrue(new TurretSetPercentOutput(+0.1, turret, log));
-    // xb[6].whenReleased(new TurretStop(turret, log));
+    //lb
+    xbLB.whileTrue(new ElevatorWristXboxControl(xboxController, elevator, wrist, log));     
+    
+    //rb
+    // xbRB.onTrue(new ManipulatorSetPistonPosition(false, led, manipulator, log));     
 
-    // back = 7, start = 8 
-    // xb[7].whenHeld(new ShootSetup(false, 500, pivisionhub, shooter, log));   // micro shot for use in the pit
-    // xb[8].whenHeld(new ClimberSetExtended(false,climber, log)); 
+    // Left Trigger
+    // When held, manipulator choke up on game piece.  When released, manipulator go to holding power
+    xbLT.onTrue(new ManipulatorSetPercent(ManipulatorConstants.pieceGrabPct, manipulator, log));
+    xbLT.onFalse(new ManipulatorSetPercent(ManipulatorConstants.pieceHoldPct, manipulator, log));
 
-    // pov is the d-pad (up, down, left, right)
-    // xbPOVUp.whenActive(new TurretTurnAngle(TargetType.kAbsolute, 0, 2, turret, pivisionhub, log));
-    // xbPOVRight.whenActive(new TurretTurnAngle(TargetType.kAbsolute, 45, 2, turret, pivisionhub, log));
-    // xbPOVLeft.whenActive(new TurretTurnAngle(TargetType.kAbsolute, -45, 2, turret, pivisionhub, log));
-    //xbPOVDown.whenActive(new StopAllMotors(feeder, shooter, intakeFront, uptake, log));
+    // Right Trigger
+    // Score piece
+    xbRT.onTrue(new EjectPiece(manipulator, log));
+
+    // back
+    // Turn off all motors
+    xbBack.onTrue(Commands.parallel(
+      new ManipulatorStopMotor(manipulator, log),
+      new IntakeStop(intake, log)
+      // new ConveyorMove(0, conveyor, log)
+    )); 
+
+    // start 
+    // xbStart.onTrue(Command command); 
+
+    // POV buttons
+
+    // Up
+    // Prepare to get cone
+    xbPOVUp.onTrue(new ManipulatorSetPistonPosition(true, led, manipulator, log));
+
+    // Down
+    // Prepare to get cube
+    xbPOVDown.onTrue(new ManipulatorSetPistonPosition(false, led, manipulator, log));
+
+    // Left
+    // Sets elevator/wrist to stowed, turn on conveyor, turn on manipulator to load piece
+    // xbPOVLeft.onTrue();
+    // xbPOVLeft.onTrue(new LoadPieceConveyor(elevator, wrist, manipulator, conveyor, log));
+
+    // Right
+    // Move elevator to loading station config and turn on manipulator to grab piece
+    xbPOVRight.onTrue( new LoadPieceLoadingStation(elevator, wrist, manipulator, intake, log) );
   }
 
   /**
@@ -264,7 +308,6 @@ public class RobotContainer {
       right[i] = new JoystickButton(rightJoystick, i);
     }
 
-    // TODO Add a button binding to zero the Pose angle (after adding that feature to DriveResetPose).
     // If the robot angle drifts (or is turned on with the wrong facing), then this button can be used to 
     // reset the robot facing for field-oriented control.  Turn the robot so that it is facing away
     // from the driver, then press this button.
@@ -273,10 +316,19 @@ public class RobotContainer {
     //left[1].onTrue(new IntakeRetractAndFlush(intakeFront, uptake, feeder, log));
     // resets current angle to 0, keeps current X and Y
     left[1].onTrue(new DriveResetPose(0, false, driveTrain, log));
+    // drive to closest goal
+    left[2].whileTrue(
+      new SequentialCommandGroup(
+        new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), 0.15, 10, driveTrain, log),
+        new DriveToPose(() -> field.getFinalColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log)
+      )
+    );
    
     // left joystick right button
-    right[1].onTrue(new DriveToPose(CoordType.kAbsolute, 0, driveTrain, log));
-    right[2].onTrue(new DriveToPose(CoordType.kRelative, 180, driveTrain, log));
+    right[1].onTrue(new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, led, log));
+    right[2].onTrue(new IntakeRetractAndTurnOffMotors(intake, elevator, log));
+    // right[1].onTrue(new DriveToPose(CoordType.kAbsolute, 0, driveTrain, log));
+    // right[2].onTrue(new DriveToPose(CoordType.kRelative, 180, driveTrain, log));
 
     //left[2].onTrue(new IntakeRetractAndFlush(intakeFront, uptake, feeder, log));
       
@@ -307,7 +359,10 @@ public class RobotContainer {
     }
 
     // top row UP then DOWN, from LEFT to RIGHT
-    // coP[1].onTrue(new IntakeToColorSensor(intakeFront, uptake, log)); 
+    coP[1].onTrue(new SequentialCommandGroup(
+      new IntakeSetPercentOutput(-.5, -.25, intake, log),
+      new ManipulatorSetPercent(-.5, manipulator, log)
+    )); 
     // coP[2].onTrue(new ShooterSetVelocity(InputMode.kSpeedRPM, ShooterConstants.shooterDefaultRPM, shooter, log)); 
 
     // coP[3].onTrue(new UptakeFeedBall(uptake, feeder, log)); 
@@ -357,7 +412,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return autoSelection.getAutoCommand(driveTrain, log);
+    return autoSelection.getAutoCommand(intake, elevator, wrist, manipulator, driveTrain, led, log);
   }
 
 
@@ -369,6 +424,7 @@ public class RobotContainer {
     if(!RobotPreferences.prefsExist()) {
       RobotPreferences.recordStickyFaults("RobotPreferences", log);
     }
+    lastEnabledModeAuto = false;
 
     // compressor.disable();
     compressor.enableDigital();
@@ -392,7 +448,10 @@ public class RobotContainer {
   public void disabledInit() {
     log.writeLogEcho(true, "Disabled", "Robot disabled");   // Don't log the word "Init" here -- it affects the Excel macro
 
-    driveTrain.setDriveModeCoast(true);     // When pushing a disabled robot by hand, it is a lot easier to push in Coast mode!!!!
+    if (!lastEnabledModeAuto) {
+      driveTrain.setDriveModeCoast(true);     // When pushing a disabled robot by hand, it is a lot easier to push in Coast mode!!!!
+    }
+
     driveTrain.stopMotors();                // SAFETY:  Turn off any closed loop control that may be running, so the robot does not move when re-enabled.
 
     elevator.setMotorModeCoast(true);
@@ -423,9 +482,11 @@ public class RobotContainer {
    */
   public void autonomousInit() {
     log.writeLogEcho(true, "Auto", "Mode Init");
+    lastEnabledModeAuto = true;
 
     driveTrain.setDriveModeCoast(false);
-    driveTrain.cameraInit();
+    driveTrain.resetGyroPitch();
+    // driveTrain.cameraInit();
     elevator.setMotorModeCoast(false);
 
     if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
@@ -450,13 +511,20 @@ public class RobotContainer {
    */
   public void teleopInit() {
     log.writeLogEcho(true, "Teleop", "Mode Init");
+    lastEnabledModeAuto = false;
 
     driveTrain.setDriveModeCoast(false);
     driveTrain.cameraInit();
     elevator.setMotorModeCoast(false);
 
-    if (patternTeamMoving.isScheduled()) patternTeamMoving.cancel();
-    led.setStrip(Color.kOrange, 0);
+    if (patternTeamMoving.isScheduled()) {
+      patternTeamMoving.cancel();
+      if (allianceSelection.getAlliance() == Alliance.Blue) {
+        led.setStrip(Color.kBlue, 0);
+      } else {
+        led.setStrip(Color.kRed, 0);
+      }
+    }
   }
 
   /**

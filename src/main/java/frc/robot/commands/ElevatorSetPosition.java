@@ -70,10 +70,12 @@ public class ElevatorSetPosition extends CommandBase {
     if(fromShuffleboard){
       target = SmartDashboard.getNumber("Elevator Position", 0);
     }
-    elevator.setProfileTarget(target);
-    log.writeLog(false, "ElevatorSetPosition", "Target Position", target);
+    log.writeLog(false, "ElevatorSetPosition", "Initialize", "Target Position", target);
 
+    toleranceCounter = 0;
+    elevator.setProfileTarget(target);
   }
+
   // Called repeatedly when this Command is scheduled to run
   @Override
   public void execute() {
@@ -83,6 +85,7 @@ public class ElevatorSetPosition extends CommandBase {
   // Called once after isFinished returns true
   @Override
   public void end(boolean interrupted) {
+    log.writeLog(false, "ElevatorSetPosition", "End", "Target Position", target);
   }
 
   // Make this return true when this Command no longer needs to run execute()
@@ -91,9 +94,9 @@ public class ElevatorSetPosition extends CommandBase {
     if (!elevator.encoderCalibrated() ||         // End immediately if encoder can't read
       Math.abs(elevator.getElevatorPos() - target) <= 0.5) {
         toleranceCounter++;
+        log.writeLog(false, "ElevatorSetPosition", "Within Tolerance", "Target Position", target, "Position", elevator.getElevatorPos(), "Tol count", toleranceCounter);
     }
-    if(toleranceCounter > 5)return true;
-    else return false;
+    return (toleranceCounter > 5);
   }
 
 }

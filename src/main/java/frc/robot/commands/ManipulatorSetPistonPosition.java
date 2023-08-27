@@ -19,7 +19,7 @@ public class ManipulatorSetPistonPosition extends CommandBase {
   private final LED led;
 
   /**
-   * Sets piston position to handle either cone or cube
+   * Sets piston position to handle either cone or cube and ends immediately
    * @param cone true = cone, false = cube
    * @param manipulator manipulator subsystem
    * @param log filelog
@@ -39,9 +39,9 @@ public class ManipulatorSetPistonPosition extends CommandBase {
   public void initialize() {
     manipulator.setPistonCone(cone);
     if(cone){
-      new LEDSetStrip(Color.kYellow, led, log);
+      led.setStrip(Color.kYellow, 0);
     } else {
-      new LEDSetStrip(Color.kPurple, led, log);
+      led.setStrip(Color.kPurple, 0);
     }
     log.writeLog(false, "ManipulatorSetPistonCone", "Initialize", "Set to cone", cone);
   }

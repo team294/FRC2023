@@ -24,8 +24,8 @@ public final class CTREConfigs {
         swerveDriveFXConfig.slot0.kD = 0.005;                                   // CALIBRATED
         swerveDriveFXConfig.slot0.kF = 0.0;     // Use arbitrary FF instead
         swerveDriveFXConfig.initializationStrategy = SensorInitializationStrategy.BootToZero;
-        swerveDriveFXConfig.openloopRamp = 0.0;     // Team364 uses 0.25        // TODO calibrate
-        swerveDriveFXConfig.closedloopRamp = 0.0;                               // TODO calibrate
+        swerveDriveFXConfig.openloopRamp = 0.0;     // Team364 uses 0.25        
+        swerveDriveFXConfig.closedloopRamp = 0.0;                               
 
         // Supply current limit is typically used to prevent breakers from tripping.
         swerveDriveFXConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration(
@@ -109,7 +109,7 @@ public final class CTREConfigs {
 
         // kP = (desired-output-1023max) / (error-in-encoder-ticks)
         //    = (desired-output-1.0max)*(1023max/1.0max) * kWristDegreesPerTick/(error-in-degrees) 
-        wristFXConfig.slot0.kP = 0.0;     // 2019 used 2.5 but had different gear ratio.  TODO Calibrate for Talon PID
+        wristFXConfig.slot0.kP = 0.03;     // CALIBRATED 0.02.  Tried 0.04 in lab, but bangs wrist when stowing.
         // kI = (desired-output-1023max) / [(time-ms) * (error-in-encoder-ticks)]
         //    = (desired-output-1.0max)*(1023max/1.0max) * (1.0sec/1000ms) * kWristDegreesPerTick / [(time-sec) * (error-in-degrees)]
         wristFXConfig.slot0.kI = 0.0;       // Example from manual = 0.0005

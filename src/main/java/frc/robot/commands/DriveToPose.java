@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -20,10 +21,12 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 
 import frc.robot.Constants;
 import frc.robot.Constants.CoordType;
+import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.TrajectoryConstants;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
 import frc.robot.utilities.HolonomicDriveControllerBCR;
+import frc.robot.utilities.MathBCR;
 import frc.robot.utilities.Translation2dBCR;
 import frc.robot.utilities.TrapezoidProfileBCR;
 
@@ -35,12 +38,16 @@ public class DriveToPose extends CommandBase {
   private SwerveDriveKinematics kinematics;
   private HolonomicDriveControllerBCR controller;
 
+  private double maxThetaErrorDegrees = TrajectoryConstants.maxThetaErrorDegrees;      
+  private double maxPositionErrorMeters = TrajectoryConstants.maxPositionErrorMeters;   
+
   // Options to control how the goal is specified
   public enum GoalMode {
     pose, poseSupplier, angleRelative, angleAbsolute, shuffleboard
   }
 
   private final GoalMode goalMode;
+  private final TrapezoidProfileBCR.Constraints trapProfileConstraints;
   private Supplier<Pose2d> goalSupplier;    // Supplier for goalPose
   private Rotation2d rotation;              // Rotation for goalPose
   private Pose2d initialPose, goalPose;     // Starting and destination robot pose (location and rotation) on the field
@@ -52,6 +59,7 @@ public class DriveToPose extends CommandBase {
 
   /**
    * Drives the robot to the desired pose in field coordinates.
+   * Stops the robot at the end of the command, unless the command is interrupted.
    * @param goalPose target pose in field coordinates.  Pose components include
    *    <p> Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
    *    <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
@@ -64,12 +72,43 @@ public class DriveToPose extends CommandBase {
     this.log = log;
     this.goalPose = goalPose;
     goalMode = GoalMode.pose;
+    trapProfileConstraints = TrajectoryConstants.kDriveProfileConstraints;
 
     constructorCommonCode();
   }
 
   /**
    * Drives the robot to the desired pose in field coordinates.
+   * Stops the robot at the end of the command, unless the command is interrupted.
+   * @param goalPose target pose in field coordinates.  Pose components include
+   *    <p> Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
+   *    <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
+   *    <p> Robot angle on the field (0 = facing away from our drivestation, + to the left, - to the right)
+   * @param maxVelMetersPerSecond max velocity to drive, in meters per second
+   * @param maxAccelMetersPerSecondSquare max acceleration/deceleration, in meters per second squared
+   * @param maxPositionErrorMeters tolerance for end position in meters
+   * @param maxThetaErrorDegrees tolerance for end theta in degrees
+   * @param driveTrain DriveTrain subsystem
+   * @param log file for logging
+   */
+  public DriveToPose(Pose2d goalPose, double maxVelMetersPerSecond, double maxAccelMetersPerSecondSquare, double maxPositionErrorMeters, double maxThetaErrorDegrees, DriveTrain driveTrain, FileLog log) {
+    this.driveTrain = driveTrain;
+    this.log = log;
+    this.goalPose = goalPose;
+    this.maxPositionErrorMeters = maxPositionErrorMeters;
+    this.maxThetaErrorDegrees = maxThetaErrorDegrees;
+    goalMode = GoalMode.pose;
+    trapProfileConstraints = new TrapezoidProfileBCR.Constraints(
+      MathUtil.clamp(maxVelMetersPerSecond, -SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullSpeedMetersPerSecond), 
+      MathUtil.clamp(maxAccelMetersPerSecondSquare, -SwerveConstants.kFullAccelerationMetersPerSecondSquare, SwerveConstants.kFullAccelerationMetersPerSecondSquare)
+    );
+
+    constructorCommonCode();
+  }
+
+  /**
+   * Drives the robot to the desired pose in field coordinates.
+   * Stops the robot at the end of the command, unless the command is interrupted.
    * @param goalPoseSupplier A function that supplies the target pose in field coordinates.  Pose components include
    *    <p> Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
    *    <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
@@ -82,13 +121,39 @@ public class DriveToPose extends CommandBase {
     this.log = log;
     goalSupplier = goalPoseSupplier;
     goalMode = GoalMode.poseSupplier;
+    trapProfileConstraints = TrajectoryConstants.kDriveProfileConstraints;
 
     constructorCommonCode();
   }
 
 
+   /**
+   * Drives the robot to the desired pose in field coordinates.
+   * Stops the robot at the end of the command, unless the command is interrupted.
+   * @param goalPoseSupplier A function that supplies the target pose in field coordinates.  Pose components include
+   *    <p> Robot X location in the field, in meters (0 = field edge in front of driver station, +=away from our drivestation)
+   *    <p> Robot Y location in the field, in meters (0 = right edge of field when standing in driver station, +=left when looking from our drivestation)
+   *    <p> Robot angle on the field (0 = facing away from our drivestation, + to the left, - to the right)
+   * @param maxPositionErrorMeters tolerance for end position in meters
+   * @param maxThetaErrorDegrees tolerance for end theta in degrees
+   * @param driveTrain DriveTrain subsystem
+   * @param log file for logging
+   */
+  public DriveToPose(Supplier<Pose2d> goalPoseSupplier, double maxPositionErrorMeters, double maxThetaErrorDegrees, DriveTrain driveTrain, FileLog log) {
+    this.driveTrain = driveTrain;
+    this.log = log;
+    this.maxPositionErrorMeters = maxPositionErrorMeters;
+    this.maxThetaErrorDegrees = maxThetaErrorDegrees;
+    goalSupplier = goalPoseSupplier;
+    goalMode = GoalMode.poseSupplier;
+    trapProfileConstraints = TrajectoryConstants.kDriveProfileConstraints;
+
+    constructorCommonCode();
+  }
+
   /**
-   * Rotates the robot to the specified rotation using an arbitrary angle without moving laterally
+   * Rotates the robot to the specified rotation using an arbitrary angle without moving laterally.
+   * Stops the robot at the end of the command, unless the command is interrupted.
    * @param type CoordType, kRelative (turn relative to current angle) or kAbsolute (turn to field angle)
    * @param rotation rotation to turn to, in degrees (+=turn left, -=turn right).  For absolute rotation,
    * the 0 degrees is facing away from the driver station.
@@ -104,12 +169,14 @@ public class DriveToPose extends CommandBase {
     } else {
       goalMode = GoalMode.angleAbsolute;
     }
+    trapProfileConstraints = TrajectoryConstants.kDriveProfileConstraints;
 
     constructorCommonCode();
   }
 
   /**
    * Drives the robot to the desired pose based on numbers inputed in shuffleboard.
+   * Stops the robot at the end of the command, unless the command is interrupted.
    * @param driveTrain DriveTrain subsystem
    * @param log file for logging
    */
@@ -117,6 +184,7 @@ public class DriveToPose extends CommandBase {
     this.driveTrain = driveTrain;
     this.log = log;
     goalMode = GoalMode.shuffleboard;
+    trapProfileConstraints = TrajectoryConstants.kDriveProfileConstraints;
 
     constructorCommonCode();
 
@@ -198,7 +266,7 @@ public class DriveToPose extends CommandBase {
     // Create the profile.  The profile is linear distance (along goalDirection) relative to the initial pose
     TrapezoidProfileBCR.State initialState = new TrapezoidProfileBCR.State(0, initialVelocity);
     TrapezoidProfileBCR.State goalState = new TrapezoidProfileBCR.State(goalDistance, 0);
-    profile = new TrapezoidProfileBCR(TrajectoryConstants.kDriveProfileConstraints, goalState, initialState);
+    profile = new TrapezoidProfileBCR(trapProfileConstraints, goalState, initialState);
 
     log.writeLog(false, "DriveToPose", "Initialize", 
       "Time", timer.get(), 
@@ -207,7 +275,8 @@ public class DriveToPose extends CommandBase {
       "Goal rot", goalPose.getRotation().getDegrees(), 
       "Robot X", initialTranslation.getX(),
       "Robot Y", initialTranslation.getY(),
-      "Robot rot", initialPose.getRotation().getDegrees()
+      "Robot rot", initialPose.getRotation().getDegrees(),
+      "Profile time",profile.totalTime()
     );
   }
 
@@ -223,7 +292,10 @@ public class DriveToPose extends CommandBase {
     // Calculate current desired pose and velocity from the Trapezoid profile, relative to starting position
     TrapezoidProfileBCR.State desiredState = profile.calculate(curTime);
     Pose2d desiredPose = new Pose2d( goalDirection.times(desiredState.position), goalDirection.getAngle());
-    double desiredVelocityMetersPerSecond = desiredState.velocity;
+
+    //fudge in some kA
+    double desiredVelocityMetersPerSecond = desiredState.velocity + (desiredState.acceleration * SwerveConstants.kADriveToPose);
+
     Rotation2d desiredRotation = goalPose.getRotation();
 
     ChassisSpeeds targetChassisSpeeds =
@@ -237,30 +309,58 @@ public class DriveToPose extends CommandBase {
         "Time", timer.get(), 
         "Trap X", desiredPose.getTranslation().getX(),
         "Trap Y", desiredPose.getTranslation().getY(),
-        "Trap Vel", desiredVelocityMetersPerSecond,
+        "Trap Accel", desiredState.acceleration,
+        "Trap Vel", desiredState.velocity,
+        "Trap Vel w/kA", desiredVelocityMetersPerSecond,
+        "Robot XVel", robotSpeeds.vxMetersPerSecond,
+        "Robot Pos Err", driveTrain.getPose().getTranslation().minus(goalPose.getTranslation()).getNorm(),
+        "Robot Th Err", MathBCR.angleMinus(driveTrain.getGyroRotation(), goalPose.getRotation().getDegrees()),
         "Trap VelAng", desiredPose.getRotation().getDegrees(),
         "Target rot", desiredRotation.getDegrees(), 
         "Robot X", curRobotTranslation.getX(),
         "Robot Y", curRobotTranslation.getY(),
         "Robot Vel", Math.hypot(robotSpeeds.vyMetersPerSecond, robotSpeeds.vxMetersPerSecond),
         "Robot VelAng", Math.toDegrees(Math.atan2(robotSpeeds.vyMetersPerSecond, robotSpeeds.vxMetersPerSecond)),
-        "Robot rot", robotPose.getRotation().getDegrees()
+        "Robot rot", robotPose.getRotation().getDegrees(),
+        "Pitch", driveTrain.getGyroPitch()
     );
+
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     timer.stop();
-    log.writeLog(false, "DriveToPose", "End"); 
+
+    if (!interrupted) {
+      driveTrain.stopMotors();
+    }
+
+    log.writeLog(false, "DriveToPose", "End", "Interrupted", interrupted); 
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return timer.hasElapsed(profile.totalTime()+3.0) ||         // if we 3 seconds after the profile completed, then end even if we are not within tolerance 
+
+    var timeout = timer.hasElapsed(profile.totalTime()+3.0);
+    if (timeout) {
+      log.writeLog(false, "DriveToPose", "timeout"); 
+    }
+
+    var gyro = MathBCR.angleMinus(driveTrain.getGyroRotation(), goalPose.getRotation().getDegrees());
+    var posError = driveTrain.getPose().getTranslation().minus(goalPose.getTranslation()).getNorm();
+    
+    var finished = timeout ||         // if we 3 seconds after the profile completed, then end even if we are not within tolerance 
       ( timer.hasElapsed(profile.totalTime())  && 
-        ( Math.abs(driveTrain.getGyroRotation() - goalPose.getRotation().getDegrees()) <= TrajectoryConstants.maxThetaErrorDegrees ) &&
-        ( driveTrain.getPose().getTranslation().minus(goalPose.getTranslation()).getNorm() <= TrajectoryConstants.maxPositionErrorMeters) );
+        ( Math.abs(gyro) <= maxThetaErrorDegrees ) &&
+        ( posError  <= maxPositionErrorMeters) );
+
+    if (finished) {
+      log.writeLog(false, "DriveToPose", "finished", "gyroError", gyro, "posError", posError, "maxTheta",maxThetaErrorDegrees, "maxMeters", maxPositionErrorMeters, "timer",timer.get()); 
+    }
+
+    return finished;
   }
+
 }
