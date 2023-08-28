@@ -38,7 +38,6 @@ public class DriveWithJoysticksAdvance extends CommandBase {
    */
 
   public DriveWithJoysticksAdvance(Joystick leftJoystick, Joystick rightJoystick, DriveTrain driveTrain, FileLog log) {
-    // Use addRequirements() here to declare subsystem dependencies.
     this.leftJoystick = leftJoystick;
     this.rightJoystick = rightJoystick;
     this.driveTrain = driveTrain;
@@ -83,9 +82,9 @@ public class DriveWithJoysticksAdvance extends CommandBase {
     leftVelocity = (Math.abs(leftVelocity) < OIConstants.joystickDeadband) ? 0 : scaleJoystick(leftVelocity) * SwerveConstants.kMaxSpeedMetersPerSecond;
     turnRate = (Math.abs(turnRate) < OIConstants.joystickDeadband) ? 0 : scaleTurn(turnRate) * SwerveConstants.kMaxTurningRadiansPerSecond;
 
-    // goalAngle = driveTrain.getPose().getRotation().getRadians();
     // SmartDashboard.putNumber("Goal Angle", goalAngle);
     // SmartDashboard.putNumber("Current Angle", driveTrain.getPose().getRotation().getRadians());
+
     // Uses profiled PID controller if the joystick is in the deadband
     if(turnRate == 0){
       if(firstInDeadband){
@@ -95,14 +94,15 @@ public class DriveWithJoysticksAdvance extends CommandBase {
       }
 
       // When the right button on the right joystick is pressed then the robot turns pi radians(180 degrees)
-      // This button works but its used for other commands
+      // This button works but it is currently used for other commands
       // if(rightJoystick.getRawButtonPressed(2)){
       //   goalAngle += Math.PI;
       //   MathUtil.angleModulus(goalAngle);
       // }
 
       // When the left button on the right joystick is pressed then the robot goes to 0 radians absolute
-      // goalAngle = rightJoystick.getRawButtonPressed(1) ? 0 : goalAngle; This works but buttons are used for other commands
+      // This button works but it is currently used for other commands
+      // goalAngle = rightJoystick.getRawButtonPressed(1) ? 0 : goalAngle;
 
       // Calculates using the profiledPIDController what the next speed should be
       nextTurnRate = turnRateController.calculate(driveTrain.getPose().getRotation().getRadians(), goalAngle);
