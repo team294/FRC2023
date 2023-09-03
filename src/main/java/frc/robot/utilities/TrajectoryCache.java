@@ -23,11 +23,11 @@ import frc.robot.Constants.SwerveConstants;
 public class TrajectoryCache {
     private FileLog log;
    
-    private static int trajectoryCount = 0;
+    private static int trajectoryCount = 1;
     public TrajectoryFacing[] cache = new TrajectoryFacing[trajectoryCount];        // array of trajectories
 
     public enum TrajectoryType {
-        // test(0),
+        test(0);
         // testCurve(1),
         // CenterBalanceBlue(2),
         // CenterBalanceRed(3),
@@ -41,8 +41,8 @@ public class TrajectoryCache {
         // Pickup(11);
 
         // @SuppressWarnings({"MemberName", "PMD.SingularField"})
-        // public final int value;
-        // TrajectoryType(int value) { this.value = value; }
+        public final int value;
+        TrajectoryType(int value) { this.value = value; }
     }
 
     /**
@@ -83,15 +83,15 @@ public class TrajectoryCache {
     public TrajectoryCache(FileLog log){
         this.log = log;
 
-        // cache[TrajectoryType.test.value] = new TrajectoryFacing(
-        //     new Rotation2d(0.0),            // Start facing +X direction
-        //     new Rotation2d(0.0),            // End facing +X direction
-        //     calcTrajectory("Test", 0.4, 0.4, false, 
-        //         new Pose2d(0, 0, new Rotation2d(0.0)),
-        //         List.of(),
-        //         new Pose2d(6.0, 0, new Rotation2d(Math.toRadians(0.0)))
-        //     )
-        // );
+        cache[TrajectoryType.test.value] = new TrajectoryFacing(
+            new Rotation2d(0.0),            // Start facing +X direction
+            new Rotation2d(Math.toRadians(180)),            // End facing 90 degrees right
+            calcTrajectory("Test", 0.4, 0.4, false, 
+                new Pose2d(0, 0, new Rotation2d(0.0)),
+                List.of(),
+                new Pose2d(10.0, 0, new Rotation2d(Math.toRadians(0)))
+            )
+        );
 
         // cache[TrajectoryType.testCurve.value] = new TrajectoryFacing(
         //     new Rotation2d(0.0),            // Start facing +X direction

@@ -114,6 +114,7 @@ public class RobotContainer {
     SmartDashboard.putData("Drive 1.5 mps 0 deg", new DriveSetState(1.5, 0, false, driveTrain, log));
     SmartDashboard.putData("Drive Straight", new DriveStraight(false, false, false, driveTrain, log));
     SmartDashboard.putData("Drive Lock Wheels", new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log));
+    SmartDashboard.putData("Drivetrain Test", new DrivetrainTest(driveTrain));
 
     // Testing for trajectories
     Rotation2d rotationFront = new Rotation2d();          // Facing away from drivers
@@ -124,6 +125,7 @@ public class RobotContainer {
       SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
       TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log));
     SmartDashboard.putData("Drive to Load Station", new DriveToLoad(driveTrain, wrist, elevator, manipulator, intake, field, log));
+    SmartDashboard.putData("Test Trajectory", new DriveTrajectory(CoordType.kAbsoluteResetPose, StopType.kBrake, trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
     // SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
     //     trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
     // SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
