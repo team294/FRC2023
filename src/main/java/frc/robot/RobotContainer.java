@@ -6,6 +6,8 @@ package frc.robot;
 
 import java.util.List;
 
+import org.ejml.equation.Sequence;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
@@ -143,7 +145,8 @@ public class RobotContainer {
           driveTrain, log));
     SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
     // SmartDashboard.putData("Drive Smart Balance", new SequentialCommandGroup(new ResetPose,new SmartBalance(0.5, 0, driveTrain)));
-
+    // SmartDashboard.putData("Test Balance", new SequentialCommandGroup(new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, .889, driveTrain, log), new ActiveBalance(driveTrain, log)));
+    SmartDashboard.putData("Test Balance", new ActiveBalance(driveTrain, log));
     // Testing for autos
     // SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
     // SmartDashboard.putData("Center Balance Blue", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
