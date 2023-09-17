@@ -315,7 +315,8 @@ public class RobotContainer {
     // left joystick left button
     //left[1].onTrue(new IntakeRetractAndFlush(intakeFront, uptake, feeder, log));
     // resets current angle to 0, keeps current X and Y
-    left[1].onTrue(new DriveResetPose(0, false, driveTrain, log));
+    //left[1].onTrue(new DriveResetPose(0, false, driveTrain, log));
+    left[1].onTrue(new EjectPiece(manipulator, log));
     // drive to closest goal
     left[2].whileTrue(
       new SequentialCommandGroup(
@@ -363,8 +364,7 @@ public class RobotContainer {
       new IntakeSetPercentOutput(-.5, -.25, intake, log),
       new ManipulatorSetPercent(-.5, manipulator, log)
     )); 
-    // coP[2].onTrue(new ShooterSetVelocity(InputMode.kSpeedRPM, ShooterConstants.shooterDefaultRPM, shooter, log)); 
-
+   coP[2].onTrue(new DriveResetPose(0, false, driveTrain, log));
     // coP[3].onTrue(new UptakeFeedBall(uptake, feeder, log)); 
     // coP[4].onTrue(new UptakeEjectBall(uptake, log)); 
 
