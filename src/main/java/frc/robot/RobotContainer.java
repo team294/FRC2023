@@ -143,7 +143,8 @@ public class RobotContainer {
           driveTrain, log));
     SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
     // SmartDashboard.putData("Drive Smart Balance", new SequentialCommandGroup(new ResetPose,new SmartBalance(0.5, 0, driveTrain)));
-
+    // SmartDashboard.putData("Test Balance", new SequentialCommandGroup(new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, .889, driveTrain, log), new ActiveBalance(driveTrain, log)));
+    SmartDashboard.putData("Test Balance", new ActiveBalance(driveTrain, log));
     // Testing for autos
     // SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
     // SmartDashboard.putData("Center Balance Blue", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
@@ -315,7 +316,8 @@ public class RobotContainer {
     // left joystick left button
     //left[1].onTrue(new IntakeRetractAndFlush(intakeFront, uptake, feeder, log));
     // resets current angle to 0, keeps current X and Y
-    left[1].onTrue(new DriveResetPose(0, false, driveTrain, log));
+    //left[1].onTrue(new DriveResetPose(0, false, driveTrain, log));
+    left[1].onTrue(new EjectPiece(manipulator, log));
     // drive to closest goal
     left[2].whileTrue(
       new SequentialCommandGroup(
@@ -363,8 +365,7 @@ public class RobotContainer {
       new IntakeSetPercentOutput(-.5, -.25, intake, log),
       new ManipulatorSetPercent(-.5, manipulator, log)
     )); 
-    // coP[2].onTrue(new ShooterSetVelocity(InputMode.kSpeedRPM, ShooterConstants.shooterDefaultRPM, shooter, log)); 
-
+   coP[2].onTrue(new DriveResetPose(0, false, driveTrain, log));
     // coP[3].onTrue(new UptakeFeedBall(uptake, feeder, log)); 
     // coP[4].onTrue(new UptakeEjectBall(uptake, log)); 
 
