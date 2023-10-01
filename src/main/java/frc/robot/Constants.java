@@ -163,9 +163,9 @@ public final class Constants {
         // After updating in RobotPreferences, you will need to re-start the robot code for the changes to take effect.
         // When calibrating offset, set the wheels to zero degrees with the bevel gear facing to the right
         public static double offsetAngleFrontLeftMotor = 0; // 92.3
-        public static double offsetAngleFrontRightMotor = 0; // -12.8, -8
+        public static double offsetAngleFrontRightMotor = 0; // -12.8
         public static double offsetAngleBackLeftMotor = 0; // -107.6
-        public static double offsetAngleBackRightMotor = 0; // -170.2,-178
+        public static double offsetAngleBackRightMotor = 0; // -170.2
 
         // Driving constants to cap acceleration
         public static final double maxAccelerationRate = 5.0;           // m/s^2

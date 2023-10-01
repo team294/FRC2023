@@ -6,8 +6,6 @@ package frc.robot;
 
 import java.util.List;
 
-import org.ejml.equation.Sequence;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
