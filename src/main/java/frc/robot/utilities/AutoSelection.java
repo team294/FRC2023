@@ -437,11 +437,13 @@ public class AutoSelection {
 					new WaitCommand(waitTime),
 					new DriveResetPose(posScoreInitial, true, driveTrain, log),
 					new AutoScoreConeHigh(true, elevator, wrist, manipulator, intake, led, log),
+					new FileLogEnableFastLogging(true, driveTrain, log),
 					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity, 1.9, driveTrain, log),		// Was 2.1m but overshot slightly in Qual39, trying 1.9m
 					new ActiveBalance(driveTrain, log)
 				).withTimeout(14.5),
+				new FileLogEnableFastLogging(false, driveTrain, log),
 				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
-	   		);
+				);
    	   	}
 
 		if (autoPlan == BALANCE_4TOWALL) {
