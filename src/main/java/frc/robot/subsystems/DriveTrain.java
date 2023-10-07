@@ -77,7 +77,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   // private boolean elevatorUpPriorIteration = false;       // Tracking for elevator position from prior iteration
 
 
-  private final SlewRateLimiter filterY = new SlewRateLimiter(maxAccelerationRate);
+  private final SlewRateLimiter filterY = new SlewRateLimiter(maxAccelerationRateY);
 
   //  tier 4 = slowest acceleration, tier 1 = fastest acceleration
   private final SlewRateLimiter filterXTier1 = new SlewRateLimiter(maxAccelerationRate);   // limiter in X direction when elevator is out
