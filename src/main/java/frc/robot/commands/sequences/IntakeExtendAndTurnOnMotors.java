@@ -38,8 +38,10 @@ public class IntakeExtendAndTurnOnMotors extends SequentialCommandGroup {
           new ManipulatorGrab(ManipulatorConstants.pieceGrabFromIntakePct, BehaviorType.waitForConeOrCube, manipulator, log),
 
           // Retract and turn off intake
-          new IntakeRetractAndTurnOffMotors(intake, elevator, log),
-
+          // new IntakeRetractAndTurnOffMotors(intake, elevator, log),
+          new IntakePistonSetPosition(false, intake, elevator, log),
+          new IntakeStop(intake, log),
+    
           new FileLogWrite(false, false, "IntakeExtendAndTurnOnMotors", "End", log)
         ),
         new FileLogWrite(false, false, "IntakeExtendAndTurnOnMotors", "Elevator Not Down", log),
