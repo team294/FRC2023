@@ -168,10 +168,11 @@ public final class Constants {
         public static double offsetAngleBackRightMotor = 0; // -170.2
 
         // Driving constants to cap acceleration
-        public static final double maxAccelerationRate = 5.0;           // m/s^2
-        public static final double maxAccelerationRateAtScoreMid = 3.5;           // m/s^2
-        public static final double maxAccelerationRateBetweenScoreMidAndHigh = 3.0;           // m/s^2
-        public static final double maxAccelerationRateWithElevatorUp = 2.0;           // m/s^2
+        public static final double maxAccelerationRate = 10.0; //5.0          // m/s^2
+        public static final double maxAccelerationRateY = 5.0; //5.0          // m/s^2
+        public static final double maxAccelerationRateAtScoreMid = 7; //3.5          // m/s^2
+        public static final double maxAccelerationRateBetweenScoreMidAndHigh = 6.0; //3.0          // m/s^2
+        public static final double maxAccelerationRateWithElevatorUp = 1.0; //2.0          // m/s^2
         public static final double maxRotationRateWithElevatorUp = 0.8;     // rad/sec
 
         // Auto balance constants
@@ -184,7 +185,7 @@ public final class Constants {
 
       public static final class TrajectoryConstants {
         public static final double ChargeStationVelocity = 1.2;
-
+ 
         // Max error for robot rotation
         public static final double maxThetaErrorDegrees = 1.0;
         public static final double maxPositionErrorMeters = 0.04; // 1.6 inches

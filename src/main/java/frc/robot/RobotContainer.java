@@ -216,6 +216,7 @@ public class RobotContainer {
     //check povtrigger and axis trigger number bindings
     
     // Triggers for all xbox buttons
+  
     Trigger xbLT = xboxController.leftTrigger();
     Trigger xbRT = xboxController.rightTrigger();
     Trigger xbA = xboxController.a();
@@ -235,7 +236,6 @@ public class RobotContainer {
     // xbA.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreLow, elevator, log)); 
     // Move elevator/wrist to score low position
     xbA.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value, elevator, wrist, intake, log));
-     
     //b
     // xbB.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreMidCone, elevator, log));         
     // Move elevator/wrist to score mid position
@@ -266,6 +266,9 @@ public class RobotContainer {
     // Score piece
     xbRT.onTrue(new EjectPiece(manipulator, log));
 
+    //Right Bumber
+    //Score piece (in case misclick)
+    xbRB.onTrue(new EjectPiece(manipulator, log));
     // back
     // Turn off all motors
     xbBack.onTrue(Commands.parallel(
@@ -514,7 +517,7 @@ public class RobotContainer {
     log.writeLogEcho(true, "Teleop", "Mode Init");
     lastEnabledModeAuto = false;
 
-    driveTrain.setDriveModeCoast(false);
+    driveTrain.setDriveModeCoast(true);
     driveTrain.cameraInit();
     elevator.setMotorModeCoast(false);
 
