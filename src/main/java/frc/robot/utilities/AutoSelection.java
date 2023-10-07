@@ -215,10 +215,12 @@ public class AutoSelection {
 					new DriveToPose(posCross, SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
 						0.4, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
 					// new DriveToPose(posCross, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
-					// 	TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
+					// 	TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),0
+					new FileLogEnableFastLogging(true, driveTrain, log),
 					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
 					new ActiveBalance(driveTrain, log)
 				).withTimeout(14.5),
+				new FileLogEnableFastLogging(false, driveTrain, log),
 				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
 			);
 		}
@@ -258,9 +260,11 @@ public class AutoSelection {
 					// 	TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),
 					new DriveToPose(posCross, SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
 						0.4, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
+					new FileLogEnableFastLogging(true, driveTrain, log),
 					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
 					new ActiveBalance(driveTrain, log)
 				).withTimeout(14.5),
+				new FileLogEnableFastLogging(false, driveTrain, log),
 				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
 			);
 		}
@@ -378,9 +382,11 @@ public class AutoSelection {
 					new DriveResetPose(posScoreInitial, true, driveTrain, log),
 					new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
 					new AutoPickUpCube(posLeave, posCross, false, intake, elevator, wrist, manipulator, driveTrain, led, log),
+					new FileLogEnableFastLogging(true, driveTrain, log),
 					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
 					new ActiveBalance(driveTrain, log)
 				).withTimeout(14.5),
+				new FileLogEnableFastLogging(false, driveTrain, log),
 				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
 			);
 		}
@@ -412,9 +418,11 @@ public class AutoSelection {
 					new DriveResetPose(posScoreInitial, true, driveTrain, log),
 					new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
 					new AutoPickUpCube(posLeave, posCross, false, intake, elevator, wrist, manipulator, driveTrain, led, log),
+					new FileLogEnableFastLogging(true, driveTrain, log),
 					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
 					new ActiveBalance(driveTrain, log)
 				).withTimeout(14.5),
+				new FileLogEnableFastLogging(false, driveTrain, log),
 				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
 			);
 		}
@@ -464,11 +472,13 @@ public class AutoSelection {
 				new SequentialCommandGroup(
 					new WaitCommand(waitTime),
 					new DriveResetPose(posScoreInitial, true, driveTrain, log),
+					new FileLogEnableFastLogging(true, driveTrain, log),
 					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity, 1.9, driveTrain, log),	// Changed from 2.1m to 1.9m after Qual39 (see CONE_BALANCE_4TOWALL)
 					new ActiveBalanceTwo(driveTrain, log)
 					//new ActiveBalance(driveTrain, log)
 				)
 				// ).withTimeout(14.5),
+				// new FileLogEnableFastLogging(false, driveTrain, log),
 				// new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
 	   		);
    	   	}
