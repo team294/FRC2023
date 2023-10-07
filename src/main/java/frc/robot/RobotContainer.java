@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -235,21 +237,65 @@ public class RobotContainer {
     //a
     // xbA.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreLow, elevator, log)); 
     // Move elevator/wrist to score low position
-    xbA.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value, elevator, wrist, intake, log));
+    xbA.onTrue(
+      new ConditionalCommand(
+        // Raise Elevator.  Schedule the elevator command separately, so this xbox button does not
+        // require the intake susbsytem outside of the conditional command.  That will prevent
+        // the conditional command from interrupting other commands if the intake is out.
+        // When the intake is in, the subsystem requirements will take effect when ElevatorWristMoveToUpperPosition
+        // is scheduled. 
+        new ScheduleCommand(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.upperLimit.value, elevator, wrist, intake, log)),
+        new FileLogWrite(false, false, "Xbox A", "Intake is out", log),
+        () -> (!intake.isDeployed()) 
+      ) // ONLY allow this command to run if the intake is in; otherwise would interrupt the ManipulatorGrab command
+    );
     //b
     // xbB.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreMidCone, elevator, log));         
     // Move elevator/wrist to score mid position
-    xbB.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreMidCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log));
+    xbB.onTrue(
+      new ConditionalCommand(
+        // Raise Elevator.  Schedule the elevator command separately, so this xbox button does not
+        // require the intake susbsytem outside of the conditional command.  That will prevent
+        // the conditional command from interrupting other commands if the intake is out.
+        // When the intake is in, the subsystem requirements will take effect when ElevatorWristMoveToUpperPosition
+        // is scheduled. 
+        new ScheduleCommand(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreMidCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log)),
+        new FileLogWrite(false, false, "Xbox B", "Intake is out", log),
+        () -> (!intake.isDeployed()) 
+      ) // ONLY allow this command to run if the intake is in; otherwise would interrupt the ManipulatorGrab command  
+    );
  
     //y
     // xbY.onTrue(new ElevatorSetPosition(ElevatorPosition.scoreHighCone, elevator, log));
     // Move elevator/wrist to score high position
-    xbY.onTrue(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log));
+    xbY.onTrue(
+      new ConditionalCommand(
+        // Raise Elevator.  Schedule the elevator command separately, so this xbox button does not
+        // require the intake susbsytem outside of the conditional command.  That will prevent
+        // the conditional command from interrupting other commands if the intake is out.
+        // When the intake is in, the subsystem requirements will take effect when ElevatorWristMoveToUpperPosition
+        // is scheduled. 
+        new ScheduleCommand(new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log)),
+        new FileLogWrite(false, false, "Xbox Y", "Intake is out", log),
+        () -> (!intake.isDeployed()) 
+      ) // ONLY allow this command to run if the intake is in; otherwise would interrupt the ManipulatorGrab command  
+    );
     
     //x
     // xbX.onTrue(new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
     // Store elevator and wrist for traveling or pickup from conveyor
-    xbX.onTrue(new ElevatorWristStow(elevator, wrist, log));        
+    xbX.onTrue(
+      new ConditionalCommand(
+        // Stow Elevator.  Schedule the elevator command separately, so this xbox button does not
+        // require the intake susbsytem outside of the conditional command.  That will prevent
+        // the conditional command from interrupting other commands if the intake is out.
+        // When the intake is in, the subsystem requirements will take effect when ElevatorWristStow
+        // is scheduled. 
+        new ScheduleCommand(new ElevatorWristStow(elevator, wrist, log)),
+        new FileLogWrite(false, false, "Xbox X", "Intake is out", log),
+        () -> (!intake.isDeployed()) 
+      ) // ONLY allow this command to run if the intake is in; otherwise would interrupt the ManipulatorGrab command   
+    );        
     
     //lb
     xbLB.whileTrue(new ElevatorWristXboxControl(xboxController, elevator, wrist, log));     
@@ -330,7 +376,21 @@ public class RobotContainer {
     );
    
     // left joystick right button
-    right[1].onTrue(new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, led, log));
+    right[1].onTrue(
+      // new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, led, log)
+      new ConditionalCommand(
+        // Extend intake.  Schedule the intake command separately, so this joystick button does not
+        // require the Manipulator susbsytem outside of the conditional command.  That will prevent
+        // the conditional command from interrupting other commands if the elevator is up.
+        // When the elevator is down, the subsystem requirements will take effect when IntakeRetractAndTurnOffMotors
+        // is scheduled. 
+        new ScheduleCommand(new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, led, log)),
+        new FileLogWrite(false, false, "RightJoystickButton1", "IntakeExtendAndTurnOnMotors - Elevator Not Down", log),
+        () -> (elevator.getElevatorPos() <= Constants.ElevatorConstants.boundBottomMain) 
+      ) // ONLY allow this command to run if elevator is not out; otherwise would interrupt the ManipulatorGrab command
+    );
+
+    
     right[2].onTrue(new IntakeRetractAndTurnOffMotors(intake, elevator, log));
     // right[1].onTrue(new DriveToPose(CoordType.kAbsolute, 0, driveTrain, log));
     // right[2].onTrue(new DriveToPose(CoordType.kRelative, 180, driveTrain, log));
