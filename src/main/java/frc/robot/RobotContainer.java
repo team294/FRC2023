@@ -50,7 +50,7 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryType;
  */
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
-  private final FileLog log = new FileLog("F2");
+  private final FileLog log = new FileLog("G1");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
   private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
   private final Field field = new Field(allianceSelection, log);
@@ -454,6 +454,7 @@ public class RobotContainer {
     }
 
     driveTrain.stopMotors();                // SAFETY:  Turn off any closed loop control that may be running, so the robot does not move when re-enabled.
+    driveTrain.enableFastLogging(false);    // Turn off fast logging, in case it was left on from auto mode
 
     elevator.setMotorModeCoast(true);
 
@@ -515,6 +516,7 @@ public class RobotContainer {
     lastEnabledModeAuto = false;
 
     driveTrain.setDriveModeCoast(false);
+    driveTrain.enableFastLogging(false);    // Turn off fast logging, in case it was left on from auto mode
     driveTrain.cameraInit();
     elevator.setMotorModeCoast(false);
 
