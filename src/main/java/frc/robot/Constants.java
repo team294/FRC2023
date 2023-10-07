@@ -185,7 +185,7 @@ public final class Constants {
 
       public static final class TrajectoryConstants {
         public static final double ChargeStationVelocity = 1.2;
- 
+
         // Max error for robot rotation
         public static final double maxThetaErrorDegrees = 1.0;
         public static final double maxPositionErrorMeters = 0.04; // 1.6 inches

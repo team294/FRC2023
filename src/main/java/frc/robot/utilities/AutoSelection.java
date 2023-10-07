@@ -439,11 +439,14 @@ public class AutoSelection {
 					new AutoScoreConeHigh(true, elevator, wrist, manipulator, intake, led, log),
 					new FileLogEnableFastLogging(true, driveTrain, log),
 					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity, 1.9, driveTrain, log),		// Was 2.1m but overshot slightly in Qual39, trying 1.9m
-					new ActiveBalance(driveTrain, log)
-				).withTimeout(14.5),
-				new FileLogEnableFastLogging(false, driveTrain, log),
-				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
-				);
+					//new ActiveBalance(driveTrain, log)
+					new ActiveBalanceTwo(driveTrain, log)
+				)
+			);
+				// ).withTimeout(14.5),
+				// new FileLogEnableFastLogging(false, driveTrain, log),
+				// new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
+				// );
    	   	}
 
 		if (autoPlan == BALANCE_4TOWALL) {
@@ -462,9 +465,11 @@ public class AutoSelection {
 					new WaitCommand(waitTime),
 					new DriveResetPose(posScoreInitial, true, driveTrain, log),
 					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity, 1.9, driveTrain, log),	// Changed from 2.1m to 1.9m after Qual39 (see CONE_BALANCE_4TOWALL)
-					new ActiveBalance(driveTrain, log)
-				).withTimeout(14.5),
-				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
+					new ActiveBalanceTwo(driveTrain, log)
+					//new ActiveBalance(driveTrain, log)
+				)
+				// ).withTimeout(14.5),
+				// new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
 	   		);
    	   	}
 
