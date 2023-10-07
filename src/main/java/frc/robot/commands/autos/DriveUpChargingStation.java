@@ -81,6 +81,9 @@ public class DriveUpChargingStation extends CommandBase {
     // and we have driven far enough 
     // then stop
 
-    return ascended && Math.abs(pitch) < 16 && Math.abs(drivetrain.getPose().getX() - initialX) > minDistance;    
+    // if we have driven too far, then stop
+
+    return (ascended && Math.abs(pitch) < 16 && Math.abs(drivetrain.getPose().getX() - initialX) > minDistance) || 
+            Math.abs(drivetrain.getPose().getX() - initialX) > minDistance + 2;    
   }
 }
