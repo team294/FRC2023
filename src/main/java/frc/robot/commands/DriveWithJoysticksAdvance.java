@@ -94,11 +94,13 @@ public class DriveWithJoysticksAdvance extends CommandBase {
         // goalAngle = MathUtil.angleModulus(goalAngle);
         // turnRateController.reset(goalAngle);      // sets the current setpoint for the controller
         firstInDeadband = false;
+        driveTrain.enableFastLogging(true);
         startTime = System.currentTimeMillis();
       }
       if(System.currentTimeMillis() - startTime > 100){
         if(firstCorrecting){
           firstCorrecting = false;
+          driveTrain.enableFastLogging(false);
           goalAngle = driveTrain.getPose().getRotation().getRadians();
           goalAngle = MathUtil.angleModulus(goalAngle);
           turnRateController.reset(goalAngle);      // sets the current setpoint for the controller

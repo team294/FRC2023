@@ -169,7 +169,7 @@ public final class Constants {
 
         // Driving constants to cap acceleration
         public static final double maxAccelerationRate = 10.0; //5.0          // m/s^2
-        public static final double maxAccelerationRateY = 7.5; //5.0          // m/s^2
+        public static final double maxAccelerationRateY = 5.0; //5.0          // m/s^2
         public static final double maxAccelerationRateAtScoreMid = 7; //3.5          // m/s^2
         public static final double maxAccelerationRateBetweenScoreMidAndHigh = 6.0; //3.0          // m/s^2
         public static final double maxAccelerationRateWithElevatorUp = 1.5; //2.0          // m/s^2
