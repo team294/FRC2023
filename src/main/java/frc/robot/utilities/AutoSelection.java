@@ -324,10 +324,11 @@ public class AutoSelection {
 			} else {
 				posScoreInitial = field.getFinalColumn(9);			// 1.77165, 0.512826, 180
 				// Travel  3.5 m in +X from starting position
-				posCube = MathBCR.translate(posScoreInitial, 5.39, -.407174);		
+				posCube = MathBCR.translate(posScoreInitial, 5.39, -.207174);		// G5:  was 5.39, -.407174.  Change to 5.39, -.207174 to prevent cube from hitting elevator IGUS
 				// Travel in Y to cross the field to the in front of charging station
 				posMidPoint = MathBCR.translate(posScoreInitial, 1.5, -.25);			// 1.5, .25  : Add a little room to clear between charging station and loading area
-				posScore = field.getFinalColumn(8);
+				// posScore = field.getFinalColumn(8);
+				posScore = MathBCR.translate(field.getFinalColumn(8), 0, 0.2);		// G5:  Move scoring location by 0.2m to better center cube
 				posEnd = new Pose2d( posCube.getTranslation(), posCube.getRotation().plus(Rotation2d.fromDegrees(-90)) );
 			}
 				
