@@ -317,7 +317,8 @@ public class AutoSelection {
 				// Travel in Y to cross the field to in front of charging station
 				// posCross = new Pose2d(6.3, 2.2, Rotation2d.fromDegrees(180.0));
 				posMidPoint = MathBCR.translate(posScoreInitial, 1.5, 0.25);			// 1.5, .25  : Add a little room to clear between charging station and loading area
-				posScore = field.getFinalColumn(2);
+				// posScore = field.getFinalColumn(2);
+				posScore = MathBCR.translate(field.getFinalColumn(2), 0, -0.1);		// G6:  Move scoring location by 0.1m to better center cube
 				posEnd = new Pose2d( posCube.getTranslation(), posCube.getRotation().plus(Rotation2d.fromDegrees(90)) );
 				// Spin 180
 				// posFinal = field.getStationCenter(2);
