@@ -115,10 +115,14 @@ public class ElevatorProfileGenerator {
 			double stoppingDistance = 0.5 * currentMPVelocity * currentMPVelocity / stoppingAcceleration;
 
 			// calculating target acceleration
-			if ( (currentMPVelocity > 0) &&
+			if ( (currentMPVelocity >= 0) &&
 			       (approachingTarget || (targetMPDistance - currentMPDistance) < stoppingDistance) ) {
 				approachingTarget = true;
 				currentMPAcceleration = -0.5 * currentMPVelocity * currentMPVelocity / (targetMPDistance - currentMPDistance);
+				if (currentMPAcceleration < -currentMPVelocity/dt) {
+					// Don't set acceleration too negative; otherwise, velocity will switch direction later in these calculations.
+					currentMPAcceleration = -currentMPVelocity/dt;
+				}
 			}
 			else if (currentMPVelocity < maxVelocity) {
 				currentMPAcceleration = maxAcceleration;

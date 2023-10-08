@@ -218,10 +218,12 @@ public class AutoSelection {
 					// 	TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),0
 					new FileLogEnableFastLogging(true, driveTrain, log),
 					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
-					new ActiveBalance(driveTrain, log)
-				).withTimeout(14.5),
-				new FileLogEnableFastLogging(false, driveTrain, log),
-				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
+					// new ActiveBalance(driveTrain, log)
+					new ActiveBalanceTwo(driveTrain, log)
+				)
+				// .withTimeout(14.5),
+				// new FileLogEnableFastLogging(false, driveTrain, log),
+				// new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
 			);
 		}
 
@@ -262,10 +264,12 @@ public class AutoSelection {
 						0.4, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
 					new FileLogEnableFastLogging(true, driveTrain, log),
 					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
-					new ActiveBalance(driveTrain, log)
-				).withTimeout(14.5),
-				new FileLogEnableFastLogging(false, driveTrain, log),
-				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
+					// new ActiveBalance(driveTrain, log)
+					new ActiveBalanceTwo(driveTrain, log)
+				)
+				// .withTimeout(14.5),
+				// new FileLogEnableFastLogging(false, driveTrain, log),
+				// new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
 			);
 		}
 
@@ -384,10 +388,12 @@ public class AutoSelection {
 					new AutoPickUpCube(posLeave, posCross, false, intake, elevator, wrist, manipulator, driveTrain, led, log),
 					new FileLogEnableFastLogging(true, driveTrain, log),
 					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
-					new ActiveBalance(driveTrain, log)
-				).withTimeout(14.5),
-				new FileLogEnableFastLogging(false, driveTrain, log),
-				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
+					// new ActiveBalance(driveTrain, log)
+					new ActiveBalanceTwo(driveTrain, log)
+				)
+				// .withTimeout(14.5),
+				// new FileLogEnableFastLogging(false, driveTrain, log),
+				// new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
 			);
 		}
 
@@ -420,10 +426,12 @@ public class AutoSelection {
 					new AutoPickUpCube(posLeave, posCross, false, intake, elevator, wrist, manipulator, driveTrain, led, log),
 					new FileLogEnableFastLogging(true, driveTrain, log),
 					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
-					new ActiveBalance(driveTrain, log)
-				).withTimeout(14.5),
-				new FileLogEnableFastLogging(false, driveTrain, log),
-				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
+					// new ActiveBalance(driveTrain, log)
+					new ActiveBalanceTwo(driveTrain, log)
+				)
+				// .withTimeout(14.5),
+				// new FileLogEnableFastLogging(false, driveTrain, log),
+				// new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
 			);
 		}
 
