@@ -78,13 +78,15 @@ public class DriveTrain extends SubsystemBase implements Loggable {
 
 
   private final SlewRateLimiter filterY = new SlewRateLimiter(maxAccelerationRate);
+  private final SlewRateLimiter filterYTier2 = new SlewRateLimiter(maxAccelerationRateY);
 
   //  tier 4 = slowest acceleration, tier 1 = fastest acceleration
   private final SlewRateLimiter filterXTier1 = new SlewRateLimiter(maxAccelerationRate);   // limiter in X direction when elevator is out
   private final SlewRateLimiter filterXTier2 = new SlewRateLimiter(maxAccelerationRateAtScoreMid);   // limiter in X direction when elevator is out
   private final SlewRateLimiter filterXTier3 = new SlewRateLimiter(maxAccelerationRateBetweenScoreMidAndHigh);   // limiter in X direction when elevator is out
   private final SlewRateLimiter filterXTier4 = new SlewRateLimiter(maxAccelerationRateWithElevatorUp);   // limiter in X direction when elevator is out
-  private ElevatorSlewRegion elevetorPriorIteration = ElevatorSlewRegion.min;
+  private ElevatorSlewRegion elevatorPriorIteration = ElevatorSlewRegion.min;
+  private ElevatorSlewRegion elevatorPriorIterationY = ElevatorSlewRegion.min;
 
   /**
    * Constructs the DriveTrain subsystem
@@ -303,72 +305,64 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     // y slew rate limit chassisspeed
     double ySlewed = filterY.calculate(chassisSpeeds.vyMetersPerSecond);
 
+    if (elevator.getElevatorPos() <= ElevatorSlewRegion.min.position) {
+      // Elevator is down.  We can X-travel at full speed
+      if (!(elevatorPriorIterationY == ElevatorSlewRegion.min)) {
+        // Elevator was up but is now down.  Reset the fast slew rate limiter
+        filterY.reset(getChassisSpeeds().vyMetersPerSecond);
+      }
+      elevatorPriorIterationY = ElevatorSlewRegion.min;
+      
+      ySlewed = filterY.calculate(chassisSpeeds.vyMetersPerSecond);
+    } else {
+      // Use low region for anything that's not min
+      if (!(elevatorPriorIterationY == ElevatorSlewRegion.low)) {
+        // Elevator was up but is now down.  Reset the fast slew rate limiter
+        filterYTier2.reset(MathUtil.clamp(getChassisSpeeds().vyMetersPerSecond, -ElevatorSlewRegion.medium.velocity, ElevatorSlewRegion.medium.velocity));
+      }
+      elevatorPriorIterationY = ElevatorSlewRegion.low;
+      
+      ySlewed = filterYTier2.calculate(MathUtil.clamp(chassisSpeeds.vyMetersPerSecond, -ElevatorSlewRegion.medium.velocity, ElevatorSlewRegion.medium.velocity));
+    }
+
     double xSlewed, omegaLimited;
-    
-    // double clampedRate = MathUtil.clamp(
-    //   rate, 
-    //   maxAccelerationRateWithElevatorUp, 
-    //   maxAccelerationRate); 
-    // filterX.setRateLimit(clampedRate);
-
-
-    // if (elevator.getElevatorRegion()==ElevatorRegion.bottom) {
-    //   // Elevator is down.  We can X-travel at full speed
-    //   if (elevatorUpPriorIteration) {
-    //     // Elevator was up but is now down.  Reset the fast slew rate limiter
-    //     filterX.reset(getChassisSpeeds().vxMetersPerSecond);
-    //   }
-    //   elevatorUpPriorIteration = false;
-    //   // x slew rate limit chassisspeed
-    //   xSlewed = filterX.calculate(chassisSpeeds.vxMetersPerSecond);
-    //   omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
-    // } else {
-    //   // Elevator is up.  X-travel slowly!
-    //   if (!elevatorUpPriorIteration) {
-    //     // Elevator was down but is now up.  Reset the slow slew rate limiter
-    //     filterXSlow.reset(MathUtil.clamp(getChassisSpeeds().vxMetersPerSecond, -maxXSpeedWithElevatorUp, maxXSpeedWithElevatorUp));     // Rev B8:  Added clamp on current velocity (may cause sudden deceleration) 
-    //   }
-    //   elevatorUpPriorIteration = true;
-    //   // x slew rate limit chassisspeed
-    //   xSlewed = filterXSlow.calculate(MathUtil.clamp(chassisSpeeds.vxMetersPerSecond, -maxXSpeedWithElevatorUp, maxXSpeedWithElevatorUp));
-    //   omegaLimited = MathUtil.clamp(chassisSpeeds.omegaRadiansPerSecond, -maxRotationRateWithElevatorUp, maxRotationRateWithElevatorUp);
-    // }
+  
 
     if (elevator.getElevatorPos() <= ElevatorSlewRegion.min.position) {
       // Elevator is down.  We can X-travel at full speed
-      if (!(elevetorPriorIteration == ElevatorSlewRegion.min)) {
+      if (!(elevatorPriorIteration == ElevatorSlewRegion.min)) {
         // Elevator was up but is now down.  Reset the fast slew rate limiter
         filterXTier1.reset(getChassisSpeeds().vxMetersPerSecond);
       }
-      elevetorPriorIteration = ElevatorSlewRegion.min;
+      elevatorPriorIteration = ElevatorSlewRegion.min;
       
       omegaLimited = chassisSpeeds.omegaRadiansPerSecond;
       xSlewed = filterXTier1.calculate(chassisSpeeds.vxMetersPerSecond);
     } else if (elevator.getElevatorPos() <= ElevatorSlewRegion.low.position) {
-      if (!(elevetorPriorIteration == ElevatorSlewRegion.low)) {
+      if (!(elevatorPriorIteration == ElevatorSlewRegion.low)) {
         // Elevator was up but is now down.  Reset the fast slew rate limiter
         filterXTier2.reset(MathUtil.clamp(getChassisSpeeds().vxMetersPerSecond, -ElevatorSlewRegion.low.velocity, ElevatorSlewRegion.low.velocity));
       }
-      elevetorPriorIteration = ElevatorSlewRegion.low;
+      elevatorPriorIteration = ElevatorSlewRegion.low;
       
       omegaLimited = MathUtil.clamp(chassisSpeeds.omegaRadiansPerSecond, -ElevatorSlewRegion.low.rotationRate, ElevatorSlewRegion.low.rotationRate);
       xSlewed = filterXTier2.calculate(MathUtil.clamp(chassisSpeeds.vxMetersPerSecond, -ElevatorSlewRegion.low.velocity, ElevatorSlewRegion.low.velocity));
     } else if (elevator.getElevatorPos() <= ElevatorSlewRegion.medium.position) {
-      if (!(elevetorPriorIteration == ElevatorSlewRegion.medium)) {
+      if (!(elevatorPriorIteration == ElevatorSlewRegion.medium)) {
         // Elevator was up but is now down.  Reset the fast slew rate limiter
         filterXTier3.reset(MathUtil.clamp(getChassisSpeeds().vxMetersPerSecond, -ElevatorSlewRegion.medium.velocity, ElevatorSlewRegion.medium.velocity));
       }
-      elevetorPriorIteration = ElevatorSlewRegion.medium;
+      elevatorPriorIteration = ElevatorSlewRegion.medium;
       
       omegaLimited = MathUtil.clamp(chassisSpeeds.omegaRadiansPerSecond, -ElevatorSlewRegion.medium.rotationRate, ElevatorSlewRegion.medium.rotationRate);
       xSlewed = filterXTier3.calculate(MathUtil.clamp(chassisSpeeds.vxMetersPerSecond, -ElevatorSlewRegion.medium.velocity, ElevatorSlewRegion.medium.velocity));
     } else {
       // Elevator is up.  X-travel slowly!
-      if (!(elevetorPriorIteration == ElevatorSlewRegion.max)) {
+      if (!(elevatorPriorIteration == ElevatorSlewRegion.max)) {
         // Elevator was up but is now down.  Reset the fast slew rate limiter
         filterXTier4.reset(MathUtil.clamp(getChassisSpeeds().vxMetersPerSecond, -ElevatorSlewRegion.max.velocity, ElevatorSlewRegion.max.velocity));
       }
-      elevetorPriorIteration = ElevatorSlewRegion.max;
+      elevatorPriorIteration = ElevatorSlewRegion.max;
       
       omegaLimited = MathUtil.clamp(chassisSpeeds.omegaRadiansPerSecond, -ElevatorSlewRegion.max.rotationRate, ElevatorSlewRegion.max.rotationRate);
       xSlewed = filterXTier4.calculate(MathUtil.clamp(chassisSpeeds.vxMetersPerSecond, -ElevatorSlewRegion.max.velocity, ElevatorSlewRegion.max.velocity));

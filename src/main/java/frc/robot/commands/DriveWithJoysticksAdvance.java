@@ -28,6 +28,8 @@ public class DriveWithJoysticksAdvance extends CommandBase {
   private int logRotationKey;
   private double fwdVelocity, leftVelocity, turnRate, nextTurnRate;
   private double goalAngle;       // in radians
+  private double startTime;
+  private boolean firstCorrecting;
 
 
     /**
@@ -58,7 +60,7 @@ public class DriveWithJoysticksAdvance extends CommandBase {
     goalAngle = driveTrain.getPose().getRotation().getRadians();
 
     firstInDeadband = true;
-
+    firstCorrecting = true;
 
     turnRateController.reset(goalAngle);      // sets the current setpoint for the controller
     turnRateController.setGoal(goalAngle);    // set the goal for the controller
@@ -88,10 +90,21 @@ public class DriveWithJoysticksAdvance extends CommandBase {
     // Uses profiled PID controller if the joystick is in the deadband
     if(turnRate == 0){
       if(firstInDeadband){
-        goalAngle = driveTrain.getPose().getRotation().getRadians();
-        goalAngle = MathUtil.angleModulus(goalAngle);
-        turnRateController.reset(goalAngle);      // sets the current setpoint for the controller
+        // goalAngle = driveTrain.getPose().getRotation().getRadians();
+        // goalAngle = MathUtil.angleModulus(goalAngle);
+        // turnRateController.reset(goalAngle);      // sets the current setpoint for the controller
+        firstInDeadband = false;
+        driveTrain.enableFastLogging(true);
+        startTime = System.currentTimeMillis();
       }
+      if(System.currentTimeMillis() - startTime > 100){
+        if(firstCorrecting){
+          firstCorrecting = false;
+          driveTrain.enableFastLogging(false);
+          goalAngle = driveTrain.getPose().getRotation().getRadians();
+          goalAngle = MathUtil.angleModulus(goalAngle);
+          turnRateController.reset(goalAngle);      // sets the current setpoint for the controller
+        }
 
       // When the right button on the right joystick is pressed then the robot turns pi radians(180 degrees)
       // This button works but it is currently used for other commands
@@ -105,15 +118,19 @@ public class DriveWithJoysticksAdvance extends CommandBase {
       // goalAngle = rightJoystick.getRawButtonPressed(1) ? 0 : goalAngle;
 
       // Calculates using the profiledPIDController what the next speed should be
-      nextTurnRate = turnRateController.calculate(driveTrain.getPose().getRotation().getRadians(), goalAngle);
+        nextTurnRate = turnRateController.calculate(driveTrain.getPose().getRotation().getRadians(), goalAngle);
 
-      if(log.isMyLogRotation(logRotationKey)) {
-        log.writeLog(false, "DriveWithJoystickAdvance", "Joystick", "Fwd", fwdVelocity, "Left", leftVelocity, "Turn", nextTurnRate, "Goal Angle", goalAngle);
+        if(log.isMyLogRotation(logRotationKey)) {
+          log.writeLog(false, "DriveWithJoystickAdvance", "Joystick", "Fwd", fwdVelocity, "Left", leftVelocity, "Turn", nextTurnRate, "Goal Angle", goalAngle);
+        }
+      
+        driveTrain.drive(fwdVelocity, leftVelocity, nextTurnRate, true, false);
+
+        //firstInDeadband = false;
+      }else{
+        driveTrain.drive(fwdVelocity, leftVelocity, turnRate, true, false);
+        
       }
-    
-      driveTrain.drive(fwdVelocity, leftVelocity, nextTurnRate, true, false);
-
-      firstInDeadband = false;
     }
 
     // Just uses the regular turnRate if the joystick is not in the deadband
@@ -125,6 +142,7 @@ public class DriveWithJoysticksAdvance extends CommandBase {
       driveTrain.drive(fwdVelocity, leftVelocity, turnRate, true, false);
       
       firstInDeadband = true;
+      firstCorrecting = true;
     }
     
   }
