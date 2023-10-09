@@ -5,12 +5,10 @@
 package frc.robot.commands.sequences;
 
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.ManipulatorConstants;
-import frc.robot.commands.FileLogWrite;
 import frc.robot.commands.ManipulatorGrab;
 import frc.robot.commands.ManipulatorGrab.BehaviorType;
 import frc.robot.subsystems.Manipulator;
