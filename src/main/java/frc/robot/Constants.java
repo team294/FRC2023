@@ -192,11 +192,14 @@ public final class Constants {
         public static final double maxPositionErrorMeters = 0.04; // 1.6 inches
 
         // Max error for interim positions (not final)
-        public static final double interimThetaErrorDegrees = 2.0;        
+        public static final double interimThetaErrorDegrees = 2.5;        
         public static final double interimPositionErrorMeters = 0.20; // 8 inches
 
         // Feedback terms for holonomic drive controllers
 
+
+        // HEY, this is a new comment.
+        
         // X-velocity controller:  kp.  Units = (meters/sec of velocity) / (meters of position error)
         public static final double kPXController = 1;
 
