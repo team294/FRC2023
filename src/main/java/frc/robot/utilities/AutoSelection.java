@@ -337,14 +337,14 @@ public class AutoSelection {
 				new WaitCommand(waitTime),
 				new DriveResetPose(posScoreInitial, true, driveTrain, log),
 				new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
-				new AutoPickUpCube(posCube, posMidPoint, true, intake, elevator, wrist, manipulator, driveTrain, led, log),
+				new AutoPickupCubeAndSetScore(posCube, posMidPoint, posScore, true, intake, elevator, wrist, manipulator, driveTrain, led, log),
 
 				new ConditionalCommand(
 					// If we have a cube in the manipulator, then score and then drive out to get the next cube
 					new SequentialCommandGroup(
-						new AutoScoreCube(posScore, driveTrain, elevator, wrist, manipulator, intake, led, log),
-
 						// Go towards getting next piece
+						new EjectPiece(manipulator, log), 		// Runs for 1 second
+						new ElevatorWristStow(elevator, wrist, log),
 						new DriveToPose(posMidPoint, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
 							TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
 						new DriveToPose(posCube, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
@@ -353,7 +353,11 @@ public class AutoSelection {
 					),
 
 					// If we don't have a cube in the manipulator, then just try score and stay at the scoring area
-					new AutoScoreCube(posScore, driveTrain, elevator, wrist, manipulator, intake, led, log), 
+					new SequentialCommandGroup(
+						new EjectPiece(manipulator, log), 		// Runs for 1 second
+						new ElevatorWristStow(elevator, wrist, log),
+						new WaitCommand(0.01)
+					),
 
 					() -> manipulator.isCubePresent()
 				)
