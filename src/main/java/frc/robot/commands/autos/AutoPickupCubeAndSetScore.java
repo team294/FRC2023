@@ -42,7 +42,7 @@ public class AutoPickupCubeAndSetScore extends SequentialCommandGroup {
         Intake intake, Elevator elevator, Wrist wrist, Manipulator manipulator, DriveTrain driveTrain, LED led, FileLog log) {
 
         addCommands(
-            new FileLogWrite(true, false, "AutoPickUpAndScoreCube", "Start", log),
+            new FileLogWrite(true, false, "AutoPickupCubeAndSetScore", "Start", log),
 
             new ParallelDeadlineGroup(
 
@@ -88,7 +88,7 @@ public class AutoPickupCubeAndSetScore extends SequentialCommandGroup {
                 () -> manipulator.isCubePresent()
             ),
 
-            new FileLogWrite(true, false, "AutoPickUpAndScoreCube", "Finish", log)
+            new FileLogWrite(true, false, "AutoPickupCubeAndSetScore", "Finish", log)
         );
     }
 }
