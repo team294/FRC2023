@@ -39,6 +39,8 @@ public class AutoSelection {
 	public static final int CONE_LEAVE_NEAR_LOAD_PICK_UP_CUBE = 9;
 	public static final int CONE_LEAVE_NEAR_LOAD_PICK_UP_BALANCE = 10;
 	public static final int CONE_LEAVE_NEAR_WALL_PICK_UP_BALANCE = 11;
+	public static final int CONE_MOBILITY_BALANCE_4TOWALL = 12;
+	public static final int CONE_PICK_UP_CUBE_BALANCE_4TOWALL = 13;
 	// 	public static final int LEAVE_COMMUNITY = 2;
 
 	private final AllianceSelection allianceSelection;
@@ -68,6 +70,9 @@ public class AutoSelection {
 		autoChooser.addOption("Cone Leave Near Load pick up cube", CONE_LEAVE_NEAR_LOAD_PICK_UP_CUBE);
 		autoChooser.addOption("Cone Leave Near Wall Pick Up Balance", CONE_LEAVE_NEAR_WALL_PICK_UP_BALANCE);
 		autoChooser.addOption("Cone Leave Near Load Pick Up Balance", CONE_LEAVE_NEAR_LOAD_PICK_UP_BALANCE);
+		autoChooser.addOption("Cone Mobility Balance 4ToWall", CONE_MOBILITY_BALANCE_4TOWALL);
+		autoChooser.addOption("Cone Pick Up Cube Balance 4ToWall", CONE_PICK_UP_CUBE_BALANCE_4TOWALL);
+
 		
 		// autoChooser.addOption("Straight", STRAIGHT);
 		// autoChooser.addOption("Leave Community", LEAVE_COMMUNITY);
@@ -492,6 +497,66 @@ public class AutoSelection {
 				// new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)		// Lock the wheels at 45deg
 	   		);
    	   	}
+
+		if (autoPlan == CONE_MOBILITY_BALANCE_4TOWALL) {
+		// Starting position = facing drivers, 4th scoring position from wall
+			log.writeLogEcho(true, "AutoSelect", "run Cone Balance 4ToWall");
+			// Pose2d posCommunityInitial = field.getStationInitial(2);
+			// Pose2d posCommunityFinal = field.getStationCenter(2);
+			// Pose2d posCommunityFinal = translate(field.getStationCenter(2), 1.5, 0.0);		// overdrive due to wheel slip when climbing on charging station
+			Pose2d posScoreInitial;
+			if (allianceSelection.getAlliance() == Alliance.Red) {
+				posScoreInitial = field.getFinalColumn(6);
+			} else {
+				posScoreInitial = field.getFinalColumn(4);
+			}
+
+				autonomousCommand = new SequentialCommandGroup(
+				new SequentialCommandGroup(
+					new WaitCommand(waitTime),
+					new DriveResetPose(posScoreInitial, true, driveTrain, log),
+					new AutoScoreConeHigh(true, elevator, wrist, manipulator, intake, led, log),
+					new FileLogEnableFastLogging(true, driveTrain, log),
+					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity, 1.9, driveTrain, log),		// Was 2.1m but overshot slightly in Qual39, trying 1.9m
+					new DriveDownChargingStation(TrajectoryConstants.ChargeStationVelocity, 0.5, driveTrain, log),
+					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
+					new ActiveBalanceTwo(driveTrain, log)
+				)
+			);
+		}
+
+		if (autoPlan == CONE_PICK_UP_CUBE_BALANCE_4TOWALL) {
+			// Starting position = facing drivers, 4th scoring position from wall
+			log.writeLogEcho(true, "AutoSelect", "run Cone Balance 4ToWall");
+			// Pose2d posCommunityInitial = field.getStationInitial(2);
+			// Pose2d posCommunityFinal = field.getStationCenter(2);
+			// Pose2d posCommunityFinal = translate(field.getStationCenter(2), 1.5, 0.0);		// overdrive due to wheel slip when climbing on charging station
+			Pose2d posScoreInitial, posPickUp, posNext;
+			if (allianceSelection.getAlliance() == Alliance.Red) {
+				posScoreInitial = field.getFinalColumn(6);
+				posPickUp = MathBCR.translate(posScoreInitial, 5.39 + 0.2, 0);	
+				posNext = MathBCR.translate(posPickUp, -.25, 0);
+			} else {
+				posScoreInitial = field.getFinalColumn(4);
+				posPickUp = MathBCR.translate(posScoreInitial, 5.39+0.2, 0);	
+				posNext = MathBCR.translate(posPickUp, -.25, 0);
+				
+			}
+
+				autonomousCommand = new SequentialCommandGroup(
+				new SequentialCommandGroup(
+					new WaitCommand(waitTime),
+					new DriveResetPose(posScoreInitial, true, driveTrain, log),
+					new AutoScoreConeHigh(true, elevator, wrist, manipulator, intake, led, log),
+					new FileLogEnableFastLogging(true, driveTrain, log),
+					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity*1.5, 1.9, driveTrain, log),		// Was 2.1m but overshot slightly in Qual39, trying 1.9m
+					new DriveDownChargingStation(TrajectoryConstants.ChargeStationVelocity*1.2, .5, driveTrain, log),
+					new AutoPickUpCube(posPickUp, posNext, false, intake, elevator, wrist, manipulator, driveTrain, led, log),
+					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.25, driveTrain, log),
+					new ActiveBalanceTwo(driveTrain, log)
+				)
+			);
+		}
 
 		// 	if (autoPlan == STRAIGHT) {
 	// 		log.writeLogEcho(true, "AutoSelect", "run Straight");
