@@ -25,4 +25,19 @@ public class EjectPiece extends SequentialCommandGroup {
       new ManipulatorStopMotor(manipulator, log)
     );
   }
+  
+  /**
+   * Runs the manipulator motor to eject a piece at percent speed for delay seconds then stops the motor
+   * @param percent percent to run motor at (positive value ejects piece)
+   * @param delay delay (in seconds)
+   * @param manipulator
+   * @param log
+   */
+  public EjectPiece(double percent, double delay, Manipulator manipulator, FileLog log) {
+    addCommands(
+      new ManipulatorSetPercent(-percent, manipulator, log),
+      new WaitCommand(delay),
+      new ManipulatorStopMotor(manipulator, log)
+    );
+  }
 }
