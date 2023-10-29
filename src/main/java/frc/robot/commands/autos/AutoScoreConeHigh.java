@@ -29,7 +29,7 @@ public class AutoScoreConeHigh extends SequentialCommandGroup {
       new ManipulatorSetPercent(ManipulatorConstants.pieceGrabPct, manipulator, log),				// Low power to hold piece
       new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log),
       // new WaitCommand(0.25),
-      new EjectPiece(0.8, 0.4, manipulator, log), 		// Runs for 1 second
+      new EjectPiece(0.8, 0.4, manipulator, log), 		// Runs for 0.4 second
       new ConditionalCommand(
         new ElevatorWristStow(elevator, wrist, log),
         new WaitCommand(0.001), 
