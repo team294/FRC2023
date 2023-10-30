@@ -53,6 +53,6 @@ public class DriveDownChargingStation extends CommandBase {
       flatPosition = driveTrain.getPose().getX();
       flat = true;
     }
-    return flat && driveTrain.getPose().getX() - flatPosition > minDistance;
+    return flat && Math.abs(driveTrain.getPose().getX() - flatPosition) > minDistance;
   }
 }
