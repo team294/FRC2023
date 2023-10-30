@@ -589,16 +589,16 @@ public class AutoSelection {
 					new AutoScoreConeHigh(true, elevator, wrist, manipulator, intake, led, log),
 					new FileLogEnableFastLogging(true, driveTrain, log),
 					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity * 1.5, 1.9, driveTrain, log),		// Was 2.1m but overshot slightly in Qual39, trying 1.9m
-					new DriveDownChargingStation(TrajectoryConstants.ChargeStationVelocity * 1.1, 0, driveTrain, log),
+					new DriveDownChargingStation(TrajectoryConstants.ChargeStationVelocity * 1.3, 0, driveTrain, log),
 					new AutoPickUpCube(posPickUp, posNext, false, intake, elevator, wrist, manipulator, driveTrain, led, log),
 					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity * 1.5, 2.85, driveTrain, log),
-					new DriveDownChargingStation(-TrajectoryConstants.ChargeStationVelocity * 1.1, 0, driveTrain, log),
+					new DriveDownChargingStation(-TrajectoryConstants.ChargeStationVelocity * 1, 0, driveTrain, log),
 					new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log),
-					new EjectPiece(1, 0.3, manipulator, log),
+					new EjectPiece(1, 0.2, manipulator, log),
 					new ParallelCommandGroup(
 						new ElevatorWristStow(elevator, wrist, log),
 						//new AutoScoreCube(posScoreCube, driveTrain, elevator, wrist, manipulator, intake, led, log), 
-						new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity*1.2, 1.25, driveTrain, log)
+						new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity, 1, driveTrain, log)
 					),
 					new ActiveBalanceTwo(driveTrain, log)
 				)
