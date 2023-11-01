@@ -48,6 +48,7 @@ public class AutoScoreCube extends SequentialCommandGroup {
       // If we have a cube in the manipulator, then score high
       new ConditionalCommand(
         new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log),
+        // new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log),
         new WaitCommand(0.01), 
         () -> manipulator.isCubePresent()
       ),
