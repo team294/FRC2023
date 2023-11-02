@@ -27,9 +27,9 @@ public class AutoScoreConeHigh extends SequentialCommandGroup {
       new FileLogWrite(true, false, "AutoScoreConeHigh", "Start", log),
       new ManipulatorSetPistonPosition(true, led, manipulator, log),		// set to cone position
       new ManipulatorSetPercent(ManipulatorConstants.pieceGrabPct, manipulator, log),				// Low power to hold piece
-      new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log),
-      new WaitCommand(0.25),
-      new EjectPiece(manipulator, log), 		// Runs for 1 second
+      new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreHighCone.value-2, WristAngle.upperLimit.value, elevator, wrist, intake, log),
+      // new WaitCommand(0.25),
+      new EjectPiece(1.0, 0.5, manipulator, log), 		// Runs for 0.5 second
       new ConditionalCommand(
         new ElevatorWristStow(elevator, wrist, log),
         new WaitCommand(0.001), 
