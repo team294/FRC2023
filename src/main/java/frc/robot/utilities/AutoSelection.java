@@ -638,7 +638,7 @@ public class AutoSelection {
 					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity*1.5, 1.9, driveTrain, log),		// Was 2.1m but overshot slightly in Qual39, trying 1.9m
 					new DriveDownChargingStation(TrajectoryConstants.ChargeStationVelocity, 0, driveTrain, log),
 					new AutoPickUpCube(posPickUp, posNext, false, intake, elevator, wrist, manipulator, driveTrain, led, log),
-					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity * 1.5, 1.35, driveTrain, log),
+					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity * 2, 1.35, driveTrain, log),
 					new ParallelCommandGroup(
 						new SequentialCommandGroup(
 							// new WaitCommand(0.5),
