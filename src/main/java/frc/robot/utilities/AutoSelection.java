@@ -611,7 +611,7 @@ public class AutoSelection {
 
 		if (autoPlan == CONE_PICK_UP_CUBE_BALANCE_BARF_4TOWALL) {
 			// Starting position = facing drivers, 4th scoring position from wall
-			log.writeLogEcho(true, "AutoSelect", "run Cone Balance 4ToWall");
+			log.writeLogEcho(true, "AutoSelect", "run Cone Pick up Cube Balance Barf 4ToWall");
 			// Pose2d posCommunityInitial = field.getStationInitial(2);
 			// Pose2d posCommunityFinal = field.getStationCenter(2);
 			// Pose2d posCommunityFinal = translate(field.getStationCenter(2), 1.5, 0.0);		// overdrive due to wheel slip when climbing on charging station
@@ -638,7 +638,7 @@ public class AutoSelection {
 					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity*1.5, 1.9, driveTrain, log),		// Was 2.1m but overshot slightly in Qual39, trying 1.9m
 					new DriveDownChargingStation(TrajectoryConstants.ChargeStationVelocity, 0, driveTrain, log),
 					new AutoPickUpCube(posPickUp, posNext, false, intake, elevator, wrist, manipulator, driveTrain, led, log),
-					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity * 1.4, 1.35, driveTrain, log),
+					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity * 1.4, 1., driveTrain, log),
 					new ParallelCommandGroup(
 						new SequentialCommandGroup(
 							// new WaitCommand(0.5),

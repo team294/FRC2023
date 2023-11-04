@@ -95,6 +95,7 @@ public class AutoPickUpCube extends SequentialCommandGroup {
       // Stop and retract the intake and slow down manipulator, in case the manipulator never saw a cube
       new ManipulatorSetPercent(ManipulatorConstants.pieceHoldPct, manipulator, log),
       new IntakePistonSetPosition(false, intake, elevator, log),
+      
       new IntakeStop(intake, log)
     );
 
