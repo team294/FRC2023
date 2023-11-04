@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -52,7 +53,7 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryType;
  */
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
-  private final FileLog log = new FileLog("G7");
+  private final FileLog log = new FileLog("H1");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
   private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
   private final Field field = new Field(allianceSelection, log);
@@ -369,9 +370,13 @@ public class RobotContainer {
     left[1].onTrue(new EjectPiece(manipulator, log));
     // drive to closest goal
     left[2].whileTrue(
-      new SequentialCommandGroup(
-        new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), 0.15, 10, driveTrain, log),
-        new DriveToPose(() -> field.getFinalColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log)
+      new ConditionalCommand(
+        new SequentialCommandGroup(
+          new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), 0.15, 10, driveTrain, log),
+          new DriveToPose(() -> field.getFinalColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log)
+        ),
+        new DriveToLoad(driveTrain, wrist, elevator, manipulator, intake, field, log),
+        () -> driveTrain.getPose().getX() < 8
       )
     );
    

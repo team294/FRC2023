@@ -356,7 +356,7 @@ public final class Constants {
       }
 
       public static final class IntakeConstants {
-        public static final double motor1NominalIntakePct = 1.0;        // Was 0.4, occasionally popping out of top.
-        public static final double motor2NominalIntakePct = 1.0;       // Was 0.52, occasionally popping out of top.
+        public static final double motor1NominalIntakePct = 0.91;        // Was 0.4, occasionally popping out of top.
+        public static final double motor2NominalIntakePct = 0.91;       // Was 0.52, occasionally popping out of top.
       }
 }

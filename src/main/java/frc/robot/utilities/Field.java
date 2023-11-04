@@ -164,9 +164,9 @@ public class Field {
         new AprilTag(8, new Pose3d(new Pose2d(15.51356, 6.932168, facingDrivers)))
     };
 
-    private final Pose2d BlueLoadingStationInitial = new Pose2d(14.47878, 6.499796, facingAwayFromDrivers);//16.17878-1.7, 6.749796-0.25
+    private final Pose2d BlueLoadingStationInitial = new Pose2d(14.37878, 6.499796, facingAwayFromDrivers);//16.17878-1.7, 6.749796-0.25
     private final Pose2d BlueLoadingStationFinal = new Pose2d(14.57878, 6.499796, facingAwayFromDrivers);//16.17878-1.6, 6.749796-0.25
-    private final Pose2d RedLoadingStationInitial = new Pose2d(14.47878, 1.003998, facingAwayFromDrivers);//16.17878-1.7, 1.253998-0.25
+    private final Pose2d RedLoadingStationInitial = new Pose2d(14.37878, 1.003998, facingAwayFromDrivers);//16.17878-1.7, 1.253998-0.25
     private final Pose2d RedLoadingStationFinal = new Pose2d(14.57878, 1.003998, facingAwayFromDrivers);//16.17878-1.6, 1.253998-0.25
     
 
