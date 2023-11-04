@@ -22,7 +22,9 @@ public class ActiveBalanceTwo extends CommandBase {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    log.writeLog(false, "ActiveBalanceTwo", "init");
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
