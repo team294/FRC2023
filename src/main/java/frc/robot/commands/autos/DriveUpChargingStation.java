@@ -13,22 +13,27 @@ public class DriveUpChargingStation extends CommandBase {
   private double pitch;
   private double maxPitch;
   private double initialX;
-  private boolean ascended;
-  private double minDistance;
+  private double ascendedX;
+  private boolean ascended1; // the robot has reached the steep angle
+  private boolean ascended2; // state 2 of the ascending proccess, after the robot has reached the steep angle and goes back down to the normal angle
+  private double ascendedDistance;
+  private double maxDistance;
 
   /**
    * This command will drive robot up a ramp a given distance
    * or until the ramp tilts. It will print the maximum slope of the ramp.
    * @param speed the speed (m/s) at which the robot will drive, field relative
-   * @param minDistance minimum distance travelled to end command
+   * @param ascendedDistance minimum distance travelled after ascending
+   * @param maxDistance max distance travelled since beginning of command
    * @param drivetrain the DriveTrain subsystem on which this command will run
    * @param log FileLog used for logging
    */
-  public DriveUpChargingStation(double speed, double minDistance, DriveTrain drivetrain, FileLog log) {
+  public DriveUpChargingStation(double speed, double ascendedDistance, double maxDistance, DriveTrain drivetrain, FileLog log) {
     this.speed = speed;
     this.drivetrain = drivetrain;
     this.log = log;
-    this.minDistance = minDistance;
+    this.ascendedDistance = ascendedDistance;
+    this.maxDistance = maxDistance;
     addRequirements(drivetrain);
   }
 
@@ -46,7 +51,8 @@ public class DriveUpChargingStation extends CommandBase {
     initialX = drivetrain.getPose().getX();
     maxPitch = Math.abs(initPitch);
 
-    ascended = Math.abs(initPitch) > 10;
+    ascended1 = Math.abs(initPitch) > 10;
+    ascended2 = Math.abs(initPitch) > 10;
     
   }
 
@@ -56,7 +62,11 @@ public class DriveUpChargingStation extends CommandBase {
     drivetrain.drive(speed, 0.0, 0.0, true, false);
 
     // track if we have reached the high threshold to determine if we are close to the top
-    if (!ascended) ascended = Math.abs(pitch) > 20;
+    if (!ascended1) ascended1 = Math.abs(pitch) > 22;
+    if (ascended1 && !ascended2 && Math.abs(pitch) < 20) {
+      ascended2 = true;
+      ascendedX = drivetrain.getPose().getX();
+    }
   }
 
 
@@ -72,7 +82,7 @@ public class DriveUpChargingStation extends CommandBase {
     pitch = drivetrain.getGyroPitch();
 
     SmartDashboard.putNumber("Pitch", pitch);
-    log.writeLog(false, "DriveUpChargingStation", "isFinished", "Pitch", pitch, "Max Pitch", maxPitch, "Ascended", ascended, "Odometry X", drivetrain.getPose().getX(), "Speed", speed);
+    log.writeLog(false, "DriveUpChargingStation", "isFinished", "Pitch", pitch, "Max Pitch", maxPitch, "Ascended1", ascended1, "Ascended2", ascended2, "Ascended Distance", ascendedDistance, "Odometry X", drivetrain.getPose().getX(), "Speed", speed);
 
     if (Math.abs(pitch) > maxPitch) maxPitch = Math.abs(pitch);
 
@@ -83,7 +93,7 @@ public class DriveUpChargingStation extends CommandBase {
 
     // if we have driven too far, then stop
 
-    return (ascended && Math.abs(pitch) < 16 && Math.abs(drivetrain.getPose().getX() - initialX) > minDistance) || 
-            Math.abs(drivetrain.getPose().getX() - initialX) > minDistance + 2;    
+    return (ascended2 && Math.abs(drivetrain.getPose().getX() - ascendedX) > ascendedDistance) || 
+            Math.abs(drivetrain.getPose().getX() - initialX) > maxDistance;    
   }
 }
