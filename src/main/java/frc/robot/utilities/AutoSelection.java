@@ -226,7 +226,7 @@ public class AutoSelection {
 					// new DriveToPose(posCross, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
 					// 	TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, false, driveTrain, log),0
 					new FileLogEnableFastLogging(true, driveTrain, log),
-					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
+					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 0.6, 3.5, driveTrain, log),
 					// new ActiveBalance(driveTrain, log)
 					new ActiveBalanceTwo(driveTrain, log)
 				)
@@ -272,7 +272,7 @@ public class AutoSelection {
 					new DriveToPose(posCross, SwerveConstants.kFullSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
 						0.4, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
 					new FileLogEnableFastLogging(true, driveTrain, log),
-					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
+					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 0.6, 3.5, driveTrain, log),
 					// new ActiveBalance(driveTrain, log)
 					new ActiveBalanceTwo(driveTrain, log)
 				)
@@ -346,14 +346,14 @@ public class AutoSelection {
 				new WaitCommand(waitTime),
 				new DriveResetPose(posScoreInitial, true, driveTrain, log),
 				new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
-				new AutoPickUpCube(posCube, posMidPoint, true, intake, elevator, wrist, manipulator, driveTrain, led, log),
+				new AutoPickupCubeAndSetScore(posCube, posMidPoint, posScore, true, intake, elevator, wrist, manipulator, driveTrain, led, log),
 
 				new ConditionalCommand(
 					// If we have a cube in the manipulator, then score and then drive out to get the next cube
 					new SequentialCommandGroup(
-						new AutoScoreCube(posScore, driveTrain, elevator, wrist, manipulator, intake, led, log),
-
 						// Go towards getting next piece
+						new EjectPiece(manipulator, log), 		// Runs for 1 second
+						new ElevatorWristStow(elevator, wrist, log),
 						new DriveToPose(posMidPoint, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
 							TrajectoryConstants.interimPositionErrorMeters, TrajectoryConstants.interimThetaErrorDegrees, driveTrain, log),
 						new DriveToPose(posCube, SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kFullAccelerationMetersPerSecondSquare,
@@ -362,7 +362,11 @@ public class AutoSelection {
 					),
 
 					// If we don't have a cube in the manipulator, then just try score and stay at the scoring area
-					new AutoScoreCube(posScore, driveTrain, elevator, wrist, manipulator, intake, led, log), 
+					new SequentialCommandGroup(
+						new EjectPiece(manipulator, log), 		// Runs for 1 second
+						new ElevatorWristStow(elevator, wrist, log),
+						new WaitCommand(0.01)
+					),
 
 					() -> manipulator.isCubePresent()
 				)
@@ -398,7 +402,7 @@ public class AutoSelection {
 					new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
 					new AutoPickUpCube(posLeave, posCross, false, intake, elevator, wrist, manipulator, driveTrain, led, log),
 					new FileLogEnableFastLogging(true, driveTrain, log),
-					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
+					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 0.6, 3.5, driveTrain, log),
 					// new ActiveBalance(driveTrain, log)
 					new ActiveBalanceTwo(driveTrain, log)
 				)
@@ -436,7 +440,7 @@ public class AutoSelection {
 					new AutoScoreConeHigh(false, elevator, wrist, manipulator, intake, led, log),
 					new AutoPickUpCube(posLeave, posCross, false, intake, elevator, wrist, manipulator, driveTrain, led, log),
 					new FileLogEnableFastLogging(true, driveTrain, log),
-					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 1.5, driveTrain, log),
+					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 0.6, 3.5, driveTrain, log),
 					// new ActiveBalance(driveTrain, log)
 					new ActiveBalanceTwo(driveTrain, log)
 				)
@@ -465,7 +469,7 @@ public class AutoSelection {
 					new DriveResetPose(posScoreInitial, true, driveTrain, log),
 					new AutoScoreConeHigh(true, elevator, wrist, manipulator, intake, led, log),
 					new FileLogEnableFastLogging(true, driveTrain, log),
-					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity, 1.9, driveTrain, log),		// Was 2.1m but overshot slightly in Qual39, trying 1.9m
+					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity, 0.6, 3.9, driveTrain, log),		// Was 2.1m but overshot slightly in Qual39, trying 1.9m
 					//new ActiveBalance(driveTrain, log)
 					new ActiveBalanceTwo(driveTrain, log)
 				)
@@ -492,7 +496,7 @@ public class AutoSelection {
 					new WaitCommand(waitTime),
 					new DriveResetPose(posScoreInitial, true, driveTrain, log),
 					new FileLogEnableFastLogging(true, driveTrain, log),
-					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity, 1.9, driveTrain, log),	// Changed from 2.1m to 1.9m after Qual39 (see CONE_BALANCE_4TOWALL)
+					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity, 0.6, 3.9, driveTrain, log),	// Changed from 2.1m to 1.9m after Qual39 (see CONE_BALANCE_4TOWALL)
 					new ActiveBalanceTwo(driveTrain, log)
 					//new ActiveBalance(driveTrain, log)
 				)
@@ -521,9 +525,9 @@ public class AutoSelection {
 					new DriveResetPose(posScoreInitial, true, driveTrain, log),
 					new AutoScoreConeHigh(true, elevator, wrist, manipulator, intake, led, log),
 					new FileLogEnableFastLogging(true, driveTrain, log),
-					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity, 1.9, driveTrain, log),		// Was 2.1m but overshot slightly in Qual39, trying 1.9m
+					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity, 0.6, 3.9, driveTrain, log),		// Was 2.1m but overshot slightly in Qual39, trying 1.9m
 					new DriveDownChargingStation(TrajectoryConstants.ChargeStationVelocity, 0.5, driveTrain, log),
-					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 0.9, driveTrain, log),
+					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, 0.6, 3.4, driveTrain, log),
 					new ActiveBalanceTwo(driveTrain, log)
 				)
 			);
@@ -553,10 +557,10 @@ public class AutoSelection {
 					new DriveResetPose(posScoreInitial, true, driveTrain, log),
 					new AutoScoreConeHigh(true, elevator, wrist, manipulator, intake, led, log),
 					new FileLogEnableFastLogging(true, driveTrain, log),
-					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity*1.5, 1.9, driveTrain, log),		// Was 2.1m but overshot slightly in Qual39, trying 1.9m
+					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity*1.5, 0.6, 3.9, driveTrain, log),		// Was 2.1m but overshot slightly in Qual39, trying 1.9m
 					new DriveDownChargingStation(TrajectoryConstants.ChargeStationVelocity, 0.0, driveTrain, log),
 					new AutoPickUpCube(posPickUp, posNext, false, intake, elevator, wrist, manipulator, driveTrain, led, log),
-					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity*1.4, 2.85, driveTrain, log),
+					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity*1.4, 0.6, 3.4, driveTrain, log),
 					new ActiveBalanceTwo(driveTrain, log)
 				)
 			);
@@ -576,7 +580,7 @@ public class AutoSelection {
 				posScoreCube = field.getFinalColumn(6);
 			} else {
 				posScoreInitial = field.getFinalColumn(4);
-				posPickUp = MathBCR.translate(posScoreInitial, 5.39+0.4, 0);	
+				posPickUp = MathBCR.translate(posScoreInitial, 5.39 + 0.4, 0);	
 				posNext = MathBCR.translate(posPickUp, -.4, 0);
 				posScoreCube = field.getFinalColumn(4);
 
@@ -588,17 +592,17 @@ public class AutoSelection {
 					new DriveResetPose(posScoreInitial, true, driveTrain, log),
 					new AutoScoreConeHigh(true, elevator, wrist, manipulator, intake, led, log),
 					new FileLogEnableFastLogging(true, driveTrain, log),
-					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity * 1.5, 1.9, driveTrain, log),		// Was 2.1m but overshot slightly in Qual39, trying 1.9m
+					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity * 1.5, 0.6, 3.9, driveTrain, log),		// Was 2.1m but overshot slightly in Qual39, trying 1.9m
 					new DriveDownChargingStation(TrajectoryConstants.ChargeStationVelocity * 1.3, 0, driveTrain, log),
 					new AutoPickUpCube(posPickUp, posNext, false, intake, elevator, wrist, manipulator, driveTrain, led, log),
-					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity * 1.5, 2.85, driveTrain, log),
+					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity * 1.5, 0.6, 3.4, driveTrain, log),
 					new DriveDownChargingStation(-TrajectoryConstants.ChargeStationVelocity * 1, 0, driveTrain, log),
 					new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log),
 					new EjectPiece(1, 0.2, manipulator, log),
 					new ParallelCommandGroup(
 						new ElevatorWristStow(elevator, wrist, log),
 						//new AutoScoreCube(posScoreCube, driveTrain, elevator, wrist, manipulator, intake, led, log), 
-						new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity, 1, driveTrain, log)
+						new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity, 0.6, 3.9, driveTrain, log)
 					),
 					new ActiveBalanceTwo(driveTrain, log)
 				)
@@ -607,7 +611,7 @@ public class AutoSelection {
 
 		if (autoPlan == CONE_PICK_UP_CUBE_BALANCE_BARF_4TOWALL) {
 			// Starting position = facing drivers, 4th scoring position from wall
-			log.writeLogEcho(true, "AutoSelect", "run Cone Balance 4ToWall");
+			log.writeLogEcho(true, "AutoSelect", "run Cone Pick up Cube Balance Barf 4ToWall");
 			// Pose2d posCommunityInitial = field.getStationInitial(2);
 			// Pose2d posCommunityFinal = field.getStationCenter(2);
 			// Pose2d posCommunityFinal = translate(field.getStationCenter(2), 1.5, 0.0);		// overdrive due to wheel slip when climbing on charging station
@@ -631,20 +635,24 @@ public class AutoSelection {
 					new DriveResetPose(posScoreInitial, true, driveTrain, log),
 					new AutoScoreConeHigh(true, elevator, wrist, manipulator, intake, led, log),
 					new FileLogEnableFastLogging(true, driveTrain, log),
-					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity*1.5, 1.9, driveTrain, log),		// Was 2.1m but overshot slightly in Qual39, trying 1.9m
+					new DriveUpChargingStation(TrajectoryConstants.ChargeStationVelocity*1.5, 0.6, 3.9, driveTrain, log),		// Was 2.1m but overshot slightly in Qual39, trying 1.9m
 					new DriveDownChargingStation(TrajectoryConstants.ChargeStationVelocity, 0, driveTrain, log),
 					new AutoPickUpCube(posPickUp, posNext, false, intake, elevator, wrist, manipulator, driveTrain, led, log),
-					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity * 1.5, 3.35, driveTrain, log),
+					new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity * 1.4, 0.6, 3.4, driveTrain, log),
 					new ParallelCommandGroup(
 						new SequentialCommandGroup(
 							// new WaitCommand(0.5),
 							new ElevatorWristMoveToUpperPosition(ElevatorPosition.scoreLow.value, WristAngle.scoreMidHigh.value, elevator, wrist, intake, log),
-							new EjectPiece(1, 0.5, manipulator, log)
+							new EjectPiece(1, 0.5, manipulator, log),
+							new ElevatorWristStow(elevator, wrist, log)
 						),
 						new ActiveBalanceTwo(driveTrain, log)
-						
+	
 					)
-				)
+				).withTimeout(14.75),
+				new FileLogEnableFastLogging(false, driveTrain, log),
+				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)	
+				
 			);
 		}
 

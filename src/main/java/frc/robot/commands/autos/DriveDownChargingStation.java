@@ -15,7 +15,7 @@ public class DriveDownChargingStation extends CommandBase {
   double speed;
   double minDistance;
   double flatPosition;
-  boolean flat = false;;
+  boolean flat = false;
   public DriveDownChargingStation(double speed, double minDistance, DriveTrain driveTrain, FileLog log) {
     this.speed = speed;
     this.driveTrain = driveTrain;
@@ -29,6 +29,8 @@ public class DriveDownChargingStation extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
+    flat = false;
+    
     log.writeLog(false, "DriveDownCharging Station", "Initialize", "Speed", speed, "MinDistance", minDistance);
   }
 

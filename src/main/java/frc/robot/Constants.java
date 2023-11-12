@@ -350,13 +350,13 @@ public final class Constants {
       }
 
       public static final class ManipulatorConstants {
-        public static final double pieceGrabPct = 0.8;                  // Motor pct when grabbing from field
+        public static final double pieceGrabPct = 1.0;  //was 0.8, changed for H5                // Motor pct when grabbing from field
         public static final double pieceGrabFromIntakePct = 1.0;        // Motor pct when grabbing from intake
         public static final double pieceHoldPct = 0.2;
       }
 
       public static final class IntakeConstants {
-        public static final double motor1NominalIntakePct = 1.0;        // Was 0.4, occasionally popping out of top.
-        public static final double motor2NominalIntakePct = 1.0;       // Was 0.52, occasionally popping out of top.
+        public static final double motor1NominalIntakePct = 0.91;        // Was 0.4, occasionally popping out of top.
+        public static final double motor2NominalIntakePct = 0.91;       // Was 0.52, occasionally popping out of top.
       }
 }
