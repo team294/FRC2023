@@ -476,7 +476,7 @@ public class RobotContainer {
     
     // top row RED SWITCH
     Runnable onXbox = () -> {useOnlyXbox = true; System.out.println("ON XBOX ON XBOX ON XBOX");};
-    Runnable offXbox = () -> {useOnlyXbox = false; System.out.println("ON XBOX ON XBOX ON XBOX");};
+    Runnable offXbox = () -> {useOnlyXbox = false; System.out.println("OFF XBOX OFF XBOX OFF XBOX");};
     coP[8].onTrue(new InstantCommand(onXbox));
     coP[8].onFalse(new InstantCommand(offXbox));
 
