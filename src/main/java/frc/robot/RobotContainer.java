@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import java.time.Instant;
 import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -20,6 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -78,6 +80,7 @@ public class RobotContainer {
   private final Joystick coPanel = new Joystick(OIConstants.usbCoPanel);
 
   private final CommandXboxController xboxController = new CommandXboxController(OIConstants.usbXboxController);
+  private boolean useOnlyXbox = false;
   private boolean rumbling = false;
   private boolean lastEnabledModeAuto = false;    // True if the last mode was auto
 
@@ -90,8 +93,17 @@ public class RobotContainer {
     configureShuffleboard(); // configure shuffleboard
 
     // driveTrain.setDefaultCommand(new DriveWithJoystick(leftJoystick, rightJoystick, driveTrain, log));
-    driveTrain.setDefaultCommand(new DriveWithJoysticksAdvance(leftJoystick, rightJoystick, driveTrain, log));
+    driveTrain.setDefaultCommand(new ConditionalCommand(
+      new DriveWithXbox(xboxController, driveTrain, log),
+      new DriveWithJoysticksAdvance(leftJoystick, rightJoystick, driveTrain, log),
+      () -> useOnlyXboxController()
+      )
+    );
 
+  }
+
+  private boolean useOnlyXboxController() {
+    return useOnlyXbox;
   }
 
     /**
@@ -326,6 +338,24 @@ public class RobotContainer {
 
     // start 
     // xbStart.onTrue(Command command); 
+    xbStart.onTrue(
+      new ConditionalCommand(
+        // new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, led, log)
+
+        new ConditionalCommand(
+          // Extend intake.  Schedule the intake command separately, so this joystick button does not
+          // require the Manipulator susbsytem outside of the conditional command.  That will prevent
+          // the conditional command from interrupting other commands if the elevator is up.
+          // When the elevator is down, the subsystem requirements will take effect when IntakeRetractAndTurnOffMotors
+          // is scheduled. 
+          new ScheduleCommand(new IntakeExtendAndTurnOnMotors(manipulator, intake, wrist, elevator, led, log)),
+          new FileLogWrite(false, false, "RightJoystickButton1", "IntakeExtendAndTurnOnMotors - Elevator Not Down", log),
+          () -> (elevator.getElevatorPos() <= Constants.ElevatorConstants.boundBottomMain) 
+        ), // ONLY allow this command to run if elevator is not out; otherwise would interrupt the ManipulatorGrab command
+        new InstantCommand(),
+        () -> useOnlyXbox
+      )
+    ); 
 
     // POV buttons
 
@@ -339,7 +369,11 @@ public class RobotContainer {
 
     // Left
     // Sets elevator/wrist to stowed, turn on conveyor, turn on manipulator to load piece
-    // xbPOVLeft.onTrue();
+    xbPOVLeft.onTrue(new ConditionalCommand(
+      new IntakeRetractAndTurnOffMotors(intake, elevator, log),
+      new InstantCommand(),
+      () -> useOnlyXbox
+    ));
     // xbPOVLeft.onTrue(new LoadPieceConveyor(elevator, wrist, manipulator, conveyor, log));
 
     // Right
@@ -441,7 +475,12 @@ public class RobotContainer {
     // coP[6].whenHeld(new ClimbSetPercentOutput(-0.4, climb, log)); // manually lower climb arms, slowly
     
     // top row RED SWITCH
-    // coP[8].onTrue(new StopAllMotors(feeder, shooter, intakeFront, uptake, log));
+    Runnable onXbox = () -> {useOnlyXbox = true; System.out.println("ON XBOX ON XBOX ON XBOX");};
+    Runnable offXbox = () -> {useOnlyXbox = false; System.out.println("ON XBOX ON XBOX ON XBOX");};
+    coP[8].onTrue(new InstantCommand(onXbox));
+    coP[8].onFalse(new InstantCommand(offXbox));
+
+    // coP[8].onFalse(new StopAllMotors(feeder, shooter, intakeFront, uptake, log));
 
     // middle row UP then DOWN, from LEFT to RIGHT
     // coP[9].onTrue(new IntakeSetPercentOutput(IntakeConstants.onPct, IntakeConstants.onPctTransfer, intakeFront, log)); // forward intake and transfer

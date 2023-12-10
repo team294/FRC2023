@@ -6,9 +6,9 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.SwerveConstants;
@@ -17,9 +17,8 @@ import frc.robot.subsystems.DriveTrain;
 import frc.robot.utilities.FileLog;
 
 
-public class DriveWithJoysticksAdvance extends CommandBase {
-  private final Joystick leftJoystick;
-  private final Joystick rightJoystick;
+public class DriveWithXbox extends CommandBase {
+  private final CommandXboxController xbox;
   private final DriveTrain driveTrain;
   private final FileLog log;
   private ProfiledPIDController turnRateController;
@@ -38,9 +37,8 @@ public class DriveWithJoysticksAdvance extends CommandBase {
    * @param log filelog to use
    */
 
-  public DriveWithJoysticksAdvance(Joystick leftJoystick, Joystick rightJoystick, DriveTrain driveTrain, FileLog log) {
-    this.leftJoystick = leftJoystick;
-    this.rightJoystick = rightJoystick;
+  public DriveWithXbox(CommandXboxController xbox, DriveTrain driveTrain, FileLog log) {
+    this.xbox = xbox;
     this.driveTrain = driveTrain;
     this.log = log;
     turnRateController = new ProfiledPIDController(DriveConstants.kPJoystickThetaController, 0, 0, TrajectoryConstants.kThetaControllerConstraints);
@@ -69,9 +67,14 @@ public class DriveWithJoysticksAdvance extends CommandBase {
   @Override
   public void execute() {
 
-    fwdVelocity = -leftJoystick.getY() * 0.4;
-    leftVelocity = -leftJoystick.getX() * 0.4;
-    turnRate = -rightJoystick.getX() * 0.3;
+    fwdVelocity = -xbox.getLeftY() * .75;
+    if (Math.abs(fwdVelocity) < 0.06) fwdVelocity = 0;
+    
+    leftVelocity = -xbox.getLeftX() * .75;
+    if (Math.abs(leftVelocity) < 0.06) leftVelocity = 0;
+    
+    turnRate = -xbox.getRightX() * .75;
+    if (Math.abs(turnRate) < 0.06) turnRate = 0;
 
     SmartDashboard.putNumber("Left Joystick Y", fwdVelocity);
     SmartDashboard.putNumber("Left Joystick X", leftVelocity);
